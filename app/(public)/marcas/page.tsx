@@ -22,8 +22,13 @@ const BRAND_CATEGORIES: Record<string, string[]> = {
     'abarth', 'fiat', 'lancia', 'opel', 'peugeot', 'renault', 'seat', 'volkswagen',
   ],
   'Motos': [
-    'aprilia', 'bimota', 'bmw-motorrad', 'ducati', 'harley-davidson',
-    'honda', 'indian', 'kawasaki', 'ktm', 'mv-agusta', 'suzuki', 'triumph', 'yamaha',
+    'aprilia', 'benelli', 'bimota', 'bmw-motorrad', 'cagiva', 'can-am',
+    'ducati', 'energica',
+    'harley-davidson', 'honda', 'husqvarna',
+    'indian', 'kawasaki', 'ktm', 'livewire',
+    'moto-guzzi', 'mv-agusta',
+    'piaggio', 'royal-enfield',
+    'suzuki', 'triumph', 'vespa', 'yamaha', 'zero-motorcycles',
   ],
 }
 

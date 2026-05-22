@@ -19,11 +19,16 @@ const CAR_CATEGORIES = [
 ]
 
 const MOTO_CATEGORIES = [
-  { value: 'sport_performance',    label: 'Sport & Performance' },
-  { value: 'enthusiast_selection', label: 'Enthusiast Selection' },
-  { value: 'classics_youngtimers', label: 'Classics & Youngtimers' },
-  { value: 'black_label_selection','label': 'Black Label Selection' },
-  { value: 'black_label_icon',     label: 'Black Label Icon' },
+  { value: 'premium_modern_bikes',      label: 'Premium Modern Bikes' },
+  { value: 'sport_supersport',          label: 'Sport & SuperSport' },
+  { value: 'naked_hypernaked',          label: 'Naked & Hypernaked' },
+  { value: 'adventure_touring_premium', label: 'Adventure & Touring Premium' },
+  { value: 'custom_cruiser_premium',    label: 'Custom & Cruiser Premium' },
+  { value: 'classic_youngtimer_bikes',  label: 'Classic & Youngtimer' },
+  { value: 'scooter_urban_premium',     label: 'Scooter & Urban Premium' },
+  { value: 'enthusiast_selection',      label: 'Enthusiast Selection' },
+  { value: 'black_label_selection',     label: 'Black Label Selection' },
+  { value: 'black_label_icon',          label: 'Black Label Icon' },
 ]
 
 // ─── Brands ───────────────────────────────────────────────────────────────────
@@ -57,14 +62,22 @@ const FEATURED_BRANDS_MOTO = [
 ]
 
 const ALL_BRANDS_MOTO = [
-  'Aprilia', 'Bimota', 'BMW Motorrad',
+  'Aprilia', 'Benelli', 'Bimota', 'BMW Motorrad',
+  'Cagiva', 'Can-Am',
   'Ducati',
-  'Harley-Davidson', 'Honda',
+  'Energica',
+  'Harley-Davidson', 'Honda', 'Husqvarna',
   'Indian',
   'Kawasaki', 'KTM',
-  'MV Agusta',
-  'Suzuki', 'Triumph',
+  'LiveWire',
+  'Moto Guzzi', 'MV Agusta',
+  'Piaggio',
+  'Royal Enfield',
+  'Suzuki',
+  'Triumph',
+  'Vespa',
   'Yamaha',
+  'Zero Motorcycles',
 ]
 
 // ─── Other filter options ─────────────────────────────────────────────────────
@@ -96,13 +109,31 @@ const CAR_BODY_TYPES = [
 ]
 
 const MOTO_STYLES = [
-  { value: 'Naked',       label: 'Naked / Streetfighter' },
-  { value: 'Deportiva',   label: 'Deportiva / Supersport' },
-  { value: 'Touring',     label: 'Touring / Sport-Touring' },
-  { value: 'Adventure',   label: 'Adventure / Trail' },
-  { value: 'Cruiser',     label: 'Cruiser / Custom' },
-  { value: 'Scrambler',   label: 'Scrambler / Café Racer' },
-  { value: 'Supermotard', label: 'Supermotard / Enduro' },
+  { value: 'superbike',       label: 'Superbike' },
+  { value: 'deportiva',       label: 'Deportiva' },
+  { value: 'naked',           label: 'Naked' },
+  { value: 'hypernaked',      label: 'Hypernaked' },
+  { value: 'maxitrail',       label: 'Maxitrail' },
+  { value: 'adventure',       label: 'Adventure' },
+  { value: 'trail',           label: 'Trail' },
+  { value: 'touring',         label: 'Touring' },
+  { value: 'sport_touring',   label: 'Sport Touring' },
+  { value: 'custom',          label: 'Custom' },
+  { value: 'cruiser',         label: 'Cruiser' },
+  { value: 'scrambler',       label: 'Scrambler / Café Racer' },
+  { value: 'clasica',         label: 'Clásica' },
+  { value: 'youngtimer',      label: 'Youngtimer' },
+  { value: 'maxiscooter',     label: 'Maxiscooter' },
+  { value: 'scooter_premium', label: 'Scooter Premium' },
+  { value: 'electrica',       label: 'Eléctrica' },
+  { value: 'enduro_supermoto',label: 'Enduro / Supermotard' },
+  { value: 'especial',        label: 'Especial / Collector' },
+]
+
+const LICENSE_TYPES = [
+  { value: 'A',  label: 'A — Sin restricciones' },
+  { value: 'A2', label: 'A2 — Hasta 35 kW' },
+  { value: 'A1', label: 'A1 — Hasta 125 cc' },
 ]
 
 const MOTO_CC_RANGES = [
@@ -398,7 +429,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
       {/* Vehicle-type-specific filters */}
       {isMoto ? (
         <>
-          <FilterGroup title="Estilo">
+          <FilterGroup title="Tipo de moto">
             <div className="space-y-2">
               {MOTO_STYLES.map((o) => <CheckOption key={o.value} param="estilo" value={o.value} label={o.label} />)}
             </div>
@@ -406,6 +437,11 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           <FilterGroup title="Cilindrada">
             <div className="space-y-2">
               {MOTO_CC_RANGES.map((o) => <CheckOption key={o.value} param="cc" value={o.value} label={o.label} />)}
+            </div>
+          </FilterGroup>
+          <FilterGroup title="Carnet requerido">
+            <div className="space-y-2">
+              {LICENSE_TYPES.map((o) => <CheckOption key={o.value} param="carnet" value={o.value} label={o.label} />)}
             </div>
           </FilterGroup>
         </>

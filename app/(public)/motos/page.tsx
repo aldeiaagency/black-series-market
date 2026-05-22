@@ -32,6 +32,7 @@ async function MotoList({ params }: { params: Record<string, string> }) {
     const [ccMin, ccMax] = params.cc.split('-').map(Number)
     query = query.gte('displacement_cc', ccMin).lte('displacement_cc', ccMax)
   }
+  if (params.carnet)    query = query.eq('license_type', params.carnet)
   if (params.search)    query = query.or(`brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`)
 
   const sort = params.sort || 'featured'
