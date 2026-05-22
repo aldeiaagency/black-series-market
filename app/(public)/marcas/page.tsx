@@ -1,22 +1,29 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
-const BRAND_CATEGORIES = {
-  'Hipercoches y superdeportivos': [
-    'bugatti', 'koenigsegg', 'pagani', 'rimac', 'ferrari', 'lamborghini', 'mclaren',
+const BRAND_CATEGORIES: Record<string, string[]> = {
+  'Supercars & Hypercars': [
+    'alpine', 'ariel', 'bugatti', 'caterham', 'corvette',
+    'ferrari', 'koenigsegg', 'lamborghini', 'lotus', 'mclaren', 'pagani', 'rimac',
   ],
-  'Gran Turismo y lujo': [
-    'aston-martin', 'bentley', 'rolls-royce', 'maserati', 'alfa-romeo',
+  'Luxury & Executive': [
+    'aston-martin', 'bentley', 'brabus', 'jaguar', 'land-rover',
+    'maserati', 'maybach', 'morgan', 'rolls-royce',
   ],
-  'Premium alemanas': [
-    'porsche', 'bmw', 'mercedes-benz', 'audi',
+  'Premium Moderno': [
+    'alfa-romeo', 'audi', 'bmw', 'cupra', 'genesis',
+    'lexus', 'mercedes-benz', 'mini', 'porsche', 'tesla', 'volvo',
   ],
-  'Premium americanas y japonesas': [
-    'corvette', 'dodge', 'lexus', 'nissan',
+  'Sport & Performance': [
+    'ford', 'honda', 'hyundai', 'kia', 'mazda',
+    'mitsubishi', 'nissan', 'subaru', 'toyota',
+  ],
+  'Classics & Youngtimers': [
+    'abarth', 'fiat', 'lancia', 'opel', 'peugeot', 'renault', 'seat', 'volkswagen',
   ],
   'Motos': [
-    'ducati', 'mv-agusta', 'aprilia', 'bimota', 'bmw-motorrad', 'harley-davidson', 'indian', 'ktm', 'triumph',
-    'yamaha', 'honda', 'kawasaki', 'suzuki',
+    'aprilia', 'bimota', 'bmw-motorrad', 'ducati', 'harley-davidson',
+    'honda', 'indian', 'kawasaki', 'ktm', 'mv-agusta', 'suzuki', 'triumph', 'yamaha',
   ],
 }
 
@@ -26,9 +33,8 @@ export default async function MarcasPage() {
     .from('brands')
     .select('*')
     .eq('is_active', true)
-    .order('sort_order')
+    .order('name')
 
-  // Count vehicles per brand
   const { data: counts } = await supabase
     .from('vehicles')
     .select('brand_name')
@@ -41,7 +47,9 @@ export default async function MarcasPage() {
   })
 
   const brandMap: Record<string, any> = {}
-  brands?.forEach((b: any) => { brandMap[b.slug] = { ...b, count: countMap[b.name.toLowerCase()] || 0 } })
+  brands?.forEach((b: any) => {
+    brandMap[b.slug] = { ...b, count: countMap[b.name.toLowerCase()] || 0 }
+  })
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
@@ -54,7 +62,10 @@ export default async function MarcasPage() {
       </div>
 
       {Object.entries(BRAND_CATEGORIES).map(([category, slugs]) => {
-        const categoryBrands = slugs.map((s) => brandMap[s]).filter(Boolean)
+        const categoryBrands = slugs
+          .map((s) => brandMap[s])
+          .filter(Boolean)
+          .sort((a: any, b: any) => a.name.localeCompare(b.name))
         if (!categoryBrands.length) return null
         return (
           <div key={category} className="mb-14">

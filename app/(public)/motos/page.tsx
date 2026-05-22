@@ -16,11 +16,14 @@ async function MotoList({ params }: { params: Record<string, string> }) {
     .eq('status', 'active')
     .eq('vehicle_type', 'motorcycle')
 
+  if (params.categoria) query = query.eq('category', params.categoria)
   if (params.marca)     query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
   if (params.anioMin)   query = query.gte('year', parseInt(params.anioMin))
   if (params.anioMax)   query = query.lte('year', parseInt(params.anioMax))
   if (params.precioMin) query = query.gte('price', parseInt(params.precioMin))
   if (params.precioMax) query = query.lte('price', parseInt(params.precioMax))
+  if (params.cvMin)     query = query.gte('power_hp', parseInt(params.cvMin))
+  if (params.cvMax)     query = query.lte('power_hp', parseInt(params.cvMax))
   if (params.kmMax)     query = query.lte('mileage_km', parseInt(params.kmMax))
   if (params.estilo)    query = query.eq('body_type', params.estilo)
   if (params.cc) {

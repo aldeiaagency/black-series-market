@@ -2,72 +2,125 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { SlidersHorizontal, X, ChevronDown } from 'lucide-react'
+import { SlidersHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const BRANDS_CAR = [
-  'Ferrari', 'Lamborghini', 'McLaren', 'Bugatti', 'Koenigsegg', 'Pagani',
-  'Aston Martin', 'Bentley', 'Rolls-Royce', 'Maserati', 'Alfa Romeo',
-  'Porsche', 'BMW', 'Mercedes-Benz', 'Audi',
-  'Cupra', 'Volkswagen', 'Renault', 'Lexus', 'Corvette',
+// ─── Categories ──────────────────────────────────────────────────────────────
+
+const CAR_CATEGORIES = [
+  { value: 'supercars',            label: 'Supercars' },
+  { value: 'luxury_executive',     label: 'Luxury & Executive' },
+  { value: 'premium_modern',       label: 'Premium Modern' },
+  { value: 'sport_performance',    label: 'Sport & Performance' },
+  { value: 'classics_youngtimers', label: 'Classics & Youngtimers' },
+  { value: 'enthusiast_selection', label: 'Enthusiast Selection' },
+  { value: 'black_label_selection','label': 'Black Label Selection' },
+  { value: 'black_label_icon',     label: 'Black Label Icon' },
 ]
 
-const BRANDS_MOTO = [
-  'Ducati', 'MV Agusta', 'Aprilia', 'Bimota', 'BMW Motorrad',
-  'Harley-Davidson', 'Indian', 'KTM', 'Triumph',
-  'Yamaha', 'Honda', 'Kawasaki', 'Suzuki',
+const MOTO_CATEGORIES = [
+  { value: 'sport_performance',    label: 'Sport & Performance' },
+  { value: 'enthusiast_selection', label: 'Enthusiast Selection' },
+  { value: 'classics_youngtimers', label: 'Classics & Youngtimers' },
+  { value: 'black_label_selection','label': 'Black Label Selection' },
+  { value: 'black_label_icon',     label: 'Black Label Icon' },
 ]
+
+// ─── Brands ───────────────────────────────────────────────────────────────────
+
+const FEATURED_BRANDS_CAR = [
+  'Aston Martin', 'Audi', 'BMW', 'Ferrari',
+  'Lamborghini', 'McLaren', 'Mercedes-Benz', 'Porsche',
+]
+
+const ALL_BRANDS_CAR = [
+  'Abarth', 'Alfa Romeo', 'Alpine', 'Ariel', 'Aston Martin', 'Audi',
+  'Bentley', 'BMW', 'Brabus', 'Bugatti',
+  'Caterham', 'Corvette', 'Cupra',
+  'Ferrari', 'Fiat', 'Ford',
+  'Genesis',
+  'Honda', 'Hyundai',
+  'Jaguar', 'Kia', 'Koenigsegg',
+  'Lamborghini', 'Land Rover', 'Lancia', 'Lexus', 'Lotus',
+  'Maserati', 'Maybach', 'Mazda', 'McLaren', 'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Morgan',
+  'Nissan', 'Opel',
+  'Pagani', 'Peugeot', 'Porsche',
+  'Renault', 'Rimac', 'Rolls-Royce',
+  'Seat', 'Subaru',
+  'Tesla', 'Toyota',
+  'Volkswagen', 'Volvo',
+]
+
+const FEATURED_BRANDS_MOTO = [
+  'BMW Motorrad', 'Ducati', 'Harley-Davidson',
+  'Honda', 'KTM', 'Triumph', 'Yamaha',
+]
+
+const ALL_BRANDS_MOTO = [
+  'Aprilia', 'Bimota', 'BMW Motorrad',
+  'Ducati',
+  'Harley-Davidson', 'Honda',
+  'Indian',
+  'Kawasaki', 'KTM',
+  'MV Agusta',
+  'Suzuki', 'Triumph',
+  'Yamaha',
+]
+
+// ─── Other filter options ─────────────────────────────────────────────────────
 
 const FUEL_OPTIONS = [
-  { value: 'gasoline', label: 'Gasolina' },
-  { value: 'diesel', label: 'Diésel' },
-  { value: 'electric', label: 'Eléctrico' },
-  { value: 'hybrid', label: 'Híbrido' },
-  { value: 'plugin_hybrid', label: 'Híbrido enchufable' },
+  { value: 'gasoline',     label: 'Gasolina' },
+  { value: 'diesel',       label: 'Diésel' },
+  { value: 'electric',     label: 'Eléctrico' },
+  { value: 'hybrid',       label: 'Híbrido' },
+  { value: 'plugin_hybrid',label: 'Híbrido enchufable' },
 ]
 
 const TRANSMISSION_OPTIONS = [
-  { value: 'manual', label: 'Manual' },
-  { value: 'automatic', label: 'Automático' },
-  { value: 'dct', label: 'Doble embrague' },
-  { value: 'semi_automatic', label: 'Semiautomático' },
+  { value: 'manual',        label: 'Manual' },
+  { value: 'automatic',     label: 'Automático' },
+  { value: 'dct',           label: 'Doble embrague' },
+  { value: 'semi_automatic',label: 'Semiautomático' },
 ]
 
 const CAR_BODY_TYPES = [
-  { value: 'Coupé', label: 'Coupé' },
-  { value: 'Cabrio', label: 'Cabrio / Roadster' },
-  { value: 'SUV', label: 'SUV / Crossover' },
-  { value: 'Deportivo', label: 'Deportivo' },
-  { value: 'GT', label: 'Gran Turismo' },
-  { value: 'Clásico', label: 'Clásico / Heritage' },
-  { value: 'Sedán', label: 'Sedán' },
-  { value: 'Hot Hatch', label: 'Hot Hatch' },
+  { value: 'Coupé',      label: 'Coupé' },
+  { value: 'Cabrio',     label: 'Cabrio / Roadster' },
+  { value: 'SUV',        label: 'SUV / Crossover' },
+  { value: 'Deportivo',  label: 'Deportivo' },
+  { value: 'GT',         label: 'Gran Turismo' },
+  { value: 'Clásico',    label: 'Clásico / Heritage' },
+  { value: 'Sedán',      label: 'Sedán' },
+  { value: 'Hot Hatch',  label: 'Hot Hatch' },
 ]
 
 const MOTO_STYLES = [
-  { value: 'Naked', label: 'Naked / Streetfighter' },
-  { value: 'Deportiva', label: 'Deportiva / Supersport' },
-  { value: 'Touring', label: 'Touring / Sport-Touring' },
-  { value: 'Adventure', label: 'Adventure / Trail' },
-  { value: 'Cruiser', label: 'Cruiser / Custom' },
-  { value: 'Scrambler', label: 'Scrambler / Café Racer' },
+  { value: 'Naked',       label: 'Naked / Streetfighter' },
+  { value: 'Deportiva',   label: 'Deportiva / Supersport' },
+  { value: 'Touring',     label: 'Touring / Sport-Touring' },
+  { value: 'Adventure',   label: 'Adventure / Trail' },
+  { value: 'Cruiser',     label: 'Cruiser / Custom' },
+  { value: 'Scrambler',   label: 'Scrambler / Café Racer' },
   { value: 'Supermotard', label: 'Supermotard / Enduro' },
 ]
 
 const MOTO_CC_RANGES = [
-  { value: '0-599', label: 'Hasta 600 cc' },
+  { value: '0-599',   label: 'Hasta 600 cc' },
   { value: '600-899', label: '600 – 900 cc' },
-  { value: '900-1199', label: '900 – 1.200 cc' },
-  { value: '1200-9999', label: 'Más de 1.200 cc' },
+  { value: '900-1199',label: '900 – 1.200 cc' },
+  { value: '1200-9999',label: 'Más de 1.200 cc' },
 ]
 
 const SORT_OPTIONS = [
-  { value: 'featured', label: 'Destacados' },
-  { value: 'newest', label: 'Más recientes' },
-  { value: 'price_asc', label: 'Precio: menor a mayor' },
-  { value: 'price_desc', label: 'Precio: mayor a menor' },
-  { value: 'mileage_asc', label: 'Menor kilometraje' },
+  { value: 'featured',     label: 'Destacados' },
+  { value: 'newest',       label: 'Más recientes' },
+  { value: 'price_asc',    label: 'Precio: menor a mayor' },
+  { value: 'price_desc',   label: 'Precio: mayor a menor' },
+  { value: 'mileage_asc',  label: 'Menor kilometraje' },
 ]
+
+// ─── Component helpers ────────────────────────────────────────────────────────
 
 interface FiltersProps {
   vehicleType: 'car' | 'motorcycle'
@@ -91,21 +144,23 @@ function FilterGroup({ title, children }: { title: string; children: React.React
 }
 
 export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps) {
-  const router = useRouter()
-  const pathname = usePathname()
+  const router    = useRouter()
+  const pathname  = usePathname()
   const searchParams = useSearchParams()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [showAllBrands, setShowAllBrands] = useState(false)
 
-  const brands = vehicleType === 'car' ? BRANDS_CAR : BRANDS_MOTO
   const isMoto = vehicleType === 'motorcycle'
+  const categories      = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
+  const allBrands       = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
+  const featuredBrands  = isMoto ? FEATURED_BRANDS_MOTO : FEATURED_BRANDS_CAR
+  const displayedBrands = showAllBrands ? allBrands : featuredBrands
+  const hiddenCount     = allBrands.length - featuredBrands.length
 
   function updateParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString())
-    if (value === null || value === '') {
-      params.delete(key)
-    } else {
-      params.set(key, value)
-    }
+    if (value === null || value === '') params.delete(key)
+    else params.set(key, value)
     params.delete('page')
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
@@ -134,6 +189,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   const FiltersContent = () => (
     <div>
+      {/* Mobile-only sort */}
       <div className="mb-6 lg:hidden">
         <label className="label-base">Ordenar</label>
         <select className="select-base" value={searchParams.get('sort') || 'featured'}
@@ -142,9 +198,19 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </select>
       </div>
 
+      {/* Category */}
+      <FilterGroup title="Categoría">
+        <div className="space-y-2">
+          {categories.map((cat) => (
+            <CheckOption key={cat.value} param="categoria" value={cat.value} label={cat.label} />
+          ))}
+        </div>
+      </FilterGroup>
+
+      {/* Brand */}
       <FilterGroup title="Marca">
         <div className="space-y-2">
-          {brands.map((brand) => (
+          {displayedBrands.map((brand) => (
             <CheckOption
               key={brand}
               param="marca"
@@ -153,8 +219,26 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             />
           ))}
         </div>
+        {!showAllBrands ? (
+          <button
+            onClick={() => setShowAllBrands(true)}
+            className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-3"
+          >
+            <ChevronDown className="w-3 h-3" />
+            Ver todas las marcas ({hiddenCount} más)
+          </button>
+        ) : (
+          <button
+            onClick={() => setShowAllBrands(false)}
+            className="flex items-center gap-1 text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors mt-3"
+          >
+            <ChevronUp className="w-3 h-3" />
+            Ver menos
+          </button>
+        )}
       </FilterGroup>
 
+      {/* Year */}
       <FilterGroup title="Año">
         <div className="flex items-center gap-3">
           <div className="flex-1">
@@ -173,6 +257,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </div>
       </FilterGroup>
 
+      {/* Price */}
       <FilterGroup title="Precio">
         <div className="flex items-center gap-3">
           <div className="flex-1">
@@ -190,6 +275,25 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </div>
       </FilterGroup>
 
+      {/* Power */}
+      <FilterGroup title="Potencia (CV)">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <label className="label-base">Desde</label>
+            <input type="number" placeholder="0" className="input-base"
+              value={searchParams.get('cvMin') || ''}
+              onChange={(e) => updateParam('cvMin', e.target.value)} />
+          </div>
+          <div className="flex-1">
+            <label className="label-base">Hasta</label>
+            <input type="number" placeholder="Sin límite" className="input-base"
+              value={searchParams.get('cvMax') || ''}
+              onChange={(e) => updateParam('cvMax', e.target.value)} />
+          </div>
+        </div>
+      </FilterGroup>
+
+      {/* Mileage */}
       <FilterGroup title="Kilometraje máximo">
         <select className="select-base" value={searchParams.get('kmMax') || ''}
           onChange={(e) => updateParam('kmMax', e.target.value)}>
@@ -202,6 +306,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </select>
       </FilterGroup>
 
+      {/* Vehicle-type-specific filters */}
       {isMoto ? (
         <>
           <FilterGroup title="Estilo">
@@ -209,7 +314,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               {MOTO_STYLES.map((o) => <CheckOption key={o.value} param="estilo" value={o.value} label={o.label} />)}
             </div>
           </FilterGroup>
-
           <FilterGroup title="Cilindrada">
             <div className="space-y-2">
               {MOTO_CC_RANGES.map((o) => <CheckOption key={o.value} param="cc" value={o.value} label={o.label} />)}
@@ -218,18 +322,16 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </>
       ) : (
         <>
-          <FilterGroup title="Tipo de carrocería">
+          <FilterGroup title="Carrocería">
             <div className="space-y-2">
               {CAR_BODY_TYPES.map((o) => <CheckOption key={o.value} param="tipo" value={o.value} label={o.label} />)}
             </div>
           </FilterGroup>
-
           <FilterGroup title="Combustible">
             <div className="space-y-2">
               {FUEL_OPTIONS.map((o) => <CheckOption key={o.value} param="combustible" value={o.value} label={o.label} />)}
             </div>
           </FilterGroup>
-
           <FilterGroup title="Transmisión">
             <div className="space-y-2">
               {TRANSMISSION_OPTIONS.map((o) => <CheckOption key={o.value} param="cambio" value={o.value} label={o.label} />)}
@@ -250,6 +352,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   return (
     <>
+      {/* Mobile toggle */}
       <div className="lg:hidden mb-6">
         <button onClick={() => setMobileOpen(!mobileOpen)}
           className="flex items-center gap-2 btn-outline w-full justify-center">
@@ -266,6 +369,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         )}
       </div>
 
+      {/* Desktop sidebar */}
       <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
         <div className="sticky top-24">
           <div className="flex items-center justify-between mb-6">
