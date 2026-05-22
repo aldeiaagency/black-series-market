@@ -1,0 +1,33 @@
+'use client'
+
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+
+const OPTIONS = [
+  { value: 'featured', label: 'Destacados' },
+  { value: 'newest', label: 'Más recientes' },
+  { value: 'price_asc', label: 'Precio: menor a mayor' },
+  { value: 'price_desc', label: 'Precio: mayor a menor' },
+  { value: 'mileage_asc', label: 'Menor kilometraje' },
+]
+
+export default function SortSelector() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const current = searchParams.get('sort') || 'featured'
+
+  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('sort', e.target.value)
+    params.delete('page')
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  return (
+    <select className="select-base w-52 hidden lg:block" value={current} onChange={handleChange}>
+      {OPTIONS.map((o) => (
+        <option key={o.value} value={o.value}>{o.label}</option>
+      ))}
+    </select>
+  )
+}

@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', system-ui, sans-serif;
+    --font-cormorant: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #0A0A0A;
+    color: #F0F0EC;
+    font-family: var(--font-inter);
+  }
+
+  ::selection {
+    background-color: rgba(201, 168, 76, 0.25);
+    color: #F0F0EC;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #111111;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2A2A2A;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C9A84C;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+}
+
+@layer components {
+  .gold-line {
+    position: relative;
+  }
+
+  .gold-line::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, #C9A84C, transparent);
+  }
+
+  .vehicle-card {
+    @apply relative bg-surface border border-bsm-border rounded-sm overflow-hidden
+           transition-all duration-300 hover:border-gold/30 hover:shadow-card-hover;
+  }
+
+  .vehicle-card:hover .vehicle-card-image img {
+    transform: scale(1.03);
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-gradient-gold text-obsidian-300 font-semibold text-sm tracking-wide
+           transition-all duration-200 hover:opacity-90 hover:shadow-gold
+           focus:outline-none focus:ring-2 focus:ring-gold/50
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           border border-bsm-border text-bsm-text-primary font-medium text-sm tracking-wide
+           transition-all duration-200 hover:border-gold/50 hover:text-gold
+           focus:outline-none focus:ring-2 focus:ring-gold/30
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2
+           text-bsm-text-secondary text-sm transition-all duration-200
+           hover:text-bsm-text-primary focus:outline-none;
+  }
+
+  .input-base {
+    @apply w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary
+           placeholder-bsm-text-muted
+           focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20
+           transition-colors duration-200;
+  }
+
+  .select-base {
+    @apply w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary
+           focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20
+           transition-colors duration-200 cursor-pointer appearance-none;
+  }
+
+  .label-base {
+    @apply block text-xs font-medium text-bsm-text-secondary uppercase tracking-widest mb-2;
+  }
+
+  .section-title {
+    @apply font-display text-3xl md:text-4xl text-bsm-text-primary font-light tracking-tight;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 text-xs font-medium tracking-wide uppercase;
+  }
+
+  .badge-gold {
+    @apply badge text-gold bg-gold/10 border border-gold/20;
+  }
+
+  .badge-active {
+    @apply badge text-emerald-400 bg-emerald-400/10;
+  }
+
+  .badge-pending {
+    @apply badge text-amber-400 bg-amber-400/10;
+  }
+
+  .badge-muted {
+    @apply badge text-bsm-text-muted bg-surface;
+  }
+
+  .stat-card {
+    @apply bg-surface border border-bsm-border p-6;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 text-sm text-bsm-text-secondary
+           transition-all duration-150 hover:text-bsm-text-primary hover:bg-surface-elevated;
+  }
+
+  .sidebar-link-active {
+    @apply sidebar-link text-gold bg-gold/5 border-l border-gold;
+  }
+
+  .table-row {
+    @apply border-b border-bsm-border transition-colors hover:bg-surface-elevated;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.03) 50%,
+      rgba(255,255,255,0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+}
