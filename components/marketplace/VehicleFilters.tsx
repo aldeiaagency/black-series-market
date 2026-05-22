@@ -231,56 +231,73 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </div>
       </FilterGroup>
 
-      {/* Brand + Model (coches.net style) */}
+      {/* Brand + Model + Version */}
       <FilterGroup title="Marca y modelo">
         <div className="space-y-3">
-          {/* Brand select */}
-          <div>
-            <label className="label-base">Marca</label>
-            <select
-              className="select-base"
-              value={currentBrand}
-              onChange={(e) => updateBrand(e.target.value)}
-            >
-              <option value="">Todas las marcas</option>
-              {(showAllBrands ? allBrands : displayedBrands).map((brand) => (
-                <option key={brand} value={brand.toLowerCase().replace(/ /g, '-')}>
-                  {brand}
-                </option>
-              ))}
-            </select>
-            {!showAllBrands && (
-              <button
-                onClick={() => setShowAllBrands(true)}
-                className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-2"
-              >
-                <ChevronDown className="w-3 h-3" />
-                Ver todas las marcas ({hiddenCount} más)
-              </button>
-            )}
-            {showAllBrands && (
-              <button
-                onClick={() => setShowAllBrands(false)}
-                className="flex items-center gap-1 text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors mt-2"
-              >
-                <ChevronUp className="w-3 h-3" />
-                Ver menos
-              </button>
-            )}
-          </div>
 
-          {/* Model select — only when a brand is selected */}
+          {/* ── Chip when brand (+ optional model) is selected ── */}
           {currentBrand && (
+            <div className="flex items-center justify-between border border-gold/40 bg-surface-elevated px-3 py-2.5">
+              <span className="text-sm font-medium text-bsm-text-primary uppercase tracking-widest">
+                {currentBrand.replace(/-/g, ' ')}
+                {currentModel && <span className="text-gold"> {currentModel}</span>}
+              </span>
+              <button
+                onClick={() => updateBrand('')}
+                className="ml-2 text-bsm-text-muted hover:text-gold transition-colors flex-shrink-0"
+                aria-label="Borrar marca"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* ── Brand select (hidden once brand+model are both set) ── */}
+          {!currentBrand && (
             <div>
-              <label className="label-base">Modelo</label>
               <select
                 className="select-base"
-                value={currentModel}
+                value=""
+                onChange={(e) => updateBrand(e.target.value)}
+              >
+                <option value="">Cualquier marca</option>
+                {(showAllBrands ? allBrands : featuredBrands).map((brand) => (
+                  <option key={brand} value={brand.toLowerCase().replace(/ /g, '-')}>
+                    {brand}
+                  </option>
+                ))}
+              </select>
+              {!showAllBrands ? (
+                <button
+                  onClick={() => setShowAllBrands(true)}
+                  className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-2"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                  Ver todas las marcas ({hiddenCount} más)
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowAllBrands(false)}
+                  className="flex items-center gap-1 text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors mt-2"
+                >
+                  <ChevronUp className="w-3 h-3" />
+                  Ver menos
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* ── Model select (only when brand selected, no model yet) ── */}
+          {currentBrand && !currentModel && (
+            <div>
+              <select
+                className="select-base"
+                value=""
                 onChange={(e) => updateParam('modelo', e.target.value || null)}
                 disabled={loadingModels}
               >
                 <option value="">
-                  {loadingModels ? 'Cargando...' : 'Todos los modelos'}
+                  {loadingModels ? 'Cargando modelos…' : 'Cualquier modelo'}
                 </option>
                 {models.map((m) => (
                   <option key={m} value={m}>{m}</option>
@@ -288,6 +305,25 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               </select>
             </div>
           )}
+
+          {/* ── Version free-text ── */}
+          <div>
+            <label className="label-base flex items-center gap-1.5">
+              Versión
+              <span
+                title="Ej: M Sport, GTI, Elegance, Competition…"
+                className="w-3.5 h-3.5 rounded-full border border-bsm-text-muted text-bsm-text-muted text-[9px] flex items-center justify-center cursor-help select-none"
+              >i</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: M Sport, GTI, Elegance…"
+              className="input-base"
+              value={searchParams.get('version') || ''}
+              onChange={(e) => updateParam('version', e.target.value || null)}
+            />
+          </div>
+
         </div>
       </FilterGroup>
 

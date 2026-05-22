@@ -27,6 +27,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
   if (params.categoria)  query = query.eq('category', params.categoria)
   if (params.marca)      query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
   if (params.modelo)     query = query.ilike('model_name', `%${params.modelo}%`)
+  if (params.version)    query = query.ilike('version', `%${params.version}%`)
   if (params.anioMin)    query = query.gte('year', parseInt(params.anioMin))
   if (params.anioMax)    query = query.lte('year', parseInt(params.anioMax))
   if (params.precioMin)  query = query.gte('price', parseInt(params.precioMin))
