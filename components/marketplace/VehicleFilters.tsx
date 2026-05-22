@@ -8,25 +8,25 @@ import { cn } from '@/lib/utils'
 // ─── Categories ──────────────────────────────────────────────────────────────
 
 const CAR_CATEGORIES = [
-  { value: 'supercars',            label: 'Supercars' },
-  { value: 'luxury_executive',     label: 'Luxury & Executive' },
-  { value: 'premium_modern',       label: 'Premium Modern' },
-  { value: 'sport_performance',    label: 'Sport & Performance' },
-  { value: 'classics_youngtimers', label: 'Classics & Youngtimers' },
-  { value: 'enthusiast_selection', label: 'Enthusiast Selection' },
+  { value: 'supercars',            label: 'Supercars & Hypercars' },
+  { value: 'luxury_executive',     label: 'Lujo y Ejecutivo' },
+  { value: 'premium_modern',       label: 'Premium Moderno' },
+  { value: 'sport_performance',    label: 'Sport y Performance' },
+  { value: 'classics_youngtimers', label: 'Clásicos y Youngtimers' },
+  { value: 'enthusiast_selection', label: 'Selección Entusiasta' },
   { value: 'black_label_selection','label': 'Black Label Selection' },
   { value: 'black_label_icon',     label: 'Black Label Icon' },
 ]
 
 const MOTO_CATEGORIES = [
-  { value: 'premium_modern_bikes',      label: 'Premium Modern Bikes' },
-  { value: 'sport_supersport',          label: 'Sport & SuperSport' },
-  { value: 'naked_hypernaked',          label: 'Naked & Hypernaked' },
-  { value: 'adventure_touring_premium', label: 'Adventure & Touring Premium' },
-  { value: 'custom_cruiser_premium',    label: 'Custom & Cruiser Premium' },
-  { value: 'classic_youngtimer_bikes',  label: 'Classic & Youngtimer' },
-  { value: 'scooter_urban_premium',     label: 'Scooter & Urban Premium' },
-  { value: 'enthusiast_selection',      label: 'Enthusiast Selection' },
+  { value: 'premium_modern_bikes',      label: 'Motos Premium Modernas' },
+  { value: 'sport_supersport',          label: 'Sport y Supersport' },
+  { value: 'naked_hypernaked',          label: 'Naked y Hypernaked' },
+  { value: 'adventure_touring_premium', label: 'Adventure y Touring Premium' },
+  { value: 'custom_cruiser_premium',    label: 'Custom y Cruiser Premium' },
+  { value: 'classic_youngtimer_bikes',  label: 'Clásica y Youngtimer' },
+  { value: 'scooter_urban_premium',     label: 'Scooter Urbano Premium' },
+  { value: 'enthusiast_selection',      label: 'Selección Entusiasta' },
   { value: 'black_label_selection',     label: 'Black Label Selection' },
   { value: 'black_label_icon',          label: 'Black Label Icon' },
 ]
@@ -242,238 +242,235 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     </label>
   )
 
-  const FiltersContent = () => (
-    <div>
-      {/* Mobile-only sort */}
-      <div className="mb-6 lg:hidden">
-        <label className="label-base">Ordenar</label>
-        <select className="select-base" value={searchParams.get('sort') || 'featured'}
-          onChange={(e) => updateParam('sort', e.target.value)}>
-          {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-      </div>
-
-      {/* Category */}
-      <FilterGroup title="Categoría">
-        <div className="space-y-2">
-          {categories.map((cat) => (
-            <CheckOption key={cat.value} param="categoria" value={cat.value} label={cat.label} />
-          ))}
+  // Rendered as a direct function call (not {renderFilters()}) so that
+  // showAllBrands state survives re-renders without React treating it as a new component type.
+  function renderFilters() {
+    const displayedBrands = showAllBrands ? allBrands : featuredBrands
+    return (
+      <div>
+        {/* Mobile-only sort */}
+        <div className="mb-6 lg:hidden">
+          <label className="label-base">Ordenar</label>
+          <select className="select-base" value={searchParams.get('sort') || 'featured'}
+            onChange={(e) => updateParam('sort', e.target.value)}>
+            {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
         </div>
-      </FilterGroup>
 
-      {/* Brand + Model + Version */}
-      <FilterGroup title="Marca y modelo">
-        <div className="space-y-3">
+        {/* Category */}
+        <FilterGroup title="Categoría">
+          <div className="space-y-2">
+            {categories.map((cat) => (
+              <CheckOption key={cat.value} param="categoria" value={cat.value} label={cat.label} />
+            ))}
+          </div>
+        </FilterGroup>
 
-          {/* ── Chip when brand (+ optional model) is selected ── */}
-          {currentBrand && (
-            <div className="flex items-center justify-between border border-gold/40 bg-surface-elevated px-3 py-2.5">
-              <span className="text-sm font-medium text-bsm-text-primary uppercase tracking-widest">
-                {currentBrand.replace(/-/g, ' ')}
-                {currentModel && <span className="text-gold"> {currentModel}</span>}
-              </span>
-              <button
-                onClick={() => updateBrand('')}
-                className="ml-2 text-bsm-text-muted hover:text-gold transition-colors flex-shrink-0"
-                aria-label="Borrar marca"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+        {/* Brand + Model + Version */}
+        <FilterGroup title="Marca y modelo">
+          <div className="space-y-3">
 
-          {/* ── Brand select (hidden once brand+model are both set) ── */}
-          {!currentBrand && (
-            <div>
-              <select
-                className="select-base"
-                value=""
-                onChange={(e) => updateBrand(e.target.value)}
-              >
-                <option value="">Cualquier marca</option>
-                {(showAllBrands ? allBrands : featuredBrands).map((brand) => (
-                  <option key={brand} value={brand.toLowerCase().replace(/ /g, '-')}>
-                    {brand}
+            {/* ── Chip when brand (+ optional model) is selected ── */}
+            {currentBrand && (
+              <div className="flex items-center justify-between border border-gold/40 bg-surface-elevated px-3 py-2.5">
+                <span className="text-sm font-medium text-bsm-text-primary uppercase tracking-widest">
+                  {currentBrand.replace(/-/g, ' ')}
+                  {currentModel && <span className="text-gold"> {currentModel}</span>}
+                </span>
+                <button
+                  onClick={() => updateBrand('')}
+                  className="ml-2 text-bsm-text-muted hover:text-gold transition-colors flex-shrink-0"
+                  aria-label="Borrar marca"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* ── Brand list (hidden once brand is selected) ── */}
+            {!currentBrand && (
+              <div>
+                <div className="flex flex-wrap gap-1.5">
+                  {displayedBrands.map((brand) => (
+                    <button
+                      key={brand}
+                      onClick={() => updateBrand(brand.toLowerCase().replace(/ /g, '-'))}
+                      className="text-xs px-2.5 py-1 border border-bsm-border text-bsm-text-secondary
+                        hover:border-gold/40 hover:text-gold transition-all duration-150 whitespace-nowrap"
+                    >
+                      {brand}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowAllBrands(!showAllBrands)}
+                  className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-3"
+                >
+                  {showAllBrands
+                    ? <><ChevronUp className="w-3 h-3" />Ver menos</>
+                    : <><ChevronDown className="w-3 h-3" />Ver todas las marcas ({hiddenCount} más)</>
+                  }
+                </button>
+              </div>
+            )}
+
+            {/* ── Model select (only when brand selected, no model yet) ── */}
+            {currentBrand && !currentModel && (
+              <div>
+                <select
+                  className="select-base"
+                  value=""
+                  onChange={(e) => updateParam('modelo', e.target.value || null)}
+                  disabled={loadingModels}
+                >
+                  <option value="">
+                    {loadingModels ? 'Cargando modelos…' : 'Cualquier modelo'}
                   </option>
-                ))}
-              </select>
-              {!showAllBrands ? (
-                <button
-                  onClick={() => setShowAllBrands(true)}
-                  className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-2"
-                >
-                  <ChevronDown className="w-3 h-3" />
-                  Ver todas las marcas ({hiddenCount} más)
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowAllBrands(false)}
-                  className="flex items-center gap-1 text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors mt-2"
-                >
-                  <ChevronUp className="w-3 h-3" />
-                  Ver menos
-                </button>
-              )}
-            </div>
-          )}
+                  {models.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-          {/* ── Model select (only when brand selected, no model yet) ── */}
-          {currentBrand && !currentModel && (
+            {/* ── Version free-text ── */}
             <div>
-              <select
-                className="select-base"
-                value=""
-                onChange={(e) => updateParam('modelo', e.target.value || null)}
-                disabled={loadingModels}
-              >
-                <option value="">
-                  {loadingModels ? 'Cargando modelos…' : 'Cualquier modelo'}
-                </option>
-                {models.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
+              <label className="label-base flex items-center gap-1.5">
+                Versión
+                <span
+                  title="Ej: M Sport, GTI, Elegance, Competition…"
+                  className="w-3.5 h-3.5 rounded-full border border-bsm-text-muted text-bsm-text-muted text-[9px] flex items-center justify-center cursor-help select-none"
+                >i</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: M Sport, GTI, Elegance…"
+                className="input-base"
+                value={searchParams.get('version') || ''}
+                onChange={(e) => updateParam('version', e.target.value || null)}
+              />
             </div>
-          )}
 
-          {/* ── Version free-text ── */}
-          <div>
-            <label className="label-base flex items-center gap-1.5">
-              Versión
-              <span
-                title="Ej: M Sport, GTI, Elegance, Competition…"
-                className="w-3.5 h-3.5 rounded-full border border-bsm-text-muted text-bsm-text-muted text-[9px] flex items-center justify-center cursor-help select-none"
-              >i</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: M Sport, GTI, Elegance…"
-              className="input-base"
-              value={searchParams.get('version') || ''}
-              onChange={(e) => updateParam('version', e.target.value || null)}
-            />
           </div>
+        </FilterGroup>
 
-        </div>
-      </FilterGroup>
-
-      {/* Year */}
-      <FilterGroup title="Año">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <label className="label-base">Desde</label>
-            <input type="number" placeholder="1970" min="1960" max={new Date().getFullYear()}
-              className="input-base" value={searchParams.get('anioMin') || ''}
-              onChange={(e) => updateParam('anioMin', e.target.value)} />
-          </div>
-          <div className="flex-1">
-            <label className="label-base">Hasta</label>
-            <input type="number" placeholder={String(new Date().getFullYear())}
-              min="1960" max={new Date().getFullYear()} className="input-base"
-              value={searchParams.get('anioMax') || ''}
-              onChange={(e) => updateParam('anioMax', e.target.value)} />
-          </div>
-        </div>
-      </FilterGroup>
-
-      {/* Price */}
-      <FilterGroup title="Precio">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <label className="label-base">Desde (€)</label>
-            <input type="number" placeholder="0" className="input-base"
-              value={searchParams.get('precioMin') || ''}
-              onChange={(e) => updateParam('precioMin', e.target.value)} />
-          </div>
-          <div className="flex-1">
-            <label className="label-base">Hasta (€)</label>
-            <input type="number" placeholder="Sin límite" className="input-base"
-              value={searchParams.get('precioMax') || ''}
-              onChange={(e) => updateParam('precioMax', e.target.value)} />
-          </div>
-        </div>
-      </FilterGroup>
-
-      {/* Power */}
-      <FilterGroup title="Potencia (CV)">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <label className="label-base">Desde</label>
-            <input type="number" placeholder="0" className="input-base"
-              value={searchParams.get('cvMin') || ''}
-              onChange={(e) => updateParam('cvMin', e.target.value)} />
-          </div>
-          <div className="flex-1">
-            <label className="label-base">Hasta</label>
-            <input type="number" placeholder="Sin límite" className="input-base"
-              value={searchParams.get('cvMax') || ''}
-              onChange={(e) => updateParam('cvMax', e.target.value)} />
-          </div>
-        </div>
-      </FilterGroup>
-
-      {/* Mileage */}
-      <FilterGroup title="Kilometraje máximo">
-        <select className="select-base" value={searchParams.get('kmMax') || ''}
-          onChange={(e) => updateParam('kmMax', e.target.value)}>
-          <option value="">Sin límite</option>
-          <option value="5000">Hasta 5.000 km</option>
-          <option value="10000">Hasta 10.000 km</option>
-          <option value="30000">Hasta 30.000 km</option>
-          <option value="50000">Hasta 50.000 km</option>
-          <option value="100000">Hasta 100.000 km</option>
-        </select>
-      </FilterGroup>
-
-      {/* Vehicle-type-specific filters */}
-      {isMoto ? (
-        <>
-          <FilterGroup title="Tipo de moto">
-            <div className="space-y-2">
-              {MOTO_STYLES.map((o) => <CheckOption key={o.value} param="estilo" value={o.value} label={o.label} />)}
+        {/* Year */}
+        <FilterGroup title="Año">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <label className="label-base">Desde</label>
+              <input type="number" placeholder="1970" min="1960" max={new Date().getFullYear()}
+                className="input-base" value={searchParams.get('anioMin') || ''}
+                onChange={(e) => updateParam('anioMin', e.target.value)} />
             </div>
-          </FilterGroup>
-          <FilterGroup title="Cilindrada">
-            <div className="space-y-2">
-              {MOTO_CC_RANGES.map((o) => <CheckOption key={o.value} param="cc" value={o.value} label={o.label} />)}
+            <div className="flex-1">
+              <label className="label-base">Hasta</label>
+              <input type="number" placeholder={String(new Date().getFullYear())}
+                min="1960" max={new Date().getFullYear()} className="input-base"
+                value={searchParams.get('anioMax') || ''}
+                onChange={(e) => updateParam('anioMax', e.target.value)} />
             </div>
-          </FilterGroup>
-          <FilterGroup title="Carnet requerido">
-            <div className="space-y-2">
-              {LICENSE_TYPES.map((o) => <CheckOption key={o.value} param="carnet" value={o.value} label={o.label} />)}
-            </div>
-          </FilterGroup>
-        </>
-      ) : (
-        <>
-          <FilterGroup title="Carrocería">
-            <div className="space-y-2">
-              {CAR_BODY_TYPES.map((o) => <CheckOption key={o.value} param="tipo" value={o.value} label={o.label} />)}
-            </div>
-          </FilterGroup>
-          <FilterGroup title="Combustible">
-            <div className="space-y-2">
-              {FUEL_OPTIONS.map((o) => <CheckOption key={o.value} param="combustible" value={o.value} label={o.label} />)}
-            </div>
-          </FilterGroup>
-          <FilterGroup title="Transmisión">
-            <div className="space-y-2">
-              {TRANSMISSION_OPTIONS.map((o) => <CheckOption key={o.value} param="cambio" value={o.value} label={o.label} />)}
-            </div>
-          </FilterGroup>
-        </>
-      )}
+          </div>
+        </FilterGroup>
 
-      {hasActiveFilters && (
-        <button onClick={clearAll}
-          className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors mt-2">
-          <X className="w-4 h-4" />
-          Borrar todos los filtros
-        </button>
-      )}
-    </div>
-  )
+        {/* Price */}
+        <FilterGroup title="Precio">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <label className="label-base">Desde (€)</label>
+              <input type="number" placeholder="0" className="input-base"
+                value={searchParams.get('precioMin') || ''}
+                onChange={(e) => updateParam('precioMin', e.target.value)} />
+            </div>
+            <div className="flex-1">
+              <label className="label-base">Hasta (€)</label>
+              <input type="number" placeholder="Sin límite" className="input-base"
+                value={searchParams.get('precioMax') || ''}
+                onChange={(e) => updateParam('precioMax', e.target.value)} />
+            </div>
+          </div>
+        </FilterGroup>
+
+        {/* Power */}
+        <FilterGroup title="Potencia (CV)">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <label className="label-base">Desde</label>
+              <input type="number" placeholder="0" className="input-base"
+                value={searchParams.get('cvMin') || ''}
+                onChange={(e) => updateParam('cvMin', e.target.value)} />
+            </div>
+            <div className="flex-1">
+              <label className="label-base">Hasta</label>
+              <input type="number" placeholder="Sin límite" className="input-base"
+                value={searchParams.get('cvMax') || ''}
+                onChange={(e) => updateParam('cvMax', e.target.value)} />
+            </div>
+          </div>
+        </FilterGroup>
+
+        {/* Mileage */}
+        <FilterGroup title="Kilometraje máximo">
+          <select className="select-base" value={searchParams.get('kmMax') || ''}
+            onChange={(e) => updateParam('kmMax', e.target.value)}>
+            <option value="">Sin límite</option>
+            <option value="5000">Hasta 5.000 km</option>
+            <option value="10000">Hasta 10.000 km</option>
+            <option value="30000">Hasta 30.000 km</option>
+            <option value="50000">Hasta 50.000 km</option>
+            <option value="100000">Hasta 100.000 km</option>
+          </select>
+        </FilterGroup>
+
+        {/* Vehicle-type-specific filters */}
+        {isMoto ? (
+          <>
+            <FilterGroup title="Tipo de moto">
+              <div className="space-y-2">
+                {MOTO_STYLES.map((o) => <CheckOption key={o.value} param="estilo" value={o.value} label={o.label} />)}
+              </div>
+            </FilterGroup>
+            <FilterGroup title="Cilindrada">
+              <div className="space-y-2">
+                {MOTO_CC_RANGES.map((o) => <CheckOption key={o.value} param="cc" value={o.value} label={o.label} />)}
+              </div>
+            </FilterGroup>
+            <FilterGroup title="Carnet requerido">
+              <div className="space-y-2">
+                {LICENSE_TYPES.map((o) => <CheckOption key={o.value} param="carnet" value={o.value} label={o.label} />)}
+              </div>
+            </FilterGroup>
+          </>
+        ) : (
+          <>
+            <FilterGroup title="Carrocería">
+              <div className="space-y-2">
+                {CAR_BODY_TYPES.map((o) => <CheckOption key={o.value} param="tipo" value={o.value} label={o.label} />)}
+              </div>
+            </FilterGroup>
+            <FilterGroup title="Combustible">
+              <div className="space-y-2">
+                {FUEL_OPTIONS.map((o) => <CheckOption key={o.value} param="combustible" value={o.value} label={o.label} />)}
+              </div>
+            </FilterGroup>
+            <FilterGroup title="Transmisión">
+              <div className="space-y-2">
+                {TRANSMISSION_OPTIONS.map((o) => <CheckOption key={o.value} param="cambio" value={o.value} label={o.label} />)}
+              </div>
+            </FilterGroup>
+          </>
+        )}
+
+        {hasActiveFilters && (
+          <button onClick={clearAll}
+            className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors mt-2">
+            <X className="w-4 h-4" />
+            Borrar todos los filtros
+          </button>
+        )}
+      </div>
+    )
+  }
 
   return (
     <>
@@ -489,7 +486,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </button>
         {mobileOpen && (
           <div className="mt-4 bg-surface border border-bsm-border p-6 animate-slide-up">
-            <FiltersContent />
+            {renderFilters()}
           </div>
         )}
       </div>
@@ -507,7 +504,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               </button>
             )}
           </div>
-          <FiltersContent />
+          {renderFilters()}
         </div>
       </aside>
     </>
