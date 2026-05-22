@@ -18,6 +18,6 @@ export async function GET(req: NextRequest) {
 
   const { data } = await query.order('model_name')
 
-  const unique = [...new Set(data?.map((v: any) => v.model_name) ?? [])].sort()
+  const unique = Array.from(new Set(data?.map((v: any) => v.model_name) ?? [])).sort()
   return NextResponse.json(unique)
 }
