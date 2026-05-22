@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { PlusCircle, Edit, Eye, Pause, Play, Trash2, Check } from 'lucide-react'
+import { PlusCircle, Edit, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { VEHICLE_STATUS_LABELS, getVehicleStatusColor, formatPrice, formatMileage } from '@/lib/utils'
+import BoostButton from '@/components/dashboard/BoostButton'
 
 export default async function InventarioPage() {
   const supabase = await createClient()
@@ -101,7 +102,14 @@ export default async function InventarioPage() {
                   <td className="px-4 py-3 text-bsm-text-muted">{v.views}</td>
                   <td className="px-4 py-3 text-bsm-text-muted">{v.leads_count}</td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1 justify-end">
+                    <div className="flex items-center gap-3 justify-end">
+                      {v.status === 'active' && (
+                        <BoostButton
+                          vehicleId={v.id}
+                          isFeatured={v.is_featured}
+                          featuredUntil={v.featured_until}
+                        />
+                      )}
                       <Link
                         href={`/dashboard/publicar?edit=${v.id}`}
                         className="p-2 text-bsm-text-muted hover:text-gold transition-colors"

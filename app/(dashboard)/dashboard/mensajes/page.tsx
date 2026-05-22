@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { LEAD_STATUS_LABELS, getLeadStatusColor, timeAgo } from '@/lib/utils'
+import { timeAgo } from '@/lib/utils'
 import { Phone, Mail, MessageCircle } from 'lucide-react'
+import LeadStatusSelector from '@/components/dashboard/LeadStatusSelector'
 
 export default async function MensajesPage() {
   const supabase = await createClient()
@@ -44,9 +45,7 @@ export default async function MensajesPage() {
                       <h3 className="font-medium text-bsm-text-primary">{lead.buyer_name}</h3>
                       <p className="text-xs text-bsm-text-muted mt-0.5">{timeAgo(lead.created_at)}</p>
                     </div>
-                    <span className={`badge text-[10px] ${getLeadStatusColor(lead.status)}`}>
-                      {LEAD_STATUS_LABELS[lead.status as keyof typeof LEAD_STATUS_LABELS]}
-                    </span>
+                    <LeadStatusSelector leadId={lead.id} currentStatus={lead.status} />
                   </div>
 
                   {lead.vehicle && (

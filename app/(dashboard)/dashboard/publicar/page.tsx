@@ -8,7 +8,8 @@ import {
   BODY_TYPES_CAR, BODY_TYPES_MOTO, COLORS, UPHOLSTERY,
   EQUIPMENT_CATEGORIES, slugify, vehicleSlug,
 } from '@/lib/utils'
-import { CheckCircle, Upload, X, ChevronRight } from 'lucide-react'
+import { CheckCircle, ChevronRight } from 'lucide-react'
+import ImageUploader from '@/components/dashboard/ImageUploader'
 
 const STEPS = ['Tipo y marca', 'Especificaciones', 'Equipamiento', 'Imágenes', 'Precio y publicar']
 
@@ -390,39 +391,10 @@ export default function PublicarPage() {
               Recomendamos fondos neutros y iluminación natural o de estudio.
             </p>
 
-            <div className="border-2 border-dashed border-bsm-border hover:border-gold/40 transition-colors p-12 text-center cursor-pointer">
-              <Upload className="w-10 h-10 text-bsm-text-muted mx-auto mb-4" />
-              <p className="text-sm text-bsm-text-secondary mb-2">
-                Arrastra y suelta las imágenes aquí
-              </p>
-              <p className="text-xs text-bsm-text-muted">JPG, PNG, WebP · Máximo 10MB por imagen</p>
-              <button type="button" className="btn-outline text-sm mt-4">
-                Seleccionar archivos
-              </button>
-            </div>
-
-            {form.images && form.images.length > 0 && (
-              <div className="grid grid-cols-4 gap-2">
-                {form.images.map((img: any, i: number) => (
-                  <div key={i} className="relative aspect-video bg-surface-elevated overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => update('images', form.images.filter((_: any, j: number) => j !== i))}
-                      className="absolute top-1 right-1 w-5 h-5 bg-obsidian/80 flex items-center justify-center"
-                    >
-                      <X className="w-3 h-3 text-white" />
-                    </button>
-                    {i === 0 && (
-                      <span className="absolute bottom-1 left-1 text-[9px] bg-gold text-obsidian px-1.5 py-0.5">
-                        PORTADA
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+            <ImageUploader
+              images={form.images}
+              onChange={(imgs) => update('images', imgs)}
+            />
 
             <div>
               <label className="label-base">Vídeo (URL de YouTube o Vimeo)</label>

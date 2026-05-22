@@ -40,7 +40,26 @@ export default async function DealerPage({ params }: PageProps) {
 
   const vehicleCount = vehicles?.length || 0
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AutoDealer',
+    name: dealer.name,
+    description: dealer.description || `Concesionario de vehículos premium en ${dealer.location_city || 'España'}.`,
+    image: dealer.logo_url || undefined,
+    url: dealer.website || undefined,
+    telephone: dealer.phone || undefined,
+    address: dealer.address ? {
+      '@type': 'PostalAddress',
+      streetAddress: dealer.address,
+      addressLocality: dealer.location_city || '',
+      addressRegion: dealer.location_region || '',
+      addressCountry: 'ES',
+    } : undefined,
+  }
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <div className="pt-20">
       {/* Cover */}
       <div className="relative h-64 md:h-80 bg-surface-elevated overflow-hidden">
@@ -143,5 +162,6 @@ export default async function DealerPage({ params }: PageProps) {
         </div>
       </div>
     </div>
+    </>
   )
 }

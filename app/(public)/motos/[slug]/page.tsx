@@ -57,12 +57,33 @@ export default async function MotoDetailPage({ params }: PageProps) {
     .neq('id', vehicle.id)
     .limit(3)
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year}${vehicle.version ? ' ' + vehicle.version : ''}`,
+    description: vehicle.description || `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year} en venta en Black Series Market.`,
+    image: vehicle.images?.map((i: any) => i.url) || [],
+    brand: { '@type': 'Brand', name: vehicle.brand_name },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: vehicle.currency || 'EUR',
+      price: vehicle.price_on_request ? undefined : vehicle.price,
+      availability: 'https://schema.org/InStock',
+      seller: { '@type': 'AutoDealer', name: vehicle.dealer?.name },
+    },
+    vehicleModelDate: String(vehicle.year),
+    mileageFromOdometer: { '@type': 'QuantitativeValue', value: vehicle.mileage_km, unitCode: 'KMT' },
+  }
+
   return (
-    <VehicleDetailContent
-      vehicle={vehicle}
-      relatedVehicles={relatedVehicles || []}
-      backHref="/motos"
-      backLabel="Motos"
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <VehicleDetailContent
+        vehicle={vehicle}
+        relatedVehicles={relatedVehicles || []}
+        backHref="/motos"
+        backLabel="Motos"
+      />
+    </>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CheckCircle, Save, Plus, Trash2, ChevronDown } from 'lucide-react'
 
 const DEFAULT_PLANS = [
@@ -47,10 +47,22 @@ type SectionKey = 'planes' | 'marcas' | 'criterios' | 'email' | 'seo'
 
 export default function AdminConfiguracionPage() {
   const [saved, setSaved] = useState<SectionKey | null>(null)
+  const [saving, setSaving] = useState(false)
   const [openSection, setOpenSection] = useState<SectionKey>('planes')
 
+  useEffect(() => {
+    fetch('/api/admin/config')
+      .then((r) => r.json())
+      .then((cfg) => {
+        if (cfg.planes) setPlans(cfg.planes)
+        if (cfg.criterios) setCriteria(cfg.criterios)
+        if (cfg.seo) setSeo((s) => ({ ...s, ...cfg.seo }))
+      })
+      .catch(() => {})
+  }, [])
+
   const [plans, setPlans] = useState(DEFAULT_PLANS)
-  const [brands] = useState(DEFAULT_BRANDS)
+  const [brands, setBrands] = useState(DEFAULT_BRANDS)
 
   const [criteria, setCriteria] = useState({
     car_min_price: 40000,
@@ -77,9 +89,26 @@ export default function AdminConfiguracionPage() {
     gtm_id: '',
   })
 
-  function handleSave(section: SectionKey) {
-    setSaved(section)
-    setTimeout(() => setSaved(null), 2500)
+  async function handleSave(section: SectionKey) {
+    const valueMap: Record<SectionKey, any> = {
+      planes,
+      marcas: brands,
+      criterios: criteria,
+      email,
+      seo,
+    }
+    setSaving(true)
+    try {
+      await fetch('/api/admin/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: section, value: valueMap[section] }),
+      })
+      setSaved(section)
+      setTimeout(() => setSaved(null), 2500)
+    } finally {
+      setSaving(false)
+    }
   }
 
   function updatePlan(id: string, key: string, value: string | number | boolean) {

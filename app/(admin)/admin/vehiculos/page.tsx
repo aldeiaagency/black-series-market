@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { VEHICLE_STATUS_LABELS, getVehicleStatusColor, formatPrice } from '@/lib/utils'
 import Link from 'next/link'
+import RejectVehicleButton from '@/components/admin/RejectVehicleButton'
 
 interface PageProps {
   searchParams: Promise<{ status?: string }>
@@ -102,11 +103,17 @@ export default async function AdminVehiculosPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     {v.status === 'pending_review' && (
-                      <form action={approveVehicle.bind(null, v.id)}>
-                        <button type="submit" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">
-                          Aprobar
-                        </button>
-                      </form>
+                      <>
+                        <form action={approveVehicle.bind(null, v.id)}>
+                          <button type="submit" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">
+                            Aprobar
+                          </button>
+                        </form>
+                        <RejectVehicleButton
+                          vehicleId={v.id}
+                          vehicleTitle={`${v.brand_name} ${v.model_name} ${v.year}`}
+                        />
+                      </>
                     )}
                     {v.status === 'active' && (
                       <Link

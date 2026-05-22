@@ -24,10 +24,15 @@ export async function POST(request: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const dealerId = session.metadata?.dealer_id
-    const plan = session.metadata?.plan
+    const { dealer_id: dealerId, plan, type, vehicle_id: vehicleId } = session.metadata || {}
 
-    if (dealerId && plan) {
+    if (type === 'boost' && vehicleId) {
+      const featuredUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      await supabase.from('vehicles').update({
+        is_featured: true,
+        featured_until: featuredUntil,
+      }).eq('id', vehicleId)
+    } else if (dealerId && plan) {
       await supabase.from('dealers').update({
         subscription_plan: plan,
         stripe_subscription_id: session.subscription as string,
