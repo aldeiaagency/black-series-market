@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -144,23 +144,47 @@ function FilterGroup({ title, children }: { title: string; children: React.React
 }
 
 export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps) {
-  const router    = useRouter()
-  const pathname  = usePathname()
+  const router       = useRouter()
+  const pathname     = usePathname()
   const searchParams = useSearchParams()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileOpen, setMobileOpen]   = useState(false)
   const [showAllBrands, setShowAllBrands] = useState(false)
+  const [models, setModels]           = useState<string[]>([])
+  const [loadingModels, setLoadingModels] = useState(false)
 
-  const isMoto = vehicleType === 'motorcycle'
-  const categories      = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
-  const allBrands       = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
+  const isMoto       = vehicleType === 'motorcycle'
+  const categories   = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
+  const allBrands    = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
   const featuredBrands  = isMoto ? FEATURED_BRANDS_MOTO : FEATURED_BRANDS_CAR
   const displayedBrands = showAllBrands ? allBrands : featuredBrands
   const hiddenCount     = allBrands.length - featuredBrands.length
+
+  const currentBrand = searchParams.get('marca') || ''
+  const currentModel = searchParams.get('modelo') || ''
+
+  // Fetch models whenever brand changes
+  useEffect(() => {
+    if (!currentBrand) { setModels([]); return }
+    setLoadingModels(true)
+    const type = isMoto ? 'motorcycle' : 'car'
+    fetch(`/api/models?brand=${currentBrand}&type=${type}`)
+      .then((r) => r.json())
+      .then((data: string[]) => setModels(data))
+      .finally(() => setLoadingModels(false))
+  }, [currentBrand, isMoto])
 
   function updateParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString())
     if (value === null || value === '') params.delete(key)
     else params.set(key, value)
+    params.delete('page')
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  function updateBrand(brand: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (!brand) { params.delete('marca'); params.delete('modelo') }
+    else { params.set('marca', brand); params.delete('modelo') }
     params.delete('page')
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
@@ -207,35 +231,64 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </div>
       </FilterGroup>
 
-      {/* Brand */}
-      <FilterGroup title="Marca">
-        <div className="space-y-2">
-          {displayedBrands.map((brand) => (
-            <CheckOption
-              key={brand}
-              param="marca"
-              value={brand.toLowerCase().replace(/ /g, '-')}
-              label={brand}
-            />
-          ))}
+      {/* Brand + Model (coches.net style) */}
+      <FilterGroup title="Marca y modelo">
+        <div className="space-y-3">
+          {/* Brand select */}
+          <div>
+            <label className="label-base">Marca</label>
+            <select
+              className="select-base"
+              value={currentBrand}
+              onChange={(e) => updateBrand(e.target.value)}
+            >
+              <option value="">Todas las marcas</option>
+              {(showAllBrands ? allBrands : displayedBrands).map((brand) => (
+                <option key={brand} value={brand.toLowerCase().replace(/ /g, '-')}>
+                  {brand}
+                </option>
+              ))}
+            </select>
+            {!showAllBrands && (
+              <button
+                onClick={() => setShowAllBrands(true)}
+                className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-2"
+              >
+                <ChevronDown className="w-3 h-3" />
+                Ver todas las marcas ({hiddenCount} más)
+              </button>
+            )}
+            {showAllBrands && (
+              <button
+                onClick={() => setShowAllBrands(false)}
+                className="flex items-center gap-1 text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors mt-2"
+              >
+                <ChevronUp className="w-3 h-3" />
+                Ver menos
+              </button>
+            )}
+          </div>
+
+          {/* Model select — only when a brand is selected */}
+          {currentBrand && (
+            <div>
+              <label className="label-base">Modelo</label>
+              <select
+                className="select-base"
+                value={currentModel}
+                onChange={(e) => updateParam('modelo', e.target.value || null)}
+                disabled={loadingModels}
+              >
+                <option value="">
+                  {loadingModels ? 'Cargando...' : 'Todos los modelos'}
+                </option>
+                {models.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
-        {!showAllBrands ? (
-          <button
-            onClick={() => setShowAllBrands(true)}
-            className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-3"
-          >
-            <ChevronDown className="w-3 h-3" />
-            Ver todas las marcas ({hiddenCount} más)
-          </button>
-        ) : (
-          <button
-            onClick={() => setShowAllBrands(false)}
-            className="flex items-center gap-1 text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors mt-3"
-          >
-            <ChevronUp className="w-3 h-3" />
-            Ver menos
-          </button>
-        )}
       </FilterGroup>
 
       {/* Year */}
