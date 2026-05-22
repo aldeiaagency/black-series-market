@@ -14,8 +14,9 @@ const BRAND_CATEGORIES = {
   'Premium americanas y japonesas': [
     'corvette', 'dodge', 'lexus', 'nissan',
   ],
-  'Motos premium': [
+  'Motos': [
     'ducati', 'mv-agusta', 'aprilia', 'bimota', 'bmw-motorrad', 'harley-davidson', 'indian', 'ktm', 'triumph',
+    'yamaha', 'honda', 'kawasaki', 'suzuki',
   ],
 }
 

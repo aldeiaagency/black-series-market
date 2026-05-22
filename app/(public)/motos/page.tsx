@@ -16,14 +16,18 @@ async function MotoList({ params }: { params: Record<string, string> }) {
     .eq('status', 'active')
     .eq('vehicle_type', 'motorcycle')
 
-  if (params.marca)       query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
-  if (params.anioMin)     query = query.gte('year', parseInt(params.anioMin))
-  if (params.anioMax)     query = query.lte('year', parseInt(params.anioMax))
-  if (params.precioMin)   query = query.gte('price', parseInt(params.precioMin))
-  if (params.precioMax)   query = query.lte('price', parseInt(params.precioMax))
-  if (params.kmMax)       query = query.lte('mileage_km', parseInt(params.kmMax))
-  if (params.combustible) query = query.eq('fuel_type', params.combustible)
-  if (params.search)      query = query.or(`brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`)
+  if (params.marca)     query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
+  if (params.anioMin)   query = query.gte('year', parseInt(params.anioMin))
+  if (params.anioMax)   query = query.lte('year', parseInt(params.anioMax))
+  if (params.precioMin) query = query.gte('price', parseInt(params.precioMin))
+  if (params.precioMax) query = query.lte('price', parseInt(params.precioMax))
+  if (params.kmMax)     query = query.lte('mileage_km', parseInt(params.kmMax))
+  if (params.estilo)    query = query.eq('body_type', params.estilo)
+  if (params.cc) {
+    const [ccMin, ccMax] = params.cc.split('-').map(Number)
+    query = query.gte('displacement_cc', ccMin).lte('displacement_cc', ccMax)
+  }
+  if (params.search)    query = query.or(`brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`)
 
   const sort = params.sort || 'featured'
   if (sort === 'price_asc')   query = query.order('price', { ascending: true })
@@ -69,7 +73,7 @@ export default async function MotosPage({ searchParams }: PageProps) {
           <span className="text-xs text-gold tracking-widest uppercase">Marketplace</span>
         </div>
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <h1 className="section-title">Motos premium</h1>
+          <h1 className="section-title">Motos</h1>
           <Suspense fallback={null}><SortSelector /></Suspense>
         </div>
       </div>
