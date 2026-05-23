@@ -1,8 +1,10 @@
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import VehicleFilters from '@/components/marketplace/VehicleFilters'
 import SortSelector from '@/components/marketplace/SortSelector'
+import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   featured:   [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
@@ -50,26 +52,33 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
 
   if (!vehicles?.length) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-16 h-16 border border-bsm-border flex items-center justify-center mb-6 text-2xl">🔍</div>
-        <h3 className="font-display text-xl mb-2">Sin resultados</h3>
-        <p className="text-sm text-bsm-text-muted max-w-xs">
-          No encontramos coches con estos filtros. Prueba a ampliar los criterios.
-        </p>
+      <div className="flex-1 space-y-6">
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
+          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay unidades con esos criterios</h3>
+          <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
+            Puedes ajustar los filtros o registrar una búsqueda privada para que te avisemos cuando entre una unidad compatible.
+          </p>
+          <div className="flex gap-3">
+            <Link href="/coches" className="btn-outline text-sm px-4">Limpiar filtros</Link>
+            <Link href="/busqueda-privada" className="btn-gold text-sm px-4">Búsqueda privada</Link>
+          </div>
+        </div>
+        <SearchAlertCTA vehicleType="car" />
       </div>
     )
   }
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
       </div>
       {count && count > limit && (
-        <p className="mt-10 text-center text-sm text-bsm-text-muted">
+        <p className="text-center text-sm text-bsm-text-muted">
           Mostrando {Math.min(page * limit, count)} de {count} vehículos
         </p>
       )}
+      <SearchAlertCTA vehicleType="car" compact />
     </div>
   )
 }

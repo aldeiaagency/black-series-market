@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, ChevronDown, Search } from 'lucide-react'
+import { Menu, X, ChevronDown, Search, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Logo from '@/components/brand/Logo'
+import CompareBar from '@/components/marketplace/CompareBar'
 
 const NAV_ITEMS = [
   { label: 'Coches', href: '/coches' },
@@ -25,8 +26,9 @@ const NAV_ITEMS = [
       { label: 'Ver todas', href: '/marcas' },
     ],
   },
-  { label: 'Concesionarios', href: '/dealers' },
-  { label: 'Búsqueda privada', href: '/buscar' },
+  { label: 'Dealers', href: '/dealers' },
+  { label: 'Búsqueda privada', href: '/busqueda-privada' },
+  { label: 'Cómo funciona', href: '/como-funciona' },
 ]
 
 export default function Header() {
@@ -49,6 +51,7 @@ export default function Header() {
   const isHome = pathname === '/'
 
   return (
+    <>
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
@@ -111,8 +114,11 @@ export default function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <Link href="/buscar" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors">
+            <Link href="/buscar" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Buscar">
               <Search className="w-4 h-4" />
+            </Link>
+            <Link href="/mis-favoritos" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+              <Heart className="w-4 h-4" />
             </Link>
             <Link href="/login" className="px-4 py-2 text-[13px] text-[#757575] hover:text-[#C9C9C9] tracking-wide transition-colors">
               Acceder
@@ -178,5 +184,7 @@ export default function Header() {
         </div>
       )}
     </header>
+    <CompareBar />
+    </>
   )
 }

@@ -7,9 +7,11 @@ const LINKS = {
     { label: 'Motos', href: '/motos' },
     { label: 'Marcas', href: '/marcas' },
     { label: 'Concesionarios', href: '/dealers' },
-    { label: 'Búsqueda privada', href: '/buscar' },
+    { label: 'Búsqueda privada', href: '/busqueda-privada' },
+    { label: 'Mis favoritos', href: '/mis-favoritos' },
+    { label: 'Cómo funciona', href: '/como-funciona' },
   ],
-  Concesionarios: [
+  Dealers: [
     { label: 'Solicitar acceso dealer', href: '/registro' },
     { label: 'Criterios de publicación', href: '/precios' },
     { label: 'Planes dealer', href: '/precios' },
@@ -94,8 +96,17 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Disclaimer */}
+        <div className="border-t border-[#141414] pt-8 mb-6">
+          <p className="text-[10px] text-[#3A3A3A] leading-relaxed max-w-3xl">
+            Black Label Market actúa como plataforma de publicación y contacto entre compradores
+            y dealers seleccionados. La operación comercial se realiza exclusivamente entre comprador
+            y vendedor. Black Label no es parte en las transacciones de compraventa.
+          </p>
+        </div>
+
         {/* Bottom */}
-        <div className="border-t border-[#141414] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[11px] text-[#474747]">
             © {new Date().getFullYear()} Black Label Market. Todos los derechos reservados.
           </p>

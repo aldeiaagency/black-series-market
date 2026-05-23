@@ -1,8 +1,10 @@
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import VehicleFilters from '@/components/marketplace/VehicleFilters'
 import SortSelector from '@/components/marketplace/SortSelector'
+import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 
 interface PageProps {
   searchParams: Promise<Record<string, string>>
@@ -46,18 +48,33 @@ async function MotoList({ params }: { params: Record<string, string> }) {
 
   if (!vehicles?.length) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center py-24 text-center">
-        <h3 className="font-display text-xl mb-2">Sin resultados</h3>
-        <p className="text-sm text-bsm-text-muted">Prueba a ampliar los criterios de búsqueda.</p>
+      <div className="flex-1 space-y-6">
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
+          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay unidades con esos criterios</h3>
+          <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
+            Ajusta los filtros o registra una búsqueda privada para que te avisemos cuando entre una moto compatible.
+          </p>
+          <div className="flex gap-3">
+            <Link href="/motos" className="btn-outline text-sm px-4">Limpiar filtros</Link>
+            <Link href="/busqueda-privada" className="btn-gold text-sm px-4">Búsqueda privada</Link>
+          </div>
+        </div>
+        <SearchAlertCTA vehicleType="motorcycle" />
       </div>
     )
   }
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
       </div>
+      {count && count > 24 && (
+        <p className="text-center text-sm text-bsm-text-muted">
+          Mostrando 24 de {count} vehículos
+        </p>
+      )}
+      <SearchAlertCTA vehicleType="motorcycle" compact />
     </div>
   )
 }
