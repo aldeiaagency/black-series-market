@@ -107,8 +107,8 @@ export default async function DealersPage({ searchParams }: PageProps) {
         <div>
           <h3 className="font-display text-2xl font-light mb-2">¿Eres concesionario?</h3>
           <p className="text-sm text-bsm-text-muted max-w-md">
-            Únete a la red de dealers premium de Black Series Market y publica tu inventario
-            ante compradores de alto poder adquisitivo.
+            Publica tu inventario en Black Label Market y da visibilidad a tus unidades
+            ante compradores con criterio e intención real.
           </p>
         </div>
         <a href="/registro" className="btn-gold flex-shrink-0 px-10 py-4">

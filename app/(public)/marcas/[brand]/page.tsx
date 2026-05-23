@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!data) return {}
   return {
     title: `${data.name} en venta`,
-    description: `Explora todos los vehículos ${data.name} disponibles en Black Series Market. Coches y motos premium verificados.`,
+    description: `Explora todos los vehículos ${data.name} disponibles en Black Label Market. Selección curada de coches y motos premium.`,
   }
 }
 

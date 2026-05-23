@@ -18,15 +18,15 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Black Series Market — Vehículos Premium y de Lujo',
-    template: '%s | Black Series Market',
+    default: 'Black Label Market | Coches y motos premium, deportivos y especiales',
+    template: '%s | Black Label Market',
   },
   description:
-    'El marketplace de referencia para coches y motos premium, de lujo, superdeportivos e hipercoches en España y Europa. Encuentra y publica vehículos exclusivos.',
-  keywords: ['coches lujo', 'superdeportivos', 'hipercoches', 'Ferrari', 'Lamborghini', 'Porsche', 'marketplace premium'],
+    'Marketplace curado de coches y motos premium, deportivos, clásicos y unidades especiales. Publicados por concesionarios y especialistas seleccionados.',
+  keywords: ['coches premium', 'motos deportivas', 'superdeportivos', 'clásicos', 'Ferrari', 'Lamborghini', 'Porsche', 'marketplace curado', 'vehículos especiales'],
   openGraph: {
-    title: 'Black Series Market',
-    description: 'El marketplace de referencia para vehículos premium y de lujo',
+    title: 'Black Label Market',
+    description: 'Marketplace curado de coches y motos premium, deportivos, clásicos y unidades especiales.',
     type: 'website',
     locale: 'es_ES',
   },

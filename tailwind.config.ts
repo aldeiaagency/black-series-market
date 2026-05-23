@@ -17,10 +17,16 @@ const config: Config = {
           300: '#0D0D0D',
         },
         gold: {
-          DEFAULT: '#C9A84C',
-          light: '#E8C97D',
-          dark: '#A88A3A',
-          muted: '#7A6230',
+          DEFAULT: '#C6A64B',
+          light: '#DEC070',
+          dark: '#A88935',
+          muted: '#5F4A18',
+          soft: '#A88935',
+        },
+        silver: {
+          DEFAULT: '#C9C9C9',
+          muted: '#A8A8A8',
+          dark: '#757575',
         },
         surface: {
           DEFAULT: '#111111',
@@ -28,11 +34,11 @@ const config: Config = {
           overlay: '#1E1E1E',
         },
         bsm: {
-          border: '#222222',
-          'border-light': '#2A2A2A',
-          'text-primary': '#F0F0EC',
+          border: '#2A2A2A',
+          'border-light': '#1E1E1E',
+          'text-primary': '#F4F1EA',
           'text-secondary': '#9A9A9A',
-          'text-muted': '#666666',
+          'text-muted': '#686868',
         },
       },
       fontFamily: {

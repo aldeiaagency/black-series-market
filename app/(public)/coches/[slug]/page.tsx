@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${data.brand_name} ${data.model_name} ${data.year}${data.version ? ' ' + data.version : ''}`
   return {
     title,
-    description: `${title} en venta en Black Series Market. Vehículo premium verificado por concesionario oficial.`,
+    description: `${title} en venta en Black Label Market. Vehículo premium publicado por dealer seleccionado.`,
     openGraph: {
       title,
       images: data.images?.[0]?.url ? [data.images[0].url] : [],
@@ -63,7 +63,7 @@ export default async function CocheDetailPage({ params }: PageProps) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year}${vehicle.version ? ' ' + vehicle.version : ''}`,
-    description: vehicle.description || `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year} en venta en Black Series Market.`,
+    description: vehicle.description || `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year} en venta en Black Label Market.`,
     image: vehicle.images?.map((i: any) => i.url) || [],
     brand: { '@type': 'Brand', name: vehicle.brand_name },
     offers: {

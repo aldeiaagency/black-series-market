@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Logo from '@/components/brand/Logo'
 
 const NAV_ITEMS = [
   { label: 'Coches', href: '/coches' },
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
     ],
   },
   { label: 'Concesionarios', href: '/dealers' },
+  { label: 'Búsqueda privada', href: '/buscar' },
 ]
 
 export default function Header() {
@@ -49,28 +51,22 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
         scrolled || !isHome
-          ? 'bg-obsidian/95 backdrop-blur-md border-b border-bsm-border'
-          : 'bg-gradient-to-b from-obsidian/80 to-transparent'
+          ? 'bg-[#080808]/96 backdrop-blur-md border-b border-[#1E1E1E]'
+          : 'bg-gradient-to-b from-[#080808]/70 to-transparent'
       )}
     >
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-        <div className="flex items-center justify-between h-18 py-4">
+        <div className="flex items-center justify-between h-16">
+
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="flex flex-col leading-none">
-              <span className="font-display text-xl font-light text-bsm-text-primary tracking-[0.15em] group-hover:text-gold transition-colors">
-                BLACK SERIES
-              </span>
-              <span className="text-[10px] font-medium tracking-[0.4em] text-gold uppercase">
-                Market
-              </span>
-            </div>
+          <Link href="/" className="flex items-center group shrink-0">
+            <Logo width={144} variant="header" />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0.5">
             {NAV_ITEMS.map((item) => (
               <div
                 key={item.label}
@@ -81,27 +77,27 @@ export default function Header() {
                 <Link
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-1 px-4 py-2 text-sm tracking-wide transition-colors duration-150',
+                    'flex items-center gap-1 px-3.5 py-2 text-[13px] tracking-[0.06em] transition-colors duration-150',
                     pathname.startsWith(item.href) && item.href !== '/'
-                      ? 'text-gold'
-                      : 'text-bsm-text-secondary hover:text-bsm-text-primary'
+                      ? 'text-[#C9C9C9]'
+                      : 'text-[#757575] hover:text-[#C9C9C9]'
                   )}
                 >
                   {item.label}
-                  {item.children && <ChevronDown className="w-3.5 h-3.5" />}
+                  {item.children && <ChevronDown className="w-3 h-3 opacity-60" />}
                 </Link>
 
                 {item.children && activeDropdown === item.label && (
-                  <div className="absolute top-full left-0 mt-1 w-52 bg-surface border border-bsm-border shadow-card animate-fade-in">
+                  <div className="absolute top-full left-0 mt-1 w-52 bg-[#0E0E0E] border border-[#1E1E1E] shadow-[0_8px_32px_rgba(0,0,0,0.6)] animate-fade-in">
                     {item.children.map((child) => (
                       <Link
                         key={child.label}
                         href={child.href}
                         className={cn(
-                          'block px-4 py-2.5 text-sm transition-colors duration-150',
+                          'block px-4 py-2.5 text-[13px] transition-colors duration-150',
                           child.label === 'Ver todas'
-                            ? 'text-gold border-t border-bsm-border mt-1 pt-3'
-                            : 'text-bsm-text-secondary hover:text-bsm-text-primary hover:bg-surface-elevated'
+                            ? 'text-[#C9C9C9] border-t border-[#1E1E1E] mt-1 pt-3'
+                            : 'text-[#757575] hover:text-[#C9C9C9] hover:bg-[#141414]'
                         )}
                       >
                         {child.label}
@@ -114,22 +110,29 @@ export default function Header() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Link href="/buscar" className="p-2 text-bsm-text-secondary hover:text-gold transition-colors">
-              <Search className="w-5 h-5" />
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
+            <Link href="/buscar" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors">
+              <Search className="w-4 h-4" />
             </Link>
-            <Link href="/login" className="btn-ghost text-sm">
+            <Link href="/login" className="px-4 py-2 text-[13px] text-[#757575] hover:text-[#C9C9C9] tracking-wide transition-colors">
               Acceder
             </Link>
-            <Link href="/registro" className="btn-gold text-sm px-5 py-2.5">
-              Publicar vehículo
+            <Link
+              href="/registro"
+              className="px-5 py-2.5 text-[12px] tracking-[0.1em] font-medium uppercase
+                border border-[#C6A64B]/60 text-[#C6A64B]
+                hover:bg-[#C6A64B]/8 hover:border-[#C6A64B]
+                transition-all duration-200"
+            >
+              Solicitar acceso dealer
             </Link>
           </div>
 
           {/* Mobile toggle */}
           <button
-            className="lg:hidden p-2 text-bsm-text-secondary"
+            className="lg:hidden p-2 text-[#757575] hover:text-[#C9C9C9] transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Abrir menú"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -138,23 +141,23 @@ export default function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden bg-obsidian border-t border-bsm-border animate-slide-up">
-          <div className="px-6 py-6 space-y-1">
+        <div className="lg:hidden bg-[#080808] border-t border-[#1E1E1E] animate-slide-up">
+          <div className="px-6 py-6 space-y-0.5">
             {NAV_ITEMS.map((item) => (
               <div key={item.label}>
                 <Link
                   href={item.href}
-                  className="block py-3 text-bsm-text-secondary hover:text-bsm-text-primary text-base border-b border-bsm-border/50"
+                  className="block py-3 text-[#9A9A9A] hover:text-[#C9C9C9] text-[15px] tracking-wide border-b border-[#141414]"
                 >
                   {item.label}
                 </Link>
                 {item.children && (
-                  <div className="pl-4 space-y-1 mt-1">
+                  <div className="pl-4 space-y-0.5 py-1">
                     {item.children.slice(0, -1).map((child) => (
                       <Link
                         key={child.label}
                         href={child.href}
-                        className="block py-2 text-sm text-bsm-text-muted hover:text-gold"
+                        className="block py-2 text-[13px] text-[#575757] hover:text-[#C6A64B]"
                       >
                         {child.label}
                       </Link>
@@ -164,11 +167,11 @@ export default function Header() {
               </div>
             ))}
             <div className="pt-6 flex flex-col gap-3">
-              <Link href="/login" className="btn-outline w-full justify-center">
+              <Link href="/login" className="btn-outline w-full justify-center text-sm">
                 Acceder
               </Link>
-              <Link href="/registro" className="btn-gold w-full justify-center">
-                Publicar vehículo
+              <Link href="/registro" className="btn-gold w-full justify-center text-sm">
+                Solicitar acceso dealer
               </Link>
             </div>
           </div>

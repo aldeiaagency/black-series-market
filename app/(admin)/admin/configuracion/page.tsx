@@ -91,7 +91,7 @@ export default function AdminConfiguracionPage() {
 
   async function handleSave(section: SectionKey) {
     const valueMap: Record<SectionKey, any> = {
-      planes,
+      planes: plans,
       marcas: brands,
       criterios: criteria,
       email,
