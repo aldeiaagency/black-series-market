@@ -87,7 +87,7 @@ export default async function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="/buscar-vehiculo"
+                href="/busqueda-privada"
                 className="inline-flex items-center gap-2 px-6 py-3 text-sm text-[#9A9A9A]
                   border border-[#2A2A2A] hover:border-[#3A3A3A] hover:text-[#C9C9C9]
                   transition-all duration-200 tracking-wide"
@@ -242,7 +242,7 @@ export default async function HomePage() {
               </div>
               <h2 className="section-title">Concesionarios y compraventas</h2>
             </div>
-            <Link href="/concesionarios" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
+            <Link href="/dealers" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
               Ver todos
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -275,7 +275,7 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="flex flex-col gap-3 flex-shrink-0 w-full md:w-auto">
-              <Link href="/buscar-vehiculo" className="btn-gold px-8 py-4 text-sm justify-center">
+              <Link href="/busqueda-privada" className="btn-gold px-8 py-4 text-sm justify-center">
                 Pedir búsqueda
                 <ArrowRight className="w-4 h-4" />
               </Link>
@@ -307,7 +307,7 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <Link href="/publicar" className="btn-outline px-8 py-4 text-sm justify-center">
+              <Link href="/registro" className="btn-outline px-8 py-4 text-sm justify-center">
                 Solicitar acceso profesional
               </Link>
             </div>
