@@ -49,9 +49,23 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   supabase.from('vehicles').update({ views: vehicle.views + 1 }).eq('id', vehicle.id).then(() => {})
 
-  const { data: relatedVehicles } = await supabase
+  let simQuery = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url)')
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
+    .eq('status', 'active')
+    .eq('vehicle_type', 'motorcycle')
+    .eq('brand_name', vehicle.brand_name)
+    .neq('id', vehicle.id)
+  if (vehicle.price) {
+    simQuery = simQuery
+      .gte('price', Math.round(vehicle.price * 0.6))
+      .lte('price', Math.round(vehicle.price * 1.4))
+  }
+  const { data: similarVehicles } = await simQuery.limit(3)
+
+  const { data: dealerVehicles } = await supabase
+    .from('vehicles')
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
     .eq('status', 'active')
     .eq('dealer_id', vehicle.dealer_id)
     .eq('vehicle_type', 'motorcycle')
@@ -81,7 +95,8 @@ export default async function MotoDetailPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <VehicleDetailContent
         vehicle={vehicle}
-        relatedVehicles={relatedVehicles || []}
+        similarVehicles={similarVehicles || []}
+        dealerVehicles={dealerVehicles || []}
         backHref="/motos"
         backLabel="Motos"
       />

@@ -1,21 +1,46 @@
 import Link from 'next/link'
 import {
-  MapPin, Phone, MessageCircle, Shield, CheckCircle, ArrowLeft, ArrowRight,
+  MapPin, Phone, MessageCircle, Shield, CheckCircle, ArrowRight,
   FileText, Clock, Wrench, BadgeCheck, AlertCircle, ChevronRight, Search,
+  Users,
 } from 'lucide-react'
 import VehicleGallery from '@/components/marketplace/VehicleGallery'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import QualifiedLeadForm from '@/components/marketplace/QualifiedLeadForm'
 import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
+import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 
 interface Props {
   vehicle: Vehicle & { dealer: any }
-  relatedVehicles: Vehicle[]
+  similarVehicles: (Vehicle & { dealer?: any })[]
+  dealerVehicles: (Vehicle & { dealer?: any })[]
   backHref: string
   backLabel: string
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="font-display text-2xl font-light mb-6 pb-4 border-b border-bsm-border">
+      {children}
+    </h2>
+  )
+}
+
+function SummaryCell({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div className="bg-surface border border-bsm-border p-4">
+      <div className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-1.5">{label}</div>
+      {value
+        ? <div className="text-sm font-medium text-bsm-text-primary">{value}</div>
+        : <div className="text-xs text-[#575757] italic">Consultar con dealer</div>
+      }
+    </div>
+  )
 }
 
 function SpecRow({ label, value }: { label: string; value: string }) {
@@ -27,95 +52,181 @@ function SpecRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function HistoryRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType
+  label: string
+  value: string | null | undefined
+}) {
   return (
-    <h2 className="font-display text-2xl font-light mb-6 pb-4 border-b border-bsm-border">
-      {children}
-    </h2>
+    <div className="flex items-center justify-between px-5 py-3.5 border-b border-bsm-border last:border-0">
+      <div className="flex items-center gap-2.5 text-sm text-bsm-text-muted">
+        <Icon className="w-4 h-4 text-gold/50" />
+        {label}
+      </div>
+      {value
+        ? <span className="text-sm text-bsm-text-primary font-medium">{value}</span>
+        : <span className="text-xs text-[#575757] italic">Consultar con dealer</span>
+      }
+    </div>
   )
 }
 
-export default function VehicleDetailContent({ vehicle, relatedVehicles, backHref, backLabel }: Props) {
-  const title = `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year}${vehicle.version ? ' ' + vehicle.version : ''}`
-  const isCar = vehicle.vehicle_type === 'car'
+const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
+  active: { label: 'Disponible', cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5' },
+  paused: { label: 'Reservado',  cls: 'text-[#C6A64B] border-[#C6A64B]/30' },
+  sold:   { label: 'Vendido',    cls: 'text-[#9A9A9A] border-[#3A3A3A]' },
+}
 
-  // Quick summary specs
+// ── Component ─────────────────────────────────────────────────────────────────
+
+export default function VehicleDetailContent({
+  vehicle,
+  similarVehicles,
+  dealerVehicles,
+  backHref,
+  backLabel,
+}: Props) {
+  const isCar = vehicle.vehicle_type === 'car'
+  const title = `${vehicle.brand_name} ${vehicle.model_name}${vehicle.version ? ' ' + vehicle.version : ''}`
+  const loc = vehicle.dealer?.location_city || vehicle.registration_country || null
+  const statusBadge = STATUS_BADGE[vehicle.status as keyof typeof STATUS_BADGE]
+  const vehicleTypeParam: 'car' | 'motorcycle' = isCar ? 'car' : 'motorcycle'
+  const vehicleWord = isCar ? 'vehículo' : 'moto'
+
+  // ── Summary specs (always show with "Consultar con dealer" fallback) ─────
   const summarySpecs = isCar
     ? [
         { label: 'Año',          value: String(vehicle.year) },
-        { label: 'Kilometraje',  value: formatMileage(vehicle.mileage_km) },
-        vehicle.power_hp       && { label: 'Potencia',     value: `${vehicle.power_hp} CV` },
-        vehicle.fuel_type      && { label: 'Combustible',  value: FUEL_LABELS[vehicle.fuel_type] },
-        vehicle.transmission   && { label: 'Cambio',       value: TRANSMISSION_LABELS[vehicle.transmission] },
-        vehicle.body_type      && { label: 'Carrocería',   value: vehicle.body_type },
-        vehicle.registration_country && { label: 'Origen', value: vehicle.registration_country },
-        vehicle.financing_available  && { label: 'Financiación', value: 'Disponible' },
-        vehicle.has_service_history  && { label: 'Historial',    value: 'Disponible' },
-      ].filter(Boolean) as { label: string; value: string }[]
+        { label: 'Kilómetros',   value: formatMileage(vehicle.mileage_km) },
+        { label: 'Precio',       value: formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request) },
+        { label: 'Potencia',     value: vehicle.power_hp ? `${vehicle.power_hp} CV` : null },
+        { label: 'Combustible',  value: vehicle.fuel_type ? FUEL_LABELS[vehicle.fuel_type] : null },
+        { label: 'Cambio',       value: vehicle.transmission ? TRANSMISSION_LABELS[vehicle.transmission] : null },
+        { label: 'Carrocería',   value: vehicle.body_type || null },
+        { label: 'Tracción',     value: vehicle.drive_type ? DRIVE_LABELS[vehicle.drive_type] : null },
+        { label: 'Ubicación',    value: loc },
+        { label: 'Garantía',     value: vehicle.has_warranty ? (vehicle.warranty_months ? `${vehicle.warranty_months} meses` : 'Disponible') : null },
+        { label: 'Financiación', value: vehicle.financing_available ? 'Disponible' : null },
+        { label: 'Categoría',    value: vehicle.category || null },
+      ]
     : [
         { label: 'Año',          value: String(vehicle.year) },
-        { label: 'Kilometraje',  value: formatMileage(vehicle.mileage_km) },
-        vehicle.displacement_cc && { label: 'Cilindrada',  value: `${vehicle.displacement_cc} cc` },
-        vehicle.power_hp        && { label: 'Potencia',    value: `${vehicle.power_hp} CV` },
-        vehicle.body_type       && { label: 'Tipo',        value: vehicle.body_type },
-        vehicle.fuel_type       && { label: 'Combustible', value: FUEL_LABELS[vehicle.fuel_type] },
-        vehicle.registration_country && { label: 'Origen', value: vehicle.registration_country },
-        vehicle.financing_available  && { label: 'Financiación', value: 'Disponible' },
+        { label: 'Kilómetros',   value: formatMileage(vehicle.mileage_km) },
+        { label: 'Precio',       value: formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request) },
+        { label: 'Cilindrada',   value: vehicle.displacement_cc ? `${vehicle.displacement_cc} cc` : null },
+        { label: 'Potencia',     value: vehicle.power_hp ? `${vehicle.power_hp} CV` : null },
+        { label: 'Carnet',       value: vehicle.license_type || null },
+        { label: 'Tipo de moto', value: vehicle.body_type || null },
+        { label: 'Ubicación',    value: loc },
+        { label: 'Garantía',     value: vehicle.has_warranty ? 'Disponible' : null },
+        { label: 'Financiación', value: vehicle.financing_available ? 'Disponible' : null },
+        { label: 'Categoría',    value: vehicle.category || null },
+      ]
+
+  // ── Technical specs split by vehicle type (only fields with values) ──────
+  const technicalSpecs = isCar
+    ? [
+        vehicle.displacement_cc    && { label: 'Cilindrada',           value: `${vehicle.displacement_cc} cc` },
+        vehicle.power_hp           && { label: 'Potencia',             value: `${vehicle.power_hp} CV${vehicle.power_kw ? ` / ${vehicle.power_kw} kW` : ''}` },
+        vehicle.torque_nm          && { label: 'Par motor',            value: `${vehicle.torque_nm} Nm` },
+        vehicle.cylinders          && { label: 'Cilindros',            value: String(vehicle.cylinders) },
+        vehicle.engine_config      && { label: 'Configuración motor',  value: vehicle.engine_config },
+        vehicle.zero_to_hundred    && { label: '0-100 km/h',           value: `${vehicle.zero_to_hundred}s` },
+        vehicle.top_speed_kmh      && { label: 'Velocidad máxima',     value: `${vehicle.top_speed_kmh} km/h` },
+        vehicle.transmission       && { label: 'Transmisión',          value: TRANSMISSION_LABELS[vehicle.transmission] },
+        vehicle.drive_type         && { label: 'Tracción',             value: DRIVE_LABELS[vehicle.drive_type] },
+        vehicle.body_type          && { label: 'Carrocería',           value: vehicle.body_type },
+        vehicle.doors              && { label: 'Puertas',              value: String(vehicle.doors) },
+        vehicle.seats              && { label: 'Plazas',               value: String(vehicle.seats) },
+        vehicle.weight_kg          && { label: 'Peso',                 value: `${vehicle.weight_kg} kg` },
+        vehicle.color_exterior     && { label: 'Color exterior',       value: vehicle.color_exterior },
+        vehicle.color_interior     && { label: 'Color interior',       value: vehicle.color_interior },
+        vehicle.upholstery         && { label: 'Tapicería',            value: vehicle.upholstery },
+        vehicle.dgt_label          && { label: 'Etiqueta DGT',         value: vehicle.dgt_label },
+        vehicle.registration_year  && { label: 'Año de matriculación', value: String(vehicle.registration_year) },
+        vehicle.registration_country && { label: 'País de origen',     value: vehicle.registration_country },
+        vehicle.itv_valid_until    && { label: 'ITV válida hasta',     value: vehicle.itv_valid_until },
+      ].filter(Boolean) as { label: string; value: string }[]
+    : [
+        vehicle.displacement_cc    && { label: 'Cilindrada',                  value: `${vehicle.displacement_cc} cc` },
+        vehicle.power_hp           && { label: 'Potencia',                    value: `${vehicle.power_hp} CV${vehicle.power_kw ? ` / ${vehicle.power_kw} kW` : ''}` },
+        vehicle.torque_nm          && { label: 'Par motor',                   value: `${vehicle.torque_nm} Nm` },
+        vehicle.engine_config      && { label: 'Configuración motor',         value: vehicle.engine_config },
+        vehicle.zero_to_hundred    && { label: '0-100 km/h',                  value: `${vehicle.zero_to_hundred}s` },
+        vehicle.top_speed_kmh      && { label: 'Velocidad máxima',            value: `${vehicle.top_speed_kmh} km/h` },
+        vehicle.transmission       && { label: 'Transmisión',                 value: TRANSMISSION_LABELS[vehicle.transmission] },
+        vehicle.weight_kg          && { label: 'Peso',                        value: `${vehicle.weight_kg} kg` },
+        vehicle.license_type       && { label: 'Carnet',                      value: vehicle.license_type },
+        vehicle.body_type          && { label: 'Tipo de moto',                value: vehicle.body_type },
+        vehicle.color_exterior     && { label: 'Color',                       value: vehicle.color_exterior },
+        vehicle.has_abs != null    && { label: 'ABS',                         value: vehicle.has_abs ? 'Sí' : 'No' },
+        vehicle.has_traction_control != null && { label: 'Control de tracción',      value: vehicle.has_traction_control ? 'Sí' : 'No' },
+        vehicle.has_riding_modes != null     && { label: 'Modos de conducción',      value: vehicle.has_riding_modes ? 'Sí' : 'No' },
+        vehicle.has_electronic_suspension != null && { label: 'Suspensión electrónica', value: vehicle.has_electronic_suspension ? 'Sí' : 'No' },
+        vehicle.has_panniers != null         && { label: 'Maletas',                  value: vehicle.has_panniers ? 'Sí' : 'No' },
+        vehicle.registration_year  && { label: 'Año de matriculación',        value: String(vehicle.registration_year) },
+        vehicle.registration_country && { label: 'País de origen',            value: vehicle.registration_country },
+        vehicle.itv_valid_until    && { label: 'ITV válida hasta',            value: vehicle.itv_valid_until },
       ].filter(Boolean) as { label: string; value: string }[]
 
-  // Technical specs
-  const technicalSpecs = [
-    vehicle.displacement_cc && { label: 'Cilindrada',        value: `${vehicle.displacement_cc} cc` },
-    vehicle.power_hp        && { label: 'Potencia',           value: `${vehicle.power_hp} CV${vehicle.power_kw ? ` / ${vehicle.power_kw} kW` : ''}` },
-    vehicle.torque_nm       && { label: 'Par motor',          value: `${vehicle.torque_nm} Nm` },
-    vehicle.cylinders       && { label: 'Cilindros',          value: String(vehicle.cylinders) },
-    vehicle.engine_config   && { label: 'Configuración',      value: vehicle.engine_config },
-    vehicle.zero_to_hundred && { label: '0-100 km/h',         value: `${vehicle.zero_to_hundred}s` },
-    vehicle.top_speed_kmh   && { label: 'Velocidad máxima',   value: `${vehicle.top_speed_kmh} km/h` },
-    vehicle.transmission    && { label: 'Transmisión',         value: TRANSMISSION_LABELS[vehicle.transmission] },
-    vehicle.drive_type      && { label: 'Tracción',            value: DRIVE_LABELS[vehicle.drive_type] },
-    vehicle.weight_kg       && { label: 'Peso',                value: `${vehicle.weight_kg} kg` },
-    vehicle.body_type       && { label: 'Carrocería',          value: vehicle.body_type },
-    vehicle.color_exterior  && { label: 'Color exterior',      value: vehicle.color_exterior },
-    vehicle.color_interior  && { label: 'Color interior',      value: vehicle.color_interior },
-    vehicle.upholstery      && { label: 'Tapicería',           value: vehicle.upholstery },
-    vehicle.registration_year && { label: 'Año matriculación', value: String(vehicle.registration_year) },
-    vehicle.registration_country && { label: 'País de origen', value: vehicle.registration_country },
-    vehicle.itv_valid_until && { label: 'ITV válida hasta',    value: vehicle.itv_valid_until },
-  ].filter(Boolean) as { label: string; value: string }[]
-
-  // History fields
-  const historyFields = [
-    { label: 'Origen',                  value: vehicle.registration_country || null,       icon: MapPin },
-    { label: 'Historial de servicio',   value: vehicle.has_service_history ? 'Disponible' : null, icon: Wrench },
-    { label: 'Informe Carfax',          value: vehicle.has_carfax ? 'Disponible' : null,   icon: FileText },
-    { label: 'ITV válida hasta',        value: vehicle.itv_valid_until || null,             icon: Clock },
+  // ── FAQ ──────────────────────────────────────────────────────────────────
+  const faqItems = [
+    {
+      q: '¿La unidad sigue disponible?',
+      a: 'La disponibilidad debe confirmarse con el dealer antes de avanzar. Utiliza el formulario de solicitud o contacta directamente por teléfono o WhatsApp.',
+    },
+    {
+      q: '¿Se puede financiar?',
+      a: vehicle.financing_available
+        ? 'Esta unidad indica financiación disponible. El dealer te informará de las condiciones específicas al recibir tu solicitud.'
+        : 'La financiación depende del dealer y la operación. Indícalo en tu solicitud para que el dealer pueda orientarte.',
+    },
+    {
+      q: `¿Aceptan ${isCar ? 'coche' : 'moto'} como parte de pago?`,
+      a: vehicle.accepts_trade_in
+        ? 'Esta unidad acepta entrega de vehículo. Indica tu vehículo actual en la solicitud para que el dealer lo valore.'
+        : 'Depende del dealer y del vehículo a entregar. Menciónalo en tu solicitud si te interesa.',
+    },
+    {
+      q: `¿Se puede probar el ${vehicleWord}?`,
+      a: 'La prueba queda sujeta a la política del dealer, disponibilidad y validación previa del comprador.',
+    },
+    {
+      q: '¿Se puede enviar a otra provincia?',
+      a: 'Algunos dealers ofrecen transporte nacional. Inclúyelo en tu solicitud de información para confirmarlo.',
+    },
+    {
+      q: '¿Black Label vende directamente el vehículo?',
+      a: 'No. Black Label Market actúa como plataforma curada de publicación y contacto. La operación se realiza directamente entre comprador y dealer.',
+    },
   ]
-
-  const hasHistoryData = historyFields.some((f) => f.value)
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
 
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-bsm-text-muted mb-8">
-        <Link href={backHref} className="hover:text-gold transition-colors flex items-center gap-1.5">
-          <ArrowLeft className="w-3.5 h-3.5" />
-          {backLabel}
-        </Link>
-        <span>/</span>
+      <nav className="flex items-center gap-2 text-xs text-bsm-text-muted mb-8 flex-wrap">
+        <Link href="/" className="hover:text-gold transition-colors">Inicio</Link>
+        <span className="text-[#2A2A2A]">/</span>
+        <Link href={backHref} className="hover:text-gold transition-colors">{backLabel}</Link>
+        <span className="text-[#2A2A2A]">/</span>
         <Link
-          href={`${backHref}?marca=${vehicle.brand_name.toLowerCase().replace(/\s/g, '-')}`}
-          className="text-gold hover:text-gold-light transition-colors"
+          href={`${backHref}?marca=${vehicle.brand_name.toLowerCase().replace(/\s+/g, '-')}`}
+          className="hover:text-gold transition-colors"
         >
           {vehicle.brand_name}
         </Link>
-        <span>/</span>
-        <span className="truncate max-w-[200px]">{title}</span>
-      </div>
+        <span className="text-[#2A2A2A]">/</span>
+        <span className="text-bsm-text-secondary truncate max-w-[180px]">{vehicle.model_name}</span>
+      </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* ───── LEFT COLUMN ───── */}
+
+        {/* ──────────────── LEFT COLUMN ──────────────── */}
         <div className="lg:col-span-8 space-y-10">
 
           {/* Title block */}
@@ -125,39 +236,54 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
               {vehicle.is_editors_pick && (
                 <span className="badge-gold text-[10px]">Editor&apos;s Pick</span>
               )}
-              {vehicle.is_exclusive && (
-                <span className="badge text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20">
+              {vehicle.is_exclusive && !vehicle.is_editors_pick && (
+                <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
+                  text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 font-medium">
                   Exclusivo
                 </span>
               )}
-              {vehicle.is_featured && (
-                <span className="badge text-[10px] text-gold bg-gold/10 border border-gold/20">
+              {vehicle.is_featured && !vehicle.is_editors_pick && (
+                <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
+                  text-gold bg-gold/10 border border-gold/20 font-medium">
                   Destacado
                 </span>
               )}
-            </div>
-            <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary leading-tight">
-              {vehicle.model_name}
-              {vehicle.version && (
-                <span className="text-bsm-text-secondary font-sans text-2xl font-normal ml-3">
-                  {vehicle.version}
+              {statusBadge && (
+                <span className={`inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase border font-medium ${statusBadge.cls}`}>
+                  {statusBadge.label}
                 </span>
               )}
+            </div>
+
+            <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary leading-tight">
+              {vehicle.model_name}
             </h1>
 
-            {/* Action buttons under title */}
-            <div className="flex items-center gap-3 mt-4">
+            {/* Subtitle: version · year · location */}
+            <p className="text-[#686868] text-sm mt-1.5">
+              {[vehicle.version, String(vehicle.year), loc].filter(Boolean).join(' · ')}
+            </p>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-3 mt-5 flex-wrap">
               <FavoriteButton vehicleId={vehicle.id} variant="detail" />
               {vehicle.status === 'active' && (
                 <CompareButton vehicleId={vehicle.id} variant="detail" />
               )}
+              <CreateAlertButton
+                vehicleType={vehicleTypeParam}
+                label="Crear alerta"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs border border-bsm-border
+                  text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"
+              />
             </div>
           </div>
 
-          {/* Status banner */}
+          {/* Status banners */}
           {vehicle.status === 'sold' && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 border border-[#2A2A2A] bg-[#0D0D0D]">
-              <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#9A9A9A] border border-[#2A2A2A] self-start sm:self-auto flex-shrink-0">
+              <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
+                text-[#9A9A9A] border border-[#2A2A2A] self-start sm:self-auto flex-shrink-0">
                 Vendido
               </span>
               <p className="text-xs text-[#575757]">Esta unidad ya no está disponible.</p>
@@ -168,7 +294,8 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
           )}
           {vehicle.status === 'paused' && (
             <div className="flex items-center gap-3 p-4 border border-[#C6A64B]/20 bg-[#0D0D0D]">
-              <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/30 flex-shrink-0">
+              <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
+                text-[#C6A64B] border border-[#C6A64B]/30 flex-shrink-0">
                 Reservado
               </span>
               <p className="text-xs text-[#686868]">Consulta disponibilidad directamente con el dealer.</p>
@@ -183,40 +310,33 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
             <SectionTitle>Resumen de la unidad</SectionTitle>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {summarySpecs.map((spec) => (
-                <div key={spec.label} className="bg-surface border border-bsm-border p-4">
-                  <div className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-1.5">
-                    {spec.label}
-                  </div>
-                  <div className="text-sm font-medium text-bsm-text-primary">{spec.value}</div>
-                </div>
+                <SummaryCell key={spec.label} label={spec.label} value={spec.value} />
               ))}
             </div>
           </div>
 
-          {/* Description */}
-          {vehicle.description ? (
-            <div>
-              <SectionTitle>Descripción</SectionTitle>
+          {/* Por qué esta unidad encaja */}
+          <div>
+            <SectionTitle>Por qué esta unidad encaja</SectionTitle>
+            {vehicle.description ? (
               <div className="text-bsm-text-secondary leading-relaxed whitespace-pre-wrap text-sm">
                 {vehicle.description}
               </div>
-            </div>
-          ) : (
-            <div>
-              <SectionTitle>Por qué esta unidad encaja</SectionTitle>
+            ) : (
               <div className="bg-surface border border-bsm-border p-6">
-                <p className="text-sm text-bsm-text-secondary leading-relaxed italic">
+                <p className="text-sm text-bsm-text-secondary leading-relaxed">
                   Esta unidad ha sido seleccionada por cumplir los criterios de publicación de Black Label Market.
-                  Si necesitas más información sobre su configuración, estado o historial, contacta directamente con el dealer.
+                  Si necesitas más información sobre su configuración, estado o historial,
+                  contacta directamente con el dealer a través del formulario de solicitud.
                 </p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Technical specs */}
+          {/* Datos técnicos */}
           {technicalSpecs.length > 0 && (
             <div>
-              <SectionTitle>Ficha técnica</SectionTitle>
+              <SectionTitle>Datos técnicos</SectionTitle>
               <div className="border border-bsm-border">
                 {technicalSpecs.map((spec) => (
                   <SpecRow key={spec.label} label={spec.label} value={spec.value} />
@@ -225,53 +345,45 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
             </div>
           )}
 
-          {/* Equipment */}
-          {vehicle.equipment && vehicle.equipment.length > 0 && (
-            <div>
-              <SectionTitle>Equipamiento</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {/* Equipamiento destacado */}
+          <div>
+            <SectionTitle>Equipamiento destacado</SectionTitle>
+            {vehicle.equipment && vehicle.equipment.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
                 {vehicle.equipment.map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-sm text-bsm-text-secondary py-1">
-                    <CheckCircle className="w-4 h-4 text-gold flex-shrink-0" />
+                  <div key={item} className="flex items-center gap-2.5 text-sm text-bsm-text-secondary py-1">
+                    <CheckCircle className="w-3.5 h-3.5 text-gold/60 flex-shrink-0" />
                     {item}
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="border border-bsm-border px-5 py-4">
+                <p className="text-sm text-[#575757] italic">
+                  Equipamiento pendiente de confirmar. Solicita información al dealer.
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Historial y documentación */}
           <div>
             <SectionTitle>Historial y documentación</SectionTitle>
-            <div className="border border-bsm-border">
-              {hasHistoryData ? (
-                historyFields
-                  .filter((f) => f.value)
-                  .map((f) => (
-                    <div key={f.label} className="flex items-center justify-between px-5 py-3.5 border-b border-bsm-border last:border-0">
-                      <div className="flex items-center gap-2.5 text-sm text-bsm-text-muted">
-                        <f.icon className="w-4 h-4 text-gold/60" />
-                        {f.label}
-                      </div>
-                      <span className="text-sm text-bsm-text-primary font-medium">{f.value}</span>
-                    </div>
-                  ))
-              ) : null}
-
-              {/* Static history fields */}
-              {[
-                { label: 'Siniestros declarados',  icon: AlertCircle },
-                { label: 'Libro de mantenimiento', icon: FileText },
-                { label: 'Número de propietarios', icon: BadgeCheck },
-              ].map((f) => (
-                <div key={f.label} className="flex items-center justify-between px-5 py-3.5 border-b border-bsm-border last:border-0">
-                  <div className="flex items-center gap-2.5 text-sm text-bsm-text-muted">
-                    <f.icon className="w-4 h-4 text-[#3A3A3A]" />
-                    {f.label}
-                  </div>
-                  <span className="text-xs text-[#575757] italic">Consultar con dealer</span>
-                </div>
-              ))}
+            <div className="border border-bsm-border mb-4">
+              <HistoryRow icon={MapPin}      label="País de origen"          value={vehicle.registration_country || null} />
+              <HistoryRow icon={Users}       label="Número de propietarios"  value={vehicle.num_owners != null ? String(vehicle.num_owners) : null} />
+              <HistoryRow icon={Wrench}      label="Historial de servicio"   value={vehicle.has_service_history ? 'Disponible' : null} />
+              <HistoryRow icon={FileText}    label="Libro de mantenimiento"  value={null} />
+              <HistoryRow icon={FileText}    label="Informe Carfax"          value={vehicle.has_carfax ? 'Disponible' : null} />
+              <HistoryRow icon={Clock}       label="ITV válida hasta"        value={vehicle.itv_valid_until || null} />
+              <HistoryRow icon={BadgeCheck}  label="IVA deducible"           value={vehicle.has_ibi != null ? (vehicle.has_ibi ? 'Sí' : 'No') : null} />
+              <HistoryRow icon={AlertCircle} label="Siniestros declarados"   value={null} />
+            </div>
+            <div className="flex items-start gap-2 p-4 bg-[#0D0D0D] border border-[#1A1A1A]">
+              <AlertCircle className="w-4 h-4 text-[#575757] flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[#575757] leading-relaxed">
+                La información documental debe confirmarse con el dealer antes de formalizar cualquier operación.
+              </p>
             </div>
           </div>
 
@@ -281,11 +393,11 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
             <div className="border border-bsm-border mb-4">
               {[
                 { label: 'Financiación disponible', value: vehicle.financing_available ? 'Sí' : null },
-                { label: 'Acepta parte de pago',    value: vehicle.accepts_trade_in    ? 'Sí' : null },
-                { label: 'IVA deducible',           value: null },
-                { label: 'Prueba disponible',       value: null },
+                { label: 'Acepta parte de pago',    value: vehicle.accepts_trade_in ? 'Sí' : null },
+                { label: 'Prueba disponible',       value: vehicle.has_test_drive != null ? (vehicle.has_test_drive ? 'Sí' : 'No') : null },
+                { label: 'IVA deducible',           value: vehicle.has_ibi != null ? (vehicle.has_ibi ? 'Sí' : 'No') : null },
                 { label: 'Transporte nacional',     value: null },
-                { label: 'Garantía',                value: null },
+                { label: 'Garantía',                value: vehicle.has_warranty ? (vehicle.warranty_months ? `${vehicle.warranty_months} meses` : 'Disponible') : null },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-5 py-3.5 border-b border-bsm-border last:border-0">
                   <span className="text-sm text-bsm-text-muted">{label}</span>
@@ -330,6 +442,85 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
             </div>
           )}
 
+          {/* Sobre el dealer (expanded body section) */}
+          {vehicle.dealer && (
+            <div>
+              <SectionTitle>Sobre el dealer</SectionTitle>
+              <div className="border border-bsm-border p-6">
+                <div className="flex items-start gap-4 mb-4">
+                  {vehicle.dealer.logo_url ? (
+                    <div className="w-12 h-12 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={vehicle.dealer.logo_url}
+                        alt={vehicle.dealer.name}
+                        className="w-full h-full object-contain p-1"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center">
+                      <span className="font-display text-xl font-light text-gold/60">
+                        {vehicle.dealer.name?.[0]}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <Link
+                        href={`/dealers/${vehicle.dealer.slug}`}
+                        className="font-medium text-bsm-text-primary hover:text-gold transition-colors"
+                      >
+                        {vehicle.dealer.name}
+                      </Link>
+                      {vehicle.dealer.is_verified && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] tracking-widest uppercase
+                          text-[#C9C9C9] bg-[#1A1A1A] border border-[#2A2A2A]">
+                          <BadgeCheck className="w-2.5 h-2.5" />Dealer verificado
+                        </span>
+                      )}
+                    </div>
+                    {vehicle.dealer.location_city && (
+                      <div className="flex items-center gap-1 text-xs text-bsm-text-muted">
+                        <MapPin className="w-3 h-3" />
+                        {[vehicle.dealer.location_city, vehicle.dealer.location_region].filter(Boolean).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {vehicle.dealer.description && (
+                  <p className="text-xs text-bsm-text-muted leading-relaxed mb-4 border-t border-bsm-border pt-4">
+                    {vehicle.dealer.description}
+                  </p>
+                )}
+                <div className="border-t border-bsm-border pt-4 space-y-2">
+                  <p className="text-[11px] text-[#575757] leading-relaxed">
+                    Unidad publicada por un dealer seleccionado. Black Label prioriza operadores con stock cuidado,
+                    presentación clara y disponibilidad real.
+                  </p>
+                  <Link
+                    href={`/dealers/${vehicle.dealer.slug}`}
+                    className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-2"
+                  >
+                    Ver showroom completo <ChevronRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Preguntas frecuentes */}
+          <div>
+            <SectionTitle>Preguntas frecuentes</SectionTitle>
+            <div className="border border-bsm-border divide-y divide-bsm-border">
+              {faqItems.map((faq, i) => (
+                <div key={i} className="px-5 py-4">
+                  <h3 className="text-sm font-medium text-bsm-text-primary mb-2">{faq.q}</h3>
+                  <p className="text-sm text-bsm-text-secondary leading-relaxed">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Marketplace disclaimer */}
           <div className="flex items-start gap-3 p-5 border border-[#1A1A1A] bg-[#0A0A0A]">
             <AlertCircle className="w-4 h-4 text-[#474747] flex-shrink-0 mt-0.5" />
@@ -342,7 +533,7 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
           </div>
         </div>
 
-        {/* ───── RIGHT COLUMN (sticky) ───── */}
+        {/* ──────────────── RIGHT COLUMN (sticky) ──────────────── */}
         <div className="lg:col-span-4">
           <div className="sticky top-24 space-y-5">
 
@@ -350,7 +541,8 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
               /* ── VENDIDO ── */
               <div className="bg-surface border border-bsm-border p-6">
                 <div className="mb-5">
-                  <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#9A9A9A] border border-[#2A2A2A] mb-3">
+                  <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
+                    text-[#9A9A9A] border border-[#2A2A2A] mb-3">
                     Vendido
                   </div>
                   <div className="font-display text-2xl font-light text-bsm-text-muted line-through opacity-40">
@@ -373,15 +565,17 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
                   </div>
                 </div>
               </div>
+
             ) : vehicle.status === 'paused' ? (
               /* ── RESERVADO ── */
               <>
                 <div className="bg-surface border border-bsm-border p-6">
                   <div className="mb-5">
-                    <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/30 mb-3">
+                    <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
+                      text-[#C6A64B] border border-[#C6A64B]/30 mb-3">
                       Reservado
                     </div>
-                    <div className={`font-display text-3xl font-light ${vehicle.price_on_request ? 'text-bsm-text-secondary text-2xl' : 'text-bsm-text-secondary'}`}>
+                    <div className="font-display text-3xl font-light text-bsm-text-secondary">
                       {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
                     </div>
                   </div>
@@ -390,11 +584,16 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
                       <span>Año</span><span className="text-bsm-text-primary">{vehicle.year}</span>
                     </div>
                     <div className="flex justify-between text-bsm-text-secondary">
-                      <span>Kilometraje</span><span className="text-bsm-text-primary">{formatMileage(vehicle.mileage_km)}</span>
+                      <span>Kilómetros</span><span className="text-bsm-text-primary">{formatMileage(vehicle.mileage_km)}</span>
                     </div>
                     {vehicle.power_hp && (
                       <div className="flex justify-between text-bsm-text-secondary">
                         <span>Potencia</span><span className="text-bsm-text-primary">{vehicle.power_hp} CV</span>
+                      </div>
+                    )}
+                    {!isCar && vehicle.displacement_cc && (
+                      <div className="flex justify-between text-bsm-text-secondary">
+                        <span>Cilindrada</span><span className="text-bsm-text-primary">{vehicle.displacement_cc} cc</span>
                       </div>
                     )}
                   </div>
@@ -415,8 +614,15 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
                         Llamar al dealer
                       </a>
                     )}
-                    <Link href="/busqueda-privada" className="flex items-center justify-center gap-2 text-xs text-bsm-text-muted hover:text-gold transition-colors py-2">
-                      ¿No consigues esta unidad? Solicitar búsqueda privada →
+                    <CreateAlertButton
+                      vehicleType={vehicleTypeParam}
+                      label="Crear alerta de búsqueda"
+                      className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted
+                        hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
+                    />
+                    <Link href="/busqueda-privada" className="flex items-center justify-center gap-2 text-xs
+                      text-bsm-text-muted hover:text-gold transition-colors py-2">
+                      ¿No consigues esta unidad? Búsqueda privada →
                     </Link>
                   </div>
                 </div>
@@ -438,17 +644,17 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
                   </div>
                 )}
               </>
+
             ) : (
               /* ── ACTIVE — CTAs completos ── */
               <>
-                {/* Price card */}
                 <div className="bg-surface border border-bsm-border p-6">
                   <div className="mb-5">
-                    <div className={`font-display text-3xl font-light ${vehicle.price_on_request ? 'text-bsm-text-secondary text-2xl' : 'text-gold'}`}>
+                    <div className={`font-display text-3xl font-light leading-none mb-1 ${vehicle.price_on_request ? 'text-bsm-text-secondary text-2xl' : 'text-gold'}`}>
                       {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
                     </div>
                     {vehicle.is_negotiable && (
-                      <p className="text-xs text-bsm-text-muted mt-1">Precio negociable</p>
+                      <p className="text-xs text-bsm-text-muted">Precio negociable</p>
                     )}
                   </div>
                   <div className="space-y-2 pt-4 border-t border-bsm-border text-sm mb-5">
@@ -456,21 +662,31 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
                       <span>Año</span><span className="text-bsm-text-primary">{vehicle.year}</span>
                     </div>
                     <div className="flex justify-between text-bsm-text-secondary">
-                      <span>Kilometraje</span><span className="text-bsm-text-primary">{formatMileage(vehicle.mileage_km)}</span>
+                      <span>Kilómetros</span><span className="text-bsm-text-primary">{formatMileage(vehicle.mileage_km)}</span>
                     </div>
                     {vehicle.power_hp && (
                       <div className="flex justify-between text-bsm-text-secondary">
                         <span>Potencia</span><span className="text-bsm-text-primary">{vehicle.power_hp} CV</span>
                       </div>
                     )}
-                    {vehicle.fuel_type && (
+                    {isCar && vehicle.fuel_type && (
                       <div className="flex justify-between text-bsm-text-secondary">
                         <span>Combustible</span><span className="text-bsm-text-primary">{FUEL_LABELS[vehicle.fuel_type]}</span>
                       </div>
                     )}
-                    {vehicle.transmission && (
+                    {isCar && vehicle.transmission && (
                       <div className="flex justify-between text-bsm-text-secondary">
                         <span>Cambio</span><span className="text-bsm-text-primary">{TRANSMISSION_LABELS[vehicle.transmission]}</span>
+                      </div>
+                    )}
+                    {!isCar && vehicle.displacement_cc && (
+                      <div className="flex justify-between text-bsm-text-secondary">
+                        <span>Cilindrada</span><span className="text-bsm-text-primary">{vehicle.displacement_cc} cc</span>
+                      </div>
+                    )}
+                    {!isCar && vehicle.license_type && (
+                      <div className="flex justify-between text-bsm-text-secondary">
+                        <span>Carnet</span><span className="text-bsm-text-primary">{vehicle.license_type}</span>
                       </div>
                     )}
                   </div>
@@ -482,7 +698,7 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
                         className="btn-gold w-full justify-center"
                       >
                         <MessageCircle className="w-4 h-4" />
-                        Contactar por WhatsApp
+                        Solicitar información
                       </a>
                     )}
                     {vehicle.dealer?.phone && (
@@ -491,10 +707,19 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
                         Llamar al dealer
                       </a>
                     )}
+                    <CreateAlertButton
+                      vehicleType={vehicleTypeParam}
+                      label="Crear alerta de búsqueda"
+                      className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted
+                        hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
+                    />
                   </div>
+                  <p className="text-[10px] text-[#575757] text-center mt-3 leading-relaxed">
+                    Tu solicitud se enviará al dealer con contexto para facilitar una respuesta más precisa.
+                  </p>
                 </div>
 
-                {/* Dealer card */}
+                {/* Dealer card (sidebar) */}
                 {vehicle.dealer && (
                   <div className="bg-surface border border-bsm-border p-5">
                     <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Dealer seleccionado</p>
@@ -515,9 +740,9 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
 
                 {/* Qualified lead form */}
                 <div className="bg-surface border border-bsm-border p-6">
-                  <h3 className="font-medium text-bsm-text-primary mb-1">Solicitar información</h3>
+                  <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">Solicitar información</h3>
                   <p className="text-xs text-bsm-text-muted mb-5">
-                    Tu solicitud llegará con contexto completo al dealer
+                    Completa los datos básicos para que el dealer pueda responder con más contexto.
                   </p>
                   <QualifiedLeadForm
                     vehicleId={vehicle.id}
@@ -531,14 +756,52 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
         </div>
       </div>
 
-      {/* Related vehicles */}
-      {relatedVehicles.length > 0 && (
+      {/* Similar vehicles */}
+      {similarVehicles.length > 0 && (
         <div className="mt-20 pt-12 border-t border-bsm-border">
-          <h2 className="font-display text-2xl font-light mb-8">
-            Más de {vehicle.dealer?.name}
-          </h2>
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-px w-6 bg-gold" />
+                <span className="text-[10px] text-gold tracking-widest uppercase">Similares</span>
+              </div>
+              <h2 className="font-display text-2xl font-light">Vehículos similares</h2>
+            </div>
+            <Link
+              href={`${backHref}?marca=${vehicle.brand_name.toLowerCase().replace(/\s+/g, '-')}`}
+              className="text-xs text-gold hover:text-gold-light transition-colors hidden sm:flex items-center gap-1"
+            >
+              Ver más de {vehicle.brand_name} <ChevronRight className="w-3 h-3" />
+            </Link>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {relatedVehicles.map((v) => <VehicleCard key={v.id} vehicle={v} />)}
+            {similarVehicles.map((v) => <VehicleCard key={v.id} vehicle={v} />)}
+          </div>
+        </div>
+      )}
+
+      {/* Dealer vehicles */}
+      {dealerVehicles.length > 0 && (
+        <div className="mt-16">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-px w-6 bg-gold" />
+                <span className="text-[10px] text-gold tracking-widest uppercase">Mismo dealer</span>
+              </div>
+              <h2 className="font-display text-2xl font-light">Más de {vehicle.dealer?.name}</h2>
+            </div>
+            {vehicle.dealer?.slug && (
+              <Link
+                href={`/dealers/${vehicle.dealer.slug}`}
+                className="text-xs text-gold hover:text-gold-light transition-colors hidden sm:flex items-center gap-1"
+              >
+                Ver showroom <ChevronRight className="w-3 h-3" />
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dealerVehicles.map((v) => <VehicleCard key={v.id} vehicle={v} />)}
           </div>
         </div>
       )}

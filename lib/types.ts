@@ -114,6 +114,22 @@ export interface Vehicle {
   itv_valid_until: string | null
   has_carfax: boolean
   has_service_history: boolean
+  // Extended optional fields — DB columns may not exist yet; undefined when absent
+  license_type?: string | null
+  category?: string | null
+  num_owners?: number | null
+  has_warranty?: boolean
+  warranty_months?: number | null
+  doors?: number | null
+  seats?: number | null
+  dgt_label?: string | null
+  has_abs?: boolean
+  has_traction_control?: boolean
+  has_riding_modes?: boolean
+  has_electronic_suspension?: boolean
+  has_panniers?: boolean
+  has_ibi?: boolean
+  has_test_drive?: boolean
   price: number | null
   price_on_request: boolean
   is_negotiable: boolean
