@@ -59,14 +59,24 @@ export default async function CompararPage({ searchParams }: PageProps) {
 
   if (vehicleIds.length < 2) {
     return (
-      <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20 text-center">
-        <h1 className="font-display text-3xl font-light text-bsm-text-primary mb-4">Comparador</h1>
-        <p className="text-bsm-text-muted mb-8">
-          Selecciona al menos 2 vehículos en el marketplace para compararlos.
-        </p>
-        <div className="flex justify-center gap-4">
-          <Link href="/coches" className="btn-gold px-6">Ir a coches</Link>
-          <Link href="/motos" className="btn-outline px-6">Ir a motos</Link>
+      <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+        <div className="max-w-lg mx-auto text-center py-16">
+          <div className="flex items-center gap-3 justify-center mb-8">
+            <div className="h-px w-8 bg-gold" />
+            <span className="text-xs text-gold tracking-widest uppercase">Comparador</span>
+            <div className="h-px w-8 bg-gold" />
+          </div>
+          <h1 className="font-display text-3xl font-light text-bsm-text-primary mb-3">
+            No hay vehículos seleccionados
+          </h1>
+          <p className="text-sm text-bsm-text-muted mb-8 leading-relaxed">
+            Añade hasta 3 coches o motos para comparar precio, año, kilómetros, potencia y condiciones.
+            Usa el botón &quot;Comparar&quot; en cada ficha o card.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link href="/coches" className="btn-gold px-6">Explorar coches</Link>
+            <Link href="/motos" className="btn-outline px-6">Explorar motos</Link>
+          </div>
         </div>
       </div>
     )
@@ -83,8 +93,11 @@ export default async function CompararPage({ searchParams }: PageProps) {
   if (vehicles.length < 2) {
     return (
       <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20 text-center">
-        <p className="text-bsm-text-muted">No se encontraron los vehículos seleccionados.</p>
-        <Link href="/coches" className="btn-gold mt-4 inline-flex px-6">Explorar coches</Link>
+        <p className="text-bsm-text-muted mb-6">Los vehículos seleccionados ya no están disponibles.</p>
+        <div className="flex justify-center gap-4">
+          <Link href="/coches" className="btn-gold px-6">Explorar coches</Link>
+          <Link href="/motos" className="btn-outline px-6">Explorar motos</Link>
+        </div>
       </div>
     )
   }

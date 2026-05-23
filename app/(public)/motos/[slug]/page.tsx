@@ -38,7 +38,8 @@ export default async function MotoDetailPage({ params }: PageProps) {
     .eq('vehicle_type', 'motorcycle')
     .single()
 
-  if (!vehicle || vehicle.status !== 'active') notFound()
+  // draft/pending_review/expired → 404; sold/paused → visible with adapted CTAs
+  if (!vehicle || ['draft', 'pending_review', 'expired'].includes(vehicle.status)) notFound()
 
   supabase.from('analytics_events').insert({
     vehicle_id: vehicle.id,
@@ -68,7 +69,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
       '@type': 'Offer',
       priceCurrency: vehicle.currency || 'EUR',
       price: vehicle.price_on_request ? undefined : vehicle.price,
-      availability: 'https://schema.org/InStock',
+      availability: vehicle.status === 'sold' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
       seller: { '@type': 'AutoDealer', name: vehicle.dealer?.name },
     },
     vehicleModelDate: String(vehicle.year),

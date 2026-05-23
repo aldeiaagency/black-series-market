@@ -5,6 +5,7 @@ import VehicleCard from '@/components/marketplace/VehicleCard'
 import VehicleFilters from '@/components/marketplace/VehicleFilters'
 import SortSelector from '@/components/marketplace/SortSelector'
 import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
+import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   featured:   [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
@@ -22,7 +23,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
   const supabase = await createClient()
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url)', { count: 'exact' })
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)', { count: 'exact' })
     .eq('status', 'active')
     .eq('vehicle_type', 'car')
 
@@ -58,9 +59,13 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
             Puedes ajustar los filtros o registrar una búsqueda privada para que te avisemos cuando entre una unidad compatible.
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             <Link href="/coches" className="btn-outline text-sm px-4">Limpiar filtros</Link>
             <Link href="/busqueda-privada" className="btn-gold text-sm px-4">Búsqueda privada</Link>
+            <CreateAlertButton
+              vehicleType="car"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-bsm-border text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"
+            />
           </div>
         </div>
         <SearchAlertCTA vehicleType="car" />

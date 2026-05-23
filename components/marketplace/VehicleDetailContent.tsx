@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import {
-  MapPin, Phone, MessageCircle, Shield, CheckCircle, ArrowLeft,
-  FileText, Clock, Wrench, BadgeCheck, AlertCircle, ChevronRight,
+  MapPin, Phone, MessageCircle, Shield, CheckCircle, ArrowLeft, ArrowRight,
+  FileText, Clock, Wrench, BadgeCheck, AlertCircle, ChevronRight, Search,
 } from 'lucide-react'
 import VehicleGallery from '@/components/marketplace/VehicleGallery'
 import VehicleCard from '@/components/marketplace/VehicleCard'
@@ -148,9 +148,32 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
             {/* Action buttons under title */}
             <div className="flex items-center gap-3 mt-4">
               <FavoriteButton vehicleId={vehicle.id} variant="detail" />
-              <CompareButton vehicleId={vehicle.id} variant="detail" />
+              {vehicle.status === 'active' && (
+                <CompareButton vehicleId={vehicle.id} variant="detail" />
+              )}
             </div>
           </div>
+
+          {/* Status banner */}
+          {vehicle.status === 'sold' && (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 border border-[#2A2A2A] bg-[#0D0D0D]">
+              <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#9A9A9A] border border-[#2A2A2A] self-start sm:self-auto flex-shrink-0">
+                Vendido
+              </span>
+              <p className="text-xs text-[#575757]">Esta unidad ya no está disponible.</p>
+              <Link href={backHref} className="text-xs text-[#C6A64B] hover:text-[#D4B560] transition-colors sm:ml-auto whitespace-nowrap flex-shrink-0">
+                Ver unidades disponibles →
+              </Link>
+            </div>
+          )}
+          {vehicle.status === 'paused' && (
+            <div className="flex items-center gap-3 p-4 border border-[#C6A64B]/20 bg-[#0D0D0D]">
+              <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/30 flex-shrink-0">
+                Reservado
+              </span>
+              <p className="text-xs text-[#686868]">Consulta disponibilidad directamente con el dealer.</p>
+            </div>
+          )}
 
           {/* Gallery */}
           <VehicleGallery images={vehicle.images || []} title={title} />
@@ -323,107 +346,187 @@ export default function VehicleDetailContent({ vehicle, relatedVehicles, backHre
         <div className="lg:col-span-4">
           <div className="sticky top-24 space-y-5">
 
-            {/* Price card */}
-            <div className="bg-surface border border-bsm-border p-6">
-              <div className="mb-5">
-                <div className={`font-display text-3xl font-light ${vehicle.price_on_request ? 'text-bsm-text-secondary text-2xl' : 'text-gold'}`}>
-                  {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
+            {vehicle.status === 'sold' ? (
+              /* ── VENDIDO ── */
+              <div className="bg-surface border border-bsm-border p-6">
+                <div className="mb-5">
+                  <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#9A9A9A] border border-[#2A2A2A] mb-3">
+                    Vendido
+                  </div>
+                  <div className="font-display text-2xl font-light text-bsm-text-muted line-through opacity-40">
+                    {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
+                  </div>
                 </div>
-                {vehicle.is_negotiable && (
-                  <p className="text-xs text-bsm-text-muted mt-1">Precio negociable</p>
-                )}
-              </div>
-
-              {/* Quick specs in sidebar */}
-              <div className="space-y-2 pt-4 border-t border-bsm-border text-sm mb-5">
-                <div className="flex justify-between text-bsm-text-secondary">
-                  <span>Año</span>
-                  <span className="text-bsm-text-primary">{vehicle.year}</span>
+                <div className="pt-4 border-t border-bsm-border">
+                  <p className="text-sm text-bsm-text-muted mb-5 leading-relaxed">
+                    Esta unidad ya no está disponible. Puedes explorar unidades similares o registrar una búsqueda privada.
+                  </p>
+                  <div className="space-y-3">
+                    <Link href={backHref} className="btn-outline w-full justify-center text-sm">
+                      <Search className="w-4 h-4" />
+                      Consultar similares
+                    </Link>
+                    <Link href="/busqueda-privada" className="btn-gold w-full justify-center text-sm">
+                      <ArrowRight className="w-4 h-4" />
+                      Solicitar búsqueda privada
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex justify-between text-bsm-text-secondary">
-                  <span>Kilometraje</span>
-                  <span className="text-bsm-text-primary">{formatMileage(vehicle.mileage_km)}</span>
+              </div>
+            ) : vehicle.status === 'paused' ? (
+              /* ── RESERVADO ── */
+              <>
+                <div className="bg-surface border border-bsm-border p-6">
+                  <div className="mb-5">
+                    <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/30 mb-3">
+                      Reservado
+                    </div>
+                    <div className={`font-display text-3xl font-light ${vehicle.price_on_request ? 'text-bsm-text-secondary text-2xl' : 'text-bsm-text-secondary'}`}>
+                      {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
+                    </div>
+                  </div>
+                  <div className="space-y-2 pt-4 border-t border-bsm-border text-sm mb-5">
+                    <div className="flex justify-between text-bsm-text-secondary">
+                      <span>Año</span><span className="text-bsm-text-primary">{vehicle.year}</span>
+                    </div>
+                    <div className="flex justify-between text-bsm-text-secondary">
+                      <span>Kilometraje</span><span className="text-bsm-text-primary">{formatMileage(vehicle.mileage_km)}</span>
+                    </div>
+                    {vehicle.power_hp && (
+                      <div className="flex justify-between text-bsm-text-secondary">
+                        <span>Potencia</span><span className="text-bsm-text-primary">{vehicle.power_hp} CV</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {vehicle.dealer?.whatsapp && (
+                      <a
+                        href={`https://wa.me/${vehicle.dealer.whatsapp.replace(/\D/g, '')}?text=Consulto disponibilidad del ${encodeURIComponent(title)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="btn-outline w-full justify-center"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Consultar disponibilidad
+                      </a>
+                    )}
+                    {vehicle.dealer?.phone && (
+                      <a href={`tel:${vehicle.dealer.phone}`} className="btn-ghost w-full justify-center text-sm text-bsm-text-muted">
+                        <Phone className="w-4 h-4" />
+                        Llamar al dealer
+                      </a>
+                    )}
+                    <Link href="/busqueda-privada" className="flex items-center justify-center gap-2 text-xs text-bsm-text-muted hover:text-gold transition-colors py-2">
+                      ¿No consigues esta unidad? Solicitar búsqueda privada →
+                    </Link>
+                  </div>
                 </div>
-                {vehicle.power_hp && (
-                  <div className="flex justify-between text-bsm-text-secondary">
-                    <span>Potencia</span>
-                    <span className="text-bsm-text-primary">{vehicle.power_hp} CV</span>
+                {vehicle.dealer && (
+                  <div className="bg-surface border border-bsm-border p-5">
+                    <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Dealer seleccionado</p>
+                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="font-medium text-bsm-text-primary hover:text-gold transition-colors block mb-1">
+                      {vehicle.dealer.name}
+                    </Link>
+                    {vehicle.dealer.location_city && (
+                      <div className="flex items-center gap-1 text-xs text-bsm-text-muted mb-3">
+                        <MapPin className="w-3 h-3" />
+                        {[vehicle.dealer.location_city, vehicle.dealer.location_region].filter(Boolean).join(', ')}
+                      </div>
+                    )}
+                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors">
+                      Ver showroom completo<ChevronRight className="w-3 h-3" />
+                    </Link>
                   </div>
                 )}
-                {vehicle.fuel_type && (
-                  <div className="flex justify-between text-bsm-text-secondary">
-                    <span>Combustible</span>
-                    <span className="text-bsm-text-primary">{FUEL_LABELS[vehicle.fuel_type]}</span>
+              </>
+            ) : (
+              /* ── ACTIVE — CTAs completos ── */
+              <>
+                {/* Price card */}
+                <div className="bg-surface border border-bsm-border p-6">
+                  <div className="mb-5">
+                    <div className={`font-display text-3xl font-light ${vehicle.price_on_request ? 'text-bsm-text-secondary text-2xl' : 'text-gold'}`}>
+                      {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
+                    </div>
+                    {vehicle.is_negotiable && (
+                      <p className="text-xs text-bsm-text-muted mt-1">Precio negociable</p>
+                    )}
                   </div>
-                )}
-                {vehicle.transmission && (
-                  <div className="flex justify-between text-bsm-text-secondary">
-                    <span>Cambio</span>
-                    <span className="text-bsm-text-primary">{TRANSMISSION_LABELS[vehicle.transmission]}</span>
+                  <div className="space-y-2 pt-4 border-t border-bsm-border text-sm mb-5">
+                    <div className="flex justify-between text-bsm-text-secondary">
+                      <span>Año</span><span className="text-bsm-text-primary">{vehicle.year}</span>
+                    </div>
+                    <div className="flex justify-between text-bsm-text-secondary">
+                      <span>Kilometraje</span><span className="text-bsm-text-primary">{formatMileage(vehicle.mileage_km)}</span>
+                    </div>
+                    {vehicle.power_hp && (
+                      <div className="flex justify-between text-bsm-text-secondary">
+                        <span>Potencia</span><span className="text-bsm-text-primary">{vehicle.power_hp} CV</span>
+                      </div>
+                    )}
+                    {vehicle.fuel_type && (
+                      <div className="flex justify-between text-bsm-text-secondary">
+                        <span>Combustible</span><span className="text-bsm-text-primary">{FUEL_LABELS[vehicle.fuel_type]}</span>
+                      </div>
+                    )}
+                    {vehicle.transmission && (
+                      <div className="flex justify-between text-bsm-text-secondary">
+                        <span>Cambio</span><span className="text-bsm-text-primary">{TRANSMISSION_LABELS[vehicle.transmission]}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                  <div className="space-y-3">
+                    {vehicle.dealer?.whatsapp && (
+                      <a
+                        href={`https://wa.me/${vehicle.dealer.whatsapp.replace(/\D/g, '')}?text=Hola, me interesa el ${encodeURIComponent(title)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="btn-gold w-full justify-center"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Contactar por WhatsApp
+                      </a>
+                    )}
+                    {vehicle.dealer?.phone && (
+                      <a href={`tel:${vehicle.dealer.phone}`} className="btn-outline w-full justify-center">
+                        <Phone className="w-4 h-4" />
+                        Llamar al dealer
+                      </a>
+                    )}
+                  </div>
+                </div>
 
-              <div className="space-y-3">
-                {vehicle.dealer?.whatsapp && (
-                  <a
-                    href={`https://wa.me/${vehicle.dealer.whatsapp.replace(/\D/g, '')}?text=Hola, me interesa el ${encodeURIComponent(title)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="btn-gold w-full justify-center"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Contactar por WhatsApp
-                  </a>
-                )}
-                {vehicle.dealer?.phone && (
-                  <a href={`tel:${vehicle.dealer.phone}`} className="btn-outline w-full justify-center">
-                    <Phone className="w-4 h-4" />
-                    Llamar al dealer
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* Dealer card */}
-            {vehicle.dealer && (
-              <div className="bg-surface border border-bsm-border p-5">
-                <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">
-                  Dealer seleccionado
-                </p>
-                <Link
-                  href={`/dealers/${vehicle.dealer.slug}`}
-                  className="font-medium text-bsm-text-primary hover:text-gold transition-colors block mb-1"
-                >
-                  {vehicle.dealer.name}
-                </Link>
-                {vehicle.dealer.location_city && (
-                  <div className="flex items-center gap-1 text-xs text-bsm-text-muted mb-3">
-                    <MapPin className="w-3 h-3" />
-                    {[vehicle.dealer.location_city, vehicle.dealer.location_region].filter(Boolean).join(', ')}
+                {/* Dealer card */}
+                {vehicle.dealer && (
+                  <div className="bg-surface border border-bsm-border p-5">
+                    <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Dealer seleccionado</p>
+                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="font-medium text-bsm-text-primary hover:text-gold transition-colors block mb-1">
+                      {vehicle.dealer.name}
+                    </Link>
+                    {vehicle.dealer.location_city && (
+                      <div className="flex items-center gap-1 text-xs text-bsm-text-muted mb-3">
+                        <MapPin className="w-3 h-3" />
+                        {[vehicle.dealer.location_city, vehicle.dealer.location_region].filter(Boolean).join(', ')}
+                      </div>
+                    )}
+                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors">
+                      Ver showroom completo<ChevronRight className="w-3 h-3" />
+                    </Link>
                   </div>
                 )}
-                <Link
-                  href={`/dealers/${vehicle.dealer.slug}`}
-                  className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
-                >
-                  Ver showroom completo
-                  <ChevronRight className="w-3 h-3" />
-                </Link>
-              </div>
+
+                {/* Qualified lead form */}
+                <div className="bg-surface border border-bsm-border p-6">
+                  <h3 className="font-medium text-bsm-text-primary mb-1">Solicitar información</h3>
+                  <p className="text-xs text-bsm-text-muted mb-5">
+                    Tu solicitud llegará con contexto completo al dealer
+                  </p>
+                  <QualifiedLeadForm
+                    vehicleId={vehicle.id}
+                    dealerId={vehicle.dealer_id}
+                    vehicleTitle={title}
+                  />
+                </div>
+              </>
             )}
-
-            {/* Qualified lead form */}
-            <div className="bg-surface border border-bsm-border p-6">
-              <h3 className="font-medium text-bsm-text-primary mb-1">Solicitar información</h3>
-              <p className="text-xs text-bsm-text-muted mb-5">
-                Tu solicitud llegará con contexto completo al dealer
-              </p>
-              <QualifiedLeadForm
-                vehicleId={vehicle.id}
-                dealerId={vehicle.dealer_id}
-                vehicleTitle={title}
-              />
-            </div>
           </div>
         </div>
       </div>
