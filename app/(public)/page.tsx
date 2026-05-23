@@ -11,10 +11,10 @@ const BRANDS_SHOWCASE = [
 ]
 
 const PILLARS = [
-  { label: 'Vehículos seleccionados' },
-  { label: 'Dealers revisados' },
+  { label: 'Selección premium' },
+  { label: 'Vendedores verificados' },
   { label: 'Coches y motos' },
-  { label: 'Búsqueda privada' },
+  { label: 'Búsqueda a medida' },
 ]
 
 export default async function HomePage() {
@@ -60,37 +60,39 @@ export default async function HomePage() {
             <div className="flex items-center gap-3 mb-10">
               <div className="h-px w-10 bg-[#C6A64B]/60" />
               <span className="text-[10px] text-[#C6A64B]/80 tracking-[0.35em] uppercase font-medium">
-                Marketplace curado de coches y motos
+                Selección de coches y motos premium
               </span>
             </div>
 
             {/* Headline */}
-            <h1 className="font-display font-light text-[#F4F1EA] leading-[1.02] mb-8"
-              style={{ fontSize: 'clamp(2.8rem, 6vw, 5rem)' }}>
+            <h1
+              className="font-display font-light text-[#F4F1EA] leading-[1.02] mb-8"
+              style={{ fontSize: 'clamp(2.8rem, 6vw, 5rem)' }}
+            >
               No es volumen.
               <span className="block italic text-[#C9C9C9]">Es selección.</span>
             </h1>
 
             {/* Subclaim */}
-            <p className="text-[#686868] text-[17px] leading-relaxed mb-10 max-w-xl">
-              Coches y motos premium, deportivos, clásicos y unidades especiales.
-              Publicados por concesionarios y especialistas seleccionados, presentados con criterio editorial.
+            <p className="text-[#858585] text-[17px] leading-relaxed mb-10 max-w-xl">
+              Coches deportivos, clásicos, motos premium y unidades especiales.
+              Publicados por concesionarios y compraventas verificados para quienes buscan algo más que un vehículo.
             </p>
 
             <SearchBar size="hero" className="max-w-2xl mb-10" />
 
             <div className="flex flex-wrap gap-3">
               <Link href="/coches" className="btn-gold">
-                Explorar vehículos
+                Ver vehículos
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="/busqueda-privada"
+                href="/buscar-vehiculo"
                 className="inline-flex items-center gap-2 px-6 py-3 text-sm text-[#9A9A9A]
                   border border-[#2A2A2A] hover:border-[#3A3A3A] hover:text-[#C9C9C9]
                   transition-all duration-200 tracking-wide"
               >
-                Solicitar búsqueda privada
+                ¿No encuentras tu vehículo?
               </Link>
             </div>
           </div>
@@ -116,7 +118,9 @@ export default async function HomePage() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-px w-8 bg-[#C6A64B]/50" />
-                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">Selección destacada</span>
+                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">
+                  Selección destacada
+                </span>
               </div>
               <h2 className="section-title">Vehículos destacados</h2>
             </div>
@@ -137,7 +141,7 @@ export default async function HomePage() {
       <section className="border-t border-b border-[#141414] py-14">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
           <p className="text-[10px] text-[#474747] uppercase tracking-[0.35em] text-center mb-8">
-            Marcas disponibles
+            Selección por marca
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
             {BRANDS_SHOWCASE.map((brand) => (
@@ -160,9 +164,11 @@ export default async function HomePage() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-px w-8 bg-[#C6A64B]/50" />
-                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">Últimas incorporaciones</span>
+                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">
+                  Novedades
+                </span>
               </div>
-              <h2 className="section-title">Recién incorporados</h2>
+              <h2 className="section-title">Últimas unidades publicadas</h2>
             </div>
             <Link href="/coches?orden=newest" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
               Ver todos
@@ -183,11 +189,13 @@ export default async function HomePage() {
           <div className="text-center mb-14">
             <div className="flex items-center justify-center gap-3 mb-5">
               <div className="h-px w-8 bg-[#C6A64B]/40" />
-              <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">El estándar</span>
+              <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+                Nuestro estándar
+              </span>
               <div className="h-px w-8 bg-[#C6A64B]/40" />
             </div>
             <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA] tracking-tight">
-              El estándar que un vehículo especial merece
+              Vehículos especiales, vendedores verificados
             </h2>
           </div>
 
@@ -195,18 +203,18 @@ export default async function HomePage() {
             {[
               {
                 icon: Shield,
-                title: 'Selección con criterio',
-                desc: 'No todo el stock entra. Priorizamos unidades con valor, estado, historia, configuración o demanda real.',
+                title: 'Vehículos con algo especial',
+                desc: 'Deportivos, clásicos, motos premium y unidades que destacan por configuración, estado, historia o carácter.',
               },
               {
                 icon: Star,
-                title: 'Dealers seleccionados',
-                desc: 'Trabajamos con concesionarios, especialistas y operadores revisados antes de publicar.',
+                title: 'Concesionarios y compraventas verificados',
+                desc: 'Antes de publicar, revisamos la reputación online y el perfil profesional de cada vendedor.',
               },
               {
                 icon: Zap,
-                title: 'Solicitudes cualificadas',
-                desc: 'El contacto se orienta a intención real, no a ruido ni curiosidad vacía.',
+                title: 'Una forma más cuidada de buscar',
+                desc: 'Explora vehículos premium en un entorno más claro, más tranquilo y menos masificado que un portal generalista.',
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="p-8 border border-[#181818] hover:border-[#242424] transition-colors duration-300">
@@ -228,11 +236,13 @@ export default async function HomePage() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-px w-8 bg-[#C6A64B]/50" />
-                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">Concesionarios</span>
+                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">
+                  Profesionales verificados
+                </span>
               </div>
-              <h2 className="section-title">Dealers seleccionados</h2>
+              <h2 className="section-title">Concesionarios y compraventas</h2>
             </div>
-            <Link href="/dealers" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
+            <Link href="/concesionarios" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
               Ver todos
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -245,30 +255,60 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* CTA DEALER */}
+      {/* CTA SEARCH */}
       <section className="border-t border-[#141414] py-20">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
           <div className="bg-[#080808] border border-[#1A1A1A] p-12 md:p-16 flex flex-col md:flex-row items-start justify-between gap-10">
             <div className="max-w-lg">
               <div className="flex items-center gap-3 mb-5">
                 <div className="h-px w-8 bg-[#C6A64B]/40" />
-                <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">Para concesionarios</span>
+                <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+                  Búsqueda a medida
+                </span>
               </div>
               <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA] mb-5">
-                Tu stock merece algo más que un portal generalista
+                ¿No encuentras el vehículo que buscas?
               </h2>
               <p className="text-[13px] text-[#686868] leading-relaxed">
-                Black Label Market está diseñado para concesionarios y especialistas que trabajan unidades premium,
-                deportivas, clásicas o de alta deseabilidad, y quieren presentarlas con criterio.
+                Cuéntanos qué coche o moto estás buscando y revisaremos opciones disponibles entre concesionarios,
+                compraventas y especialistas verificados.
               </p>
             </div>
             <div className="flex flex-col gap-3 flex-shrink-0 w-full md:w-auto">
-              <Link href="/registro" className="btn-gold px-8 py-4 text-sm justify-center">
-                Solicitar acceso dealer
+              <Link href="/buscar-vehiculo" className="btn-gold px-8 py-4 text-sm justify-center">
+                Pedir búsqueda
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link href="/precios" className="btn-outline px-8 py-4 text-sm justify-center">
-                Ver criterios de publicación
+              <Link href="/coches" className="btn-outline px-8 py-4 text-sm justify-center">
+                Seguir viendo vehículos
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA PROFESSIONAL */}
+      <section className="border-t border-[#141414] py-16">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+            <div className="max-w-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px w-8 bg-[#C6A64B]/30" />
+                <span className="text-[10px] text-[#C6A64B]/50 tracking-[0.3em] uppercase">
+                  Para profesionales
+                </span>
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl font-light text-[#F4F1EA] mb-4">
+                ¿Eres concesionario o compraventa?
+              </h2>
+              <p className="text-[13px] text-[#686868] leading-relaxed">
+                Si trabajas con vehículos premium, deportivos, clásicos o unidades especiales,
+                puedes solicitar acceso para publicar tu stock en Black Label Market.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <Link href="/publicar" className="btn-outline px-8 py-4 text-sm justify-center">
+                Solicitar acceso profesional
               </Link>
             </div>
           </div>
