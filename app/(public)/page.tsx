@@ -85,7 +85,7 @@ export default async function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="/buscar"
+                href="/busqueda-privada"
                 className="inline-flex items-center gap-2 px-6 py-3 text-sm text-[#9A9A9A]
                   border border-[#2A2A2A] hover:border-[#3A3A3A] hover:text-[#C9C9C9]
                   transition-all duration-200 tracking-wide"
@@ -143,7 +143,7 @@ export default async function HomePage() {
             {BRANDS_SHOWCASE.map((brand) => (
               <Link
                 key={brand}
-                href={`/coches?marca=${brand.toLowerCase().replace(' ', '-')}`}
+                href={`/coches?marca=${brand.toLowerCase().replace(/ /g, '-')}`}
                 className="text-[13px] text-[#575757] hover:text-[#C9C9C9] transition-colors duration-150 tracking-wide"
               >
                 {brand}
