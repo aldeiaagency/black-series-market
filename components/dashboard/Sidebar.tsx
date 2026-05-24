@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import Logo from '@/components/brand/Logo'
 
 const NAV = [
   { label: 'Panel', href: '/dashboard', icon: LayoutDashboard, exact: true },
@@ -47,8 +48,7 @@ export default function Sidebar({ dealerName, dealerSlug, plan }: SidebarProps) 
       {/* Logo */}
       <div className="p-6 border-b border-bsm-border">
         <Link href="/">
-          <div className="font-display text-lg font-light tracking-[0.15em]">BLACK SERIES</div>
-          <div className="text-[9px] tracking-[0.4em] text-gold uppercase">Market</div>
+          <Logo width={140} />
         </Link>
       </div>
 

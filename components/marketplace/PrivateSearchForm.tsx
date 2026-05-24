@@ -45,7 +45,6 @@ export default function PrivateSearchForm() {
       localStorage.setItem('blm_private_searches', JSON.stringify(stored))
     } catch {}
 
-    // Simulate network delay for credibility
     await new Promise((r) => setTimeout(r, 800))
     setSubmitted(true)
   }

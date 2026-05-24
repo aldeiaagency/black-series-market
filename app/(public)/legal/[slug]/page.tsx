@@ -68,11 +68,9 @@ Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo c
 
 **Cookies que utilizamos**
 
-| Tipo | Finalidad | Duración |
-|------|-----------|----------|
-| Técnicas (sesión) | Mantener la sesión del usuario autenticado | Sesión |
-| Preferencias | Recordar idioma y configuración | 1 año |
-| Analíticas | Analizar el uso del sitio (datos agregados y anonimizados) | 90 días |
+- Técnicas (sesión): Mantener la sesión del usuario autenticado. Duración: sesión del navegador.
+- Preferencias: Recordar idioma y configuración. Duración: 1 año.
+- Analíticas: Analizar el uso del sitio con datos agregados y anonimizados. Duración: 90 días.
 
 **Gestión de cookies**
 

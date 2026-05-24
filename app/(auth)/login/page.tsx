@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import Logo from '@/components/brand/Logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -31,12 +32,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-obsidian flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-10">
+        <div className="flex justify-center mb-10">
           <Link href="/">
-            <div className="font-display text-2xl font-light tracking-[0.15em] text-bsm-text-primary">
-              BLACK SERIES
-            </div>
-            <div className="text-[10px] tracking-[0.4em] text-gold uppercase">Market</div>
+            <Logo width={160} />
           </Link>
         </div>
 

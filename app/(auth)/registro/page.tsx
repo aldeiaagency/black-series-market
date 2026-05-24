@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { slugify } from '@/lib/utils'
+import Logo from '@/components/brand/Logo'
 
 export default function RegistroPage() {
   const [step, setStep] = useState(1)
@@ -72,12 +73,9 @@ export default function RegistroPage() {
   return (
     <div className="min-h-screen bg-obsidian flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg">
-        <div className="text-center mb-10">
+        <div className="flex justify-center mb-10">
           <Link href="/">
-            <div className="font-display text-2xl font-light tracking-[0.15em] text-bsm-text-primary">
-              BLACK SERIES
-            </div>
-            <div className="text-[10px] tracking-[0.4em] text-gold uppercase">Market</div>
+            <Logo width={160} />
           </Link>
         </div>
 

@@ -51,6 +51,7 @@ export default function PublicarPage() {
     has_carfax: false,
     description: '',
     equipment: [] as string[],
+    equipment_extra: '',
     images: [] as { url: string; order: number }[],
     price: '',
     price_on_request: false,
@@ -376,6 +377,8 @@ export default function PublicarPage() {
               <label className="label-base">Equipamiento adicional (uno por línea)</label>
               <textarea
                 rows={3}
+                value={form.equipment_extra}
+                onChange={(e) => update('equipment_extra', e.target.value)}
                 className="input-base resize-none"
                 placeholder="Otros extras no listados arriba..."
               />

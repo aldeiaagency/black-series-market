@@ -35,7 +35,7 @@ const PLANS = [
     id: 'elite',
     name: 'Elite',
     price: 699,
-    slots: 999,
+    slots: 9999,
     features: [
       'Vehículos ilimitados',
       'Aparición en homepage del marketplace',

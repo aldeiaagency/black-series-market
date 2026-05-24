@@ -71,8 +71,12 @@ export default function ContactoPage() {
               <div className="w-12 h-12 border border-gold/30 flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-6 h-6 text-gold" />
               </div>
-              <h2 className="font-display text-2xl font-light mb-2">Mensaje enviado</h2>
-              <p className="text-bsm-text-muted">Te responderemos en menos de 24 horas laborables.</p>
+              <h2 className="font-display text-2xl font-light mb-2">Solicitud recibida</h2>
+              <p className="text-bsm-text-muted mb-4">Nos pondremos en contacto contigo en breve.</p>
+              <p className="text-xs text-bsm-text-muted">
+                Si prefieres contacto inmediato, escríbenos a{' '}
+                <a href="mailto:hola@blackseriesmarket.com" className="text-gold">hola@blackseriesmarket.com</a>
+              </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="bg-surface border border-bsm-border p-8 space-y-5">
