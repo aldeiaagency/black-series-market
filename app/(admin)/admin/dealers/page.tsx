@@ -11,9 +11,15 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = await createClient()
 
+  const { count: pendingCount } = await supabase
+    .from('dealers')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pending')
+
   let query = supabase
     .from('dealers')
     .select('*, profile:profiles(email)', { count: 'exact' })
+    .order('status', { ascending: true }) // pending first
     .order('created_at', { ascending: false })
 
   if (params.status) query = query.eq('status', params.status)
@@ -28,6 +34,17 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
           <h1 className="font-display text-3xl font-light mb-1">Concesionarios</h1>
           <p className="text-sm text-bsm-text-muted">{count} registrados</p>
         </div>
+        {(pendingCount ?? 0) > 0 && (
+          <Link
+            href="/admin/dealers?status=pending"
+            className="flex items-center gap-2 px-4 py-2.5 border border-amber-400/30 bg-amber-400/5 text-amber-400 text-sm hover:bg-amber-400/10 transition-colors"
+          >
+            <span className="w-5 h-5 rounded-full bg-amber-400 text-black text-xs font-bold flex items-center justify-center">
+              {pendingCount}
+            </span>
+            Solicitud{pendingCount !== 1 ? 'es' : ''} pendiente{pendingCount !== 1 ? 's' : ''}
+          </Link>
+        )}
       </div>
 
       {/* Filters */}

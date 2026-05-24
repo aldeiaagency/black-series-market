@@ -15,6 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .single()
 
   if (!dealer) redirect('/registro')
+  if (dealer.status === 'pending') redirect('/solicitud-enviada')
 
   return (
     <div className="flex min-h-screen bg-obsidian">

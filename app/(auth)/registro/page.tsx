@@ -49,7 +49,7 @@ export default function RegistroPage() {
     await supabase.from('profiles').update({ role: 'dealer' }).eq('id', authData.user.id)
 
     const slug = slugify(form.dealer_name) + '-' + Math.random().toString(36).slice(2, 6)
-    const { error: dealerError } = await supabase.from('dealers').insert({
+    const { data: dealerData, error: dealerError } = await supabase.from('dealers').insert({
       profile_id: authData.user.id,
       slug,
       name: form.dealer_name,
@@ -57,9 +57,9 @@ export default function RegistroPage() {
       location_region: form.location_region,
       phone: form.phone,
       email: form.email,
-      status: 'trial',
+      status: 'pending',
       vehicle_slots: 5,
-    })
+    }).select('id').single()
 
     if (dealerError) {
       setError('Error al crear el perfil de concesionario.')
@@ -67,7 +67,20 @@ export default function RegistroPage() {
       return
     }
 
-    router.push('/dashboard?welcome=true')
+    // Notify internal team via n8n (fire and forget)
+    fetch('/api/webhooks/dealer-registered', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dealer_id: dealerData?.id,
+        dealer_name: form.dealer_name,
+        email: form.email,
+        location_city: form.location_city,
+        phone: form.phone,
+      }),
+    }).catch(() => {})
+
+    router.push('/solicitud-enviada')
   }
 
   return (

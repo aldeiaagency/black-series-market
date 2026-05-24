@@ -2,10 +2,35 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { DEALER_STATUS_LABELS, VEHICLE_STATUS_LABELS, getVehicleStatusColor, formatPrice, formatNumber, timeAgo } from '@/lib/utils'
 import Link from 'next/link'
-import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe } from 'lucide-react'
+import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe, CheckCircle, Clock } from 'lucide-react'
 
 interface PageProps {
   params: Promise<{ id: string }>
+}
+
+async function approveDealerAccess(formData: FormData) {
+  'use server'
+  const dealerId   = formData.get('dealerId') as string
+  const dealerName = formData.get('dealerName') as string
+  const email      = formData.get('email') as string
+  const supabase   = await createAdminClient()
+  await supabase.from('dealers').update({ status: 'trial' }).eq('id', dealerId)
+
+  const webhookUrl = process.env.N8N_WEBHOOK_DEALER_APPROVED
+  if (webhookUrl) {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dealer_id:    dealerId,
+        dealer_name:  dealerName,
+        email,
+        approved_at:  new Date().toISOString(),
+        dashboard_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      }),
+    }).catch(() => {})
+  }
+  redirect(`/admin/dealers/${dealerId}`)
 }
 
 async function setDealerStatus(dealerId: string, status: string) {
@@ -79,6 +104,37 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
 
   return (
     <div className="p-8">
+
+      {/* Pending approval banner */}
+      {dealer.status === 'pending' && (
+        <div className="flex items-center justify-between gap-6 p-5 mb-8 border border-amber-400/30 bg-amber-400/5">
+          <div className="flex items-start gap-3">
+            <Clock className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-400 mb-0.5">Solicitud pendiente de aprobación</p>
+              <p className="text-xs text-bsm-text-muted">
+                {dealer.name} ha solicitado acceso. Verifica su reputación antes de aprobar.
+                {dealer.profile?.email && (
+                  <> Email: <a href={`mailto:${dealer.profile.email}`} className="text-gold hover:underline">{dealer.profile.email}</a></>
+                )}
+              </p>
+            </div>
+          </div>
+          <form action={approveDealerAccess}>
+            <input type="hidden" name="dealerId" value={id} />
+            <input type="hidden" name="dealerName" value={dealer.name} />
+            <input type="hidden" name="email" value={dealer.profile?.email || ''} />
+            <button
+              type="submit"
+              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-semibold transition-colors flex-shrink-0"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Aprobar acceso
+            </button>
+          </form>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <Link href="/admin/dealers" className="flex items-center gap-1.5 text-sm text-bsm-text-muted hover:text-gold transition-colors mb-6">

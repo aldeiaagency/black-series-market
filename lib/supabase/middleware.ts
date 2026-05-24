@@ -27,9 +27,20 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  // Protected dealer routes
-  if (pathname.startsWith('/dashboard') && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // Protected dealer dashboard — also gate by dealer status
+  if (pathname.startsWith('/dashboard')) {
+    if (!user) return NextResponse.redirect(new URL('/login', request.url))
+
+    const { data: dealer } = await supabase
+      .from('dealers')
+      .select('status')
+      .eq('profile_id', user.id)
+      .single()
+
+    if (!dealer) return NextResponse.redirect(new URL('/registro', request.url))
+    if (dealer.status === 'pending') {
+      return NextResponse.redirect(new URL('/solicitud-enviada', request.url))
+    }
   }
 
   // Protected buyer/account routes
@@ -55,15 +66,17 @@ export async function updateSession(request: NextRequest) {
   if (isAuthPage && user) {
     const { data: dealer } = await supabase
       .from('dealers')
-      .select('id')
+      .select('id, status')
       .eq('profile_id', user.id)
       .single()
 
     if (dealer) {
-      // Dealer trying to access auth pages → send to dashboard
+      // Pending dealers trying to access auth pages → send to holding page
+      if (dealer.status === 'pending') {
+        return NextResponse.redirect(new URL('/solicitud-enviada', request.url))
+      }
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-    // Buyer logged in: allow /login (to sign out); redirect /registro and /registro-comprador away
     if (pathname === '/registro' || pathname === '/registro-comprador') {
       return NextResponse.redirect(new URL('/', request.url))
     }
