@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link'
-import { ArrowRight, Shield, Star, Zap } from 'lucide-react'
+import { ArrowRight, Shield, Star, Zap, Diamond, BadgeCheck, CarFront, Search } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import DealerCard from '@/components/marketplace/DealerCard'
@@ -10,11 +11,11 @@ const BRANDS_SHOWCASE = [
   'Rolls-Royce', 'Aston Martin', 'Maserati', 'BMW', 'Mercedes-Benz', 'Ducati',
 ]
 
-const PILLARS = [
-  { label: 'Selección premium' },
-  { label: 'Vendedores verificados' },
-  { label: 'Coches y motos' },
-  { label: 'Búsqueda a medida' },
+const PILLARS: { label: string; icon: LucideIcon }[] = [
+  { label: 'Selección premium',    icon: Diamond    },
+  { label: 'Vendedores verificados', icon: BadgeCheck },
+  { label: 'Coches y motos',       icon: CarFront   },
+  { label: 'Búsqueda a medida',    icon: Search     },
 ]
 
 export default async function HomePage() {
@@ -99,11 +100,12 @@ export default async function HomePage() {
 
           {/* Pillars */}
           <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-px border border-[#161616] bg-[#161616]">
-            {PILLARS.map((p) => (
-              <div key={p.label} className="bg-[#0A0A0A] px-6 py-6">
+            {PILLARS.map(({ label, icon: Icon }) => (
+              <div key={label} className="bg-[#0A0A0A] px-6 py-8 flex flex-col items-center text-center">
+                <Icon className="w-6 h-6 text-[#C6A64B]/60 mb-4" strokeWidth={1.25} />
                 <div className="h-px w-8 bg-[#C6A64B]/40 mb-4" />
                 <div className="text-[11px] text-[#8A8A8A] uppercase tracking-[0.18em] leading-relaxed">
-                  {p.label}
+                  {label}
                 </div>
               </div>
             ))}
