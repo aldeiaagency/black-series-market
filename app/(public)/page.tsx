@@ -1,4 +1,5 @@
 ﻿import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Shield, Star, Zap, Diamond, BadgeCheck, CarFront, Search } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -47,59 +48,100 @@ export default async function HomePage() {
   return (
     <>
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center">
+      <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-[#050505]">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(198,166,75,0.04)_0%,transparent_70%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_30%_40%,rgba(198,166,75,0.05)_0%,transparent_65%)]" />
           <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#050505] to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-screen-2xl mx-auto px-6 lg:px-12 pt-36 pb-20 w-full">
-          <div className="max-w-3xl">
 
-            {/* Eyebrow */}
-            <div className="flex items-center gap-3 mb-10">
-              <div className="h-px w-10 bg-[#C6A64B]/60" />
-              <span className="text-[10px] text-[#C6A64B]/80 tracking-[0.35em] uppercase font-medium">
-                Selección de coches y motos premium
-              </span>
+          {/* ── Two-column hero grid ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-0 lg:gap-8">
+
+            {/* Text column */}
+            <div className="lg:col-span-7">
+
+              {/* Eyebrow */}
+              <div className="flex items-center gap-3 mb-10">
+                <div className="h-px w-10 bg-[#C6A64B]/60" />
+                <span className="text-[10px] text-[#C6A64B]/80 tracking-[0.35em] uppercase font-medium">
+                  Selección de coches y motos premium
+                </span>
+              </div>
+
+              {/* Headline */}
+              <h1
+                className="font-display font-light text-[#F4F1EA] leading-[1.02] mb-8"
+                style={{ fontSize: 'clamp(2.8rem, 5.5vw, 5rem)' }}
+              >
+                No es volumen.
+                <span className="block italic text-[#C9C9C9]">Es selección.</span>
+              </h1>
+
+              {/* Subclaim */}
+              <p className="text-[#858585] text-[17px] leading-relaxed mb-10 max-w-xl">
+                Coches deportivos, clásicos, motos premium y unidades especiales.
+                Publicados por concesionarios y compraventas verificados para quienes buscan algo más que un vehículo.
+              </p>
+
+              <SearchBar size="hero" className="max-w-xl mb-10" />
+
+              <div className="flex flex-wrap gap-3">
+                <Link href="/coches" className="btn-gold">
+                  Ver vehículos
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/busqueda-privada"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-sm text-[#9A9A9A]
+                    border border-[#2A2A2A] hover:border-[#3A3A3A] hover:text-[#C9C9C9]
+                    transition-all duration-200 tracking-wide"
+                >
+                  ¿No encuentras tu vehículo?
+                </Link>
+              </div>
             </div>
 
-            {/* Headline */}
-            <h1
-              className="font-display font-light text-[#F4F1EA] leading-[1.02] mb-8"
-              style={{ fontSize: 'clamp(2.8rem, 6vw, 5rem)' }}
-            >
-              No es volumen.
-              <span className="block italic text-[#C9C9C9]">Es selección.</span>
-            </h1>
-
-            {/* Subclaim */}
-            <p className="text-[#858585] text-[17px] leading-relaxed mb-10 max-w-xl">
-              Coches deportivos, clásicos, motos premium y unidades especiales.
-              Publicados por concesionarios y compraventas verificados para quienes buscan algo más que un vehículo.
-            </p>
-
-            <SearchBar size="hero" className="max-w-2xl mb-10" />
-
-            <div className="flex flex-wrap gap-3">
-              <Link href="/coches" className="btn-gold">
-                Ver vehículos
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/busqueda-privada"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm text-[#9A9A9A]
-                  border border-[#2A2A2A] hover:border-[#3A3A3A] hover:text-[#C9C9C9]
-                  transition-all duration-200 tracking-wide"
-              >
-                ¿No encuentras tu vehículo?
-              </Link>
+            {/* Image column — desktop only */}
+            <div className="hidden lg:block lg:col-span-5 relative h-[500px] xl:h-[560px]">
+              <Image
+                src="/images/hero/black-label-hero-gt3rs-ducati.webp"
+                alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
+                fill
+                priority
+                className="object-cover object-center"
+                sizes="(max-width: 1280px) 42vw, 640px"
+              />
+              {/* Fade left edge into background */}
+              <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-[#050505] to-transparent pointer-events-none" />
+              {/* Fade bottom edge */}
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none" />
+              {/* Subtle top edge */}
+              <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#050505]/60 to-transparent pointer-events-none" />
+              {/* Subtle right vignette */}
+              <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#050505]/50 to-transparent pointer-events-none" />
             </div>
           </div>
 
+          {/* Mobile image — below CTAs, before pillars */}
+          <div className="lg:hidden mt-10 relative h-52 sm:h-64 -mx-6 overflow-hidden">
+            <Image
+              src="/images/hero/black-label-hero-gt3rs-ducati.webp"
+              alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
+              fill
+              className="object-cover object-center"
+              sizes="100vw"
+            />
+            {/* Heavy bottom fade so pillars transition smoothly */}
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none" />
+            {/* Top fade from header */}
+            <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-[#050505]/70 to-transparent pointer-events-none" />
+          </div>
+
           {/* Pillars */}
-          <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-px border border-[#161616] bg-[#161616]">
+          <div className="mt-16 lg:mt-20 grid grid-cols-2 md:grid-cols-4 gap-px border border-[#161616] bg-[#161616]">
             {PILLARS.map(({ label, icon: Icon }) => (
               <div key={label} className="bg-[#0A0A0A] px-6 py-8 flex flex-col items-center text-center">
                 <Icon className="w-6 h-6 text-[#C6A64B]/60 mb-4" strokeWidth={1.25} />
