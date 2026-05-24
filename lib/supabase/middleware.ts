@@ -32,6 +32,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Protected buyer/account routes
+  if (pathname.startsWith('/cuenta') && !user) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
   // Protected admin routes
   if (pathname.startsWith('/admin')) {
     if (!user) return NextResponse.redirect(new URL('/login', request.url))
@@ -45,8 +50,9 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Redirect logged-in users with a dealer profile away from auth pages
-  if ((pathname === '/login' || pathname === '/registro') && user) {
+  // Redirect already-logged-in users away from auth pages
+  const isAuthPage = pathname === '/login' || pathname === '/registro' || pathname === '/registro-comprador'
+  if (isAuthPage && user) {
     const { data: dealer } = await supabase
       .from('dealers')
       .select('id')
@@ -54,9 +60,13 @@ export async function updateSession(request: NextRequest) {
       .single()
 
     if (dealer) {
+      // Dealer trying to access auth pages → send to dashboard
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-    // No dealer profile yet: allow /login (to sign out) and /registro (to complete signup)
+    // Buyer logged in: allow /login (to sign out); redirect /registro and /registro-comprador away
+    if (pathname === '/registro' || pathname === '/registro-comprador') {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
   return supabaseResponse

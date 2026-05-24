@@ -18,20 +18,28 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
+
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    if (authError || !data.user) {
       setError('Credenciales incorrectas. Verifica tu email y contraseña.')
       setLoading(false)
       return
     }
-    router.push('/dashboard')
+
+    // Route by role: dealer → dashboard, buyer → homepage
+    const { data: dealer } = await supabase
+      .from('dealers')
+      .select('id')
+      .eq('profile_id', data.user.id)
+      .single()
+
+    router.push(dealer ? '/dashboard' : '/')
     router.refresh()
   }
 
   return (
     <div className="min-h-screen bg-obsidian flex items-center justify-center px-6">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="flex justify-center mb-10">
           <Link href="/">
             <Logo width={160} />
@@ -40,7 +48,7 @@ export default function LoginPage() {
 
         <div className="bg-surface border border-bsm-border p-8">
           <h1 className="font-display text-2xl font-light mb-1">Acceder</h1>
-          <p className="text-sm text-bsm-text-muted mb-8">Panel de concesionarios</p>
+          <p className="text-sm text-bsm-text-muted mb-8">Accede a tu cuenta</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -49,7 +57,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@concesionario.com"
+                placeholder="tu@email.com"
                 className="input-base"
                 required
               />
@@ -81,11 +89,17 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-bsm-border text-center">
+          <div className="mt-6 pt-6 border-t border-bsm-border space-y-3 text-center">
             <p className="text-sm text-bsm-text-muted">
-              ¿No tienes cuenta?{' '}
-              <Link href="/registro" className="text-gold hover:text-gold-light transition-colors">
-                Registrar concesionario
+              ¿Sin cuenta?{' '}
+              <Link href="/registro-comprador" className="text-gold hover:text-gold-light transition-colors">
+                Crear cuenta gratuita
+              </Link>
+            </p>
+            <p className="text-xs text-bsm-text-muted">
+              ¿Eres concesionario?{' '}
+              <Link href="/registro" className="text-bsm-text-secondary hover:text-gold transition-colors">
+                Acceso profesional
               </Link>
             </p>
           </div>

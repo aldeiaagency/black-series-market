@@ -124,13 +124,13 @@ export default function Header() {
               Acceder
             </Link>
             <Link
-              href="/registro"
+              href="/registro-comprador"
               className="px-5 py-2.5 text-[12px] tracking-[0.1em] font-medium uppercase
                 border border-[#C6A64B]/60 text-[#C6A64B]
                 hover:bg-[#C6A64B]/8 hover:border-[#C6A64B]
                 transition-all duration-200"
             >
-              Publicar en Black Label
+              Registrarse
             </Link>
           </div>
 
@@ -176,8 +176,8 @@ export default function Header() {
               <Link href="/login" className="btn-outline w-full justify-center text-sm">
                 Acceder
               </Link>
-              <Link href="/registro" className="btn-gold w-full justify-center text-sm">
-                Publicar en Black Label
+              <Link href="/registro-comprador" className="btn-gold w-full justify-center text-sm">
+                Registrarse
               </Link>
             </div>
           </div>
