@@ -51,10 +51,6 @@ export default function Footer() {
               Marketplace curado de coches y motos premium, deportivos, clásicos
               y unidades especiales.
             </p>
-            <div className="mt-6 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/70" />
-              <span className="text-[11px] text-[#808080]">Plataforma activa</span>
-            </div>
           </div>
 
           {/* Links */}
