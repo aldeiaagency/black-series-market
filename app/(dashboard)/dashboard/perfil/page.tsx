@@ -1,15 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Upload, X } from 'lucide-react'
 
 export default function PerfilPage() {
   const [dealer, setDealer] = useState<any>(null)
   const [form, setForm] = useState<any>({})
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [logoError, setLogoError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -20,6 +24,7 @@ export default function PerfilPage() {
       const { data } = await supabase.from('dealers').select('*').eq('profile_id', user.id).single()
       setDealer(data)
       setForm(data || {})
+      setLogoUrl(data?.logo_url || null)
     }
     load()
   }, [router])
@@ -28,21 +33,47 @@ export default function PerfilPage() {
     setForm((f: any) => ({ ...f, [key]: value }))
   }
 
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLogoError(null)
+    setLogoUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload?type=logo', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!res.ok) { setLogoError(json.error || 'Error al subir el logo'); return }
+      setLogoUrl(json.url)
+    } catch {
+      setLogoError('Error de conexión al subir el logo')
+    } finally {
+      setLogoUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  async function handleRemoveLogo() {
+    const supabase = createClient()
+    await supabase.from('dealers').update({ logo_url: null }).eq('id', dealer.id)
+    setLogoUrl(null)
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     const supabase = createClient()
     await supabase.from('dealers').update({
-      name: form.name,
-      description: form.description,
-      location_city: form.location_city,
-      location_region: form.location_region,
-      address: form.address,
-      phone: form.phone,
-      whatsapp: form.whatsapp,
-      email: form.email,
-      website: form.website,
-      instagram: form.instagram,
+      name:             form.name,
+      description:      form.description,
+      location_city:    form.location_city,
+      location_region:  form.location_region,
+      address:          form.address,
+      phone:            form.phone,
+      whatsapp:         form.whatsapp,
+      email:            form.email,
+      website:          form.website,
+      instagram:        form.instagram,
       years_in_business: form.years_in_business ? parseInt(form.years_in_business) : null,
     }).eq('id', dealer.id)
     setLoading(false)
@@ -58,6 +89,8 @@ export default function PerfilPage() {
     )
   }
 
+  const initial = dealer.name?.[0]?.toUpperCase() || '?'
+
   return (
     <div className="p-8 max-w-2xl">
       <div className="mb-8">
@@ -65,6 +98,67 @@ export default function PerfilPage() {
         <p className="text-sm text-bsm-text-muted">
           Esta información es visible en tu página pública del marketplace.
         </p>
+      </div>
+
+      {/* Logo upload */}
+      <div className="bg-surface border border-bsm-border p-6 mb-6">
+        <h2 className="font-medium text-bsm-text-primary mb-1">Logo del concesionario</h2>
+        <p className="text-xs text-bsm-text-muted mb-5">
+          Se muestra en las tarjetas de vehículos y en tu página de showroom. JPG, PNG o WebP, máx. 2 MB.
+        </p>
+
+        <div className="flex items-center gap-5">
+          {/* Preview */}
+          <div className="w-16 h-16 flex-shrink-0 bg-[#0D0D0D] border border-bsm-border flex items-center justify-center overflow-hidden">
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1.5" />
+            ) : (
+              <span className="font-display text-2xl font-light text-[#C6A64B]/40 select-none">
+                {initial}
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              onChange={handleLogoChange}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={logoUploading}
+              className="btn-outline text-sm px-4 py-2 flex items-center gap-2"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              {logoUploading ? 'Subiendo...' : logoUrl ? 'Cambiar logo' : 'Subir logo'}
+            </button>
+            {logoUrl && (
+              <button
+                type="button"
+                onClick={handleRemoveLogo}
+                className="flex items-center gap-1.5 text-xs text-bsm-text-muted hover:text-red-400 transition-colors"
+              >
+                <X className="w-3 h-3" />
+                Eliminar logo
+              </button>
+            )}
+          </div>
+        </div>
+
+        {logoError && (
+          <p className="mt-3 text-xs text-red-400">{logoError}</p>
+        )}
+        {logoUrl && !logoUploading && (
+          <p className="mt-3 text-xs text-emerald-400 flex items-center gap-1.5">
+            <CheckCircle className="w-3 h-3" />
+            Logo guardado correctamente
+          </p>
+        )}
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">

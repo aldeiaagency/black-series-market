@@ -25,17 +25,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'El archivo supera los 10MB' }, { status: 400 })
   }
 
+  const isLogo = req.nextUrl.searchParams.get('type') === 'logo'
   const ext = file.name.split('.').pop() || 'jpg'
-  const path = `${dealer.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const path = isLogo
+    ? `logos/${dealer.id}/logo.${ext}`
+    : `${dealer.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
   const admin = await createAdminClient()
   const { error } = await admin.storage.from(BUCKET).upload(path, file, {
     contentType: file.type,
-    upsert: false,
+    upsert: isLogo, // overwrite previous logo, never overwrite vehicle images
   })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(path)
+
+  // For logo uploads: persist logo_url directly on the dealer row
+  if (isLogo) {
+    await supabase.from('dealers').update({ logo_url: publicUrl }).eq('id', dealer.id)
+  }
+
   return NextResponse.json({ url: publicUrl, path })
 }
