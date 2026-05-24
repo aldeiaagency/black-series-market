@@ -206,8 +206,7 @@ export default function PrivateSearchForm() {
       </button>
 
       <p className="text-[10px] text-bsm-text-muted text-center leading-relaxed">
-        Al enviar aceptas la política de privacidad. Este servicio no garantiza disponibilidad.
-        Prepárate para un contacto de Black Label en las próximas 48-72 horas laborables.
+        La búsqueda privada registra tu interés para detectar oportunidades compatibles. No garantiza disponibilidad, precio ni localización concreta. Al enviar aceptas la política de privacidad.
       </p>
     </form>
   )

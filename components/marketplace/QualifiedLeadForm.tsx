@@ -109,7 +109,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
           El vendedor recibirá tu interés con el contexto necesario.
         </p>
         <p className="text-[10px] text-[#575757] mt-3 max-w-[220px] leading-relaxed italic">
-          El envío no garantiza disponibilidad. Confirma siempre condiciones actualizadas con el vendedor.
+          Tu solicitud se enviará al vendedor profesional responsable de la unidad. El envío no garantiza disponibilidad ni reserva del vehículo.
         </p>
       </div>
     )
@@ -246,7 +246,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
       <div className="flex items-start gap-2 pt-1">
         <Info className="w-3.5 h-3.5 text-bsm-text-muted flex-shrink-0 mt-0.5" />
         <p className="text-[10px] text-bsm-text-muted leading-relaxed">
-          El envío no garantiza disponibilidad. Confirma siempre condiciones actualizadas con el vendedor.
+          Tu solicitud se enviará al vendedor profesional responsable de la unidad. El envío no garantiza disponibilidad ni reserva del vehículo.
         </p>
       </div>
     </form>

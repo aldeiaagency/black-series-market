@@ -5,114 +5,259 @@ const LEGAL_CONTENT: Record<string, { title: string; content: string }> = {
   'aviso-legal': {
     title: 'Aviso Legal',
     content: `
-**Titular del sitio web**
+**Identificación del titular**
 
-Black Series Agency, en adelante "Black Series Market", es la entidad responsable de la operación de este marketplace de vehículos premium.
+Titular: KAZAWEB, S.L.U.
+NIF: B42761254
+Domicilio fiscal: Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña
+Nombre comercial: Black Label Market
+Dominio: [PENDIENTE_DEFINIR_DOMINIO]
+Email de contacto: [PENDIENTE_EMAIL_CONTACTO]
+Email legal: [PENDIENTE_EMAIL_LEGAL]
+Actividad: Intermediarios del comercio — Epígrafe IAE 631
 
-**Objeto del sitio**
+**Objeto del sitio web**
 
-Black Series Market es una plataforma de intermediación digital que facilita el contacto entre concesionarios y compraventas de vehículos premium con posibles compradores. Black Series Market no es parte en las transacciones de compraventa entre usuarios y vendedores, actuando exclusivamente como plataforma de intermediación.
+Black Label Market es una plataforma digital orientada a la presentación de coches y motos premium, deportivos, clásicos, de colección, enthusiast y unidades especiales publicados por vendedores profesionales seleccionados.
+
+**Naturaleza de la plataforma**
+
+Black Label Market actúa como plataforma de publicación y contacto. La operación comercial, negociación, documentación, garantía, pago, entrega y cualquier acuerdo posterior se realiza directamente entre el comprador interesado y el vendedor profesional responsable del vehículo.
+
+- Black Label Market no vende directamente los vehículos.
+- La información de cada anuncio es proporcionada por el vendedor profesional responsable.
+- La disponibilidad debe confirmarse directamente con el vendedor antes de cualquier operación.
+- Las condiciones de venta, garantía, financiación, entrega, reserva o prueba dependen del vendedor profesional.
+- Black Label Market puede revisar, editar, suspender o retirar anuncios que no cumplan criterios editoriales, comerciales o legales.
 
 **Propiedad intelectual**
 
-Todos los contenidos del sitio web, incluyendo diseño, textos, imágenes y código fuente, son propiedad de Black Series Market o de sus licenciantes y están protegidos por las leyes de propiedad intelectual vigentes.
+El diseño, textos, marca, logotipos, imágenes propias, contenidos editoriales y la estructura de la plataforma son propiedad de KAZAWEB, S.L.U. o de sus licenciantes, y están protegidos por la legislación sobre propiedad intelectual e industrial vigente.
 
-**Responsabilidad de los contenidos**
+Las marcas, modelos y logotipos de terceros pertenecen a sus respectivos titulares y se utilizan únicamente con finalidad identificativa cuando proceda.
 
-Los concesionarios registrados son los únicos responsables de la veracidad y exactitud de la información publicada sobre los vehículos de su inventario. Black Series Market realiza revisión editorial básica pero no garantiza la exactitud de las especificaciones técnicas ni del estado real de los vehículos.
+**Limitación de responsabilidad**
+
+- Black Label Market no garantiza la disponibilidad continua del servicio.
+- Black Label Market no garantiza la exactitud absoluta de la información facilitada por los vendedores profesionales.
+- Black Label Market no es responsable de las negociaciones, acuerdos o transacciones realizadas directamente entre comprador y vendedor.
+- Black Label Market no sustituye la revisión técnica, documental o legal que el comprador deba realizar antes de cualquier operación.
+- Las decisiones de compra son responsabilidad exclusiva de las partes implicadas.
 
 **Legislación aplicable**
 
-Este aviso legal se rige por la legislación española. Para cualquier controversia, las partes se someten a los juzgados y tribunales de España.
+Este aviso legal se rige por la legislación española. Los conflictos se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.
     `.trim(),
   },
+
   'privacidad': {
     title: 'Política de Privacidad',
     content: `
 **Responsable del tratamiento**
 
-Black Series Market trata los datos personales de sus usuarios de conformidad con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 de Protección de Datos Personales (LOPDGDD).
+KAZAWEB, S.L.U.
+NIF: B42761254
+Domicilio: Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña
+Email privacidad: [PENDIENTE_EMAIL_PRIVACIDAD]
+
+De conformidad con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD).
 
 **Datos que recogemos**
 
-- **Concesionarios:** nombre, email, teléfono, información de empresa, datos de facturación.
-- **Compradores:** nombre, email, teléfono (únicamente cuando contactan a través del formulario de lead).
-- **Datos de uso:** páginas visitadas, vehículos consultados, búsquedas realizadas.
+Formulario de solicitud de información sobre vehículos: nombre, email, teléfono (opcional), vehículo de interés, plazo de compra, financiación, entrega de vehículo, preferencia de contacto y mensaje.
 
-**Finalidad del tratamiento**
+Formulario de búsqueda privada: nombre, email, teléfono (opcional), tipo de vehículo, marca y modelo buscados, presupuesto, ubicación, plazo de compra y comentarios.
 
-- Gestión del contrato de suscripción con concesionarios.
-- Facilitar el contacto entre compradores y vendedores.
-- Mejora de la plataforma y análisis de uso.
-- Comunicaciones comerciales (solo con consentimiento explícito).
+Formulario de acceso profesional: nombre, empresa, email, teléfono, tipo de negocio, ubicación, stock aproximado y mensaje.
+
+Datos técnicos de navegación: [PENDIENTE_DEFINIR_ANALYTICS_COOKIES]
+
+**Finalidades del tratamiento**
+
+- Gestionar solicitudes de información sobre vehículos.
+- Contactar con usuarios que han enviado un formulario.
+- Registrar y tramitar búsquedas privadas.
+- Valorar solicitudes de acceso profesional.
+- Mejorar la plataforma y prevenir usos indebidos o fraude.
+- Cumplir las obligaciones legales aplicables.
+- Enviar comunicaciones si el usuario lo acepta expresamente.
+
+**Base jurídica**
+
+- Consentimiento del usuario para el envío de formularios y comunicaciones opcionales.
+- Interés legítimo para seguridad, prevención de abuso y mejora del servicio.
+- Ejecución de medidas precontractuales cuando el usuario solicita información sobre un vehículo.
+- Cumplimiento de obligaciones legales.
+
+**Comunicación de datos a terceros**
+
+Cuando el usuario solicita información sobre un vehículo, Black Label Market podrá comunicar los datos necesarios al vendedor profesional responsable de dicha unidad para que pueda responder a la solicitud.
+
+Herramientas de gestión previstas pendientes de configuración: [PENDIENTE_HERRAMIENTA_FORMULARIOS] · [PENDIENTE_CRM] · [PENDIENTE_EMAIL_MARKETING] · [PENDIENTE_ANALYTICS]
 
 **Conservación de datos**
 
-Los datos se conservan durante el tiempo necesario para la prestación del servicio y durante los plazos legalmente exigibles.
+Los datos se conservarán durante el tiempo necesario para gestionar la solicitud y, posteriormente, durante los plazos legalmente exigibles o mientras puedan derivarse responsabilidades.
 
-**Derechos**
+**Tus derechos**
 
-Puedes ejercer tus derechos de acceso, rectificación, supresión, limitación, portabilidad y oposición escribiendo a: privacidad@blackseriesmarket.com
+Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad de datos, así como retirar el consentimiento en cualquier momento, escribiendo a: [PENDIENTE_EMAIL_PRIVACIDAD]
 
-**Cookies**
+Puedes presentar una reclamación ante la Agencia Española de Protección de Datos (www.aepd.es).
 
-Utilizamos cookies técnicas necesarias para el funcionamiento del sitio y, con tu consentimiento, cookies analíticas. Consulta nuestra Política de Cookies para más información.
+**Menores de edad**
+
+Este servicio no está dirigido a menores de edad. Black Label Market no recaba datos de personas menores de edad de forma consciente.
     `.trim(),
   },
+
   'cookies': {
     title: 'Política de Cookies',
     content: `
 **¿Qué son las cookies?**
 
-Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas un sitio web.
+Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas un sitio web. Permiten al sitio recordar información sobre tu visita y mejorar tu experiencia.
 
-**Cookies que utilizamos**
+**Tipos de cookies**
 
-- Técnicas (sesión): Mantener la sesión del usuario autenticado. Duración: sesión del navegador.
-- Preferencias: Recordar idioma y configuración. Duración: 1 año.
-- Analíticas: Analizar el uso del sitio con datos agregados y anonimizados. Duración: 90 días.
+- Técnicas: necesarias para el funcionamiento básico del sitio. Sin ellas, el servicio no puede prestarse correctamente.
+- Preferencias: permiten recordar configuraciones seleccionadas por el usuario.
+- Analíticas: recogen información estadística sobre el uso del sitio, de forma agregada y anonimizada.
+- Publicidad: utilizadas para mostrar contenidos relevantes según el perfil del usuario.
+- Terceros: instaladas por servicios externos integrados en la plataforma.
+
+**Cookies utilizadas actualmente**
+
+Actualmente la configuración definitiva de cookies está pendiente de validación técnica.
+
+- Técnicas — Funcionamiento básico de la plataforma — Black Label Market — Duración: [PENDIENTE]
+- Analítica — Medición del uso del sitio — Proveedor: [PENDIENTE_ANALYTICS] — Duración: [PENDIENTE]
+- Publicidad — Remarketing y audiencias — Proveedor: [PENDIENTE_PIXEL] — Duración: [PENDIENTE]
 
 **Gestión de cookies**
 
-Puedes configurar tu navegador para rechazar todas las cookies o para que te avise cuando se envía una cookie. Ten en cuenta que algunas funcionalidades del sitio pueden no estar disponibles si rechazas las cookies técnicas.
+Puedes configurar tu navegador para rechazar o eliminar cookies en cualquier momento. Ten en cuenta que algunas funcionalidades del sitio pueden no estar disponibles si rechazas las cookies técnicas.
 
-**Cookies de terceros**
+Cuando se activen cookies no estrictamente técnicas, la plataforma incorporará un sistema de consentimiento adecuado conforme a la normativa aplicable.
 
-Podemos utilizar servicios de análisis de terceros (como Supabase Analytics) que instalan sus propias cookies bajo sus propias políticas de privacidad.
+**Actualización de esta política**
+
+Esta política puede actualizarse cuando se modifique la configuración técnica del sitio o cuando la normativa lo requiera. La fecha de última actualización aparece al inicio de esta página.
     `.trim(),
   },
+
   'terminos': {
     title: 'Términos de Uso',
     content: `
-**Aceptación de los términos**
+**Uso de la plataforma**
 
-Al registrarte en Black Series Market como concesionario, aceptas estos términos de uso en su totalidad.
+Black Label Market es un marketplace de vehículos premium de navegación pública. Cualquier persona puede explorar los vehículos publicados sin necesidad de registro. Para enviar solicitudes de información, búsquedas privadas o acceder como profesional, el usuario debe facilitar datos de contacto veraces.
 
-**Condiciones para concesionarios**
+**Obligaciones del usuario comprador**
 
-1. Debes ser un profesional del sector de la automoción con actividad económica registrada.
-2. Los vehículos publicados deben cumplir los criterios de calidad editorial del marketplace.
-3. La información publicada sobre los vehículos debe ser veraz y actualizada.
-4. Estás obligado a retirar o marcar como vendido cualquier vehículo que ya no esté disponible.
-5. Queda prohibida la publicación de vehículos con documentación incompleta, robados o con cargas ocultas.
+- Facilitar datos de contacto veraces al utilizar los formularios de la plataforma.
+- No usar la plataforma para fines fraudulentos, ilegales o contrarios a la buena fe.
+- No suplantar la identidad de terceros.
+- No intentar acceder a áreas restringidas o sistemas de la plataforma.
+- Confirmar disponibilidad, condiciones y documentación directamente con el vendedor antes de formalizar cualquier operación.
 
-**Criterios de admisión de vehículos**
+**Obligaciones del vendedor profesional**
 
-- Coches: precio de mercado superior a 40.000€
-- Motos: precio de mercado superior a 15.000€
-- Marcas convencionales (BMW, Mercedes-Benz, Audi, Ford, etc.): solo modelos de altas prestaciones verificados
+- Publicar información veraz y actualizada sobre los vehículos.
+- Mantener la disponibilidad actualizada y retirar unidades vendidas o no disponibles.
+- Declarar el estado, kilometraje, documentación y condiciones relevantes del vehículo.
+- No publicar imágenes falsas ni correspondientes a otra unidad.
+- No ocultar defectos o incidencias relevantes que afecten al valor o estado del vehículo.
+- Atender solicitudes de interesados de forma diligente.
+- Respetar la normativa aplicable en la comercialización de vehículos.
 
-**Suscripciones y pagos**
+**Operaciones entre comprador y vendedor**
 
-Las suscripciones se facturan mensualmente mediante pago automático con tarjeta de crédito a través de Stripe. La cancelación es posible en cualquier momento con efecto al final del periodo facturado.
+Black Label Market no interviene como parte compradora ni vendedora en la compraventa del vehículo. Cualquier acuerdo, pago, reserva, financiación, garantía, transporte o entrega se realiza directamente entre las partes implicadas.
 
-**Resolución de cuenta**
+Black Label Market actúa exclusivamente como plataforma de publicación y contacto. La operación comercial, negociación, documentación y cualquier acuerdo posterior son responsabilidad de las partes.
 
-Black Series Market se reserva el derecho de suspender o cancelar cuentas que incumplan estos términos, sin reembolso de la parte proporcional del periodo en curso.
+**Suscripciones y pagos profesionales**
+
+Los planes de publicación se facturan mensualmente mediante pago automático a través de Stripe. La cancelación es posible en cualquier momento con efecto al final del periodo facturado.
+
+**Limitaciones del servicio**
+
+- Black Label Market puede modificar, pausar o retirar contenido que no cumpla sus criterios editoriales, comerciales o legales.
+- Black Label Market puede suspender o cancelar el acceso de un profesional que incumpla estos términos.
+- Black Label Market puede rechazar solicitudes de publicación o acceso sin necesidad de justificación adicional.
+- Black Label Market puede modificar los criterios de publicación, planes y funcionamiento del servicio.
+- La disponibilidad continua del servicio no está garantizada.
 
 **Modificaciones**
 
-Black Series Market puede modificar estos términos notificándolo con 30 días de antelación por email.
+Black Label Market puede actualizar estos términos en cualquier momento. Los cambios relevantes serán comunicados a los usuarios registrados con la antelación razonable.
+
+**Legislación aplicable**
+
+Estos términos se rigen por la legislación española. Los conflictos se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.
+    `.trim(),
+  },
+
+  'criterios-publicacion': {
+    title: 'Criterios de Publicación',
+    content: `
+**Black Label Market no es un clasificado abierto**
+
+La publicación de vehículos en Black Label Market está sujeta a criterios editoriales, comerciales y de calidad. Cada solicitud de publicación es revisada por el equipo antes de activarse.
+
+**Tipos de vehículos que encajan**
+
+Coches: premium modernos y de altas prestaciones, deportivos, supercars, hypercars, luxury y executive, clásicos de colección, youngtimers de interés enthusiast, ediciones especiales y series limitadas.
+
+Motos: deportivas premium de altas prestaciones, touring y adventure de gama alta, custom y cruiser premium, scooters premium de segmento alto, clásicas de colección y unidades especiales.
+
+También se consideran vehículos con historia documentada, comunidad activa o valor diferencial claro.
+
+**Criterios que valoramos**
+
+- Marca, modelo y versión.
+- Estado general y configuración de la unidad.
+- Historial documental y de mantenimiento.
+- Demanda y relevancia en el mercado actual.
+- Rareza, edición limitada o valor de colección.
+- Comunidad y valor cultural del modelo.
+- Calidad de la presentación fotográfica.
+- Documentación disponible.
+- Coherencia del precio con el mercado.
+- Vendedor profesional responsable e identificado.
+
+**Requisitos mínimos para publicar**
+
+- Vendedor profesional identificado y aprobado por Black Label Market.
+- Disponibilidad real confirmada en el momento de la publicación.
+- Fotografías reales de la unidad concreta, no de archivo ni de otra unidad.
+- Datos técnicos completos y verificables.
+- Precio indicado o condición de consulta clara.
+- Ubicación del vehículo.
+- Estado declarado con honestidad.
+- Garantía o condiciones de venta indicadas.
+- Sin incidencias o defectos relevantes ocultos.
+
+**Motivos habituales de rechazo**
+
+- Stock sin criterio editorial o comercial.
+- Fotografías de archivo o no correspondientes a la unidad concreta.
+- Unidad no disponible en el momento de solicitar la publicación.
+- Información incompleta o engañosa.
+- Precio sin justificación coherente.
+- Documentación con dudas sin resolver.
+- Daños o incidencias relevantes no declarados.
+- Vendedor no profesional o no aprobado por Black Label Market.
+- Vehículos sin encaje con el perfil del marketplace.
+
+**Derecho editorial**
+
+Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o retirar publicaciones conforme a sus criterios editoriales, comerciales y de calidad, sin necesidad de justificación adicional.
+
+**¿Quieres publicar en Black Label Market?**
+
+Si eres un profesional del sector y quieres solicitar acceso para publicar vehículos, puedes hacerlo a través del formulario de registro profesional. Tu perfil será revisado antes de habilitar la publicación de vehículos.
     `.trim(),
   },
 }
@@ -124,7 +269,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const page = LEGAL_CONTENT[slug]
-  return { title: page?.title || 'Legal' }
+  return { title: page?.title ? `${page.title} — Black Label Market` : 'Legal' }
 }
 
 export default async function LegalPage({ params }: PageProps) {
@@ -132,14 +277,10 @@ export default async function LegalPage({ params }: PageProps) {
   const page = LEGAL_CONTENT[slug]
   if (!page) notFound()
 
-  // Simple markdown-like rendering
   function renderContent(text: string) {
     return text.split('\n').map((line, i) => {
       if (line.startsWith('**') && line.endsWith('**') && !line.slice(2, -2).includes('**')) {
         return <h2 key={i} className="font-display text-xl font-light text-bsm-text-primary mt-8 mb-3">{line.slice(2, -2)}</h2>
-      }
-      if (line.startsWith('| ')) {
-        return null // Skip table lines (rendered separately below if needed)
       }
       if (line.match(/^\d+\./)) {
         return <li key={i} className="text-bsm-text-secondary text-sm leading-relaxed mb-2 ml-4">{line.replace(/^\d+\. /, '')}</li>

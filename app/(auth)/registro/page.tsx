@@ -212,6 +212,9 @@ export default function RegistroPage() {
                 </div>
 
                 <p className="text-[10px] text-bsm-text-muted text-center pt-2">
+                  El envío de esta solicitud no implica aceptación automática. Black Label Market revisa cada perfil profesional antes de habilitar la publicación de vehículos.
+                </p>
+                <p className="text-[10px] text-bsm-text-muted text-center pt-1">
                   Al registrarte aceptas nuestros{' '}
                   <Link href="/legal/terminos" className="text-gold">términos de uso</Link>
                   {' '}y{' '}

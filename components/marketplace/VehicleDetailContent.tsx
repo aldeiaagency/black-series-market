@@ -526,10 +526,7 @@ export default function VehicleDetailContent({
           <div className="flex items-start gap-3 p-5 border border-[#1A1A1A] bg-[#0A0A0A]">
             <AlertCircle className="w-4 h-4 text-[#474747] flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#474747] leading-relaxed">
-              Información proporcionada por el vendedor. Black Label recomienda confirmar disponibilidad,
-              historial, condiciones y documentación antes de formalizar cualquier operación.
-              Black Label Market actúa como plataforma de publicación y contacto; la operación comercial
-              se realiza entre comprador y vendedor.
+              Información proporcionada por el vendedor profesional. Black Label Market recomienda confirmar disponibilidad, historial, documentación, garantía y condiciones antes de formalizar cualquier operación. Black Label Market actúa como plataforma de publicación y contacto; la operación comercial se realiza directamente entre comprador y vendedor.
             </p>
           </div>
         </div>

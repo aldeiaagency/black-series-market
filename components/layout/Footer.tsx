@@ -13,7 +13,7 @@ const LINKS = {
   ],
   Profesionales: [
     { label: 'Solicitar acceso profesional', href: '/registro' },
-    { label: 'Criterios de publicación', href: '/precios' },
+    { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
     { label: 'Planes de publicación', href: '/precios' },
     { label: 'Soporte', href: '/contacto' },
   ],
@@ -22,6 +22,7 @@ const LINKS = {
     { label: 'Política de privacidad', href: '/legal/privacidad' },
     { label: 'Política de cookies', href: '/legal/cookies' },
     { label: 'Términos de uso', href: '/legal/terminos' },
+    { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
   ],
 }
 
@@ -111,7 +112,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Black Label Market. Todos los derechos reservados.
           </p>
           <p className="text-[11px] text-[#474747]">
-            Operado por <span className="text-[#686868]">Black Series</span>
+            Operado por <span className="text-[#686868]">KAZAWEB, S.L.U.</span> · NIF B42761254
           </p>
         </div>
       </div>
