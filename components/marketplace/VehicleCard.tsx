@@ -43,7 +43,6 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
   const showPick       = vehicle.is_editors_pick && !vehicle.is_featured && isActive
   const showNew        = !showFeatured && !showPick && isActive && isNewVehicle(vehicle.published_at)
   const showBadge      = vehicle.badge && !showFeatured && !showPick && !showNew && isActive
-  const showVerified   = isActive && vehicle.dealer?.is_verified
 
   return (
     <article className={cn(
@@ -114,12 +113,6 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
               text-[#9A9A9A] bg-[#141414]/90 border border-[#222222] font-medium">
               {vehicle.badge}
-            </span>
-          )}
-          {showVerified && (
-            <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-[#9A9A9A] bg-[#0D0D0D]/90 border border-[#2A2A2A] font-medium">
-              Profesional verificado
             </span>
           )}
         </div>

@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url)', { count: 'exact' })
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
     .eq('status', 'active')
 
   const type = searchParams.get('type')

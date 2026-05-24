@@ -2,8 +2,9 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PlusCircle, Edit, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { VEHICLE_STATUS_LABELS, getVehicleStatusColor, formatPrice, formatMileage } from '@/lib/utils'
+import { formatPrice, formatMileage } from '@/lib/utils'
 import BoostButton from '@/components/dashboard/BoostButton'
+import VehicleStatusSelector from '@/components/dashboard/VehicleStatusSelector'
 
 export default async function InventarioPage() {
   const supabase = await createClient()
@@ -95,9 +96,7 @@ export default async function InventarioPage() {
                     {formatMileage(v.mileage_km)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`badge text-[10px] ${getVehicleStatusColor(v.status)}`}>
-                      {VEHICLE_STATUS_LABELS[v.status as keyof typeof VEHICLE_STATUS_LABELS]}
-                    </span>
+                    <VehicleStatusSelector vehicleId={v.id} initialStatus={v.status} />
                   </td>
                   <td className="px-4 py-3 text-bsm-text-muted">{v.views}</td>
                   <td className="px-4 py-3 text-bsm-text-muted">{v.leads_count}</td>

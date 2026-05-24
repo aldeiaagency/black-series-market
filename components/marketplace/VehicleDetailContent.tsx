@@ -473,10 +473,11 @@ export default function VehicleDetailContent({
                       >
                         {vehicle.dealer.name}
                       </Link>
-                      {vehicle.dealer.is_verified && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] tracking-widest uppercase
-                          text-[#C9C9C9] bg-[#1A1A1A] border border-[#2A2A2A]">
-                          <BadgeCheck className="w-2.5 h-2.5" />Profesional verificado
+                      <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" aria-label="Profesional verificado" />
+                      {vehicle.dealer.subscription_plan === 'elite' && (
+                        <span className="inline-flex items-center px-2 py-0.5 text-[9px] tracking-[0.15em] uppercase
+                          text-[#C6A64B] bg-[#0D0D0D] border border-[#C6A64B]/30">
+                          Elite
                         </span>
                       )}
                     </div>

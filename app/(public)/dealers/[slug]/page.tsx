@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone, Globe, Instagram, Car, Bike, MessageCircle, BadgeCheck, ChevronRight, AlertCircle } from 'lucide-react'
+import { MapPin, Phone, Globe, Instagram, Car, Bike, MessageCircle, CheckCircle, BadgeCheck, ChevronRight, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import type { Metadata } from 'next'
@@ -49,7 +49,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
 
   const { data: vehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)')
     .eq('dealer_id', dealer.id)
     .in('status', ['active', 'paused', 'sold'])
     .order('status', { ascending: true })
@@ -147,11 +147,14 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
 
                 <div className="flex flex-wrap items-center gap-3 mb-2">
                   <h1 className="font-display text-3xl md:text-4xl font-light text-bsm-text-primary">{dealer.name}</h1>
-                  {dealer.is_verified && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] tracking-[0.1em] uppercase
-                      text-[#C9C9C9] bg-[#0D0D0D] border border-[#2A2A2A]">
-                      <BadgeCheck className="w-3 h-3 text-gold" />
-                      Revisado por Black Label
+                  <div className="flex items-center gap-1.5 text-emerald-400">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="text-[10px] tracking-[0.1em] uppercase font-medium">Verificado</span>
+                  </div>
+                  {dealer.subscription_plan === 'elite' && (
+                    <div className="inline-flex items-center px-2.5 py-1 text-[9px] tracking-[0.15em] uppercase
+                      text-[#C6A64B] bg-[#0D0D0D] border border-[#C6A64B]/30">
+                      Elite
                     </div>
                   )}
                 </div>

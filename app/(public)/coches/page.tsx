@@ -24,7 +24,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
   const supabase = await createClient()
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)', { count: 'exact' })
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
     .eq('status', 'active')
     .eq('vehicle_type', 'car')
 
@@ -54,7 +54,15 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
 
   const page  = Math.max(1, parseInt(params.page || '1'))
   const limit = 24
-  const { data: vehicles, count } = await query.range((page - 1) * limit, page * limit - 1)
+  const { data: rawVehicles, count } = await query.range((page - 1) * limit, page * limit - 1)
+
+  const planRank = (plan: string | null | undefined) =>
+    plan === 'elite' ? 2 : plan === 'professional' ? 1 : 0
+  const vehicles = rawVehicles
+    ? [...rawVehicles].sort((a: any, b: any) =>
+        planRank(b.dealer?.subscription_plan) - planRank(a.dealer?.subscription_plan)
+      )
+    : rawVehicles
 
   if (!vehicles?.length) {
     return (
