@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Cómo funciona — Black Label Market',
-  description: 'Cómo funciona Black Label Market para compradores y dealers de vehículos premium.',
+  description: 'Cómo funciona Black Label Market para compradores y profesionales del motor premium.',
 }
 
 const BUYER_STEPS = [
@@ -30,8 +30,8 @@ const BUYER_STEPS = [
   },
   {
     icon: MessageSquare,
-    title: 'Contacta con dealers seleccionados',
-    desc: 'El formulario de contacto cualificado permite que tu solicitud llegue al dealer con más contexto: plazo, financiación, parte de pago y preferencia de contacto.',
+    title: 'Contacta con profesionales seleccionados',
+    desc: 'El formulario de contacto cualificado permite que tu solicitud llegue al vendedor con más contexto: plazo, financiación, parte de pago y preferencia de contacto.',
   },
 ]
 
@@ -39,12 +39,12 @@ const DEALER_STEPS = [
   {
     icon: ShieldCheck,
     title: 'Solicita acceso',
-    desc: 'Black Label selecciona dealers que trabajan con criterio: presentación cuidada, información real y disponibilidad verificada. El acceso es por solicitud.',
+    desc: 'Black Label selecciona profesionales que trabajan con criterio: presentación cuidada, información real y disponibilidad verificada. El acceso es por solicitud.',
   },
   {
     icon: Package,
     title: 'Publica tu inventario',
-    desc: 'Sube fichas de calidad con imágenes reales, ficha técnica completa, equipamiento y condiciones de venta. El dashboard dealer te permite gestionar todo el proceso.',
+    desc: 'Sube fichas de calidad con imágenes reales, ficha técnica completa, equipamiento y condiciones de venta. El panel de gestión te permite controlar todo el proceso.',
   },
   {
     icon: MessageSquare,
@@ -113,7 +113,7 @@ export default function ComoFuncionaPage() {
       {/* Para dealers */}
       <section className="mb-20">
         <div className="mb-8">
-          <h2 className="font-display text-3xl font-light mb-2">Para dealers</h2>
+          <h2 className="font-display text-3xl font-light mb-2">Para profesionales</h2>
           <p className="text-bsm-text-muted text-sm">Un canal pensado para oportunidades reales, no para generar curiosidad vacía.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -128,7 +128,7 @@ export default function ComoFuncionaPage() {
           ))}
         </div>
         <div className="mt-8">
-          <Link href="/registro" className="btn-gold px-6">Solicitar acceso dealer</Link>
+          <Link href="/registro" className="btn-gold px-6">Solicitar acceso profesional</Link>
         </div>
       </section>
 
@@ -161,12 +161,12 @@ export default function ComoFuncionaPage() {
           </Link>
         </div>
         <div className="border border-[#C6A64B]/20 bg-[#C6A64B]/3 p-8">
-          <h3 className="font-display text-2xl font-light mb-3 text-bsm-text-primary">Soy dealer</h3>
+          <h3 className="font-display text-2xl font-light mb-3 text-bsm-text-primary">Soy profesional</h3>
           <p className="text-sm text-bsm-text-muted mb-6 leading-relaxed">
             Solicita acceso para publicar tu inventario y llegar a compradores con criterio real.
           </p>
           <Link href="/registro" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
-            Solicitar acceso dealer <ArrowRight className="w-4 h-4" />
+            Solicitar acceso profesional <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>

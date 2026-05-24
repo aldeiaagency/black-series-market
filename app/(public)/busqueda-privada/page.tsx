@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Búsqueda privada de vehículos — Black Label Market',
-  description: 'Si no encuentras la unidad que buscas, Black Label puede registrar tu demanda y conectarla con dealers seleccionados cuando aparezca una oportunidad compatible.',
+  description: 'Si no encuentras la unidad que buscas, Black Label puede registrar tu demanda y conectarla con profesionales seleccionados cuando aparezca una oportunidad compatible.',
 }
 
 const EXAMPLES = [
@@ -30,7 +30,7 @@ export default function BusquedaPrivadaPage() {
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
           Si no encuentras la unidad que buscas, Black Label puede registrar tu demanda
-          y conectarla con dealers seleccionados cuando aparezca una oportunidad compatible.
+          y conectarla con profesionales seleccionados cuando aparezca una oportunidad compatible.
         </p>
         <div className="flex items-start gap-2 mt-5 p-4 border border-[#1A1A1A] bg-[#0A0A0A]">
           <AlertCircle className="w-4 h-4 text-[#474747] flex-shrink-0 mt-0.5" />
@@ -122,7 +122,7 @@ export default function BusquedaPrivadaPage() {
                 href="/dealers"
                 className="flex items-center justify-between text-sm text-[#686868] hover:text-[#C9C9C9] transition-colors"
               >
-                Ver dealers seleccionados
+                Ver showrooms seleccionados
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>

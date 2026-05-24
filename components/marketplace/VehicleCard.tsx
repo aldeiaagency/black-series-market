@@ -119,7 +119,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           {showVerified && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
               text-[#9A9A9A] bg-[#0D0D0D]/90 border border-[#2A2A2A] font-medium">
-              Dealer verificado
+              Profesional verificado
             </span>
           )}
         </div>
@@ -199,7 +199,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           </div>
         ) : (
           <div className="mt-3 pt-2.5 border-t border-[#1A1A1A]">
-            <span className="text-[11px] text-[#3A3A3A] italic">Dealer pendiente de confirmar</span>
+            <span className="text-[11px] text-[#3A3A3A] italic">Vendedor pendiente de confirmar</span>
           </div>
         )}
       </div>

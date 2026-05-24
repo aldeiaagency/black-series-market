@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${data.brand_name} ${data.model_name} ${data.year}${data.version ? ' ' + data.version : ''}`
   return {
     title,
-    description: `${title} en venta en Black Label Market. Moto premium publicada por dealer seleccionado.`,
+    description: `${title} en venta en Black Label Market. Moto premium publicada por profesional seleccionado.`,
     openGraph: {
       title,
       images: data.images?.[0]?.url ? [data.images[0].url] : [],

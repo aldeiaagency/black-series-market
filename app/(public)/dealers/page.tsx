@@ -72,7 +72,7 @@ export default async function DealersPage({ searchParams }: PageProps) {
       {dealers?.some((d: any) => d.is_featured) && (
         <div className="mb-12">
           <h2 className="font-display text-xl font-light mb-6 pb-3 border-b border-bsm-border">
-            Dealers seleccionados
+            Showrooms seleccionados
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {dealers

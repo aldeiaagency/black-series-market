@@ -26,7 +26,7 @@ const NAV_ITEMS = [
       { label: 'Ver todas', href: '/marcas' },
     ],
   },
-  { label: 'Dealers', href: '/dealers' },
+  { label: 'Showrooms', href: '/dealers' },
   { label: 'Búsqueda privada', href: '/busqueda-privada' },
   { label: 'Cómo funciona', href: '/como-funciona' },
 ]
@@ -130,7 +130,7 @@ export default function Header() {
                 hover:bg-[#C6A64B]/8 hover:border-[#C6A64B]
                 transition-all duration-200"
             >
-              Solicitar acceso dealer
+              Publicar en Black Label
             </Link>
           </div>
 
@@ -177,7 +177,7 @@ export default function Header() {
                 Acceder
               </Link>
               <Link href="/registro" className="btn-gold w-full justify-center text-sm">
-                Solicitar acceso dealer
+                Publicar en Black Label
               </Link>
             </div>
           </div>

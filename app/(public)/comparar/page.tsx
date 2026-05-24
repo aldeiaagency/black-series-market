@@ -194,7 +194,7 @@ export default async function CompararPage({ searchParams }: PageProps) {
           {/* Section: Dealer */}
           <div className={`grid bg-[#0E0E0E] ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
             <div className="col-span-full px-4 py-2.5 text-[10px] text-gold uppercase tracking-widest border-b border-bsm-border border-t border-t-bsm-border">
-              Dealer
+              Concesionario
             </div>
           </div>
 

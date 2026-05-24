@@ -64,7 +64,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
         </div>
 
         {dealer.is_verified && (
-          <BadgeCheck className="w-3 h-3 text-[#C6A64B]/40 flex-shrink-0" aria-label="Dealer verificado" />
+          <BadgeCheck className="w-3 h-3 text-[#C6A64B]/40 flex-shrink-0" aria-label="Profesional verificado" />
         )}
       </Link>
     )
@@ -74,7 +74,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
   return (
     <div className={cn('', className)}>
       <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">
-        Dealer seleccionado
+        Profesional seleccionado
       </p>
 
       <div className="flex items-center gap-2.5 mb-2">
@@ -104,7 +104,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
           {dealer.is_verified && (
             <span className="flex items-center gap-1 text-[9px] text-[#686868] uppercase tracking-widest">
               <BadgeCheck className="w-2.5 h-2.5 text-[#C6A64B]/50" />
-              Dealer verificado
+              Revisado por Black Label
             </span>
           )}
         </div>

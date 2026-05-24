@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { data } = await supabase.from('dealers').select('name, description, location_city').eq('slug', slug).single()
   if (!data) return {}
   return {
-    title: `${data.name} — Dealer seleccionado`,
+    title: `${data.name} — Showroom seleccionado`,
     description: data.description || `Showroom de ${data.name} en Black Label Market. Vehículos premium seleccionados.`,
   }
 }
@@ -76,13 +76,13 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
   const specialties = dealer.certifications?.filter((c: string) => c in SPECIALTIES_LABELS) || []
 
   const FALLBACK_DESCRIPTION =
-    'Dealer seleccionado en Black Label por su enfoque en unidades con valor, presentación cuidada y stock de interés para compradores exigentes.'
+    'Profesional seleccionado por Black Label por su enfoque en unidades con valor, presentación cuidada y stock de interés para compradores exigentes.'
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'AutoDealer',
     name: dealer.name,
-    description: dealer.description || `Dealer seleccionado por Black Label Market en ${dealer.location_city || 'España'}.`,
+    description: dealer.description || `Showroom seleccionado por Black Label Market en ${dealer.location_city || 'España'}.`,
     image: dealer.logo_url || undefined,
     url: dealer.website || undefined,
     telephone: dealer.phone || undefined,
@@ -142,7 +142,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                 {/* Label */}
                 <div className="flex items-center gap-2 mb-2">
                   <div className="h-px w-5 bg-gold" />
-                  <span className="text-[10px] text-gold tracking-[0.2em] uppercase">Dealer seleccionado por Black Label</span>
+                  <span className="text-[10px] text-gold tracking-[0.2em] uppercase">Profesional seleccionado por Black Label</span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 mb-2">
@@ -151,7 +151,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] tracking-[0.1em] uppercase
                       text-[#C9C9C9] bg-[#0D0D0D] border border-[#2A2A2A]">
                       <BadgeCheck className="w-3 h-3 text-gold" />
-                      Dealer revisado
+                      Revisado por Black Label
                     </div>
                   )}
                 </div>
@@ -310,7 +310,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
               </div>
             ) : (
               <p className="text-bsm-text-muted text-center py-16 border border-bsm-border bg-surface">
-                Este dealer no tiene vehículos activos en este momento.
+                Este showroom no tiene vehículos activos en este momento.
               </p>
             )}
 
@@ -335,7 +335,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
               <div className="flex items-center gap-3 mb-4">
                 <BadgeCheck className="w-5 h-5 text-gold" />
                 <h3 className="font-display text-xl font-light text-bsm-text-primary">
-                  Qué significa dealer seleccionado
+                  Qué significa estar seleccionado
                 </h3>
               </div>
               <p className="text-sm text-bsm-text-secondary leading-relaxed mb-4">

@@ -38,7 +38,7 @@ function SummaryCell({ label, value }: { label: string; value: string | null | u
       <div className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-1.5">{label}</div>
       {value
         ? <div className="text-sm font-medium text-bsm-text-primary">{value}</div>
-        : <div className="text-xs text-[#575757] italic">Consultar con dealer</div>
+        : <div className="text-xs text-[#575757] italic">Consultar con el vendedor</div>
       }
     </div>
   )
@@ -70,7 +70,7 @@ function HistoryRow({
       </div>
       {value
         ? <span className="text-sm text-bsm-text-primary font-medium">{value}</span>
-        : <span className="text-xs text-[#575757] italic">Consultar con dealer</span>
+        : <span className="text-xs text-[#575757] italic">Consultar con el vendedor</span>
       }
     </div>
   )
@@ -98,7 +98,7 @@ export default function VehicleDetailContent({
   const vehicleTypeParam: 'car' | 'motorcycle' = isCar ? 'car' : 'motorcycle'
   const vehicleWord = isCar ? 'vehículo' : 'moto'
 
-  // ── Summary specs (always show with "Consultar con dealer" fallback) ─────
+  // ── Summary specs (always show with "Consultar con el vendedor" fallback) ─────
   const summarySpecs = isCar
     ? [
         { label: 'Año',          value: String(vehicle.year) },
@@ -178,31 +178,31 @@ export default function VehicleDetailContent({
   const faqItems = [
     {
       q: '¿La unidad sigue disponible?',
-      a: 'La disponibilidad debe confirmarse con el dealer antes de avanzar. Utiliza el formulario de solicitud o contacta directamente por teléfono o WhatsApp.',
+      a: 'La disponibilidad debe confirmarse con el vendedor antes de avanzar. Utiliza el formulario de solicitud o contacta directamente por teléfono o WhatsApp.',
     },
     {
       q: '¿Se puede financiar?',
       a: vehicle.financing_available
-        ? 'Esta unidad indica financiación disponible. El dealer te informará de las condiciones específicas al recibir tu solicitud.'
-        : 'La financiación depende del dealer y la operación. Indícalo en tu solicitud para que el dealer pueda orientarte.',
+        ? 'Esta unidad indica financiación disponible. El vendedor te informará de las condiciones específicas al recibir tu solicitud.'
+        : 'La financiación depende del vendedor y la operación. Indícalo en tu solicitud para que te puedan orientar.',
     },
     {
       q: `¿Aceptan ${isCar ? 'coche' : 'moto'} como parte de pago?`,
       a: vehicle.accepts_trade_in
-        ? 'Esta unidad acepta entrega de vehículo. Indica tu vehículo actual en la solicitud para que el dealer lo valore.'
-        : 'Depende del dealer y del vehículo a entregar. Menciónalo en tu solicitud si te interesa.',
+        ? 'Esta unidad acepta entrega de vehículo. Indica tu vehículo actual en la solicitud para que el vendedor lo valore.'
+        : 'Depende del vendedor y del vehículo a entregar. Menciónalo en tu solicitud si te interesa.',
     },
     {
       q: `¿Se puede probar el ${vehicleWord}?`,
-      a: 'La prueba queda sujeta a la política del dealer, disponibilidad y validación previa del comprador.',
+      a: 'La prueba queda sujeta a la política del vendedor, disponibilidad y validación previa del comprador.',
     },
     {
       q: '¿Se puede enviar a otra provincia?',
-      a: 'Algunos dealers ofrecen transporte nacional. Inclúyelo en tu solicitud de información para confirmarlo.',
+      a: 'Algunos vendedores ofrecen transporte nacional. Inclúyelo en tu solicitud de información para confirmarlo.',
     },
     {
       q: '¿Black Label vende directamente el vehículo?',
-      a: 'No. Black Label Market actúa como plataforma curada de publicación y contacto. La operación se realiza directamente entre comprador y dealer.',
+      a: 'No. Black Label Market actúa como plataforma curada de publicación y contacto. La operación se realiza directamente entre comprador y vendedor.',
     },
   ]
 
@@ -299,7 +299,7 @@ export default function VehicleDetailContent({
                 text-[#C6A64B] border border-[#C6A64B]/30 flex-shrink-0">
                 Reservado
               </span>
-              <p className="text-xs text-[#686868]">Consulta disponibilidad directamente con el dealer.</p>
+              <p className="text-xs text-[#686868]">Consulta disponibilidad directamente con el vendedor.</p>
             </div>
           )}
 
@@ -328,7 +328,7 @@ export default function VehicleDetailContent({
                 <p className="text-sm text-bsm-text-secondary leading-relaxed">
                   Esta unidad ha sido seleccionada por cumplir los criterios de publicación de Black Label Market.
                   Si necesitas más información sobre su configuración, estado o historial,
-                  contacta directamente con el dealer a través del formulario de solicitud.
+                  contacta directamente con el vendedor a través del formulario de solicitud.
                 </p>
               </div>
             )}
@@ -361,7 +361,7 @@ export default function VehicleDetailContent({
             ) : (
               <div className="border border-bsm-border px-5 py-4">
                 <p className="text-sm text-[#575757] italic">
-                  Equipamiento pendiente de confirmar. Solicita información al dealer.
+                  Equipamiento pendiente de confirmar. Solicita información al vendedor.
                 </p>
               </div>
             )}
@@ -383,7 +383,7 @@ export default function VehicleDetailContent({
             <div className="flex items-start gap-2 p-4 bg-[#0D0D0D] border border-[#1A1A1A]">
               <AlertCircle className="w-4 h-4 text-[#575757] flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-[#575757] leading-relaxed">
-                La información documental debe confirmarse con el dealer antes de formalizar cualquier operación.
+                La información documental debe confirmarse con el vendedor antes de formalizar cualquier operación.
               </p>
             </div>
           </div>
@@ -403,7 +403,7 @@ export default function VehicleDetailContent({
                 <div key={label} className="flex items-center justify-between px-5 py-3.5 border-b border-bsm-border last:border-0">
                   <span className="text-sm text-bsm-text-muted">{label}</span>
                   <span className={`text-sm font-medium ${value ? 'text-emerald-400' : 'text-[#575757] italic text-xs'}`}>
-                    {value || 'Consultar con dealer'}
+                    {value || 'Consultar con el vendedor'}
                   </span>
                 </div>
               ))}
@@ -411,7 +411,7 @@ export default function VehicleDetailContent({
             <div className="flex items-start gap-2 p-4 bg-[#0D0D0D] border border-[#1A1A1A]">
               <AlertCircle className="w-4 h-4 text-[#575757] flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-[#575757] leading-relaxed">
-                Las condiciones finales dependen del dealer responsable de la unidad.
+                Las condiciones finales dependen del vendedor responsable de la unidad.
                 Solicita información para confirmar disponibilidad, documentación y condiciones actualizadas.
               </p>
             </div>
@@ -443,10 +443,10 @@ export default function VehicleDetailContent({
             </div>
           )}
 
-          {/* Sobre el dealer (expanded body section) */}
+          {/* Sobre el vendedor (expanded body section) */}
           {vehicle.dealer && (
             <div>
-              <SectionTitle>Sobre el dealer</SectionTitle>
+              <SectionTitle>Sobre el vendedor</SectionTitle>
               <div className="border border-bsm-border p-6">
                 <div className="flex items-start gap-4 mb-4">
                   {vehicle.dealer.logo_url ? (
@@ -476,7 +476,7 @@ export default function VehicleDetailContent({
                       {vehicle.dealer.is_verified && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] tracking-widest uppercase
                           text-[#C9C9C9] bg-[#1A1A1A] border border-[#2A2A2A]">
-                          <BadgeCheck className="w-2.5 h-2.5" />Dealer verificado
+                          <BadgeCheck className="w-2.5 h-2.5" />Profesional verificado
                         </span>
                       )}
                     </div>
@@ -495,7 +495,7 @@ export default function VehicleDetailContent({
                 )}
                 <div className="border-t border-bsm-border pt-4 space-y-2">
                   <p className="text-[11px] text-[#575757] leading-relaxed">
-                    Unidad publicada por un dealer seleccionado. Black Label prioriza operadores con stock cuidado,
+                    Unidad publicada por un profesional seleccionado. Black Label prioriza operadores con stock cuidado,
                     presentación clara y disponibilidad real.
                   </p>
                   <Link
@@ -526,7 +526,7 @@ export default function VehicleDetailContent({
           <div className="flex items-start gap-3 p-5 border border-[#1A1A1A] bg-[#0A0A0A]">
             <AlertCircle className="w-4 h-4 text-[#474747] flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#474747] leading-relaxed">
-              Información proporcionada por el dealer. Black Label recomienda confirmar disponibilidad,
+              Información proporcionada por el vendedor. Black Label recomienda confirmar disponibilidad,
               historial, condiciones y documentación antes de formalizar cualquier operación.
               Black Label Market actúa como plataforma de publicación y contacto; la operación comercial
               se realiza entre comprador y vendedor.
@@ -612,7 +612,7 @@ export default function VehicleDetailContent({
                     {vehicle.dealer?.phone && (
                       <a href={`tel:${vehicle.dealer.phone}`} className="btn-ghost w-full justify-center text-sm text-bsm-text-muted">
                         <Phone className="w-4 h-4" />
-                        Llamar al dealer
+                        Llamar
                       </a>
                     )}
                     <CreateAlertButton
@@ -693,7 +693,7 @@ export default function VehicleDetailContent({
                     {vehicle.dealer?.phone && (
                       <a href={`tel:${vehicle.dealer.phone}`} className="btn-outline w-full justify-center">
                         <Phone className="w-4 h-4" />
-                        Llamar al dealer
+                        Llamar
                       </a>
                     )}
                     <CreateAlertButton
@@ -704,7 +704,7 @@ export default function VehicleDetailContent({
                     />
                   </div>
                   <p className="text-[10px] text-[#575757] text-center mt-3 leading-relaxed">
-                    Tu solicitud se enviará al dealer con contexto para facilitar una respuesta más precisa.
+                    Tu solicitud se enviará al vendedor con contexto para facilitar una respuesta más precisa.
                   </p>
                 </div>
 
@@ -719,7 +719,7 @@ export default function VehicleDetailContent({
                 <div className="bg-surface border border-bsm-border p-6">
                   <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">Solicitar información</h3>
                   <p className="text-xs text-bsm-text-muted mb-5">
-                    Completa los datos básicos para que el dealer pueda responder con más contexto.
+                    Completa los datos básicos para que el vendedor pueda responder con más contexto.
                   </p>
                   <QualifiedLeadForm
                     vehicleId={vehicle.id}
@@ -764,7 +764,7 @@ export default function VehicleDetailContent({
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-px w-6 bg-gold" />
-                <span className="text-[10px] text-gold tracking-widest uppercase">Mismo dealer</span>
+                <span className="text-[10px] text-gold tracking-widest uppercase">Mismo showroom</span>
               </div>
               <h2 className="font-display text-2xl font-light">Más de {vehicle.dealer?.name}</h2>
             </div>

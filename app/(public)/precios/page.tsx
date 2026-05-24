@@ -23,7 +23,7 @@ const PLANS = [
     price: 349,
     slots: 30,
     popular: true,
-    description: 'El más elegido por dealers establecidos con inventario activo',
+    description: 'El más elegido por concesionarios con inventario activo y criterio editorial',
     features: [
       'Hasta 30 vehículos activos',
       'Perfil destacado en resultados de búsqueda',

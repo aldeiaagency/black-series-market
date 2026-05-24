@@ -11,10 +11,10 @@ const LINKS = {
     { label: 'Mis favoritos', href: '/mis-favoritos' },
     { label: 'Cómo funciona', href: '/como-funciona' },
   ],
-  Dealers: [
-    { label: 'Solicitar acceso dealer', href: '/registro' },
+  Profesionales: [
+    { label: 'Solicitar acceso profesional', href: '/registro' },
     { label: 'Criterios de publicación', href: '/precios' },
-    { label: 'Planes dealer', href: '/precios' },
+    { label: 'Planes de publicación', href: '/precios' },
     { label: 'Soporte', href: '/contacto' },
   ],
   Legal: [
@@ -100,7 +100,7 @@ export default function Footer() {
         <div className="border-t border-[#141414] pt-8 mb-6">
           <p className="text-[10px] text-[#3A3A3A] leading-relaxed max-w-3xl">
             Black Label Market actúa como plataforma de publicación y contacto entre compradores
-            y dealers seleccionados. La operación comercial se realiza exclusivamente entre comprador
+            y profesionales seleccionados. La operación comercial se realiza exclusivamente entre comprador
             y vendedor. Black Label no es parte en las transacciones de compraventa.
           </p>
         </div>

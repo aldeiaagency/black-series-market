@@ -11,7 +11,7 @@ Black Series Agency, en adelante "Black Series Market", es la entidad responsabl
 
 **Objeto del sitio**
 
-Black Series Market es una plataforma de intermediación digital que facilita el contacto entre concesionarios y compraventas de vehículos premium con posibles compradores. Black Series Market no es parte en las transacciones de compraventa entre usuarios y dealers, actuando exclusivamente como plataforma de intermediación.
+Black Series Market es una plataforma de intermediación digital que facilita el contacto entre concesionarios y compraventas de vehículos premium con posibles compradores. Black Series Market no es parte en las transacciones de compraventa entre usuarios y vendedores, actuando exclusivamente como plataforma de intermediación.
 
 **Propiedad intelectual**
 
@@ -42,7 +42,7 @@ Black Series Market trata los datos personales de sus usuarios de conformidad co
 **Finalidad del tratamiento**
 
 - Gestión del contrato de suscripción con concesionarios.
-- Facilitar el contacto entre compradores y dealers.
+- Facilitar el contacto entre compradores y vendedores.
 - Mejora de la plataforma y análisis de uso.
 - Comunicaciones comerciales (solo con consentimiento explícito).
 
