@@ -1,3 +1,7 @@
+'use client'
+
+import { useId } from 'react'
+
 interface LogoProps {
   className?: string
   width?: number
@@ -5,6 +9,7 @@ interface LogoProps {
 }
 
 export default function Logo({ className, width = 148, variant = 'header' }: LogoProps) {
+  const uid = useId().replace(/:/g, '')
   const isFooter = variant === 'footer'
   const isFull   = variant === 'full'
   const isHeader = variant === 'header'
@@ -33,6 +38,10 @@ export default function Logo({ className, width = 148, variant = 'header' }: Log
   const ruleX1R = isFull ? 208 : isHeader ? 212 : 218
   const ruleX2R = isFull ? 266 : 258
 
+  const gChrome = `${uid}-chrome`
+  const gMuted  = `${uid}-muted`
+  const gMono   = `${uid}-mono`
+
   return (
     <svg
       width={width}
@@ -44,17 +53,17 @@ export default function Logo({ className, width = 148, variant = 'header' }: Log
       className={className}
     >
       <defs>
-        <linearGradient id="blm-chrome" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gChrome} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"   stopColor="#E8E8E8" />
           <stop offset="28%"  stopColor="#D0D0D0" />
           <stop offset="60%"  stopColor="#B8B8B8" />
           <stop offset="100%" stopColor="#989898" />
         </linearGradient>
-        <linearGradient id="blm-muted" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gMuted} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%"   stopColor="#B4B4B4" />
           <stop offset="100%" stopColor="#787878" />
         </linearGradient>
-        <linearGradient id="blm-mono" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={gMono} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%"   stopColor="#787878" />
           <stop offset="22%"  stopColor="#C8C8C8" />
           <stop offset="45%"  stopColor="#F0F0F0" />
@@ -73,7 +82,7 @@ export default function Logo({ className, width = 148, variant = 'header' }: Log
           fontWeight="300"
           letterSpacing={isFull ? -5 : -4}
           textAnchor="middle"
-          fill="url(#blm-mono)"
+          fill={`url(#${gMono})`}
         >
           BL
         </text>
@@ -83,7 +92,7 @@ export default function Logo({ className, width = 148, variant = 'header' }: Log
       {isHeader && (
         <line
           x1="105" y1="42" x2="175" y2="42"
-          stroke="url(#blm-muted)" strokeWidth="0.4"
+          stroke={`url(#${gMuted})`} strokeWidth="0.4"
         />
       )}
 
@@ -96,14 +105,14 @@ export default function Logo({ className, width = 148, variant = 'header' }: Log
         fontWeight="300"
         letterSpacing={mainLS}
         textAnchor="middle"
-        fill="url(#blm-chrome)"
+        fill={`url(#${gChrome})`}
       >
         BLACK LABEL
       </text>
 
       {/* Left rule */}
       <line x1={ruleX1L} y1={ruleY} x2={ruleX2L} y2={ruleY}
-        stroke="url(#blm-muted)" strokeWidth="0.55" />
+        stroke={`url(#${gMuted})`} strokeWidth="0.55" />
 
       {/* MARKET */}
       <text
@@ -114,14 +123,14 @@ export default function Logo({ className, width = 148, variant = 'header' }: Log
         fontWeight="400"
         letterSpacing={mktLS}
         textAnchor="middle"
-        fill="url(#blm-muted)"
+        fill={`url(#${gMuted})`}
       >
         MARKET
       </text>
 
       {/* Right rule */}
       <line x1={ruleX1R} y1={ruleY} x2={ruleX2R} y2={ruleY}
-        stroke="url(#blm-muted)" strokeWidth="0.55" />
+        stroke={`url(#${gMuted})`} strokeWidth="0.55" />
     </svg>
   )
 }
