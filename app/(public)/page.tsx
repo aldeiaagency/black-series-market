@@ -107,7 +107,7 @@ export default async function HomePage() {
             {/* Image column — desktop only */}
             <div className="hidden lg:block lg:col-span-5 relative h-[500px] xl:h-[560px]">
               <Image
-                src="/images/hero/black-label-hero-gt3rs-ducati.webp"
+                src="/images/hero/black-label-hero-gt3rs-ducati.png"
                 alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
                 fill
                 priority
@@ -128,7 +128,7 @@ export default async function HomePage() {
           {/* Mobile image — below CTAs, before pillars */}
           <div className="lg:hidden mt-10 relative h-52 sm:h-64 -mx-6 overflow-hidden">
             <Image
-              src="/images/hero/black-label-hero-gt3rs-ducati.webp"
+              src="/images/hero/black-label-hero-gt3rs-ducati.png"
               alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
               fill
               className="object-cover object-center"
