@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import PrivateSearchForm from '@/components/marketplace/PrivateSearchForm'
 import { AlertCircle, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
@@ -33,8 +33,8 @@ export default function BusquedaPrivadaPage() {
           y conectarla con profesionales seleccionados cuando aparezca una oportunidad compatible.
         </p>
         <div className="flex items-start gap-2 mt-5 p-4 border border-[#1A1A1A] bg-[#0A0A0A]">
-          <AlertCircle className="w-4 h-4 text-[#474747] flex-shrink-0 mt-0.5" />
-          <p className="text-[11px] text-[#575757] leading-relaxed">
+          <AlertCircle className="w-4 h-4 text-[#737373] flex-shrink-0 mt-0.5" />
+          <p className="text-[11px] text-[#808080] leading-relaxed">
             Este servicio no garantiza disponibilidad. Registra tu interés para detectar oportunidades
             compatibles con tu perfil de búsqueda.
           </p>
@@ -63,7 +63,7 @@ export default function BusquedaPrivadaPage() {
             </p>
             <ul className="space-y-3">
               {EXAMPLES.map((ex) => (
-                <li key={ex} className="flex items-start gap-2.5 text-xs text-[#686868] leading-relaxed">
+                <li key={ex} className="flex items-start gap-2.5 text-xs text-[#8A8A8A] leading-relaxed">
                   <span className="text-[#C6A64B] mt-0.5">→</span>
                   {ex}
                 </li>
@@ -83,7 +83,7 @@ export default function BusquedaPrivadaPage() {
               ].map((step, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="font-display text-sm text-gold flex-shrink-0 w-5">{i + 1}.</span>
-                  <span className="text-xs text-[#686868] leading-relaxed">{step}</span>
+                  <span className="text-xs text-[#8A8A8A] leading-relaxed">{step}</span>
                 </li>
               ))}
             </ol>
@@ -106,21 +106,21 @@ export default function BusquedaPrivadaPage() {
             <div className="space-y-3">
               <Link
                 href="/coches"
-                className="flex items-center justify-between text-sm text-[#686868] hover:text-[#C9C9C9] transition-colors"
+                className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
               >
                 Explorar coches disponibles
                 <ChevronRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/motos"
-                className="flex items-center justify-between text-sm text-[#686868] hover:text-[#C9C9C9] transition-colors"
+                className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
               >
                 Explorar motos disponibles
                 <ChevronRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/dealers"
-                className="flex items-center justify-between text-sm text-[#686868] hover:text-[#C9C9C9] transition-colors"
+                className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
               >
                 Ver showrooms seleccionados
                 <ChevronRight className="w-4 h-4" />

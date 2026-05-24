@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -21,7 +21,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
           <Bell className="w-4 h-4 text-[#C6A64B] flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-[#C9C9C9]">¿No encuentras lo que buscas?</p>
-            <p className="text-[11px] text-[#575757]">Registra tu demanda y avísanos cuando entre algo compatible</p>
+            <p className="text-[11px] text-[#808080]">Registra tu demanda y avísanos cuando entre algo compatible</p>
           </div>
           <button
             onClick={() => setModalOpen(true)}
@@ -50,14 +50,14 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
             <h3 className="font-display text-xl font-light text-[#F4F1EA] mb-2">
               Crea una alerta de búsqueda
             </h3>
-            <p className="text-sm text-[#686868] leading-relaxed">
+            <p className="text-sm text-[#8A8A8A] leading-relaxed">
               Si no encuentras el {typeLabel} que buscas, registra tu demanda.
               Cuando entre una unidad compatible con tus criterios, podemos contactarte.
             </p>
           </div>
         </div>
 
-        <div className="text-[11px] text-[#474747] mb-5 italic">
+        <div className="text-[11px] text-[#737373] mb-5 italic">
           Ejemplo: Porsche 911 manual, hasta 90.000 €, nacional, menos de 80.000 km.
         </div>
 
@@ -75,7 +75,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
           <Link
             href="/busqueda-privada"
             className="inline-flex items-center gap-2 px-6 py-3 text-[12px] tracking-[0.1em] font-medium uppercase
-              border border-[#2A2A2A] text-[#686868]
+              border border-[#2A2A2A] text-[#8A8A8A]
               hover:border-[#3A3A3A] hover:text-[#C9C9C9]
               transition-all duration-200"
           >
@@ -83,7 +83,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
           </Link>
         </div>
 
-        <p className="text-[10px] text-[#3A3A3A] mt-4">
+        <p className="text-[10px] text-[#8A8A8A] mt-4">
           Este servicio no garantiza disponibilidad. Registra tu interés para detectar oportunidades compatibles.
         </p>
       </div>

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import Logo from '@/components/brand/Logo'
 
 const LINKS = {
@@ -43,24 +43,24 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <div className="mb-6">
               <Logo width={152} variant="footer" />
-              <p className="mt-2 text-[11px] text-[#575757] tracking-[0.15em] uppercase">
+              <p className="mt-2 text-[12px] text-[#808080] tracking-[0.12em] uppercase">
                 by Black Series
               </p>
             </div>
-            <p className="text-[13px] text-[#686868] leading-relaxed max-w-xs">
+            <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xs">
               Marketplace curado de coches y motos premium, deportivos, clásicos
               y unidades especiales.
             </p>
             <div className="mt-6 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/70" />
-              <span className="text-[11px] text-[#575757]">Plataforma activa</span>
+              <span className="text-[11px] text-[#808080]">Plataforma activa</span>
             </div>
           </div>
 
           {/* Links */}
           {Object.entries(LINKS).map(([category, items]) => (
             <div key={category}>
-              <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#575757] mb-5">
+              <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
                 {category}
               </h4>
               <ul className="space-y-3">
@@ -68,7 +68,7 @@ export default function Footer() {
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className="text-[13px] text-[#686868] hover:text-[#C9C9C9] transition-colors duration-150"
+                      className="text-[13px] text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors duration-150"
                     >
                       {item.label}
                     </Link>
@@ -81,7 +81,7 @@ export default function Footer() {
 
         {/* Brands */}
         <div className="border-t border-[#141414] pt-10 mb-10">
-          <p className="text-[10px] text-[#474747] uppercase tracking-[0.3em] mb-5">
+          <p className="text-[10px] text-[#737373] uppercase tracking-[0.3em] mb-5">
             Marcas disponibles
           </p>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
@@ -89,7 +89,7 @@ export default function Footer() {
               <Link
                 key={brand}
                 href={`/marcas/${brand.toLowerCase().replace(/\s/g, '-')}`}
-                className="text-[13px] text-[#575757] hover:text-[#C9C9C9] transition-colors duration-150"
+                className="text-[13px] text-[#808080] hover:text-[#C9C9C9] transition-colors duration-150"
               >
                 {brand}
               </Link>
@@ -99,7 +99,7 @@ export default function Footer() {
 
         {/* Disclaimer */}
         <div className="border-t border-[#141414] pt-8 mb-6">
-          <p className="text-[10px] text-[#3A3A3A] leading-relaxed max-w-3xl">
+          <p className="text-[10px] text-[#8A8A8A] leading-relaxed max-w-3xl">
             Black Label Market actúa como plataforma de publicación y contacto entre compradores
             y profesionales seleccionados. La operación comercial se realiza exclusivamente entre comprador
             y vendedor. Black Label no es parte en las transacciones de compraventa.
@@ -108,11 +108,11 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[11px] text-[#474747]">
+          <p className="text-[11px] text-[#737373]">
             © {new Date().getFullYear()} Black Label Market. Todos los derechos reservados.
           </p>
-          <p className="text-[11px] text-[#474747]">
-            Operado por <span className="text-[#686868]">KAZAWEB, S.L.U.</span> · NIF B42761254
+          <p className="text-[11px] text-[#737373]">
+            Operado por <span className="text-[#8A8A8A]">KAZAWEB, S.L.U.</span> · NIF B42761254
           </p>
         </div>
       </div>

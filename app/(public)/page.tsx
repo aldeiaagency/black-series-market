@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { ArrowRight, Shield, Star, Zap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
@@ -102,7 +102,7 @@ export default async function HomePage() {
             {PILLARS.map((p) => (
               <div key={p.label} className="bg-[#0A0A0A] px-6 py-6">
                 <div className="h-px w-8 bg-[#C6A64B]/40 mb-4" />
-                <div className="text-[11px] text-[#686868] uppercase tracking-[0.18em] leading-relaxed">
+                <div className="text-[11px] text-[#8A8A8A] uppercase tracking-[0.18em] leading-relaxed">
                   {p.label}
                 </div>
               </div>
@@ -124,7 +124,7 @@ export default async function HomePage() {
               </div>
               <h2 className="section-title">Vehículos destacados</h2>
             </div>
-            <Link href="/coches?destacados=true" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
+            <Link href="/coches?destacados=true" className="btn-ghost hidden md:flex text-[#8A8A8A] hover:text-[#C9C9C9]">
               Ver selección
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -140,7 +140,7 @@ export default async function HomePage() {
       {/* BRANDS */}
       <section className="border-t border-b border-[#141414] py-14">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-          <p className="text-[10px] text-[#474747] uppercase tracking-[0.35em] text-center mb-8">
+          <p className="text-[10px] text-[#737373] uppercase tracking-[0.35em] text-center mb-8">
             Selección por marca
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
@@ -148,7 +148,7 @@ export default async function HomePage() {
               <Link
                 key={brand}
                 href={`/coches?marca=${brand.toLowerCase().replace(/ /g, '-')}`}
-                className="text-[13px] text-[#575757] hover:text-[#C9C9C9] transition-colors duration-150 tracking-wide"
+                className="text-[13px] text-[#808080] hover:text-[#C9C9C9] transition-colors duration-150 tracking-wide"
               >
                 {brand}
               </Link>
@@ -170,7 +170,7 @@ export default async function HomePage() {
               </div>
               <h2 className="section-title">Últimas unidades publicadas</h2>
             </div>
-            <Link href="/coches?orden=newest" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
+            <Link href="/coches?orden=newest" className="btn-ghost hidden md:flex text-[#8A8A8A] hover:text-[#C9C9C9]">
               Ver todos
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -197,7 +197,7 @@ export default async function HomePage() {
               No publicamos volumen.<br />
               <span className="text-[#9A9A9A]">Seleccionamos unidades con criterio.</span>
             </h2>
-            <p className="text-[13px] text-[#686868] leading-relaxed max-w-xl">
+            <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xl">
               Cualquier portal puede publicar 300.000 anuncios. Nosotros preferimos publicar los correctos.
               Unidades con algo especial, vendidas por profesionales con los que vale la pena hablar.
             </p>
@@ -226,7 +226,7 @@ export default async function HomePage() {
                   <Icon className="w-4 h-4 text-[#C6A64B]/60" />
                 </div>
                 <h3 className="font-medium text-[#D4D4D4] mb-3 tracking-wide">{title}</h3>
-                <p className="text-[13px] text-[#686868] leading-relaxed">{desc}</p>
+                <p className="text-[13px] text-[#8A8A8A] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -246,7 +246,7 @@ export default async function HomePage() {
               </div>
               <h2 className="section-title">Concesionarios y compraventas</h2>
             </div>
-            <Link href="/dealers" className="btn-ghost hidden md:flex text-[#686868] hover:text-[#C9C9C9]">
+            <Link href="/dealers" className="btn-ghost hidden md:flex text-[#8A8A8A] hover:text-[#C9C9C9]">
               Ver todos
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -302,7 +302,7 @@ export default async function HomePage() {
               <div key={item.n} className="bg-[#0A0A0A] p-6 md:p-8">
                 <div className="font-display text-xs text-[#C6A64B]/40 mb-4 tracking-[0.2em]">{item.n}</div>
                 <h3 className="text-[13px] font-medium text-[#C9C9C9] mb-3 leading-snug">{item.title}</h3>
-                <p className="text-[12px] text-[#575757] leading-relaxed">{item.desc}</p>
+                <p className="text-[12px] text-[#808080] leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -331,7 +331,7 @@ export default async function HomePage() {
                 ].map((point) => (
                   <li key={point} className="flex items-start gap-3">
                     <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
-                    <span className="text-[13px] text-[#686868] leading-relaxed">{point}</span>
+                    <span className="text-[13px] text-[#8A8A8A] leading-relaxed">{point}</span>
                   </li>
                 ))}
               </ul>
@@ -347,8 +347,8 @@ export default async function HomePage() {
             </div>
             <div className="flex-shrink-0 w-full lg:w-auto">
               <div className="border border-[#1E1E1E] bg-[#0D0D0D] p-6 min-w-[260px]">
-                <p className="text-[10px] text-[#474747] uppercase tracking-widest mb-4">¿No lo encuentras?</p>
-                <p className="text-sm text-[#686868] leading-relaxed mb-5">
+                <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">¿No lo encuentras?</p>
+                <p className="text-sm text-[#8A8A8A] leading-relaxed mb-5">
                   Cuéntanos qué buscas. Si aparece una oportunidad compatible, te lo comunicamos.
                 </p>
                 <Link href="/busqueda-privada" className="flex items-center gap-2 text-xs text-gold hover:text-gold-light transition-colors">
@@ -373,7 +373,7 @@ export default async function HomePage() {
                 Un canal pensado para<br />
                 <span className="text-[#9A9A9A]">oportunidades reales.</span>
               </h2>
-              <p className="text-[13px] text-[#686868] leading-relaxed mb-6">
+              <p className="text-[13px] text-[#8A8A8A] leading-relaxed mb-6">
                 Si trabajas con vehículos premium, deportivos, clásicos o unidades especiales,
                 Black Label es un canal diferente al generalista.
               </p>
@@ -386,7 +386,7 @@ export default async function HomePage() {
                 ].map((point) => (
                   <li key={point} className="flex items-start gap-3">
                     <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
-                    <span className="text-[13px] text-[#686868] leading-relaxed">{point}</span>
+                    <span className="text-[13px] text-[#8A8A8A] leading-relaxed">{point}</span>
                   </li>
                 ))}
               </ul>
@@ -395,7 +395,7 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="flex-shrink-0 border border-[#1E1E1E] bg-[#080808] p-8 min-w-[280px] max-w-xs">
-              <p className="text-[10px] text-[#474747] uppercase tracking-widest mb-4">Criterios de acceso</p>
+              <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">Criterios de acceso</p>
               <ul className="space-y-3">
                 {[
                   'Vehículos con algo especial — no stock genérico',
@@ -403,7 +403,7 @@ export default async function HomePage() {
                   'Disponibilidad verificada en el momento de publicación',
                   'Perfil profesional identificable',
                 ].map((c) => (
-                  <li key={c} className="flex items-start gap-2.5 text-[12px] text-[#575757] leading-relaxed">
+                  <li key={c} className="flex items-start gap-2.5 text-[12px] text-[#808080] leading-relaxed">
                     <span className="text-[#C6A64B]/40 mt-0.5 flex-shrink-0">→</span>
                     {c}
                   </li>
@@ -412,7 +412,7 @@ export default async function HomePage() {
               <div className="mt-6 pt-5 border-t border-[#141414]">
                 <Link
                   href="/como-funciona"
-                  className="flex items-center gap-1.5 text-xs text-[#575757] hover:text-gold transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-[#808080] hover:text-gold transition-colors"
                 >
                   Cómo funciona para profesionales <ArrowRight className="w-3 h-3" />
                 </Link>
@@ -426,10 +426,10 @@ export default async function HomePage() {
       <section className="border-t border-[#0E0E0E] py-12">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-[11px] text-[#3A3A3A] tracking-[0.15em] uppercase">
+            <p className="text-[11px] text-[#8A8A8A] tracking-[0.15em] uppercase">
               Powered by Black Series
             </p>
-            <p className="text-[12px] text-[#3A3A3A] max-w-md text-center md:text-right leading-relaxed">
+            <p className="text-[12px] text-[#8A8A8A] max-w-md text-center md:text-right leading-relaxed">
               Black Label Market es una iniciativa de Black Series, agencia especializada en el mundo
               del motor de alto rendimiento. No somos un portal anónimo.
             </p>

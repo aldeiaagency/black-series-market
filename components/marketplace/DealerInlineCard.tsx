@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { MapPin, CheckCircle, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -53,11 +53,11 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
         </div>
 
         <div className="flex-1 min-w-0">
-          <span className="text-[11px] text-[#686868] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate block leading-tight">
+          <span className="text-[12px] text-[#8A8A8A] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate block leading-tight">
             {dealer.name}
           </span>
           {city && (
-            <span className="flex items-center gap-0.5 text-[10px] text-[#474747] leading-tight">
+            <span className="flex items-center gap-0.5 text-[11px] text-[#737373] leading-tight">
               <MapPin className="w-2 h-2 flex-shrink-0" />
               {city}
             </span>
@@ -107,7 +107,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
           </Link>
           <span className="flex items-center gap-1.5 mt-0.5">
             <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-            <span className="text-[9px] text-emerald-400 uppercase tracking-widest">Verificado</span>
+            <span className="text-[10px] text-emerald-400 uppercase tracking-widest">Verificado</span>
             {dealer.subscription_plan === 'elite' && (
               <span className="text-[8px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/30 px-1 py-0.5 leading-none">
                 Elite

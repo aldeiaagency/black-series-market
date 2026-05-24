@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ArrowLeft, Check, X } from 'lucide-react'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS } from '@/lib/utils'
@@ -15,7 +15,7 @@ interface PageProps {
 
 function CompareCell({ value }: { value: string | null | undefined }) {
   if (!value) {
-    return <span className="text-[#3A3A3A] text-xs italic">—</span>
+    return <span className="text-[#8A8A8A] text-xs italic">—</span>
   }
   return <span className="text-bsm-text-primary text-sm font-medium">{value}</span>
 }
@@ -23,7 +23,7 @@ function CompareCell({ value }: { value: string | null | undefined }) {
 function BoolCell({ value }: { value: boolean }) {
   return value
     ? <Check className="w-4 h-4 text-emerald-400 mx-auto" />
-    : <X className="w-4 h-4 text-[#3A3A3A] mx-auto" />
+    : <X className="w-4 h-4 text-[#8A8A8A] mx-auto" />
 }
 
 function CompareRow({ label, values }: { label: string; values: (string | null | undefined)[] }) {

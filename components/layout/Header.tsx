@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -174,14 +174,14 @@ export default function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <Link href="/buscar" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Buscar">
+            <Link href="/buscar" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Buscar">
               <Search className="w-4 h-4" />
             </Link>
 
             {user ? (
               <>
                 {/* Heart → cuenta/favoritos */}
-                <Link href="/cuenta/favoritos" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+                <Link href="/cuenta/favoritos" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
                   <Heart className="w-4 h-4" />
                 </Link>
 
@@ -202,7 +202,7 @@ export default function Header() {
                       shadow-[0_8px_32px_rgba(0,0,0,0.7)] animate-fade-in">
                       {/* Email */}
                       <div className="px-4 py-3 border-b border-[#1A1A1A]">
-                        <p className="text-[11px] text-[#575757] truncate">{user.email}</p>
+                        <p className="text-[11px] text-[#808080] truncate">{user.email}</p>
                       </div>
                       {/* Links */}
                       <div className="py-1">
@@ -227,7 +227,7 @@ export default function Header() {
                       <div className="border-t border-[#1A1A1A] py-1">
                         <button
                           onClick={handleSignOut}
-                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#575757] hover:text-red-400 hover:bg-[#141414] transition-colors"
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#808080] hover:text-red-400 hover:bg-[#141414] transition-colors"
                         >
                           <LogOut className="w-3.5 h-3.5" />
                           Cerrar sesión
@@ -239,7 +239,7 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/mis-favoritos" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+                <Link href="/mis-favoritos" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
                   <Heart className="w-4 h-4" />
                 </Link>
                 <Link href="/login" className="px-4 py-2 text-[13px] text-[#757575] hover:text-[#C9C9C9] tracking-wide transition-colors">
@@ -287,7 +287,7 @@ export default function Header() {
                       <Link
                         key={child.label}
                         href={child.href}
-                        className="block py-2 text-[13px] text-[#575757] hover:text-[#C6A64B]"
+                        className="block py-2 text-[13px] text-[#808080] hover:text-[#C6A64B]"
                       >
                         {child.label}
                       </Link>
@@ -313,7 +313,7 @@ export default function Header() {
                       Mi panel
                     </Link>
                   )}
-                  <button onClick={handleSignOut} className="w-full text-sm text-[#575757] hover:text-red-400 transition-colors py-2">
+                  <button onClick={handleSignOut} className="w-full text-sm text-[#808080] hover:text-red-400 transition-colors py-2">
                     Cerrar sesión
                   </button>
                 </>

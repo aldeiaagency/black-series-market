@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, Car } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -68,14 +68,14 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
           </h3>
 
           {(dealer.location_city || dealer.location_region) && (
-            <div className="flex items-center gap-1 text-[11px] text-[#575757] mb-3">
+            <div className="flex items-center gap-1 text-[11px] text-[#808080] mb-3">
               <MapPin className="w-2.5 h-2.5" />
               {[dealer.location_city, dealer.location_region].filter(Boolean).join(', ')}
             </div>
           )}
 
           {dealer.vehicle_count !== undefined && (
-            <div className="flex items-center gap-1 text-[11px] text-[#575757]">
+            <div className="flex items-center gap-1 text-[11px] text-[#808080]">
               <Car className="w-3 h-3" />
               {dealer.vehicle_count} vehículos
             </div>

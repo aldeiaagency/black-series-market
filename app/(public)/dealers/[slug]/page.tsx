@@ -116,7 +116,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
           <div className="absolute top-6 left-6 lg:left-12">
             <Link
               href="/dealers"
-              className="flex items-center gap-1.5 text-xs text-[#575757] hover:text-[#C9C9C9] transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[#808080] hover:text-[#C9C9C9] transition-colors"
             >
               ← Concesionarios
             </Link>
@@ -162,18 +162,18 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                 <div className="flex flex-wrap items-center gap-5 text-sm text-bsm-text-secondary">
                   {dealer.location_city && (
                     <span className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-[#474747]" />
+                      <MapPin className="w-4 h-4 text-[#737373]" />
                       {[dealer.location_city, dealer.location_region].filter(Boolean).join(', ')}
                     </span>
                   )}
                   {totalActive > 0 && (
                     <span className="flex items-center gap-1.5">
-                      <Car className="w-4 h-4 text-[#474747]" />
+                      <Car className="w-4 h-4 text-[#737373]" />
                       {totalActive} vehículo{totalActive !== 1 ? 's' : ''} activos
                     </span>
                   )}
                   {dealer.years_in_business && (
-                    <span className="text-[#575757]">{dealer.years_in_business} años en el sector</span>
+                    <span className="text-[#808080]">{dealer.years_in_business} años en el sector</span>
                   )}
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-2">Marcas en inventario</p>
                     <div className="flex flex-wrap gap-x-3 gap-y-1">
                       {uniqueBrands.map((brand) => (
-                        <span key={brand} className="text-xs text-[#686868] tracking-wide">
+                        <span key={brand} className="text-xs text-[#8A8A8A] tracking-wide">
                           {brand}
                         </span>
                       ))}
@@ -347,8 +347,8 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                 del vehículo, pero ayuda a reducir ruido y mejorar la calidad del contacto.
               </p>
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-3.5 h-3.5 text-[#3A3A3A] flex-shrink-0 mt-0.5" />
-                <p className="text-[11px] text-[#474747] leading-relaxed">
+                <AlertCircle className="w-3.5 h-3.5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#737373] leading-relaxed">
                   La presencia en Black Label Market no implica garantía legal total, verificación documental
                   completa ni ausencia de fraude. Recomendamos siempre realizar una inspección independiente
                   antes de formalizar cualquier operación.

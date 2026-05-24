@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ export default function CompareBar() {
             {selected.length} vehículo{selected.length !== 1 ? 's' : ''} seleccionado{selected.length !== 1 ? 's' : ''} para comparar
           </span>
           {selected.length < 3 && (
-            <span className="text-xs text-[#575757]">
+            <span className="text-xs text-[#808080]">
               (puedes añadir {3 - selected.length} más)
             </span>
           )}
@@ -34,7 +34,7 @@ export default function CompareBar() {
         <div className="flex items-center gap-3">
           <button
             onClick={clear}
-            className="flex items-center gap-1.5 text-xs text-[#575757] hover:text-[#C9C9C9] transition-colors"
+            className="flex items-center gap-1.5 text-xs text-[#808080] hover:text-[#C9C9C9] transition-colors"
           >
             <X className="w-3.5 h-3.5" />
             Limpiar

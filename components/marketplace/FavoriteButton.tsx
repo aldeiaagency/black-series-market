@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Heart } from 'lucide-react'
 import { useFavorites } from '@/hooks/useFavorites'
@@ -22,7 +22,7 @@ export default function FavoriteButton({ vehicleId, variant = 'card', className 
           'flex items-center gap-2 px-4 py-2.5 border text-sm transition-all duration-200',
           saved
             ? 'border-[#C6A64B]/40 text-[#C6A64B] bg-[#C6A64B]/5'
-            : 'border-[#2A2A2A] text-[#686868] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
+            : 'border-[#2A2A2A] text-[#8A8A8A] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
           className
         )}
         aria-label={saved ? 'Quitar de guardados' : 'Guardar vehículo'}

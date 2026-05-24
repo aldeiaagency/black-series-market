@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -132,7 +132,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
         <Link href={href} className="block">
           {/* Brand */}
           <div className="mb-0.5">
-            <span className="text-[10px] text-[#C6A64B]/80 tracking-[0.25em] uppercase font-medium">
+            <span className="text-[11px] text-[#C6A64B]/80 tracking-[0.2em] uppercase font-medium">
               {vehicle.brand_name}
             </span>
           </div>
@@ -143,21 +143,21 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             {vehicle.model_name}
           </h3>
           {vehicle.version && (
-            <p className="text-[12px] text-[#686868] mb-3 leading-tight">{vehicle.version}</p>
+            <p className="text-[12px] text-[#8A8A8A] mb-3 leading-tight">{vehicle.version}</p>
           )}
 
           {/* Specs */}
-          <div className="flex items-center gap-3.5 mb-4 text-[12px] text-[#686868]">
+          <div className="flex items-center gap-3.5 mb-4 text-[12px] text-[#8A8A8A]">
             <span className="flex items-center gap-1.5">
-              <Calendar className="w-3 h-3 text-[#474747]" />
+              <Calendar className="w-3 h-3 text-[#737373]" />
               {vehicle.year}
             </span>
             <span className="flex items-center gap-1.5">
-              <Gauge className="w-3 h-3 text-[#474747]" />
+              <Gauge className="w-3 h-3 text-[#737373]" />
               {formatMileage(vehicle.mileage_km)}
             </span>
             {vehicle.fuel_type && (
-              <span className="hidden sm:block text-[#575757]">
+              <span className="hidden sm:block text-[#808080]">
                 {FUEL_LABELS[vehicle.fuel_type]}
               </span>
             )}
@@ -170,7 +170,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           <div className="flex items-end justify-between">
             <div className={cn(
               'font-display text-[20px] font-light leading-none',
-              vehicle.price_on_request ? 'text-[#686868] text-[16px]' : 'text-[#C6A64B]'
+              vehicle.price_on_request ? 'text-[#8A8A8A] text-[16px]' : 'text-[#C6A64B]'
             )}>
               {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
             </div>
@@ -179,7 +179,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
                 <div className="font-display text-[18px] font-light text-[#D4D4D4]">
                   {vehicle.power_hp}
                 </div>
-                <div className="text-[9px] text-[#575757] uppercase tracking-[0.15em]">CV</div>
+                <div className="text-[10px] text-[#808080] uppercase tracking-[0.12em]">CV</div>
               </div>
             )}
           </div>
@@ -192,7 +192,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           </div>
         ) : (
           <div className="mt-3 pt-2.5 border-t border-[#1A1A1A]">
-            <span className="text-[11px] text-[#3A3A3A] italic">Vendedor pendiente de confirmar</span>
+            <span className="text-[11px] text-[#8A8A8A] italic">Vendedor pendiente de confirmar</span>
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
@@ -313,7 +313,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           {searchParams.get('search') && (
             <button
               onClick={() => { setSearchDraft(''); updateParam('search', null) }}
-              className="flex items-center gap-1 text-xs text-[#575757] hover:text-[#9A9A9A] transition-colors mt-2"
+              className="flex items-center gap-1 text-xs text-[#808080] hover:text-[#9A9A9A] transition-colors mt-2"
             >
               <X className="w-3 h-3" />
               Quitar búsqueda
@@ -548,7 +548,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         {activeFilterCount > 0 && (
           <button
             onClick={clearAll}
-            className="flex items-center gap-2 text-sm text-[#575757] hover:text-[#9A9A9A] transition-colors mt-4"
+            className="flex items-center gap-2 text-sm text-[#808080] hover:text-[#9A9A9A] transition-colors mt-4"
           >
             <X className="w-4 h-4" />
             Borrar todos los filtros

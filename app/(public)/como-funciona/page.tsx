@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { Search, Heart, Bell, GitCompareArrows, MessageSquare, ShieldCheck, Package, BarChart2, X, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -141,8 +141,8 @@ export default function ComoFuncionaPage() {
           <ul className="space-y-3">
             {NOT_BL.map((item) => (
               <li key={item} className="flex items-start gap-3">
-                <X className="w-4 h-4 text-[#474747] flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-[#686868]">{item}</span>
+                <X className="w-4 h-4 text-[#737373] flex-shrink-0 mt-0.5" />
+                <span className="text-sm text-[#8A8A8A]">{item}</span>
               </li>
             ))}
           </ul>

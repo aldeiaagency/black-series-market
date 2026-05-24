@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -96,7 +96,7 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
           <button
             aria-label="Cerrar"
             onClick={onClose}
-            className="text-[#575757] hover:text-[#C9C9C9] transition-colors"
+            className="text-[#808080] hover:text-[#C9C9C9] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -108,10 +108,10 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
             <h3 className="font-display text-xl font-light text-[#F4F1EA] mb-2">
               Búsqueda registrada
             </h3>
-            <p className="text-sm text-[#686868] leading-relaxed max-w-xs mx-auto">
+            <p className="text-sm text-[#8A8A8A] leading-relaxed max-w-xs mx-auto">
               Dejaremos registrada tu preferencia para futuras oportunidades compatibles.
             </p>
-            <p className="text-[10px] text-[#3A3A3A] mt-4">
+            <p className="text-[10px] text-[#8A8A8A] mt-4">
               Este registro no garantiza disponibilidad ni contacto inmediato.
             </p>
             <button onClick={onClose} className="btn-outline mt-6 text-sm px-8">
@@ -211,7 +211,7 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
               {isSubmitting ? 'Registrando…' : 'Crear alerta'}
             </button>
 
-            <p className="text-[10px] text-[#3A3A3A] text-center leading-relaxed pb-1">
+            <p className="text-[10px] text-[#8A8A8A] text-center leading-relaxed pb-1">
               Dejaremos registrada tu preferencia para futuras oportunidades compatibles.
               Este registro no garantiza disponibilidad ni contacto inmediato.
             </p>

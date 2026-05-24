@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -108,7 +108,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
         <p className="text-xs text-bsm-text-muted max-w-[240px]">
           El vendedor recibirá tu interés con el contexto necesario.
         </p>
-        <p className="text-[10px] text-[#575757] mt-3 max-w-[220px] leading-relaxed italic">
+        <p className="text-[10px] text-[#808080] mt-3 max-w-[220px] leading-relaxed italic">
           Tu solicitud se enviará al vendedor profesional responsable de la unidad. El envío no garantiza disponibilidad ni reserva del vehículo.
         </p>
       </div>

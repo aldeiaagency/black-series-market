@@ -38,7 +38,7 @@ const config: Config = {
           'border-light': '#1E1E1E',
           'text-primary': '#F4F1EA',
           'text-secondary': '#9A9A9A',
-          'text-muted': '#686868',
+          'text-muted': '#8A8A8A',
         },
       },
       fontFamily: {

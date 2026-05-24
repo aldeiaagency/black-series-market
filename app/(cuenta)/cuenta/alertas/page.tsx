@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Heart, Bell, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -109,11 +109,11 @@ export default async function CuentaAlertasPage() {
                     )}
                   </div>
                   {/* Details */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#575757]">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#808080]">
                     <span>Plazo: {TIMELINE_LABELS[alert.timeline] || alert.timeline}</span>
                     {alert.location && <span>Zona: {alert.location}</span>}
                     {alert.km_max && <span>Km máx: {alert.km_max}</span>}
-                    <span className="text-[#3A3A3A]">
+                    <span className="text-[#8A8A8A]">
                       Creada {new Date(alert.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </span>
                   </div>
@@ -124,7 +124,7 @@ export default async function CuentaAlertasPage() {
                   <input type="hidden" name="alertId" value={alert.id} />
                   <button
                     type="submit"
-                    className="p-2 text-[#3A3A3A] hover:text-red-400 transition-colors flex-shrink-0"
+                    className="p-2 text-[#8A8A8A] hover:text-red-400 transition-colors flex-shrink-0"
                     title="Eliminar alerta"
                   >
                     <Trash2 className="w-4 h-4" />

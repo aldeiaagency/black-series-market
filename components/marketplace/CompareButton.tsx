@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { GitCompareArrows } from 'lucide-react'
 import { useComparator } from '@/hooks/useComparator'
@@ -25,8 +25,8 @@ export default function CompareButton({ vehicleId, variant = 'card', className }
           selected
             ? 'border-[#C6A64B]/40 text-[#C6A64B] bg-[#C6A64B]/5'
             : disabled
-              ? 'border-[#1A1A1A] text-[#3A3A3A] cursor-not-allowed'
-              : 'border-[#2A2A2A] text-[#686868] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
+              ? 'border-[#1A1A1A] text-[#8A8A8A] cursor-not-allowed'
+              : 'border-[#2A2A2A] text-[#8A8A8A] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
           className
         )}
         title={disabled ? 'Máximo 3 vehículos en comparador' : undefined}
