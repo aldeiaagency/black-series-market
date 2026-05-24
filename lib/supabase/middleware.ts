@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Redirect logged-in users away from auth pages
+  // Redirect logged-in users with a dealer profile away from auth pages
   if ((pathname === '/login' || pathname === '/registro') && user) {
     const { data: dealer } = await supabase
       .from('dealers')
@@ -56,10 +56,7 @@ export async function updateSession(request: NextRequest) {
     if (dealer) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-    // Logged in but no dealer profile yet: allow /registro, send /login there too
-    if (pathname === '/login') {
-      return NextResponse.redirect(new URL('/registro', request.url))
-    }
+    // No dealer profile yet: allow /login (to sign out) and /registro (to complete signup)
   }
 
   return supabaseResponse
