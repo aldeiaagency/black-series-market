@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Menu, X, ChevronDown, Search, Heart } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Menu, X, ChevronDown, Search, Heart, LogOut, Bell, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Logo from '@/components/brand/Logo'
 import CompareBar from '@/components/marketplace/CompareBar'
+import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
   { label: 'Coches', href: '/coches' },
@@ -31,11 +32,22 @@ const NAV_ITEMS = [
   { label: 'Cómo funciona', href: '/como-funciona' },
 ]
 
+interface AuthUser {
+  id: string
+  email?: string
+  user_metadata?: { full_name?: string }
+}
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [isDealer, setIsDealer] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20)
@@ -46,9 +58,57 @@ export default function Header() {
   useEffect(() => {
     setMobileOpen(false)
     setActiveDropdown(null)
+    setUserMenuOpen(false)
   }, [pathname])
 
+  // Auth state
+  useEffect(() => {
+    const supabase = createClient()
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+      if (user) checkDealer(user.id, supabase)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      const u = session?.user ?? null
+      setUser(u)
+      if (u) checkDealer(u.id, supabase)
+      else setIsDealer(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function checkDealer(userId: string, supabase: ReturnType<typeof createClient>) {
+    const { data } = await supabase.from('dealers').select('id').eq('profile_id', userId).single()
+    setIsDealer(!!data)
+  }
+
+  // Close user menu on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setUser(null)
+    setIsDealer(false)
+    router.push('/')
+    router.refresh()
+  }
+
   const isHome = pathname === '/'
+  const userInitial = user?.user_metadata?.full_name?.[0]?.toUpperCase()
+    || user?.email?.[0]?.toUpperCase()
+    || '?'
 
   return (
     <>
@@ -117,21 +177,85 @@ export default function Header() {
             <Link href="/buscar" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Buscar">
               <Search className="w-4 h-4" />
             </Link>
-            <Link href="/mis-favoritos" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
-              <Heart className="w-4 h-4" />
-            </Link>
-            <Link href="/login" className="px-4 py-2 text-[13px] text-[#757575] hover:text-[#C9C9C9] tracking-wide transition-colors">
-              Acceder
-            </Link>
-            <Link
-              href="/registro-comprador"
-              className="px-5 py-2.5 text-[12px] tracking-[0.1em] font-medium uppercase
-                border border-[#C6A64B]/60 text-[#C6A64B]
-                hover:bg-[#C6A64B]/8 hover:border-[#C6A64B]
-                transition-all duration-200"
-            >
-              Registrarse
-            </Link>
+
+            {user ? (
+              <>
+                {/* Heart → cuenta/favoritos */}
+                <Link href="/cuenta/favoritos" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+                  <Heart className="w-4 h-4" />
+                </Link>
+
+                {/* User menu */}
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen((o) => !o)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-medium
+                      bg-[#C6A64B]/15 border border-[#C6A64B]/40 text-[#C6A64B]
+                      hover:bg-[#C6A64B]/25 transition-colors"
+                    aria-label="Menú de usuario"
+                  >
+                    {userInitial}
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-[#0E0E0E] border border-[#1E1E1E]
+                      shadow-[0_8px_32px_rgba(0,0,0,0.7)] animate-fade-in">
+                      {/* Email */}
+                      <div className="px-4 py-3 border-b border-[#1A1A1A]">
+                        <p className="text-[11px] text-[#575757] truncate">{user.email}</p>
+                      </div>
+                      {/* Links */}
+                      <div className="py-1">
+                        <Link href="/cuenta/favoritos"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#9A9A9A] hover:text-[#C9C9C9] hover:bg-[#141414] transition-colors">
+                          <Heart className="w-3.5 h-3.5" />
+                          Mis favoritos
+                        </Link>
+                        <Link href="/cuenta/alertas"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#9A9A9A] hover:text-[#C9C9C9] hover:bg-[#141414] transition-colors">
+                          <Bell className="w-3.5 h-3.5" />
+                          Mis alertas
+                        </Link>
+                        {isDealer && (
+                          <Link href="/dashboard"
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#9A9A9A] hover:text-[#C9C9C9] hover:bg-[#141414] transition-colors">
+                            <User className="w-3.5 h-3.5" />
+                            Mi panel
+                          </Link>
+                        )}
+                      </div>
+                      <div className="border-t border-[#1A1A1A] py-1">
+                        <button
+                          onClick={handleSignOut}
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#575757] hover:text-red-400 hover:bg-[#141414] transition-colors"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          Cerrar sesión
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <Link href="/mis-favoritos" className="p-2 text-[#575757] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+                  <Heart className="w-4 h-4" />
+                </Link>
+                <Link href="/login" className="px-4 py-2 text-[13px] text-[#757575] hover:text-[#C9C9C9] tracking-wide transition-colors">
+                  Acceder
+                </Link>
+                <Link
+                  href="/registro-comprador"
+                  className="px-5 py-2.5 text-[12px] tracking-[0.1em] font-medium uppercase
+                    border border-[#C6A64B]/60 text-[#C6A64B]
+                    hover:bg-[#C6A64B]/8 hover:border-[#C6A64B]
+                    transition-all duration-200"
+                >
+                  Registrarse
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -172,13 +296,37 @@ export default function Header() {
                 )}
               </div>
             ))}
+
             <div className="pt-6 flex flex-col gap-3">
-              <Link href="/login" className="btn-outline w-full justify-center text-sm">
-                Acceder
-              </Link>
-              <Link href="/registro-comprador" className="btn-gold w-full justify-center text-sm">
-                Registrarse
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/cuenta/favoritos" className="btn-outline w-full justify-center text-sm">
+                    <Heart className="w-4 h-4" />
+                    Mis favoritos
+                  </Link>
+                  <Link href="/cuenta/alertas" className="btn-outline w-full justify-center text-sm">
+                    <Bell className="w-4 h-4" />
+                    Mis alertas
+                  </Link>
+                  {isDealer && (
+                    <Link href="/dashboard" className="btn-outline w-full justify-center text-sm">
+                      Mi panel
+                    </Link>
+                  )}
+                  <button onClick={handleSignOut} className="w-full text-sm text-[#575757] hover:text-red-400 transition-colors py-2">
+                    Cerrar sesión
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="btn-outline w-full justify-center text-sm">
+                    Acceder
+                  </Link>
+                  <Link href="/registro-comprador" className="btn-gold w-full justify-center text-sm">
+                    Registrarse
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

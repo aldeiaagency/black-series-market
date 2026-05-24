@@ -89,7 +89,11 @@ export default function MisFavoritosPage() {
 
       {vehicles.length > 0 && (
         <div className="mt-10 p-4 border border-[#1A1A1A] bg-[#0A0A0A] text-[11px] text-[#474747] text-center">
-          Los favoritos se guardan en este dispositivo. Crea una cuenta de comprador para sincronizarlos — próximamente.
+          Los favoritos se guardan en este dispositivo.{' '}
+          <a href="/registro-comprador" className="text-[#C6A64B] hover:underline">
+            Crea una cuenta gratuita
+          </a>{' '}
+          para sincronizarlos en todos tus dispositivos.
         </div>
       )}
     </div>

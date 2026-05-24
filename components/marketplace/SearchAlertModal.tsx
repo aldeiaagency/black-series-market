@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Bell, CheckCircle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const schema = z.object({
   vehicle_type: z.enum(['car', 'motorcycle', 'any']),
@@ -39,13 +40,34 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
   })
 
   async function onSubmit(data: FormData) {
-    // TODO: Connect to n8n/CRM webhook — POST /api/alerts (future integration)
-    try {
-      const stored = JSON.parse(localStorage.getItem('blacklabel_alerts') || '[]')
-      stored.push({ ...data, created_at: new Date().toISOString() })
-      localStorage.setItem('blacklabel_alerts', JSON.stringify(stored))
-    } catch {}
-    await new Promise((r) => setTimeout(r, 600))
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      // Logged-in: save to Supabase
+      await supabase.from('search_alerts').insert({
+        user_id:      user.id,
+        email:        data.email,
+        phone:        data.phone || null,
+        vehicle_type: data.vehicle_type,
+        brand:        data.brand || null,
+        model:        data.model || null,
+        budget_max:   data.budget_max || null,
+        year_min:     data.year_min ? parseInt(data.year_min) : null,
+        km_max:       data.km_max || null,
+        location:     data.location || null,
+        timeline:     data.timeline,
+      })
+    } else {
+      // Guest: store locally
+      try {
+        const stored = JSON.parse(localStorage.getItem('blacklabel_alerts') || '[]')
+        stored.push({ ...data, created_at: new Date().toISOString() })
+        localStorage.setItem('blacklabel_alerts', JSON.stringify(stored))
+      } catch {}
+      await new Promise((r) => setTimeout(r, 600))
+    }
+
     setSubmitted(true)
   }
 
