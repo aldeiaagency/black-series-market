@@ -13,7 +13,7 @@ async function SearchResults({ q, tipo }: { q: string; tipo?: string }) {
 
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url)', { count: 'exact' })
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)', { count: 'exact' })
     .eq('status', 'active')
     .or(`brand_name.ilike.%${q}%,model_name.ilike.%${q}%,title.ilike.%${q}%,version.ilike.%${q}%`)
 

@@ -4,8 +4,17 @@ import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import VehicleFilters from '@/components/marketplace/VehicleFilters'
 import SortSelector from '@/components/marketplace/SortSelector'
+import ActiveFiltersBar from '@/components/marketplace/ActiveFiltersBar'
 import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
+
+const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
+  featured:    [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
+  newest:      [{ col: 'published_at', asc: false }],
+  price_asc:   [{ col: 'price', asc: true }],
+  price_desc:  [{ col: 'price', asc: false }],
+  mileage_asc: [{ col: 'mileage_km', asc: true }],
+}
 
 interface PageProps {
   searchParams: Promise<Record<string, string>>
@@ -19,39 +28,42 @@ async function MotoList({ params }: { params: Record<string, string> }) {
     .eq('status', 'active')
     .eq('vehicle_type', 'motorcycle')
 
-  if (params.categoria) query = query.eq('category', params.categoria)
-  if (params.marca)     query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
-  if (params.modelo)    query = query.ilike('model_name', `%${params.modelo}%`)
-  if (params.version)   query = query.ilike('version', `%${params.version}%`)
-  if (params.anioMin)   query = query.gte('year', parseInt(params.anioMin))
-  if (params.anioMax)   query = query.lte('year', parseInt(params.anioMax))
-  if (params.precioMin) query = query.gte('price', parseInt(params.precioMin))
-  if (params.precioMax) query = query.lte('price', parseInt(params.precioMax))
-  if (params.cvMin)     query = query.gte('power_hp', parseInt(params.cvMin))
-  if (params.cvMax)     query = query.lte('power_hp', parseInt(params.cvMax))
-  if (params.kmMax)     query = query.lte('mileage_km', parseInt(params.kmMax))
-  if (params.estilo)    query = query.eq('body_type', params.estilo)
+  if (params.categoria)    query = query.eq('category', params.categoria)
+  if (params.marca)        query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
+  if (params.modelo)       query = query.ilike('model_name', `%${params.modelo}%`)
+  if (params.version)      query = query.ilike('version', `%${params.version}%`)
+  if (params.anioMin)      query = query.gte('year', parseInt(params.anioMin))
+  if (params.anioMax)      query = query.lte('year', parseInt(params.anioMax))
+  if (params.precioMin)    query = query.gte('price', parseInt(params.precioMin))
+  if (params.precioMax)    query = query.lte('price', parseInt(params.precioMax))
+  if (params.cvMin)        query = query.gte('power_hp', parseInt(params.cvMin))
+  if (params.cvMax)        query = query.lte('power_hp', parseInt(params.cvMax))
+  if (params.kmMax)        query = query.lte('mileage_km', parseInt(params.kmMax))
+  if (params.estilo)       query = query.eq('body_type', params.estilo)
+  if (params.carnet)       query = query.eq('license_type', params.carnet)
+  if (params.destacados === 'true') query = query.eq('is_featured', true)
+  if (params.garantia === 'si')     query = query.eq('has_warranty', true)
+  if (params.financiacion === 'si') query = query.eq('financing_available', true)
   if (params.cc) {
     const [ccMin, ccMax] = params.cc.split('-').map(Number)
     query = query.gte('displacement_cc', ccMin).lte('displacement_cc', ccMax)
   }
-  if (params.carnet)    query = query.eq('license_type', params.carnet)
-  if (params.search)    query = query.or(`brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`)
+  if (params.search) query = query.or(
+    `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,title.ilike.%${params.search}%,version.ilike.%${params.search}%`
+  )
 
-  const sort = params.sort || 'featured'
-  if (sort === 'price_asc')   query = query.order('price', { ascending: true })
-  else if (sort === 'price_desc') query = query.order('price', { ascending: false })
-  else if (sort === 'mileage_asc') query = query.order('mileage_km', { ascending: true })
-  else if (sort === 'newest') query = query.order('published_at', { ascending: false })
-  else query = query.order('is_featured', { ascending: false }).order('published_at', { ascending: false })
+  const sorts = SORT_MAP[params.sort || 'featured'] || SORT_MAP.featured
+  for (const s of sorts) query = query.order(s.col, { ascending: s.asc })
 
-  const { data: vehicles, count } = await query.limit(24)
+  const page  = Math.max(1, parseInt(params.page || '1'))
+  const limit = 24
+  const { data: vehicles, count } = await query.range((page - 1) * limit, page * limit - 1)
 
   if (!vehicles?.length) {
     return (
       <div className="flex-1 space-y-6">
         <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
-          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay unidades con esos criterios</h3>
+          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay motos con esos criterios</h3>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
             Ajusta los filtros o registra una búsqueda privada para que te avisemos cuando entre una moto compatible.
           </p>
@@ -71,12 +83,15 @@ async function MotoList({ params }: { params: Record<string, string> }) {
 
   return (
     <div className="flex-1 space-y-8">
+      <p className="text-sm text-bsm-text-muted">
+        {count} moto{count !== 1 ? 's' : ''} encontrada{count !== 1 ? 's' : ''}
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
       </div>
-      {count && count > 24 && (
+      {count && count > limit && (
         <p className="text-center text-sm text-bsm-text-muted">
-          Mostrando 24 de {count} vehículos
+          Mostrando {Math.min(page * limit, count)} de {count} motos
         </p>
       )}
       <SearchAlertCTA vehicleType="motorcycle" compact />
@@ -95,15 +110,18 @@ export default async function MotosPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <div className="mb-10">
+      <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Marketplace</span>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <h1 className="section-title">Motos</h1>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-5">
+          <h1 className="section-title">Motos premium</h1>
           <Suspense fallback={null}><SortSelector /></Suspense>
         </div>
+        <Suspense fallback={null}>
+          <ActiveFiltersBar />
+        </Suspense>
       </div>
 
       <div className="flex gap-12">

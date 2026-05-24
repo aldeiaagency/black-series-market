@@ -4,15 +4,16 @@ import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import VehicleFilters from '@/components/marketplace/VehicleFilters'
 import SortSelector from '@/components/marketplace/SortSelector'
+import ActiveFiltersBar from '@/components/marketplace/ActiveFiltersBar'
 import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
-  featured:   [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
-  newest:     [{ col: 'published_at', asc: false }],
-  price_asc:  [{ col: 'price', asc: true }],
-  price_desc: [{ col: 'price', asc: false }],
-  mileage_asc:[{ col: 'mileage_km', asc: true }],
+  featured:    [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
+  newest:      [{ col: 'published_at', asc: false }],
+  price_asc:   [{ col: 'price', asc: true }],
+  price_desc:  [{ col: 'price', asc: false }],
+  mileage_asc: [{ col: 'mileage_km', asc: true }],
 }
 
 interface PageProps {
@@ -27,22 +28,26 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
     .eq('status', 'active')
     .eq('vehicle_type', 'car')
 
-  if (params.categoria)  query = query.eq('category', params.categoria)
-  if (params.marca)      query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
-  if (params.modelo)     query = query.ilike('model_name', `%${params.modelo}%`)
-  if (params.version)    query = query.ilike('version', `%${params.version}%`)
-  if (params.anioMin)    query = query.gte('year', parseInt(params.anioMin))
-  if (params.anioMax)    query = query.lte('year', parseInt(params.anioMax))
-  if (params.precioMin)  query = query.gte('price', parseInt(params.precioMin))
-  if (params.precioMax)  query = query.lte('price', parseInt(params.precioMax))
-  if (params.cvMin)      query = query.gte('power_hp', parseInt(params.cvMin))
-  if (params.cvMax)      query = query.lte('power_hp', parseInt(params.cvMax))
-  if (params.kmMax)      query = query.lte('mileage_km', parseInt(params.kmMax))
-  if (params.tipo)       query = query.eq('body_type', params.tipo)
-  if (params.combustible) query = query.eq('fuel_type', params.combustible)
-  if (params.cambio)     query = query.eq('transmission', params.cambio)
+  if (params.categoria)    query = query.eq('category', params.categoria)
+  if (params.marca)        query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
+  if (params.modelo)       query = query.ilike('model_name', `%${params.modelo}%`)
+  if (params.version)      query = query.ilike('version', `%${params.version}%`)
+  if (params.anioMin)      query = query.gte('year', parseInt(params.anioMin))
+  if (params.anioMax)      query = query.lte('year', parseInt(params.anioMax))
+  if (params.precioMin)    query = query.gte('price', parseInt(params.precioMin))
+  if (params.precioMax)    query = query.lte('price', parseInt(params.precioMax))
+  if (params.cvMin)        query = query.gte('power_hp', parseInt(params.cvMin))
+  if (params.cvMax)        query = query.lte('power_hp', parseInt(params.cvMax))
+  if (params.kmMax)        query = query.lte('mileage_km', parseInt(params.kmMax))
+  if (params.tipo)         query = query.eq('body_type', params.tipo)
+  if (params.combustible)  query = query.eq('fuel_type', params.combustible)
+  if (params.cambio)       query = query.eq('transmission', params.cambio)
   if (params.destacados === 'true') query = query.eq('is_featured', true)
-  if (params.search)     query = query.or(`brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,title.ilike.%${params.search}%`)
+  if (params.garantia === 'si')     query = query.eq('has_warranty', true)
+  if (params.financiacion === 'si') query = query.eq('financing_available', true)
+  if (params.search)       query = query.or(
+    `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,title.ilike.%${params.search}%,version.ilike.%${params.search}%`
+  )
 
   const sorts = SORT_MAP[params.sort || 'featured'] || SORT_MAP.featured
   for (const s of sorts) query = query.order(s.col, { ascending: s.asc })
@@ -57,7 +62,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
         <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
           <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay unidades con esos criterios</h3>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
-            Puedes ajustar los filtros o registrar una búsqueda privada para que te avisemos cuando entre una unidad compatible.
+            Ajusta los filtros o registra una búsqueda privada para que te avisemos cuando entre una unidad compatible.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/coches" className="btn-outline text-sm px-4">Limpiar filtros</Link>
@@ -75,6 +80,9 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
 
   return (
     <div className="flex-1 space-y-8">
+      <p className="text-sm text-bsm-text-muted">
+        {count} unidad{count !== 1 ? 'es' : ''} encontrada{count !== 1 ? 's' : ''}
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
       </div>
@@ -99,17 +107,20 @@ export default async function CochesPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <div className="mb-10">
+      <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Marketplace</span>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-5">
           <h1 className="section-title">Coches premium</h1>
           <Suspense fallback={null}>
             <SortSelector />
           </Suspense>
         </div>
+        <Suspense fallback={null}>
+          <ActiveFiltersBar />
+        </Suspense>
       </div>
 
       <div className="flex gap-12">

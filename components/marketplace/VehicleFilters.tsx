@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { SlidersHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ─── Categories ──────────────────────────────────────────────────────────────
@@ -151,47 +151,76 @@ const SORT_OPTIONS = [
   { value: 'mileage_asc',  label: 'Menor kilometraje' },
 ]
 
-// ─── Component helpers ────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 interface FiltersProps {
   vehicleType: 'car' | 'motorcycle'
   totalCount: number
 }
 
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  const [open, setOpen] = useState(true)
+function FilterGroup({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string
+  children: React.ReactNode
+  defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className="border-b border-bsm-border pb-5 mb-5">
+    <div className="border-b border-bsm-border pb-5 mb-5 last:border-0 last:mb-0 last:pb-0">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-full mb-4 text-left"
       >
         <span className="label-base mb-0">{title}</span>
-        <ChevronDown className={cn('w-4 h-4 text-bsm-text-muted transition-transform', !open && '-rotate-90')} />
+        {open
+          ? <ChevronUp className="w-4 h-4 text-bsm-text-muted" />
+          : <ChevronDown className="w-4 h-4 text-bsm-text-muted" />
+        }
       </button>
       {open && <div>{children}</div>}
     </div>
   )
 }
 
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps) {
   const router       = useRouter()
   const pathname     = usePathname()
   const searchParams = useSearchParams()
-  const [mobileOpen, setMobileOpen]   = useState(false)
+  const [mobileOpen, setMobileOpen]       = useState(false)
   const [showAllBrands, setShowAllBrands] = useState(false)
-  const [models, setModels]           = useState<string[]>([])
+  const [models, setModels]               = useState<string[]>([])
   const [loadingModels, setLoadingModels] = useState(false)
+  const [searchDraft, setSearchDraft]     = useState(searchParams.get('search') || '')
 
-  const isMoto       = vehicleType === 'motorcycle'
-  const categories   = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
-  const allBrands    = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
+  const isMoto          = vehicleType === 'motorcycle'
+  const categories      = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
+  const allBrands       = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
   const featuredBrands  = isMoto ? FEATURED_BRANDS_MOTO : FEATURED_BRANDS_CAR
   const displayedBrands = showAllBrands ? allBrands : featuredBrands
   const hiddenCount     = allBrands.length - featuredBrands.length
 
   const currentBrand = searchParams.get('marca') || ''
   const currentModel = searchParams.get('modelo') || ''
+
+  // Active filter count (excluding page and sort)
+  const activeFilterCount = Array.from(searchParams.entries()).filter(
+    ([k]) => !['page', 'sort'].includes(k)
+  ).length
+
+  // Prevent body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
 
   // Fetch models whenever brand changes
   useEffect(() => {
@@ -203,6 +232,11 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
       .then((data: string[]) => setModels(data))
       .finally(() => setLoadingModels(false))
   }, [currentBrand, isMoto])
+
+  // Keep searchDraft in sync when param changes externally
+  useEffect(() => {
+    setSearchDraft(searchParams.get('search') || '')
+  }, [searchParams])
 
   function updateParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString())
@@ -220,13 +254,17 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
-  function clearAll() {
-    router.push(pathname, { scroll: false })
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault()
+    updateParam('search', searchDraft.trim() || null)
+    setMobileOpen(false)
   }
 
-  const hasActiveFilters = Array.from(searchParams.entries()).some(
-    ([key]) => !['page', 'sort'].includes(key)
-  )
+  function clearAll() {
+    const sort = searchParams.get('sort')
+    router.push(sort ? `${pathname}?sort=${sort}` : pathname, { scroll: false })
+    setSearchDraft('')
+  }
 
   const CheckOption = ({ param, value, label }: { param: string; value: string; label: string }) => (
     <label className="flex items-center gap-2.5 cursor-pointer group">
@@ -242,10 +280,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     </label>
   )
 
-  // Rendered as a direct function call (not {renderFilters()}) so that
-  // showAllBrands state survives re-renders without React treating it as a new component type.
   function renderFilters() {
-    const displayedBrands = showAllBrands ? allBrands : featuredBrands
     return (
       <div>
         {/* Mobile-only sort */}
@@ -257,8 +292,37 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           </select>
         </div>
 
+        {/* Search */}
+        <FilterGroup title="Buscar">
+          <form onSubmit={submitSearch} className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-bsm-text-muted pointer-events-none" />
+              <input
+                type="text"
+                placeholder={`Marca, modelo${isMoto ? ', estilo' : ', versión'}…`}
+                className="input-base pl-9 text-sm"
+                value={searchDraft}
+                onChange={(e) => setSearchDraft(e.target.value)}
+              />
+            </div>
+            <button type="submit"
+              className="px-3 py-2 bg-gold/10 border border-gold/30 text-gold text-xs hover:bg-gold/20 transition-colors">
+              OK
+            </button>
+          </form>
+          {searchParams.get('search') && (
+            <button
+              onClick={() => { setSearchDraft(''); updateParam('search', null) }}
+              className="flex items-center gap-1 text-xs text-[#575757] hover:text-[#9A9A9A] transition-colors mt-2"
+            >
+              <X className="w-3 h-3" />
+              Quitar búsqueda
+            </button>
+          )}
+        </FilterGroup>
+
         {/* Category */}
-        <FilterGroup title="Categoría">
+        <FilterGroup title="Categoría" defaultOpen={false}>
           <div className="space-y-2">
             {categories.map((cat) => (
               <CheckOption key={cat.value} param="categoria" value={cat.value} label={cat.label} />
@@ -270,7 +334,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         <FilterGroup title="Marca y modelo">
           <div className="space-y-3">
 
-            {/* ── Chip when brand (+ optional model) is selected ── */}
+            {/* Chip when brand selected */}
             {currentBrand && (
               <div className="flex items-center justify-between border border-gold/40 bg-surface-elevated px-3 py-2.5">
                 <span className="text-sm font-medium text-bsm-text-primary uppercase tracking-widest">
@@ -287,7 +351,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               </div>
             )}
 
-            {/* ── Brand list (hidden once brand is selected) ── */}
+            {/* Brand chips (hidden once brand selected) */}
             {!currentBrand && (
               <div>
                 <div className="flex flex-wrap gap-1.5">
@@ -314,32 +378,31 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               </div>
             )}
 
-            {/* ── Model select (only when brand selected, no model yet) ── */}
+            {/* Model select */}
             {currentBrand && !currentModel && (
-              <div>
-                <select
-                  className="select-base"
-                  value=""
-                  onChange={(e) => updateParam('modelo', e.target.value || null)}
-                  disabled={loadingModels}
-                >
-                  <option value="">
-                    {loadingModels ? 'Cargando modelos…' : 'Cualquier modelo'}
-                  </option>
-                  {models.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-              </div>
+              <select
+                className="select-base"
+                value=""
+                onChange={(e) => updateParam('modelo', e.target.value || null)}
+                disabled={loadingModels}
+              >
+                <option value="">
+                  {loadingModels ? 'Cargando modelos…' : 'Cualquier modelo'}
+                </option>
+                {models.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
             )}
 
-            {/* ── Version free-text ── */}
+            {/* Version */}
             <div>
               <label className="label-base flex items-center gap-1.5">
                 Versión
                 <span
                   title="Ej: M Sport, GTI, Elegance, Competition…"
-                  className="w-3.5 h-3.5 rounded-full border border-bsm-text-muted text-bsm-text-muted text-[9px] flex items-center justify-center cursor-help select-none"
+                  className="w-3.5 h-3.5 rounded-full border border-bsm-text-muted text-bsm-text-muted
+                    text-[9px] flex items-center justify-center cursor-help select-none"
                 >i</span>
               </label>
               <input
@@ -350,7 +413,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 onChange={(e) => updateParam('version', e.target.value || null)}
               />
             </div>
-
           </div>
         </FilterGroup>
 
@@ -392,7 +454,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </FilterGroup>
 
         {/* Power */}
-        <FilterGroup title="Potencia (CV)">
+        <FilterGroup title="Potencia (CV)" defaultOpen={false}>
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <label className="label-base">Desde</label>
@@ -427,17 +489,23 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           <>
             <FilterGroup title="Tipo de moto">
               <div className="space-y-2">
-                {MOTO_STYLES.map((o) => <CheckOption key={o.value} param="estilo" value={o.value} label={o.label} />)}
+                {MOTO_STYLES.map((o) => (
+                  <CheckOption key={o.value} param="estilo" value={o.value} label={o.label} />
+                ))}
               </div>
             </FilterGroup>
-            <FilterGroup title="Cilindrada">
+            <FilterGroup title="Cilindrada" defaultOpen={false}>
               <div className="space-y-2">
-                {MOTO_CC_RANGES.map((o) => <CheckOption key={o.value} param="cc" value={o.value} label={o.label} />)}
+                {MOTO_CC_RANGES.map((o) => (
+                  <CheckOption key={o.value} param="cc" value={o.value} label={o.label} />
+                ))}
               </div>
             </FilterGroup>
-            <FilterGroup title="Carnet requerido">
+            <FilterGroup title="Carnet requerido" defaultOpen={false}>
               <div className="space-y-2">
-                {LICENSE_TYPES.map((o) => <CheckOption key={o.value} param="carnet" value={o.value} label={o.label} />)}
+                {LICENSE_TYPES.map((o) => (
+                  <CheckOption key={o.value} param="carnet" value={o.value} label={o.label} />
+                ))}
               </div>
             </FilterGroup>
           </>
@@ -445,25 +513,43 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           <>
             <FilterGroup title="Carrocería">
               <div className="space-y-2">
-                {CAR_BODY_TYPES.map((o) => <CheckOption key={o.value} param="tipo" value={o.value} label={o.label} />)}
+                {CAR_BODY_TYPES.map((o) => (
+                  <CheckOption key={o.value} param="tipo" value={o.value} label={o.label} />
+                ))}
               </div>
             </FilterGroup>
-            <FilterGroup title="Combustible">
+            <FilterGroup title="Combustible" defaultOpen={false}>
               <div className="space-y-2">
-                {FUEL_OPTIONS.map((o) => <CheckOption key={o.value} param="combustible" value={o.value} label={o.label} />)}
+                {FUEL_OPTIONS.map((o) => (
+                  <CheckOption key={o.value} param="combustible" value={o.value} label={o.label} />
+                ))}
               </div>
             </FilterGroup>
-            <FilterGroup title="Transmisión">
+            <FilterGroup title="Transmisión" defaultOpen={false}>
               <div className="space-y-2">
-                {TRANSMISSION_OPTIONS.map((o) => <CheckOption key={o.value} param="cambio" value={o.value} label={o.label} />)}
+                {TRANSMISSION_OPTIONS.map((o) => (
+                  <CheckOption key={o.value} param="cambio" value={o.value} label={o.label} />
+                ))}
               </div>
             </FilterGroup>
           </>
         )}
 
-        {hasActiveFilters && (
-          <button onClick={clearAll}
-            className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors mt-2">
+        {/* Guarantee + Financing */}
+        <FilterGroup title="Garantía y financiación" defaultOpen={false}>
+          <div className="space-y-2">
+            <CheckOption param="garantia"    value="si"   label="Con garantía" />
+            <CheckOption param="financiacion" value="si"  label="Con financiación" />
+            <CheckOption param="destacados"  value="true" label="Solo destacados" />
+          </div>
+        </FilterGroup>
+
+        {/* Clear all */}
+        {activeFilterCount > 0 && (
+          <button
+            onClick={clearAll}
+            className="flex items-center gap-2 text-sm text-[#575757] hover:text-[#9A9A9A] transition-colors mt-4"
+          >
             <X className="w-4 h-4" />
             Borrar todos los filtros
           </button>
@@ -474,33 +560,80 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   return (
     <>
-      {/* Mobile toggle */}
+      {/* ── MOBILE trigger ── */}
       <div className="lg:hidden mb-6">
-        <button onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex items-center gap-2 btn-outline w-full justify-center">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="flex items-center gap-2 btn-outline w-full justify-center"
+        >
           <SlidersHorizontal className="w-4 h-4" />
           Filtros
-          {hasActiveFilters && (
-            <span className="w-5 h-5 rounded-full bg-gold text-obsidian text-xs flex items-center justify-center">!</span>
+          {activeFilterCount > 0 && (
+            <span className="w-5 h-5 rounded-full bg-gold text-obsidian text-[10px] font-medium flex items-center justify-center">
+              {activeFilterCount}
+            </span>
           )}
         </button>
-        {mobileOpen && (
-          <div className="mt-4 bg-surface border border-bsm-border p-6 animate-slide-up">
-            {renderFilters()}
-          </div>
-        )}
       </div>
 
-      {/* Desktop sidebar */}
+      {/* ── MOBILE drawer (fixed overlay) ── */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          {/* Backdrop */}
+          <button
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Cerrar filtros"
+          />
+
+          {/* Panel */}
+          <div className="relative z-10 w-[min(85vw,340px)] h-full bg-[#080808] border-r border-bsm-border flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-bsm-border flex-shrink-0">
+              <span className="text-sm font-medium text-bsm-text-primary">
+                Filtros {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+              </span>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-1 text-bsm-text-muted hover:text-bsm-text-primary transition-colors"
+                aria-label="Cerrar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-5 py-5">
+              {renderFilters()}
+            </div>
+
+            {/* Footer */}
+            <div className="flex-shrink-0 px-5 py-4 border-t border-bsm-border">
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="btn-gold w-full justify-center text-sm"
+              >
+                Ver resultados
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DESKTOP sidebar ── */}
       <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
         <div className="sticky top-24">
           <div className="flex items-center justify-between mb-6">
             <span className="text-xs text-bsm-text-muted uppercase tracking-widest">
               {totalCount} vehículos
             </span>
-            {hasActiveFilters && (
-              <button onClick={clearAll} className="text-xs text-gold hover:text-gold-light transition-colors">
-                Borrar filtros
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearAll}
+                className="text-xs text-gold hover:text-gold-light transition-colors flex items-center gap-1"
+              >
+                <X className="w-3 h-3" />
+                Borrar {activeFilterCount > 1 ? `${activeFilterCount} filtros` : 'filtro'}
               </button>
             )}
           </div>
