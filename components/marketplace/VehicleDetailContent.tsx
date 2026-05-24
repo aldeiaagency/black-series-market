@@ -10,6 +10,7 @@ import QualifiedLeadForm from '@/components/marketplace/QualifiedLeadForm'
 import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
+import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 
@@ -628,19 +629,7 @@ export default function VehicleDetailContent({
                 </div>
                 {vehicle.dealer && (
                   <div className="bg-surface border border-bsm-border p-5">
-                    <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Dealer seleccionado</p>
-                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="font-medium text-bsm-text-primary hover:text-gold transition-colors block mb-1">
-                      {vehicle.dealer.name}
-                    </Link>
-                    {vehicle.dealer.location_city && (
-                      <div className="flex items-center gap-1 text-xs text-bsm-text-muted mb-3">
-                        <MapPin className="w-3 h-3" />
-                        {[vehicle.dealer.location_city, vehicle.dealer.location_region].filter(Boolean).join(', ')}
-                      </div>
-                    )}
-                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors">
-                      Ver showroom completo<ChevronRight className="w-3 h-3" />
-                    </Link>
+                    <DealerInlineCard dealer={vehicle.dealer} variant="sidebar" />
                   </div>
                 )}
               </>
@@ -722,19 +711,7 @@ export default function VehicleDetailContent({
                 {/* Dealer card (sidebar) */}
                 {vehicle.dealer && (
                   <div className="bg-surface border border-bsm-border p-5">
-                    <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Dealer seleccionado</p>
-                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="font-medium text-bsm-text-primary hover:text-gold transition-colors block mb-1">
-                      {vehicle.dealer.name}
-                    </Link>
-                    {vehicle.dealer.location_city && (
-                      <div className="flex items-center gap-1 text-xs text-bsm-text-muted mb-3">
-                        <MapPin className="w-3 h-3" />
-                        {[vehicle.dealer.location_city, vehicle.dealer.location_region].filter(Boolean).join(', ')}
-                      </div>
-                    )}
-                    <Link href={`/dealers/${vehicle.dealer.slug}`} className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors">
-                      Ver showroom completo<ChevronRight className="w-3 h-3" />
-                    </Link>
+                    <DealerInlineCard dealer={vehicle.dealer} variant="sidebar" />
                   </div>
                 )}
 

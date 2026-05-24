@@ -1,0 +1,126 @@
+import Link from 'next/link'
+import { MapPin, BadgeCheck, ChevronRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+interface DealerProps {
+  name: string
+  slug: string
+  logo_url?: string | null
+  location_city?: string | null
+  location_region?: string | null
+  is_verified?: boolean
+}
+
+interface DealerInlineCardProps {
+  dealer: DealerProps
+  variant?: 'card' | 'sidebar'
+  className?: string
+}
+
+/**
+ * Compact dealer display. Use variant="card" in VehicleCard, variant="sidebar" in detail panels.
+ */
+export default function DealerInlineCard({ dealer, variant = 'card', className }: DealerInlineCardProps) {
+  const initial = dealer.name?.[0]?.toUpperCase() || '?'
+  const city = dealer.location_city || null
+  const region = dealer.location_region || null
+  const locationLabel = [city, region].filter(Boolean).join(', ') || 'Ubicación pendiente'
+
+  if (variant === 'card') {
+    return (
+      <Link
+        href={`/dealers/${dealer.slug}`}
+        className={cn(
+          'flex items-center gap-2 group/dealer',
+          className
+        )}
+      >
+        {/* Logo or initial */}
+        <div className="w-5 h-5 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+          {dealer.logo_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={dealer.logo_url}
+              alt={dealer.name}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <span className="text-[8px] font-medium text-[#C6A64B]/60 leading-none select-none">
+              {initial}
+            </span>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <span className="text-[11px] text-[#686868] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate block leading-tight">
+            {dealer.name}
+          </span>
+          {city && (
+            <span className="flex items-center gap-0.5 text-[10px] text-[#474747] leading-tight">
+              <MapPin className="w-2 h-2 flex-shrink-0" />
+              {city}
+            </span>
+          )}
+        </div>
+
+        {dealer.is_verified && (
+          <BadgeCheck className="w-3 h-3 text-[#C6A64B]/40 flex-shrink-0" aria-label="Dealer verificado" />
+        )}
+      </Link>
+    )
+  }
+
+  // sidebar variant
+  return (
+    <div className={cn('', className)}>
+      <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">
+        Dealer seleccionado
+      </p>
+
+      <div className="flex items-center gap-2.5 mb-2">
+        {/* Logo or initial */}
+        <div className="w-8 h-8 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+          {dealer.logo_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={dealer.logo_url}
+              alt={dealer.name}
+              className="w-full h-full object-contain p-0.5"
+            />
+          ) : (
+            <span className="font-display text-sm font-light text-[#C6A64B]/60 select-none">
+              {initial}
+            </span>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <Link
+            href={`/dealers/${dealer.slug}`}
+            className="font-medium text-bsm-text-primary hover:text-gold transition-colors block truncate text-sm"
+          >
+            {dealer.name}
+          </Link>
+          {dealer.is_verified && (
+            <span className="flex items-center gap-1 text-[9px] text-[#686868] uppercase tracking-widest">
+              <BadgeCheck className="w-2.5 h-2.5 text-[#C6A64B]/50" />
+              Dealer verificado
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1 text-xs text-bsm-text-muted mb-3">
+        <MapPin className="w-3 h-3 flex-shrink-0" />
+        {locationLabel}
+      </div>
+
+      <Link
+        href={`/dealers/${dealer.slug}`}
+        className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
+      >
+        Ver showroom completo <ChevronRight className="w-3 h-3" />
+      </Link>
+    </div>
+  )
+}

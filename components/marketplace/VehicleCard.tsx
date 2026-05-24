@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin, Gauge, Calendar } from 'lucide-react'
+import { Gauge, Calendar } from 'lucide-react'
 import { cn, formatPrice, formatMileage, FUEL_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
+import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
 
 interface VehicleCardProps {
   vehicle: Vehicle & { dealer?: any }
@@ -174,19 +175,11 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
 
           {/* Price + Power */}
           <div className="flex items-end justify-between">
-            <div>
-              <div className={cn(
-                'font-display text-[20px] font-light leading-none',
-                vehicle.price_on_request ? 'text-[#686868] text-[16px]' : 'text-[#C6A64B]'
-              )}>
-                {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
-              </div>
-              {vehicle.dealer && (
-                <div className="flex items-center gap-1 mt-1.5 text-[11px] text-[#575757]">
-                  <MapPin className="w-2.5 h-2.5" />
-                  {vehicle.dealer.location_city || vehicle.dealer.name}
-                </div>
-              )}
+            <div className={cn(
+              'font-display text-[20px] font-light leading-none',
+              vehicle.price_on_request ? 'text-[#686868] text-[16px]' : 'text-[#C6A64B]'
+            )}>
+              {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
             </div>
             {vehicle.power_hp && (
               <div className="text-right">
@@ -198,6 +191,17 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             )}
           </div>
         </Link>
+
+        {/* Dealer row — separate link so it doesn't nest inside the vehicle link */}
+        {vehicle.dealer ? (
+          <div className="mt-3 pt-2.5 border-t border-[#1A1A1A]">
+            <DealerInlineCard dealer={vehicle.dealer} variant="card" />
+          </div>
+        ) : (
+          <div className="mt-3 pt-2.5 border-t border-[#1A1A1A]">
+            <span className="text-[11px] text-[#3A3A3A] italic">Dealer pendiente de confirmar</span>
+          </div>
+        )}
       </div>
     </article>
   )

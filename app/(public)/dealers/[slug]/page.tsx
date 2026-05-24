@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 
 interface PageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ tipo?: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -32,8 +33,9 @@ const SPECIALTIES_LABELS: Record<string, string> = {
   custom:      'Custom bikes',
 }
 
-export default async function DealerPage({ params }: PageProps) {
+export default async function DealerPage({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const { tipo } = await searchParams
   const supabase = await createClient()
 
   const { data: dealer } = await supabase
@@ -47,7 +49,7 @@ export default async function DealerPage({ params }: PageProps) {
 
   const { data: vehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url)')
+    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
     .eq('dealer_id', dealer.id)
     .in('status', ['active', 'paused', 'sold'])
     .order('status', { ascending: true })
@@ -60,7 +62,21 @@ export default async function DealerPage({ params }: PageProps) {
   const motos = activeVehicles.filter((v: any) => v.vehicle_type === 'motorcycle')
   const totalActive = activeVehicles.length
 
+  // Filter inventory by tipo param (car / motorcycle / all or undefined)
+  const displayVehicles =
+    tipo === 'car'        ? cars  :
+    tipo === 'motorcycle' ? motos :
+    activeVehicles
+
+  // Brands derived from actual inventory (deduplicated)
+  const uniqueBrands = Array.from(
+    new Set((vehicles || []).map((v: any) => v.brand_name).filter(Boolean))
+  ) as string[]
+
   const specialties = dealer.certifications?.filter((c: string) => c in SPECIALTIES_LABELS) || []
+
+  const FALLBACK_DESCRIPTION =
+    'Dealer seleccionado en Black Label por su enfoque en unidades con valor, presentación cuidada y stock de interés para compradores exigentes.'
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -194,15 +210,34 @@ export default async function DealerPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Description + specialties */}
+            {/* Description + specialties + brands */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {dealer.description && (
-                <div className="md:col-span-2">
-                  <p className="text-bsm-text-secondary text-sm leading-relaxed">{dealer.description}</p>
+              <div className="md:col-span-2 space-y-5">
+                {/* About */}
+                <div>
+                  <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-2">Sobre el showroom</p>
+                  <p className="text-bsm-text-secondary text-sm leading-relaxed">
+                    {dealer.description || FALLBACK_DESCRIPTION}
+                  </p>
                 </div>
-              )}
+
+                {/* Brands derived from inventory */}
+                {uniqueBrands.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-2">Marcas en inventario</p>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                      {uniqueBrands.map((brand) => (
+                        <span key={brand} className="text-xs text-[#686868] tracking-wide">
+                          {brand}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {specialties.length > 0 && (
-                <div className={dealer.description ? '' : 'md:col-span-3'}>
+                <div>
                   <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Especialidades</p>
                   <div className="flex flex-wrap gap-2">
                     {specialties.map((s: string) => (
@@ -219,32 +254,57 @@ export default async function DealerPage({ params }: PageProps) {
           {/* Inventory */}
           <div className="pb-8">
 
-            {/* Tab bar when both types */}
-            {cars.length > 0 && motos.length > 0 && (
-              <div className="flex gap-0 mb-8 border-b border-bsm-border">
-                <div className="flex items-center gap-2 px-5 py-3 border-b-2 border-gold text-sm text-gold">
-                  <Car className="w-4 h-4" />
-                  Coches
-                  <span className="text-xs text-bsm-text-muted ml-1">({cars.length})</span>
-                </div>
-                <div className="flex items-center gap-2 px-5 py-3 text-sm text-bsm-text-muted">
-                  <Bike className="w-4 h-4" />
-                  Motos
-                  <span className="text-xs ml-1">({motos.length})</span>
-                </div>
+            {/* Inventory header + tab filter */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="font-display text-2xl font-light mb-1">Inventario actual</h2>
+                <p className="text-sm text-bsm-text-muted">
+                  {totalActive} unidad{totalActive !== 1 ? 'es' : ''} disponible{totalActive !== 1 ? 's' : ''}
+                </p>
               </div>
-            )}
 
-            <h2 className="font-display text-2xl font-light mb-2">
-              Inventario activo
-            </h2>
-            <p className="text-sm text-bsm-text-muted mb-8">
-              {totalActive} vehículo{totalActive !== 1 ? 's' : ''} publicado{totalActive !== 1 ? 's' : ''} en este momento
-            </p>
+              {/* Tab filter — only when both types present */}
+              {cars.length > 0 && motos.length > 0 && (
+                <div className="flex border border-bsm-border">
+                  <a
+                    href={`/dealers/${slug}`}
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors
+                      ${!tipo || tipo === 'all'
+                        ? 'bg-gold/10 text-gold border-r border-bsm-border'
+                        : 'text-bsm-text-muted hover:text-bsm-text-primary border-r border-bsm-border'}`}
+                  >
+                    Todos
+                    <span className="text-xs opacity-60">({totalActive})</span>
+                  </a>
+                  <a
+                    href={`/dealers/${slug}?tipo=car`}
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors
+                      ${tipo === 'car'
+                        ? 'bg-gold/10 text-gold border-r border-bsm-border'
+                        : 'text-bsm-text-muted hover:text-bsm-text-primary border-r border-bsm-border'}`}
+                  >
+                    <Car className="w-3.5 h-3.5" />
+                    Coches
+                    <span className="text-xs opacity-60">({cars.length})</span>
+                  </a>
+                  <a
+                    href={`/dealers/${slug}?tipo=motorcycle`}
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors
+                      ${tipo === 'motorcycle'
+                        ? 'bg-gold/10 text-gold'
+                        : 'text-bsm-text-muted hover:text-bsm-text-primary'}`}
+                  >
+                    <Bike className="w-3.5 h-3.5" />
+                    Motos
+                    <span className="text-xs opacity-60">({motos.length})</span>
+                  </a>
+                </div>
+              )}
+            </div>
 
-            {activeVehicles.length > 0 ? (
+            {displayVehicles.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-                {activeVehicles.map((v: any) => (
+                {displayVehicles.map((v: any) => (
                   <VehicleCard key={v.id} vehicle={v} />
                 ))}
               </div>

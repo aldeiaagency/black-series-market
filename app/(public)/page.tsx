@@ -24,14 +24,14 @@ export default async function HomePage() {
     await Promise.all([
       supabase
         .from('vehicles')
-        .select('*, dealer:dealers(name, slug, location_city, logo_url)')
+        .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
         .eq('status', 'active')
         .eq('is_featured', true)
         .order('published_at', { ascending: false })
         .limit(6),
       supabase
         .from('vehicles')
-        .select('*, dealer:dealers(name, slug, location_city, logo_url)')
+        .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
         .eq('status', 'active')
         .order('published_at', { ascending: false })
         .limit(8),

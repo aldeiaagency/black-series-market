@@ -40,9 +40,9 @@ export default async function DealersPage({ searchParams }: PageProps) {
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Red de concesionarios</span>
         </div>
-        <h1 className="section-title mb-2">Concesionarios premium</h1>
+        <h1 className="section-title mb-2">Showrooms seleccionados</h1>
         <p className="text-bsm-text-muted text-sm">
-          {count || 0} concesionarios verificados en el marketplace
+          {count || 0} concesionarios y especialistas en el marketplace
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export default async function DealersPage({ searchParams }: PageProps) {
       {dealers?.some((d: any) => d.is_featured) && (
         <div className="mb-12">
           <h2 className="font-display text-xl font-light mb-6 pb-3 border-b border-bsm-border">
-            Concesionarios Elite
+            Dealers seleccionados
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {dealers
