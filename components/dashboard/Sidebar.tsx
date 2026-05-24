@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Car, PlusCircle, User, BarChart2,
-  MessageSquare, CreditCard, LogOut, ExternalLink,
+  MessageSquare, CreditCard, LogOut, ExternalLink, FileUp,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -14,6 +14,7 @@ const NAV = [
   { label: 'Panel', href: '/dashboard', icon: LayoutDashboard, exact: true },
   { label: 'Inventario', href: '/dashboard/inventario', icon: Car },
   { label: 'Publicar vehículo', href: '/dashboard/publicar', icon: PlusCircle },
+  { label: 'Importar CSV', href: '/dashboard/importar', icon: FileUp },
   { label: 'Mensajes / Leads', href: '/dashboard/mensajes', icon: MessageSquare },
   { label: 'Analíticas', href: '/dashboard/analiticas', icon: BarChart2 },
   { label: 'Mi perfil', href: '/dashboard/perfil', icon: User },
