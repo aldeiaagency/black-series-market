@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" fill="#0A0A0A"/>
+  <defs>
+    <linearGradient id="ic-mono" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#787878"/>
+      <stop offset="22%"  stop-color="#C8C8C8"/>
+      <stop offset="45%"  stop-color="#F0F0F0"/>
+      <stop offset="68%"  stop-color="#C0C0C0"/>
+      <stop offset="100%" stop-color="#787878"/>
+    </linearGradient>
+  </defs>
+  <text
+    x="16"
+    y="23"
+    font-family="Georgia, serif"
+    font-size="18"
+    font-weight="300"
+    letter-spacing="-1"
+    text-anchor="middle"
+    fill="url(#ic-mono)"
+  >BL</text>
+</svg>

@@ -125,7 +125,7 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center group shrink-0">
-            <Logo width={144} variant="header" />
+            <Logo width={180} variant="header" />
           </Link>
 
           {/* Desktop Nav */}
