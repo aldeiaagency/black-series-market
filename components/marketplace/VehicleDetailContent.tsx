@@ -206,10 +206,6 @@ export default function VehicleDetailContent({
     },
   ]
 
-  const decode = (s: string) => {
-    try { return decodeURIComponent(s) } catch { return s }
-  }
-
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
 
@@ -223,10 +219,10 @@ export default function VehicleDetailContent({
           href={`${backHref}?marca=${vehicle.brand_name.toLowerCase().replace(/\s+/g, '-')}`}
           className="hover:text-gold transition-colors"
         >
-          {decode(vehicle.brand_name)}
+          {vehicle.brand_name}
         </Link>
         <span className="text-[#2A2A2A]">/</span>
-        <span className="text-bsm-text-secondary truncate max-w-[180px]">{decode(vehicle.model_name)}</span>
+        <span className="text-bsm-text-secondary truncate max-w-[180px]">{vehicle.model_name}</span>
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">

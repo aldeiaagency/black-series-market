@@ -141,13 +141,23 @@ export default function ImportarPage() {
     setFileName(file.name)
     const reader = new FileReader()
     reader.onload = (e) => {
-      const text = e.target?.result as string
+      const buffer = e.target?.result as ArrayBuffer
+      const bytes = new Uint8Array(buffer)
+
+      // Try UTF-8 first; Excel on Windows saves CSV as Windows-1252, which
+      // produces U+FFFD replacement chars when read as UTF-8. If that happens,
+      // re-decode with Windows-1252 (covers á é í ó ú ñ ü etc.).
+      let text = new TextDecoder('utf-8', { fatal: false }).decode(bytes)
+      if (text.includes('�')) {
+        text = new TextDecoder('windows-1252').decode(bytes)
+      }
+
       const { rows } = parseCSV(text)
       if (!rows.length) { setFileError('El archivo está vacío o no tiene filas de datos.'); return }
       const normalised = rows.map(r => normaliseRow(r))
       setParsed(normalised.map(r => ({ raw: r, error: validateRow(r) })))
     }
-    reader.readAsText(file, 'utf-8')
+    reader.readAsArrayBuffer(file)
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
