@@ -228,16 +228,14 @@ export default async function HomePage() {
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px w-8 bg-[#C6A64B]/40" />
               <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
-                Nuestro criterio
+                NUESTRO ESTÁNDAR
               </span>
             </div>
             <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA] tracking-tight mb-4">
-              No publicamos volumen.<br />
-              <span className="text-[#9A9A9A]">Seleccionamos unidades con criterio.</span>
+              Qué nos hace diferentes.<br />
             </h2>
             <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xl">
-              Cualquier portal puede publicar 300.000 anuncios. Nosotros preferimos publicar los correctos.
-              Unidades con algo especial, vendidas por profesionales con los que vale la pena hablar.
+              Cuando buscas un deportivo, un clásico, una moto premium o una unidad difícil de encontrar, necesitas algo más que una lista interminable de anuncios. Necesitas contexto, confianza y buenos profesionales detrás.
             </p>
           </div>
 
@@ -245,17 +243,17 @@ export default async function HomePage() {
             {[
               {
                 icon: Shield,
-                title: 'Selección antes que volumen',
-                desc: 'No publicamos todo lo que entra. Cada unidad pasa por un criterio editorial mínimo: tipo de vehículo, presentación, información real.',
+                title: 'Vehículos premium',
+                desc: 'Deportivos, clásicos, motos premium y unidades singulares con algo que las diferencia: versión, estado, configuración, historia o atractivo real.',
               },
               {
                 icon: Star,
-                title: 'Profesionales identificados',
-                desc: 'Revisamos el perfil de cada concesionario o compraventa antes de darles acceso. No es una verificación total, pero es un filtro real.',
+                title: 'Profesionales verificados',
+                desc: 'Antes de publicar, revisamos la reputación y presencia online de cada concesionario, compraventa o especialista.',
               },
               {
                 icon: Zap,
-                title: 'Un entorno diseñado para buscar bien',
+                title: 'Una búsqueda más fácil',
                 desc: 'Menos ruido, más criterio. Explora vehículos premium en un entorno más claro y menos masificado que un portal generalista.',
               },
             ].map(({ icon: Icon, title, desc }) => (
