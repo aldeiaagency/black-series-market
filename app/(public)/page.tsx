@@ -95,6 +95,7 @@ export default async function HomePage() {
               style={{ fontSize: 'clamp(2.8rem, 5.5vw, 5rem)' }}
             >
               Selección exclusiva de coches y motos premium
+            </h1>
 
             {/* Subclaim */}
             <p className="text-[#858585] text-[17px] leading-relaxed mb-10 max-w-xl">
