@@ -29,8 +29,9 @@ export default async function HomePage() {
         .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
         .eq('status', 'active')
         .eq('is_featured', true)
+        .or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`)
         .order('published_at', { ascending: false })
-        .limit(6),
+        .limit(8),
       supabase
         .from('vehicles')
         .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
@@ -167,7 +168,7 @@ export default async function HomePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {featuredVehicles.map((v: any) => (
               <VehicleCard key={v.id} vehicle={v} />
             ))}
