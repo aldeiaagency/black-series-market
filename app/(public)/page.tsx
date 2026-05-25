@@ -355,56 +355,78 @@ export default async function HomePage() {
   </div>
 </section>
 
-      {/* BUYER BLOCK */}
-      <section className="border-t border-[#141414] py-20">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-          <div className="bg-[#080808] border border-[#1A1A1A] p-12 md:p-16 flex flex-col lg:flex-row items-start justify-between gap-12">
-            <div className="max-w-lg">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="h-px w-8 bg-[#C6A64B]/40" />
-                <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">Para compradores</span>
-              </div>
-              <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA] mb-5">
-                Menos ruido.<br />
-                <span className="text-[#9A9A9A]">Más criterio.</span>
-              </h2>
-              <ul className="space-y-3 mb-8">
-                {[
-                  'Filtra por marca, modelo, precio, kilómetros y más de 10 criterios adicionales',
-                  'Cada unidad publicada por un profesional con perfil revisado',
-                  'Formulario de contacto que incluye tu contexto real de compra',
-                  'Búsqueda privada si no encuentras lo que buscas en el catálogo',
-                ].map((point) => (
-                  <li key={point} className="flex items-start gap-3">
-                    <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
-                    <span className="text-[13px] text-[#8A8A8A] leading-relaxed">{point}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/coches" className="btn-gold px-6 py-3 text-sm">
-                  Explorar coches
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link href="/busqueda-privada" className="btn-outline px-6 py-3 text-sm">
-                  Búsqueda privada
-                </Link>
-              </div>
-            </div>
-            <div className="flex-shrink-0 w-full lg:w-auto">
-              <div className="border border-[#1E1E1E] bg-[#0D0D0D] p-6 min-w-[260px]">
-                <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">¿No lo encuentras?</p>
-                <p className="text-sm text-[#8A8A8A] leading-relaxed mb-5">
-                  Cuéntanos qué buscas. Si aparece una oportunidad compatible, te lo comunicamos.
-                </p>
-                <Link href="/busqueda-privada" className="flex items-center gap-2 text-xs text-gold hover:text-gold-light transition-colors">
-                  Registrar búsqueda privada <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-          </div>
+    {/* VEHÍCULOS A LA CARTA */}
+<section className="border-t border-[#141414] py-20">
+  <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+    <div className="bg-[#080808] border border-[#1A1A1A] p-12 md:p-16 flex flex-col lg:flex-row items-start justify-between gap-12">
+      <div className="max-w-lg">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-px w-8 bg-[#C6A64B]/40" />
+          <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+            Vehículos a la carta
+          </span>
         </div>
-      </section>
+
+        <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA] mb-5">
+          ¿No encuentras la unidad<br />
+          <span className="text-[#9A9A9A]">que estás buscando?</span>
+        </h2>
+
+        <p className="text-[14px] text-[#8A8A8A] leading-relaxed mb-8">
+          Dinos qué coche o moto tienes en mente. Si aparece una oportunidad compatible
+          dentro de nuestra red de profesionales, podremos avisarte con discreción.
+        </p>
+
+        <ul className="space-y-3 mb-8">
+          {[
+            'Define marca, modelo, versión y presupuesto',
+            'Indica si buscas coche, moto, clásico, deportivo o una unidad especial',
+            'Cuéntanos tus preferencias de color, kilometraje, ubicación o plazo de compra',
+            'Recibe aviso si aparece una oportunidad compatible con lo que estás buscando',
+          ].map((point) => (
+            <li key={point} className="flex items-start gap-3">
+              <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
+              <span className="text-[13px] text-[#8A8A8A] leading-relaxed">
+                {point}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="flex flex-wrap gap-3">
+          <Link href="/busqueda-privada" className="btn-gold px-6 py-3 text-sm">
+            Solicitar vehículo a la carta
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+
+          <Link href="/coches" className="btn-outline px-6 py-3 text-sm">
+            Explorar vehículos
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex-shrink-0 w-full lg:w-auto">
+        <div className="border border-[#1E1E1E] bg-[#0D0D0D] p-6 min-w-[260px]">
+          <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
+            ¿Buscas algo muy concreto?
+          </p>
+
+          <p className="text-sm text-[#8A8A8A] leading-relaxed mb-5">
+            Algunas unidades no aparecen todos los días. Registra tu búsqueda y
+            cuéntanos exactamente qué estás intentando encontrar.
+          </p>
+
+          <Link
+            href="/busqueda-privada"
+            className="flex items-center gap-2 text-xs text-gold hover:text-gold-light transition-colors"
+          >
+            Solicitar vehículo a la carta <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* PROFESSIONAL BLOCK */}
       <section className="border-t border-[#141414] py-20">
