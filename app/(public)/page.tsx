@@ -29,7 +29,6 @@ export default async function HomePage() {
         .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
         .eq('status', 'active')
         .eq('is_featured', true)
-        .or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`)
         .order('published_at', { ascending: false })
         .limit(8),
       supabase
