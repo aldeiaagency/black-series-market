@@ -429,66 +429,98 @@ export default async function HomePage() {
 </section>
 
       {/* PROFESSIONAL BLOCK */}
-      <section className="border-t border-[#141414] py-20">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row items-start justify-between gap-12">
-            <div className="max-w-xl">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="h-px w-8 bg-[#C6A64B]/30" />
-                <span className="text-[10px] text-[#C6A64B]/50 tracking-[0.3em] uppercase">Para profesionales</span>
-              </div>
-              <h2 className="font-display text-2xl md:text-3xl font-light text-[#F4F1EA] mb-4">
-                Un canal pensado para<br />
-                <span className="text-[#9A9A9A]">oportunidades reales.</span>
-              </h2>
-              <p className="text-[13px] text-[#8A8A8A] leading-relaxed mb-6">
-                Si trabajas con vehículos premium, deportivos, clásicos o unidades especiales,
-                Black Label es un canal diferente al generalista.
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  'Acceso por solicitud — no es un portal de alta masiva',
-                  'Solicitudes cualificadas con contexto de compra real',
-                  'Entorno diseñado para mostrar bien lo que tienes',
-                  'Base operativa con criterio editorial, no solo técnico',
-                ].map((point) => (
-                  <li key={point} className="flex items-start gap-3">
-                    <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
-                    <span className="text-[13px] text-[#8A8A8A] leading-relaxed">{point}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/registro" className="btn-outline px-8 py-3 text-sm inline-flex">
-                Solicitar acceso profesional
-              </Link>
-            </div>
-            <div className="flex-shrink-0 border border-[#1E1E1E] bg-[#080808] p-8 min-w-[280px] max-w-xs">
-              <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">Criterios de acceso</p>
-              <ul className="space-y-3">
-                {[
-                  'Vehículos con algo especial — no stock genérico',
-                  'Información real y presentación cuidada',
-                  'Disponibilidad verificada en el momento de publicación',
-                  'Perfil profesional identificable',
-                ].map((c) => (
-                  <li key={c} className="flex items-start gap-2.5 text-[12px] text-[#808080] leading-relaxed">
-                    <span className="text-[#C6A64B]/40 mt-0.5 flex-shrink-0">→</span>
-                    {c}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 pt-5 border-t border-[#141414]">
-                <Link
-                  href="/como-funciona"
-                  className="flex items-center gap-1.5 text-xs text-[#808080] hover:text-gold transition-colors"
+<section className="border-t border-[#141414] py-20">
+  <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-10 lg:gap-14 items-stretch">
+      <div className="max-w-xl">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-px w-8 bg-[#C6A64B]/30" />
+          <span className="text-[10px] text-[#C6A64B]/50 tracking-[0.3em] uppercase">
+            Para concesionarios y especialistas
+          </span>
+        </div>
+
+        <h2 className="font-display text-2xl md:text-3xl font-light text-[#F4F1EA] mb-4">
+          Un escaparate más cuidado<br />
+          <span className="text-[#9A9A9A]">para tu mejor stock.</span>
+        </h2>
+
+        <p className="text-[13px] text-[#8A8A8A] leading-relaxed mb-6">
+          Si trabajas con coches o motos premium, deportivos, clásicos o unidades
+          especiales, Black Label te permite presentar tu inventario en un entorno
+          más visual, más selectivo y alineado con el comprador adecuado.
+        </p>
+
+        <ul className="space-y-3 mb-8">
+          {[
+            'Acceso por solicitud, no publicación abierta',
+            'Tu showroom y tus vehículos con una presentación más cuidada',
+            'Consultas de compradores con más contexto antes del contacto',
+            'Un canal complementario para destacar unidades premium, deportivas o especiales',
+          ].map((point) => (
+            <li key={point} className="flex items-start gap-3">
+              <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
+              <span className="text-[13px] text-[#8A8A8A] leading-relaxed">
+                {point}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <Link href="/registro" className="btn-outline px-8 py-3 text-sm inline-flex">
+          Solicitar acceso profesional
+        </Link>
+      </div>
+
+      <div className="relative w-full min-h-[360px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
+        <img
+          src="/images/professionals/professional-showroom-black-label.webp"
+          alt="Showroom profesional premium con vehículo revisado para Black Label"
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
+          loading="lazy"
+          decoding="async"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/70 to-[#080808]/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-[#080808]/40" />
+
+        <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8">
+          <div className="border border-[#1E1E1E] bg-[#080808]/85 backdrop-blur-sm p-6">
+            <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
+              Qué buscamos
+            </p>
+
+            <ul className="space-y-3">
+              {[
+                'Vehículos con valor real para el comprador',
+                'Información clara, fotos cuidadas y disponibilidad actualizada',
+                'Profesionales con reputación y presencia revisable',
+                'Stock premium, deportivo, clásico, enthusiast o unidades especiales',
+              ].map((c) => (
+                <li
+                  key={c}
+                  className="flex items-start gap-2.5 text-[12px] text-[#808080] leading-relaxed"
                 >
-                  Cómo funciona para profesionales <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
+                  <span className="text-[#C6A64B]/40 mt-0.5 flex-shrink-0">→</span>
+                  {c}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 pt-5 border-t border-[#141414]">
+              <Link
+                href="/registro"
+                className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
+              >
+                Solicitar acceso profesional <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* POWERED BY BLACK SERIES */}
       <section className="border-t border-[#0E0E0E] py-12">
