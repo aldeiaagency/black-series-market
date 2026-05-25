@@ -296,55 +296,64 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* QUÉ NOS DIFERENCIA */}
-      <section className="border-t border-[#141414] py-20">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px w-8 bg-[#C6A64B]/40" />
-              <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">Por qué Black Label</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA]">
-              Qué nos diferencia
-            </h2>
+   {/* CÓMO TE AYUDA BLACK LABEL */}
+<section className="border-t border-[#141414] py-20">
+  <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+    <div className="mb-12">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-px w-8 bg-[#C6A64B]/40" />
+        <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+          Cómo te ayuda Black Label
+        </span>
+      </div>
+      <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA]">
+        Una forma más clara de encontrar tu próximo vehículo
+      </h2>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-px border border-[#161616] bg-[#161616]">
+      {[
+        {
+          n: '01',
+          title: 'Menos anuncios sin interés',
+          desc: 'No queremos que pierdas tiempo entre miles de resultados. Black Label reúne coches y motos que encajan con una búsqueda más especial.',
+        },
+        {
+          n: '02',
+          title: 'Profesionales identificados',
+          desc: 'Cada vehículo está publicado por un concesionario, compraventa o especialista reconocible, con ficha propia y datos claros.',
+        },
+        {
+          n: '03',
+          title: 'Información útil desde el primer vistazo',
+          desc: 'Fichas visuales, datos clave, ubicación, estado, vendedor y condiciones principales para comparar con más tranquilidad.',
+        },
+        {
+          n: '04',
+          title: 'Vehículos a la carta',
+          desc: 'Si no encuentras la unidad que quieres, puedes decirnos qué buscas y activaremos una búsqueda para localizar oportunidades compatibles.',
+        },
+        {
+          n: '05',
+          title: 'Contacto directo con el vendedor',
+          desc: 'Puedes contactar directamente desde la ficha del vehículo o desde el perfil del vendedor para resolver dudas y avanzar con más contexto.',
+        },
+      ].map((item) => (
+        <div key={item.n} className="bg-[#0A0A0A] p-6 md:p-8">
+          <div className="font-display text-xs text-[#C6A64B]/40 mb-4 tracking-[0.2em]">
+            {item.n}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-px border border-[#161616] bg-[#161616]">
-            {[
-              {
-                n: '01',
-                title: 'Selección antes que volumen',
-                desc: 'No publicamos todo. Hay un criterio editorial mínimo para cada unidad publicada.',
-              },
-              {
-                n: '02',
-                title: 'Profesionales identificados',
-                desc: 'Acceso por solicitud. Revisamos el perfil de cada vendedor antes de darle acceso a la plataforma.',
-              },
-              {
-                n: '03',
-                title: 'Solicitudes con contexto',
-                desc: 'El formulario de contacto cualificado envía al vendedor información real: plazo, financiación, entrega.',
-              },
-              {
-                n: '04',
-                title: 'Búsqueda privada',
-                desc: 'Registra lo que buscas. Si aparece una oportunidad compatible, te lo comunicamos discretamente.',
-              },
-              {
-                n: '05',
-                title: 'Base operativa Black Series',
-                desc: 'Impulsado por Black Series, agencia de referencia en el mundo del motor de alto rendimiento.',
-              },
-            ].map((item) => (
-              <div key={item.n} className="bg-[#0A0A0A] p-6 md:p-8">
-                <div className="font-display text-xs text-[#C6A64B]/40 mb-4 tracking-[0.2em]">{item.n}</div>
-                <h3 className="text-[13px] font-medium text-[#C9C9C9] mb-3 leading-snug">{item.title}</h3>
-                <p className="text-[12px] text-[#808080] leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
+          <h3 className="text-[13px] font-medium text-[#C9C9C9] mb-3 leading-snug">
+            {item.title}
+          </h3>
+          <p className="text-[12px] text-[#808080] leading-relaxed">
+            {item.desc}
+          </p>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* BUYER BLOCK */}
       <section className="border-t border-[#141414] py-20">
