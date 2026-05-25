@@ -93,25 +93,25 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
         <div className="absolute top-3 left-3 z-20 pointer-events-none flex flex-col gap-1">
           {showFeatured && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-[#C6A64B] bg-[#C6A64B]/10 border border-[#C6A64B]/25 font-medium">
+              text-[#C6A64B] bg-[#0A0A0A] border border-[#C6A64B]/40 font-medium">
               Destacado
             </span>
           )}
           {showPick && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-[#C9C9C9] bg-[#1A1A1A]/90 border border-[#2A2A2A] font-medium">
+              text-[#C9C9C9] bg-[#0A0A0A] border border-[#2A2A2A] font-medium">
               Selection
             </span>
           )}
           {showNew && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 font-medium">
+              text-emerald-400 bg-[#0A0A0A] border border-emerald-400/30 font-medium">
               Recién llegado
             </span>
           )}
           {showBadge && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-[#9A9A9A] bg-[#141414]/90 border border-[#222222] font-medium">
+              text-[#9A9A9A] bg-[#0A0A0A] border border-[#2A2A2A] font-medium">
               {vehicle.badge}
             </span>
           )}
