@@ -28,7 +28,7 @@ const NAV_ITEMS = [
     ],
   },
   { label: 'Showrooms', href: '/dealers' },
-  { label: 'Búsqueda privada', href: '/busqueda-privada' },
+  { label: 'Vehículos a la carta', href: '/busqueda-privada' },
   { label: 'Cómo funciona', href: '/como-funciona' },
 ]
 
