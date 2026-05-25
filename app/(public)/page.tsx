@@ -16,7 +16,7 @@ const PILLARS: { label: string; icon: LucideIcon }[] = [
   { label: 'Selección premium',    icon: Diamond    },
   { label: 'Vendedores verificados', icon: BadgeCheck },
   { label: 'Coches y motos',       icon: CarFront   },
-  { label: 'Búsqueda a medida',    icon: Search     },
+  { label: 'Vehículos a la carta',    icon: Search     },
 ]
 
 export default async function HomePage() {
@@ -85,7 +85,7 @@ export default async function HomePage() {
             <div className="flex items-center gap-3 mb-10">
               <div className="h-px w-10 bg-[#C6A64B]/60" />
               <span className="text-[10px] text-[#C6A64B]/80 tracking-[0.35em] uppercase font-medium">
-                Selección de coches y motos premium
+                ENCUENTRA EL VEHÍCULO DE TUS SUEÑOS
               </span>
             </div>
 
@@ -94,14 +94,11 @@ export default async function HomePage() {
               className="font-display font-light text-[#F4F1EA] leading-[1.02] mb-8"
               style={{ fontSize: 'clamp(2.8rem, 5.5vw, 5rem)' }}
             >
-              No es volumen.
-              <span className="block italic text-[#C9C9C9]">Es selección.</span>
-            </h1>
+              Selección exclusiva de coches y motos premium
 
             {/* Subclaim */}
             <p className="text-[#858585] text-[17px] leading-relaxed mb-10 max-w-xl">
-              Coches deportivos, clásicos, motos premium y unidades especiales.
-              Publicados por concesionarios y compraventas verificados para quienes buscan algo más que un vehículo.
+              Encuentra coches deportivos, clásicos, motos premium y unidades especiales publicadas por concesionarios, compraventas y especialistas previamente verificados.
             </p>
 
             <SearchBar size="hero" className="max-w-xl mb-10" />
