@@ -7,7 +7,7 @@ const LINKS = {
     { label: 'Motos', href: '/motos' },
     { label: 'Marcas', href: '/marcas' },
     { label: 'Concesionarios', href: '/dealers' },
-    { label: 'Búsqueda privada', href: '/busqueda-privada' },
+    { label: 'Coches a la carta', href: '/busqueda-privada' },
     { label: 'Mis favoritos', href: '/mis-favoritos' },
     { label: 'Cómo funciona', href: '/como-funciona' },
   ],
@@ -48,8 +48,7 @@ export default function Footer() {
               </p>
             </div>
             <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xs">
-              Marketplace curado de coches y motos premium, deportivos, clásicos
-              y unidades especiales.
+              Marketplace especializado en coches y motos premium, deportivos, clásicos y unidades especiales.
             </p>
           </div>
 
