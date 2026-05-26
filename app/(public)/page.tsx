@@ -63,9 +63,9 @@ export default async function HomePage() {
             alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
             fill
             priority
-            quality={92}
+            quality={100}
             className="object-cover object-center"
-            sizes="50vw"
+            sizes="(max-width: 1280px) 50vw, 800px"
           />
           {/* Left fade — blends into background */}
           <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-[#050505] to-transparent pointer-events-none" />
@@ -127,7 +127,7 @@ export default async function HomePage() {
               src="/images/hero/black-label-hero-gt3rs-ducati.webp"
               alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
               fill
-              quality={85}
+              quality={100}
               className="object-cover object-center"
               sizes="100vw"
             />
