@@ -61,7 +61,7 @@ export default async function AdminVehiculosPage({ searchParams }: PageProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-bsm-border">
-              {['Foto', 'Vehículo', 'Concesionario', 'Precio', 'Estado', 'Visitas', 'Fecha', 'Acciones'].map((h) => (
+              {['Foto', 'Vehículo', 'Condición', 'Concesionario', 'Precio', 'Estado', 'Visitas', 'Fecha', 'Acciones'].map((h) => (
                 <th key={h} className="text-left px-4 py-3 text-xs text-bsm-text-muted font-medium uppercase tracking-wide">
                   {h}
                 </th>
@@ -81,7 +81,15 @@ export default async function AdminVehiculosPage({ searchParams }: PageProps) {
                 </td>
                 <td className="px-4 py-3">
                   <p className="font-medium text-bsm-text-primary">{v.brand_name} {v.model_name}</p>
-                  <p className="text-xs text-bsm-text-muted">{v.year}</p>
+                  <p className="text-xs text-bsm-text-muted">{v.year} {v.location_province ? `· ${v.location_province}` : ''}</p>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="text-xs text-bsm-text-secondary">
+                    {v.condition_type || <span className="text-[#555]">—</span>}
+                  </div>
+                  {v.iva_deducible && (
+                    <span className="text-[9px] text-emerald-400/70 uppercase tracking-wide">IVA ded.</span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <Link href={`/dealers/${v.dealer?.slug}`} className="text-xs text-bsm-text-secondary hover:text-gold">

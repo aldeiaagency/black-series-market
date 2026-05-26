@@ -28,24 +28,33 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
     .eq('status', 'active')
     .eq('vehicle_type', 'car')
 
-  if (params.categoria)    query = query.eq('category', params.categoria)
-  if (params.marca)        query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
-  if (params.modelo)       query = query.ilike('model_name', `%${params.modelo}%`)
-  if (params.version)      query = query.ilike('version', `%${params.version}%`)
-  if (params.anioMin)      query = query.gte('year', parseInt(params.anioMin))
-  if (params.anioMax)      query = query.lte('year', parseInt(params.anioMax))
-  if (params.precioMin)    query = query.gte('price', parseInt(params.precioMin))
-  if (params.precioMax)    query = query.lte('price', parseInt(params.precioMax))
-  if (params.cvMin)        query = query.gte('power_hp', parseInt(params.cvMin))
-  if (params.cvMax)        query = query.lte('power_hp', parseInt(params.cvMax))
-  if (params.kmMax)        query = query.lte('mileage_km', parseInt(params.kmMax))
-  if (params.tipo)         query = query.eq('body_type', params.tipo)
-  if (params.combustible)  query = query.eq('fuel_type', params.combustible)
-  if (params.cambio)       query = query.eq('transmission', params.cambio)
+  if (params.categoria)          query = query.eq('category', params.categoria)
+  if (params.marca)              query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
+  if (params.modelo)             query = query.ilike('model_name', `%${params.modelo}%`)
+  if (params.version)            query = query.ilike('version', `%${params.version}%`)
+  if (params.anioMin)            query = query.gte('year', parseInt(params.anioMin))
+  if (params.anioMax)            query = query.lte('year', parseInt(params.anioMax))
+  if (params.precioMin)          query = query.gte('price', parseInt(params.precioMin))
+  if (params.precioMax)          query = query.lte('price', parseInt(params.precioMax))
+  if (params.cvMin)              query = query.gte('power_hp', parseInt(params.cvMin))
+  if (params.cvMax)              query = query.lte('power_hp', parseInt(params.cvMax))
+  if (params.kmMax)              query = query.lte('mileage_km', parseInt(params.kmMax))
+  if (params.tipo)               query = query.eq('body_type', params.tipo)
+  if (params.combustible)        query = query.eq('fuel_type', params.combustible)
+  if (params.cambio)             query = query.eq('transmission', params.cambio)
+  if (params.colorExterior)      query = query.ilike('color_exterior', `%${params.colorExterior}%`)
+  if (params.provincia)          query = query.ilike('location_province', `%${params.provincia}%`)
+  if (params.showroom)           query = query.eq('dealer_id', params.showroom)
+  if (params.condicion)          query = query.eq('condition_type', params.condicion)
+  if (params.traccion)           query = query.eq('drive_type', params.traccion)
+  if (params.etiquetaDgt)        query = query.eq('dgt_label', params.etiquetaDgt)
+  if (params.equipamiento)       query = query.contains('equipment', [params.equipamiento])
+  if (params.historial === 'si') query = query.eq('has_service_history', true)
+  if (params.ivaDeducible === 'si') query = query.eq('iva_deducible', true)
   if (params.destacados === 'true') query = query.eq('is_featured', true)
   if (params.garantia === 'si')     query = query.eq('has_warranty', true)
   if (params.financiacion === 'si') query = query.eq('financing_available', true)
-  if (params.search)       query = query.or(
+  if (params.search)             query = query.or(
     `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,title.ilike.%${params.search}%,version.ilike.%${params.search}%`
   )
 
@@ -68,13 +77,13 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
     return (
       <div className="flex-1 space-y-6">
         <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
-          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay unidades con esos criterios</h3>
+          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay vehículos con esos criterios</h3>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
-            Ajusta los filtros o registra una búsqueda privada para que te avisemos cuando entre una unidad compatible.
+            Ajusta los filtros o solicita un vehículo a la carta para que podamos tener en cuenta tu búsqueda.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/coches" className="btn-outline text-sm px-4">Limpiar filtros</Link>
-            <Link href="/busqueda-privada" className="btn-gold text-sm px-4">Búsqueda privada</Link>
+            <Link href="/busqueda-privada" className="btn-gold text-sm px-4">Vehículos a la carta</Link>
             <CreateAlertButton
               vehicleType="car"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-bsm-border text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"

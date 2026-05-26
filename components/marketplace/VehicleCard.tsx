@@ -1,10 +1,10 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Gauge, Calendar } from 'lucide-react'
-import { cn, formatPrice, formatMileage, FUEL_LABELS } from '@/lib/utils'
+import { Gauge, Calendar, Images, MapPin } from 'lucide-react'
+import { cn, formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
@@ -30,6 +30,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
   const [imgError, setImgError] = useState(false)
   const primaryImage = vehicle.images?.[0]?.url
   const href = `/${vehicle.vehicle_type === 'car' ? 'coches' : 'motos'}/${vehicle.slug}`
+  const photoCount = vehicle.images?.length || 0
 
   const title = vehicle.title || `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year}`
 
@@ -39,10 +40,16 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
     : null
 
   // Badge priority: featured > editors_pick > new arrival > custom; max 2 badges total
-  const showFeatured   = vehicle.is_featured && isActive
-  const showPick       = vehicle.is_editors_pick && !vehicle.is_featured && isActive
-  const showNew        = !showFeatured && !showPick && isActive && isNewVehicle(vehicle.published_at)
-  const showBadge      = vehicle.badge && !showFeatured && !showPick && !showNew && isActive
+  const showFeatured = vehicle.is_featured && isActive
+  const showPick     = vehicle.is_editors_pick && !vehicle.is_featured && isActive
+  const showNew      = !showFeatured && !showPick && isActive && isNewVehicle(vehicle.published_at)
+  const showBadge    = vehicle.badge && !showFeatured && !showPick && !showNew && isActive
+
+  // Extra meta badges (prioritized, max 2)
+  const showIva      = isActive && vehicle.iva_deducible === true
+
+  // Location: prefer vehicle's own province, fallback to dealer city
+  const location = vehicle.location_province || vehicle.dealer?.location_city || null
 
   return (
     <article className={cn(
@@ -117,6 +124,15 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           )}
         </div>
 
+        {/* Photo count — bottom right */}
+        {photoCount > 1 && (
+          <div className="absolute bottom-2.5 right-3 z-20 pointer-events-none
+            flex items-center gap-1 text-[10px] text-[#9A9A9A]">
+            <Images className="w-3 h-3" />
+            {photoCount}
+          </div>
+        )}
+
         {/* Action buttons — top right */}
         {isActive && (
           <div className="absolute top-3 right-3 z-20 flex gap-1.5
@@ -143,11 +159,11 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             {vehicle.model_name}
           </h3>
           {vehicle.version && (
-            <p className="text-[12px] text-[#8A8A8A] mb-3 leading-tight">{vehicle.version}</p>
+            <p className="text-[12px] text-[#8A8A8A] mb-2.5 leading-tight">{vehicle.version}</p>
           )}
 
-          {/* Specs */}
-          <div className="flex items-center gap-3.5 mb-4 text-[12px] text-[#8A8A8A]">
+          {/* Specs row: year · km · cambio · combustible */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-[12px] text-[#8A8A8A]">
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-[#737373]" />
               {vehicle.year}
@@ -156,12 +172,35 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <Gauge className="w-3 h-3 text-[#737373]" />
               {formatMileage(vehicle.mileage_km)}
             </span>
-            {vehicle.fuel_type && (
+            {vehicle.transmission && (
               <span className="hidden sm:block text-[#808080]">
+                {TRANSMISSION_LABELS[vehicle.transmission]}
+              </span>
+            )}
+            {vehicle.fuel_type && (
+              <span className="hidden md:block text-[#808080]">
                 {FUEL_LABELS[vehicle.fuel_type]}
               </span>
             )}
           </div>
+
+          {/* Location */}
+          {location && (
+            <div className="flex items-center gap-1 mb-2.5 text-[11px] text-[#737373]">
+              <MapPin className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate">{location}</span>
+            </div>
+          )}
+
+          {/* Meta badges: IVA deducible + warranty */}
+          {showIva && (
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
+              <span className="inline-flex items-center px-2 py-0.5 text-[9px] tracking-[0.1em] uppercase
+                text-emerald-400/80 bg-[#0A0A0A] border border-emerald-400/20 font-medium">
+                IVA deducible
+              </span>
+            </div>
+          )}
 
           {/* Divider */}
           <div className="h-px bg-[#1A1A1A] mb-3.5" />

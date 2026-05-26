@@ -1,5 +1,6 @@
 export type VehicleType = 'car' | 'motorcycle'
 export type VehicleStatus = 'draft' | 'pending_review' | 'active' | 'paused' | 'sold' | 'expired'
+export type VehicleCondition = 'new' | 'seminuevo' | 'ocasion' | 'clasico' | 'restaurado' | 'preparado' | 'coleccion'
 export type DealerStatus = 'pending' | 'active' | 'suspended' | 'trial'
 export type SubscriptionPlan = 'essential' | 'professional' | 'elite'
 export type FuelType = 'gasoline' | 'diesel' | 'electric' | 'hybrid' | 'plugin_hybrid' | 'hydrogen' | 'other'
@@ -114,6 +115,10 @@ export interface Vehicle {
   itv_valid_until: string | null
   has_carfax: boolean
   has_service_history: boolean
+  // New fields added in migration 004
+  condition_type?: VehicleCondition | null
+  iva_deducible?: boolean
+  location_province?: string | null
   // Extended optional fields — DB columns may not exist yet; undefined when absent
   license_type?: string | null
   category?: string | null

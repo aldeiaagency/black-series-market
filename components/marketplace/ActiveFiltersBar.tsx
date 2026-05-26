@@ -24,6 +24,15 @@ const CC_LABELS: Record<string, string> = {
   '900-1199': '900–1.200 cc', '1200-9999': 'Más de 1.200 cc',
 }
 
+const CONDITION_LABELS: Record<string, string> = {
+  new: 'Nuevo', seminuevo: 'Seminuevo', ocasion: 'Ocasión',
+  clasico: 'Clásico', restaurado: 'Restaurado', preparado: 'Preparado', coleccion: 'Colección',
+}
+
+const DRIVE_LABELS: Record<string, string> = {
+  rwd: 'Tracción trasera', fwd: 'Tracción delantera', awd: 'Tracción total', '4wd': '4x4',
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   supercars: 'Supercars', luxury_executive: 'Lujo y Ejecutivo',
   premium_modern: 'Premium Moderno', sport_performance: 'Sport y Performance',
@@ -55,11 +64,20 @@ function getLabel(key: string, value: string): string | null {
     case 'cambio':      return TRANSMISSION_LABELS[value] || value
     case 'carnet':      return LICENSE_LABELS[value] || value
     case 'cc':          return CC_LABELS[value] || `${value} cc`
-    case 'garantia':    return value === 'si' ? 'Con garantía' : null
-    case 'financiacion':return value === 'si' ? 'Con financiación' : null
-    case 'destacados':  return value === 'true' ? 'Destacados' : null
-    case 'ciudad':      return `Ciudad: ${value}`
-    default:            return null
+    case 'garantia':      return value === 'si' ? 'Con garantía' : null
+    case 'financiacion':  return value === 'si' ? 'Con financiación' : null
+    case 'ivaDeducible':  return value === 'si' ? 'IVA deducible' : null
+    case 'destacados':    return value === 'true' ? 'Destacados' : null
+    case 'colorExterior': return `Color: ${value}`
+    case 'provincia':     return `${value}`
+    case 'condicion':     return CONDITION_LABELS[value] || value
+    case 'traccion':      return DRIVE_LABELS[value] || value
+    case 'etiquetaDgt':   return `DGT ${value}`
+    case 'historial':     return value === 'si' ? 'Historial completo' : null
+    case 'equipamiento':  return value
+    case 'showroom':      return 'Showroom seleccionado'
+    case 'ciudad':        return `Ciudad: ${value}`
+    default:              return null
   }
 }
 

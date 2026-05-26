@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import type { FuelType, TransmissionType, DriveType, VehicleStatus, DealerStatus, LeadStatus } from './types'
+import type { FuelType, TransmissionType, DriveType, VehicleStatus, DealerStatus, LeadStatus, VehicleCondition } from './types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -129,8 +129,8 @@ export function truncate(str: string, length: number): string {
 }
 
 export const BODY_TYPES_CAR = [
-  'Coupé', 'Cabriolet', 'Roadster', 'Berlina', 'SUV', 'Spider', 'Targa',
-  'Shooting Brake', 'Gran Turismo', 'Supercar', 'Hypercar', 'Pick-up', 'Van',
+  'Coupé', 'Cabrio / Roadster', 'Berlina', 'Familiar', 'SUV',
+  'Compacto', 'Compacto deportivo', 'Shooting Brake', 'Pick-up', 'Supercar', 'Hypercar',
 ]
 
 export const BODY_TYPES_MOTO = [
@@ -140,7 +140,30 @@ export const BODY_TYPES_MOTO = [
 
 export const COLORS = [
   'Negro', 'Blanco', 'Gris', 'Plata', 'Rojo', 'Azul', 'Verde', 'Amarillo',
-  'Naranja', 'Marrón', 'Beige', 'Oro', 'Bronce', 'Violeta', 'Rosa', 'Otro',
+  'Naranja', 'Marrón', 'Beige', 'Dorado', 'Morado', 'Color especial', 'Otro',
+]
+
+export const VEHICLE_CONDITION_LABELS: Record<VehicleCondition, string> = {
+  new:        'Nuevo',
+  seminuevo:  'Seminuevo',
+  ocasion:    'Ocasión',
+  clasico:    'Clásico',
+  restaurado: 'Restaurado',
+  preparado:  'Preparado',
+  coleccion:  'Colección',
+}
+
+export const SPAIN_PROVINCES = [
+  'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila',
+  'Badajoz', 'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria',
+  'Castellón', 'Ciudad Real', 'Córdoba', 'A Coruña', 'Cuenca',
+  'Girona', 'Granada', 'Guadalajara', 'Guipúzcoa', 'Huelva', 'Huesca',
+  'Islas Baleares', 'Jaén', 'León', 'Lleida', 'La Rioja', 'Lugo',
+  'Madrid', 'Málaga', 'Murcia', 'Navarra', 'Ourense', 'Palencia',
+  'Las Palmas', 'Pontevedra', 'Salamanca', 'Santa Cruz de Tenerife',
+  'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel', 'Toledo',
+  'Valencia', 'Valladolid', 'Vizcaya', 'Zamora', 'Zaragoza',
+  'Ceuta', 'Melilla',
 ]
 
 export const UPHOLSTERY = ['Piel', 'Alcántara', 'Cuero Nappa', 'Tela', 'Cuero sintético', 'Otro']

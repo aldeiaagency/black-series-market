@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, SPAIN_PROVINCES } from '@/lib/utils'
 
 // ─── Categories ──────────────────────────────────────────────────────────────
 
@@ -80,7 +80,7 @@ const ALL_BRANDS_MOTO = [
   'Zero Motorcycles',
 ]
 
-// ─── Other filter options ─────────────────────────────────────────────────────
+// ─── Filter options ───────────────────────────────────────────────────────────
 
 const FUEL_OPTIONS = [
   { value: 'gasoline',     label: 'Gasolina' },
@@ -98,14 +98,65 @@ const TRANSMISSION_OPTIONS = [
 ]
 
 const CAR_BODY_TYPES = [
-  { value: 'Coupé',      label: 'Coupé' },
-  { value: 'Cabrio',     label: 'Cabrio / Roadster' },
-  { value: 'SUV',        label: 'SUV / Crossover' },
-  { value: 'Deportivo',  label: 'Deportivo' },
-  { value: 'GT',         label: 'Gran Turismo' },
-  { value: 'Clásico',    label: 'Clásico / Heritage' },
-  { value: 'Sedán',      label: 'Sedán' },
-  { value: 'Hot Hatch',  label: 'Hot Hatch' },
+  { value: 'Coupé',              label: 'Coupé' },
+  { value: 'Cabrio / Roadster',  label: 'Cabrio / Roadster' },
+  { value: 'Berlina',            label: 'Berlina' },
+  { value: 'Familiar',           label: 'Familiar' },
+  { value: 'SUV',                label: 'SUV' },
+  { value: 'Compacto',           label: 'Compacto' },
+  { value: 'Compacto deportivo', label: 'Compacto deportivo' },
+  { value: 'Shooting Brake',     label: 'Shooting Brake' },
+  { value: 'Pick-up',            label: 'Pick-up' },
+  { value: 'Supercar',           label: 'Supercar' },
+  { value: 'Hypercar',           label: 'Hypercar' },
+]
+
+const COLOR_OPTIONS = [
+  { value: 'Negro',          label: 'Negro' },
+  { value: 'Blanco',         label: 'Blanco' },
+  { value: 'Gris',           label: 'Gris' },
+  { value: 'Plata',          label: 'Plata' },
+  { value: 'Rojo',           label: 'Rojo' },
+  { value: 'Azul',           label: 'Azul' },
+  { value: 'Verde',          label: 'Verde' },
+  { value: 'Amarillo',       label: 'Amarillo' },
+  { value: 'Naranja',        label: 'Naranja' },
+  { value: 'Marrón',         label: 'Marrón' },
+  { value: 'Beige',          label: 'Beige' },
+  { value: 'Dorado',         label: 'Dorado' },
+  { value: 'Morado',         label: 'Morado' },
+  { value: 'Color especial', label: 'Color especial' },
+]
+
+const CONDITION_OPTIONS = [
+  { value: 'new',        label: 'Nuevo' },
+  { value: 'seminuevo',  label: 'Seminuevo' },
+  { value: 'ocasion',    label: 'Ocasión' },
+  { value: 'clasico',    label: 'Clásico' },
+  { value: 'restaurado', label: 'Restaurado' },
+  { value: 'preparado',  label: 'Preparado' },
+  { value: 'coleccion',  label: 'Colección' },
+]
+
+const DRIVE_OPTIONS = [
+  { value: 'rwd', label: 'Trasera' },
+  { value: 'fwd', label: 'Delantera' },
+  { value: 'awd', label: 'Total' },
+  { value: '4wd', label: '4x4' },
+]
+
+const DGT_OPTIONS = [
+  { value: '0',    label: 'Etiqueta 0' },
+  { value: 'ECO',  label: 'ECO' },
+  { value: 'C',    label: 'C' },
+  { value: 'B',    label: 'B' },
+]
+
+const FEATURED_EQUIPMENT = [
+  'Frenos cerámicos', 'Lift delantero', 'Carbono', 'Techo panorámico',
+  'Cámara 360', 'Head-up display', 'Sistema de sonido premium',
+  'Asientos calefactables', 'Escape sport', 'Suspensión deportiva',
+  'Modos de conducción', 'Paquete aerodinámico',
 ]
 
 const MOTO_STYLES = [
@@ -137,10 +188,29 @@ const LICENSE_TYPES = [
 ]
 
 const MOTO_CC_RANGES = [
-  { value: '0-599',   label: 'Hasta 600 cc' },
-  { value: '600-899', label: '600 – 900 cc' },
-  { value: '900-1199',label: '900 – 1.200 cc' },
+  { value: '0-599',    label: 'Hasta 600 cc' },
+  { value: '600-899',  label: '600 – 900 cc' },
+  { value: '900-1199', label: '900 – 1.200 cc' },
   { value: '1200-9999',label: 'Más de 1.200 cc' },
+]
+
+const KM_OPTIONS = [
+  { value: '5000',   label: 'Hasta 5.000 km' },
+  { value: '10000',  label: 'Hasta 10.000 km' },
+  { value: '20000',  label: 'Hasta 20.000 km' },
+  { value: '30000',  label: 'Hasta 30.000 km' },
+  { value: '40000',  label: 'Hasta 40.000 km' },
+  { value: '50000',  label: 'Hasta 50.000 km' },
+  { value: '60000',  label: 'Hasta 60.000 km' },
+  { value: '70000',  label: 'Hasta 70.000 km' },
+  { value: '80000',  label: 'Hasta 80.000 km' },
+  { value: '90000',  label: 'Hasta 90.000 km' },
+  { value: '100000', label: 'Hasta 100.000 km' },
+  { value: '120000', label: 'Hasta 120.000 km' },
+  { value: '140000', label: 'Hasta 140.000 km' },
+  { value: '160000', label: 'Hasta 160.000 km' },
+  { value: '180000', label: 'Hasta 180.000 km' },
+  { value: '200000', label: 'Hasta 200.000 km' },
 ]
 
 const SORT_OPTIONS = [
@@ -191,11 +261,13 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const router       = useRouter()
   const pathname     = usePathname()
   const searchParams = useSearchParams()
-  const [mobileOpen, setMobileOpen]       = useState(false)
-  const [showAllBrands, setShowAllBrands] = useState(false)
-  const [models, setModels]               = useState<string[]>([])
-  const [loadingModels, setLoadingModels] = useState(false)
-  const [searchDraft, setSearchDraft]     = useState(searchParams.get('search') || '')
+  const [mobileOpen, setMobileOpen]             = useState(false)
+  const [showAllBrands, setShowAllBrands]       = useState(false)
+  const [models, setModels]                     = useState<string[]>([])
+  const [loadingModels, setLoadingModels]       = useState(false)
+  const [searchDraft, setSearchDraft]           = useState(searchParams.get('search') || '')
+  const [showAdvanced, setShowAdvanced]         = useState(false)
+  const [featuredDealers, setFeaturedDealers]   = useState<{ id: string; name: string; location_city: string | null }[]>([])
 
   const isMoto          = vehicleType === 'motorcycle'
   const categories      = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
@@ -207,12 +279,10 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const currentBrand = searchParams.get('marca') || ''
   const currentModel = searchParams.get('modelo') || ''
 
-  // Active filter count (excluding page and sort)
   const activeFilterCount = Array.from(searchParams.entries()).filter(
     ([k]) => !['page', 'sort'].includes(k)
   ).length
 
-  // Prevent body scroll when mobile drawer is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = 'hidden'
@@ -222,7 +292,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     return () => { document.body.style.overflow = '' }
   }, [mobileOpen])
 
-  // Fetch models whenever brand changes
   useEffect(() => {
     if (!currentBrand) { setModels([]); return }
     setLoadingModels(true)
@@ -233,9 +302,26 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
       .finally(() => setLoadingModels(false))
   }, [currentBrand, isMoto])
 
-  // Keep searchDraft in sync when param changes externally
   useEffect(() => {
     setSearchDraft(searchParams.get('search') || '')
+  }, [searchParams])
+
+  // Fetch featured dealers for showroom filter
+  useEffect(() => {
+    if (!isMoto) {
+      fetch('/api/featured-dealers')
+        .then((r) => r.json())
+        .then((data) => setFeaturedDealers(data || []))
+        .catch(() => {})
+    }
+  }, [isMoto])
+
+  // Open advanced section automatically if an advanced filter is active
+  useEffect(() => {
+    const advancedParams = ['condicion', 'ivaDeducible', 'showroom', 'traccion', 'etiquetaDgt', 'equipamiento', 'historial']
+    if (advancedParams.some((p) => searchParams.has(p))) {
+      setShowAdvanced(true)
+    }
   }, [searchParams])
 
   function updateParam(key: string, value: string | null) {
@@ -333,8 +419,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         {/* Brand + Model + Version */}
         <FilterGroup title="Marca y modelo">
           <div className="space-y-3">
-
-            {/* Chip when brand selected */}
             {currentBrand && (
               <div className="flex items-center justify-between border border-gold/40 bg-surface-elevated px-3 py-2.5">
                 <span className="text-sm font-medium text-bsm-text-primary uppercase tracking-widest">
@@ -350,8 +434,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 </button>
               </div>
             )}
-
-            {/* Brand chips (hidden once brand selected) */}
             {!currentBrand && (
               <div>
                 <div className="flex flex-wrap gap-1.5">
@@ -377,8 +459,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 </button>
               </div>
             )}
-
-            {/* Model select */}
             {currentBrand && !currentModel && (
               <select
                 className="select-base"
@@ -394,8 +474,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 ))}
               </select>
             )}
-
-            {/* Version */}
             <div>
               <label className="label-base flex items-center gap-1.5">
                 Versión
@@ -453,38 +531,31 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           </div>
         </FilterGroup>
 
-        {/* Power */}
-        <FilterGroup title="Potencia (CV)" defaultOpen={false}>
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <label className="label-base">Desde</label>
-              <input type="number" placeholder="0" className="input-base"
-                value={searchParams.get('cvMin') || ''}
-                onChange={(e) => updateParam('cvMin', e.target.value)} />
-            </div>
-            <div className="flex-1">
-              <label className="label-base">Hasta</label>
-              <input type="number" placeholder="Sin límite" className="input-base"
-                value={searchParams.get('cvMax') || ''}
-                onChange={(e) => updateParam('cvMax', e.target.value)} />
-            </div>
-          </div>
-        </FilterGroup>
-
         {/* Mileage */}
         <FilterGroup title="Kilometraje máximo">
           <select className="select-base" value={searchParams.get('kmMax') || ''}
             onChange={(e) => updateParam('kmMax', e.target.value)}>
             <option value="">Sin límite</option>
-            <option value="5000">Hasta 5.000 km</option>
-            <option value="10000">Hasta 10.000 km</option>
-            <option value="30000">Hasta 30.000 km</option>
-            <option value="50000">Hasta 50.000 km</option>
-            <option value="100000">Hasta 100.000 km</option>
+            {KM_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
           </select>
         </FilterGroup>
 
-        {/* Vehicle-type-specific filters */}
+        {/* Location — cars only */}
+        {!isMoto && (
+          <FilterGroup title="Ubicación" defaultOpen={false}>
+            <select className="select-base" value={searchParams.get('provincia') || ''}
+              onChange={(e) => updateParam('provincia', e.target.value || null)}>
+              <option value="">Cualquier provincia</option>
+              {SPAIN_PROVINCES.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </FilterGroup>
+        )}
+
+        {/* Vehicle-type-specific main filters */}
         {isMoto ? (
           <>
             <FilterGroup title="Tipo de moto">
@@ -511,7 +582,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           </>
         ) : (
           <>
-            <FilterGroup title="Carrocería">
+            <FilterGroup title="Carrocería" defaultOpen={false}>
               <div className="space-y-2">
                 {CAR_BODY_TYPES.map((o) => (
                   <CheckOption key={o.value} param="tipo" value={o.value} label={o.label} />
@@ -532,17 +603,124 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 ))}
               </div>
             </FilterGroup>
+            <FilterGroup title="Color exterior" defaultOpen={false}>
+              <div className="space-y-2">
+                {COLOR_OPTIONS.map((o) => (
+                  <CheckOption key={o.value} param="colorExterior" value={o.value} label={o.label} />
+                ))}
+              </div>
+            </FilterGroup>
           </>
         )}
 
         {/* Guarantee + Financing */}
         <FilterGroup title="Garantía y financiación" defaultOpen={false}>
           <div className="space-y-2">
-            <CheckOption param="garantia"    value="si"   label="Con garantía" />
-            <CheckOption param="financiacion" value="si"  label="Con financiación" />
-            <CheckOption param="destacados"  value="true" label="Solo destacados" />
+            <CheckOption param="garantia"     value="si"   label="Con garantía" />
+            <CheckOption param="financiacion" value="si"   label="Con financiación" />
+            {!isMoto && (
+              <CheckOption param="ivaDeducible" value="si" label="IVA deducible" />
+            )}
+            <CheckOption param="destacados"   value="true" label="Solo destacados" />
           </div>
         </FilterGroup>
+
+        {/* ── ADVANCED FILTERS ── */}
+        {!isMoto && (
+          <div className="border-b border-bsm-border pb-5 mb-5">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center justify-between w-full mb-1 text-left"
+            >
+              <span className="label-base mb-0 text-gold/80">Más filtros</span>
+              {showAdvanced
+                ? <ChevronUp className="w-4 h-4 text-bsm-text-muted" />
+                : <ChevronDown className="w-4 h-4 text-bsm-text-muted" />
+              }
+            </button>
+            {showAdvanced && (
+              <div className="mt-4 space-y-0">
+
+                {/* Estado del vehículo */}
+                <FilterGroup title="Estado del vehículo" defaultOpen={false}>
+                  <div className="space-y-2">
+                    {CONDITION_OPTIONS.map((o) => (
+                      <CheckOption key={o.value} param="condicion" value={o.value} label={o.label} />
+                    ))}
+                  </div>
+                </FilterGroup>
+
+                {/* Potencia CV */}
+                <FilterGroup title="Potencia (CV)" defaultOpen={false}>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <label className="label-base">Desde</label>
+                      <input type="number" placeholder="0" className="input-base"
+                        value={searchParams.get('cvMin') || ''}
+                        onChange={(e) => updateParam('cvMin', e.target.value)} />
+                    </div>
+                    <div className="flex-1">
+                      <label className="label-base">Hasta</label>
+                      <input type="number" placeholder="Sin límite" className="input-base"
+                        value={searchParams.get('cvMax') || ''}
+                        onChange={(e) => updateParam('cvMax', e.target.value)} />
+                    </div>
+                  </div>
+                </FilterGroup>
+
+                {/* Tracción */}
+                <FilterGroup title="Tracción" defaultOpen={false}>
+                  <div className="space-y-2">
+                    {DRIVE_OPTIONS.map((o) => (
+                      <CheckOption key={o.value} param="traccion" value={o.value} label={o.label} />
+                    ))}
+                  </div>
+                </FilterGroup>
+
+                {/* Etiqueta DGT */}
+                <FilterGroup title="Etiqueta DGT" defaultOpen={false}>
+                  <div className="space-y-2">
+                    {DGT_OPTIONS.map((o) => (
+                      <CheckOption key={o.value} param="etiquetaDgt" value={o.value} label={o.label} />
+                    ))}
+                  </div>
+                </FilterGroup>
+
+                {/* Historial */}
+                <FilterGroup title="Historial" defaultOpen={false}>
+                  <div className="space-y-2">
+                    <CheckOption param="historial" value="si" label="Historial completo" />
+                  </div>
+                </FilterGroup>
+
+                {/* Equipamiento destacado */}
+                <FilterGroup title="Equipamiento destacado" defaultOpen={false}>
+                  <div className="space-y-2">
+                    {FEATURED_EQUIPMENT.map((item) => (
+                      <CheckOption key={item} param="equipamiento" value={item} label={item} />
+                    ))}
+                  </div>
+                </FilterGroup>
+
+                {/* Showroom — only featured dealers */}
+                {featuredDealers.length > 0 && (
+                  <FilterGroup title="Showroom" defaultOpen={false}>
+                    <div className="space-y-2">
+                      {featuredDealers.map((d) => (
+                        <CheckOption
+                          key={d.id}
+                          param="showroom"
+                          value={d.id}
+                          label={d.location_city ? `${d.name} · ${d.location_city}` : d.name}
+                        />
+                      ))}
+                    </div>
+                  </FilterGroup>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Clear all */}
         {activeFilterCount > 0 && (
@@ -576,19 +754,15 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </button>
       </div>
 
-      {/* ── MOBILE drawer (fixed overlay) ── */}
+      {/* ── MOBILE drawer ── */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
-          {/* Backdrop */}
           <button
             className="absolute inset-0 bg-black/60"
             onClick={() => setMobileOpen(false)}
             aria-label="Cerrar filtros"
           />
-
-          {/* Panel */}
           <div className="relative z-10 w-[min(85vw,340px)] h-full bg-[#080808] border-r border-bsm-border flex flex-col">
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-bsm-border flex-shrink-0">
               <span className="text-sm font-medium text-bsm-text-primary">
                 Filtros {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
@@ -601,13 +775,9 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 <X className="w-5 h-5" />
               </button>
             </div>
-
-            {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-5 py-5">
               {renderFilters()}
             </div>
-
-            {/* Footer */}
             <div className="flex-shrink-0 px-5 py-4 border-t border-bsm-border">
               <button
                 onClick={() => setMobileOpen(false)}

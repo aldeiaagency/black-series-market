@@ -11,7 +11,7 @@ import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
-import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS } from '@/lib/utils'
+import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS, VEHICLE_CONDITION_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 
 interface Props {
@@ -93,7 +93,7 @@ export default function VehicleDetailContent({
 }: Props) {
   const isCar = vehicle.vehicle_type === 'car'
   const title = `${vehicle.brand_name} ${vehicle.model_name}${vehicle.version ? ' ' + vehicle.version : ''}`
-  const loc = vehicle.dealer?.location_city || vehicle.registration_country || null
+  const loc = vehicle.location_province || vehicle.dealer?.location_city || vehicle.registration_country || null
   const statusBadge = STATUS_BADGE[vehicle.status as keyof typeof STATUS_BADGE]
   const vehicleTypeParam: 'car' | 'motorcycle' = isCar ? 'car' : 'motorcycle'
   const vehicleWord = isCar ? 'vehículo' : 'moto'
@@ -101,18 +101,20 @@ export default function VehicleDetailContent({
   // ── Summary specs (always show with "Consultar con el vendedor" fallback) ─────
   const summarySpecs = isCar
     ? [
-        { label: 'Año',          value: String(vehicle.year) },
-        { label: 'Kilómetros',   value: formatMileage(vehicle.mileage_km) },
-        { label: 'Precio',       value: formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request) },
-        { label: 'Potencia',     value: vehicle.power_hp ? `${vehicle.power_hp} CV` : null },
-        { label: 'Combustible',  value: vehicle.fuel_type ? FUEL_LABELS[vehicle.fuel_type] : null },
-        { label: 'Cambio',       value: vehicle.transmission ? TRANSMISSION_LABELS[vehicle.transmission] : null },
-        { label: 'Carrocería',   value: vehicle.body_type || null },
-        { label: 'Tracción',     value: vehicle.drive_type ? DRIVE_LABELS[vehicle.drive_type] : null },
-        { label: 'Ubicación',    value: loc },
-        { label: 'Garantía',     value: vehicle.has_warranty ? (vehicle.warranty_months ? `${vehicle.warranty_months} meses` : 'Disponible') : null },
-        { label: 'Financiación', value: vehicle.financing_available ? 'Disponible' : null },
-        { label: 'Categoría',    value: vehicle.category || null },
+        { label: 'Año',              value: String(vehicle.year) },
+        { label: 'Kilómetros',       value: formatMileage(vehicle.mileage_km) },
+        { label: 'Precio',           value: formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request) },
+        { label: 'Potencia',         value: vehicle.power_hp ? `${vehicle.power_hp} CV` : null },
+        { label: 'Combustible',      value: vehicle.fuel_type ? FUEL_LABELS[vehicle.fuel_type] : null },
+        { label: 'Cambio',           value: vehicle.transmission ? TRANSMISSION_LABELS[vehicle.transmission] : null },
+        { label: 'Carrocería',       value: vehicle.body_type || null },
+        { label: 'Tracción',         value: vehicle.drive_type ? DRIVE_LABELS[vehicle.drive_type] : null },
+        { label: 'Estado',           value: vehicle.condition_type ? VEHICLE_CONDITION_LABELS[vehicle.condition_type] ?? null : null },
+        { label: 'Ubicación',        value: loc },
+        { label: 'Garantía',         value: vehicle.has_warranty ? (vehicle.warranty_months ? `${vehicle.warranty_months} meses` : 'Disponible') : null },
+        { label: 'Financiación',     value: vehicle.financing_available ? 'Disponible' : null },
+        { label: 'IVA deducible',    value: vehicle.iva_deducible ? 'Sí' : null },
+        { label: 'Categoría',        value: vehicle.category || null },
       ]
     : [
         { label: 'Año',          value: String(vehicle.year) },

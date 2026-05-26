@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import {
   FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS,
   BODY_TYPES_CAR, BODY_TYPES_MOTO, COLORS, UPHOLSTERY,
-  EQUIPMENT_CATEGORIES, slugify, vehicleSlug,
+  EQUIPMENT_CATEGORIES, VEHICLE_CONDITION_LABELS, SPAIN_PROVINCES,
+  slugify, vehicleSlug,
 } from '@/lib/utils'
 import { CheckCircle, ChevronRight } from 'lucide-react'
 import ImageUploader from '@/components/dashboard/ImageUploader'
@@ -49,6 +50,9 @@ export default function PublicarPage() {
     itv_valid_until: '',
     has_service_history: false,
     has_carfax: false,
+    condition_type: '',
+    iva_deducible: false,
+    location_province: '',
     description: '',
     equipment: [] as string[],
     equipment_extra: '',
@@ -219,6 +223,27 @@ export default function PublicarPage() {
                 {bodyTypes.map((b) => <option key={b} value={b}>{b}</option>)}
               </select>
             </div>
+
+            {form.vehicle_type === 'car' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label-base">Estado del vehículo</label>
+                  <select value={form.condition_type} onChange={(e) => update('condition_type', e.target.value)} className="select-base">
+                    <option value="">Seleccionar...</option>
+                    {Object.entries(VEHICLE_CONDITION_LABELS).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label-base">Provincia</label>
+                  <select value={form.location_province} onChange={(e) => update('location_province', e.target.value)} className="select-base">
+                    <option value="">Seleccionar...</option>
+                    {SPAIN_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -444,9 +469,10 @@ export default function PublicarPage() {
 
             <div className="space-y-3">
               {[
-                { key: 'is_negotiable', label: 'Precio negociable' },
-                { key: 'accepts_trade_in', label: 'Acepta parte de pago' },
-                { key: 'financing_available', label: 'Financiación disponible' },
+                { key: 'is_negotiable',      label: 'Precio negociable' },
+                { key: 'accepts_trade_in',   label: 'Acepta parte de pago' },
+                { key: 'financing_available',label: 'Financiación disponible' },
+                { key: 'iva_deducible',      label: 'IVA deducible (venta a empresa)' },
               ].map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                   <input
