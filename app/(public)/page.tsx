@@ -436,27 +436,28 @@ export default async function HomePage() {
         <div className="flex items-center gap-3 mb-5">
           <div className="h-px w-8 bg-[#C6A64B]/30" />
           <span className="text-[10px] text-[#C6A64B]/50 tracking-[0.3em] uppercase">
-            Para concesionarios y especialistas
+            Para showrooms, concesionarios y especialistas
           </span>
         </div>
 
         <h2 className="font-display text-2xl md:text-3xl font-light text-[#F4F1EA] mb-4">
-          Un escaparate más cuidado<br />
-          <span className="text-[#9A9A9A]">para tu mejor stock.</span>
+          Un vehículo premium no debe competir<br />
+          <span className="text-[#9A9A9A]">en el mismo lugar que todos los demás.</span>
         </h2>
 
         <p className="text-[13px] text-[#8A8A8A] leading-relaxed mb-6">
-          Si trabajas con coches o motos premium, deportivos, clásicos o unidades
-          especiales, Black Label te permite presentar tu inventario en un entorno
-          más visual, más selectivo y alineado con el comprador adecuado.
+          Hay coches y motos que no se presentan bien dentro de una lista infinita
+          de anuncios. Necesitan contexto, una imagen cuidada y un comprador capaz
+          de entender lo que tiene delante. Black Label está creado para conectar
+          ese tipo de stock con personas que buscan algo más concreto.
         </p>
 
         <ul className="space-y-3 mb-8">
           {[
-            'Acceso por solicitud, no publicación abierta',
-            'Tu showroom y tus vehículos con una presentación más cuidada',
-            'Consultas de compradores con más contexto antes del contacto',
-            'Un canal complementario para destacar unidades premium, deportivas o especiales',
+            'Acceso bajo solicitud, revisión de reputación y aceptación previa',
+            'Tu stock aparece en un entorno alineado con su valor',
+            'El comprador entiende mejor qué vendes y por qué merece atención',
+            'Un canal exclusivo para convertir vehículos especiales en oportunidades mejor presentadas',
           ].map((point) => (
             <li key={point} className="flex items-start gap-3">
               <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
@@ -476,25 +477,25 @@ export default async function HomePage() {
         <img
           src="/images/hero/professional-showroom-black-label.webp"
           alt="Showroom profesional premium con vehículo revisado para Black Label"
-          className="absolute inset-0 h-full w-full object-cover opacity-45"
+          className="absolute inset-0 h-full w-full object-cover opacity-65"
           loading="lazy"
           decoding="async"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-[#080808] via-[#080808]/70 to-[#080808]/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-[#080808]/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#080808]/70 via-[#080808]/35 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/25 to-[#080808]/30" />
 
         <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8">
-          <div className="border border-[#1E1E1E] bg-[#080808]/85 backdrop-blur-sm p-6">
+          <div className="border border-[#1E1E1E] bg-[#080808]/78 backdrop-blur-sm p-6 max-w-md">
             <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
-              Qué buscamos
+              Qué queremos publicar
             </p>
 
             <ul className="space-y-3">
               {[
-                'Vehículos con valor real para el comprador',
-                'Información clara, fotos cuidadas y disponibilidad actualizada',
-                'Profesionales con reputación y presencia revisable',
+                'Vehículos con historia, configuración, versión o atractivo real',
+                'Fotos cuidadas, información clara y disponibilidad actualizada',
+                'Concesionarios, compraventas y especialistas con buena reputación online',
                 'Stock premium, deportivo, clásico, enthusiast o unidades especiales',
               ].map((c) => (
                 <li
