@@ -124,7 +124,7 @@ export default async function HomePage() {
           {/* Mobile image — below CTAs, before pillars */}
           <div className="lg:hidden mt-10 relative h-56 sm:h-72 -mx-6 overflow-hidden">
             <Image
-              src="/images/hero/black-label-hero-gt3rs-ducati.png"
+              src="/images/hero/black-label-hero-gt3rs-ducati.webp"
               alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
               fill
               quality={85}
