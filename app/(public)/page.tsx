@@ -59,7 +59,7 @@ export default async function HomePage() {
         {/* ── Hero image — desktop: absolute right 50%, full height ── */}
         <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-1/2">
           <Image
-            src="/images/hero/black-label-hero-gt3rs-ducati.png"
+            src="/images/hero/black-label-hero-gt3rs-ducati.webp"
             alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
             fill
             priority
