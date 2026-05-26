@@ -474,7 +474,7 @@ export default async function HomePage() {
 
       <div className="relative w-full min-h-[360px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
         <img
-          src="/images/professionals/professional-showroom-black-label.webp"
+          src="/images/hero/professional-showroom-black-label.webp"
           alt="Showroom profesional premium con vehículo revisado para Black Label"
           className="absolute inset-0 h-full w-full object-cover opacity-45"
           loading="lazy"
