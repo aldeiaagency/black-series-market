@@ -431,7 +431,7 @@ export default async function HomePage() {
       {/* PROFESSIONAL BLOCK */}
 <section className="border-t border-[#141414] py-20">
   <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-10 lg:gap-14 items-stretch">
+    <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-16 items-stretch">
       <div className="max-w-xl">
         <div className="flex items-center gap-3 mb-5">
           <div className="h-px w-8 bg-[#C6A64B]/30" />
@@ -442,14 +442,16 @@ export default async function HomePage() {
 
         <h2 className="font-display text-2xl md:text-3xl font-light text-[#F4F1EA] mb-4">
           Un vehículo premium no debe competir<br />
-          <span className="text-[#9A9A9A]">en el mismo lugar que todos los demás.</span>
+          <span className="text-[#9A9A9A]">
+            en el mismo lugar que todos los demás.
+          </span>
         </h2>
 
         <p className="text-[13px] text-[#8A8A8A] leading-relaxed mb-6">
-          Hay coches y motos que no se presentan bien dentro de una lista infinita
-          de anuncios. Necesitan contexto, una imagen cuidada y un comprador capaz
-          de entender lo que tiene delante. Black Label está creado para conectar
-          ese tipo de stock con personas que buscan algo más concreto.
+          Un vehículo premium merece presentarse en un entorno a su altura.
+          Black Label ofrece una experiencia visual más cuidada, fichas con
+          información clara y un contexto pensado para que tu stock llegue a
+          compradores que saben lo que buscan.
         </p>
 
         <ul className="space-y-3 mb-8">
@@ -473,20 +475,20 @@ export default async function HomePage() {
         </Link>
       </div>
 
-      <div className="relative w-full min-h-[360px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
+      <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
         <img
           src="/images/hero/professional-showroom-black-label.webp"
           alt="Showroom profesional premium con vehículo revisado para Black Label"
-          className="absolute inset-0 h-full w-full object-cover opacity-65"
+          className="absolute inset-0 h-full w-full object-cover opacity-90"
           loading="lazy"
           decoding="async"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-[#080808]/70 via-[#080808]/35 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/25 to-[#080808]/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#080808]/35 via-[#080808]/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080808]/85 via-[#080808]/15 to-[#080808]/20" />
 
-        <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8">
-          <div className="border border-[#1E1E1E] bg-[#080808]/78 backdrop-blur-sm p-6 max-w-md">
+        <div className="relative z-10 h-full flex flex-col justify-end p-5 md:p-7 lg:p-8">
+          <div className="w-full max-w-lg border border-[#1E1E1E] bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
             <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
               Qué queremos publicar
             </p>
@@ -500,15 +502,15 @@ export default async function HomePage() {
               ].map((c) => (
                 <li
                   key={c}
-                  className="flex items-start gap-2.5 text-[12px] text-[#808080] leading-relaxed"
+                  className="flex items-start gap-2.5 text-[12px] text-[#9A9A9A] leading-relaxed"
                 >
-                  <span className="text-[#C6A64B]/40 mt-0.5 flex-shrink-0">→</span>
+                  <span className="text-[#C6A64B]/50 mt-0.5 flex-shrink-0">→</span>
                   {c}
                 </li>
               ))}
             </ul>
 
-            <div className="mt-6 pt-5 border-t border-[#141414]">
+            <div className="mt-6 pt-5 border-t border-[#1A1A1A]">
               <Link
                 href="/registro"
                 className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
