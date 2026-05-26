@@ -407,7 +407,7 @@ export default async function HomePage() {
 
       <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
         <img
-          src="/images/sections/vehicle-concierge-black-label.webp"
+          src="/images/hero/vehicle-concierge-black-label.webp"
           alt="Búsqueda personalizada de coche o moto premium en Black Label"
           className="absolute inset-0 h-full w-full object-cover opacity-90"
           loading="lazy"
