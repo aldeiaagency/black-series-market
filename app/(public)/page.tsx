@@ -533,8 +533,8 @@ export default async function HomePage() {
               Powered by Black Series
             </p>
             <p className="text-[12px] text-[#8A8A8A] max-w-md text-center md:text-right leading-relaxed">
-              Black Label Market es una iniciativa de Black Series, agencia especializada en el mundo
-              del motor de alto rendimiento. No somos un portal anónimo.
+              Black Label Market es una producto de Black Series, agencia especializada en el mundo
+              del motor de alto rendimiento.
             </p>
           </div>
         </div>
