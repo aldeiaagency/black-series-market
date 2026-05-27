@@ -168,8 +168,9 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                   )}
                   {totalActive > 0 && (
                     <span className="flex items-center gap-1.5">
-                      <Car className="w-4 h-4 text-[#737373]" />
-                      {totalActive} vehículo{totalActive !== 1 ? 's' : ''} activos
+                      {cars.length > 0 && <Car className="w-4 h-4 text-[#737373]" />}
+                      {motos.length > 0 && <Bike className="w-4 h-4 text-[#737373]" />}
+                      {totalActive} unidad{totalActive !== 1 ? 'es' : ''} activa{totalActive !== 1 ? 's' : ''}
                     </span>
                   )}
                   {dealer.years_in_business && (

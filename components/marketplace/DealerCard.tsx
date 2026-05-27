@@ -10,38 +10,66 @@ interface DealerCardProps {
 }
 
 export default function DealerCard({ dealer, variant = 'default' }: DealerCardProps) {
+  const isFeatured = variant === 'featured'
   return (
     <Link href={`/dealers/${dealer.slug}`}>
       <article className={cn(
-        'group bg-[#0D0D0D] border border-[#1A1A1A] transition-all duration-300',
-        'hover:border-[#C6A64B]/20 hover:shadow-[0_8px_32px_rgba(0,0,0,0.6)]',
-        variant === 'featured' && 'border-[#222222]'
+        'group relative bg-[#0D0D0D] border transition-all duration-300',
+        'hover:shadow-[0_8px_32px_rgba(0,0,0,0.6)]',
+        isFeatured
+          ? 'border-[#C6A64B]/25 hover:border-[#C6A64B]/50'
+          : 'border-[#1A1A1A] hover:border-[#C6A64B]/20'
       )}>
 
+        {/* Featured gold accent line */}
+        {isFeatured && (
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C6A64B]/60 to-transparent" />
+        )}
+
         {/* Cover */}
-        <div className="relative h-32 bg-[#111111] overflow-hidden">
+        <div className={cn(
+          'relative bg-[#111111] overflow-hidden',
+          isFeatured ? 'h-40' : 'h-32'
+        )}>
           {dealer.cover_url ? (
             <Image
               src={dealer.cover_url}
               alt={dealer.name}
               fill
-              className="object-cover opacity-50 group-hover:opacity-65 transition-opacity duration-500"
+              className={cn(
+                'object-cover transition-opacity duration-500',
+                isFeatured
+                  ? 'opacity-60 group-hover:opacity-75'
+                  : 'opacity-50 group-hover:opacity-65'
+              )}
               sizes="(max-width: 640px) 100vw, 33vw"
             />
           ) : (
-            /* Premium gradient fallback */
             <div className="absolute inset-0 bg-gradient-to-br from-[#161616] via-[#111111] to-[#0A0A0A]">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(198,166,75,0.04)_0%,transparent_70%)]" />
+              <div className={cn(
+                'absolute inset-0',
+                isFeatured
+                  ? 'bg-[radial-gradient(ellipse_at_30%_50%,rgba(198,166,75,0.08)_0%,transparent_70%)]'
+                  : 'bg-[radial-gradient(ellipse_at_30%_50%,rgba(198,166,75,0.04)_0%,transparent_70%)]'
+              )} />
             </div>
           )}
 
           {/* Badges */}
-          {dealer.subscription_plan === 'elite' && (
-            <div className="absolute top-3 left-3 inline-flex items-center px-2 py-0.5 text-[9px]
-              tracking-[0.15em] uppercase text-[#C6A64B]/80 bg-[#0D0D0D]/90 border border-[#C6A64B]/20">
-              Elite
-            </div>
-          )}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+            {isFeatured && (
+              <div className="inline-flex items-center px-2 py-0.5 text-[9px]
+                tracking-[0.15em] uppercase text-[#C6A64B] bg-[#0D0D0D]/90 border border-[#C6A64B]/30">
+                Destacado
+              </div>
+            )}
+            {dealer.subscription_plan === 'elite' && (
+              <div className="inline-flex items-center px-2 py-0.5 text-[9px]
+                tracking-[0.15em] uppercase text-[#C6A64B]/80 bg-[#0D0D0D]/90 border border-[#C6A64B]/20">
+                Elite
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Content */}

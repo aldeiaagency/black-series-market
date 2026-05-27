@@ -3,10 +3,14 @@ import DealerCard from '@/components/marketplace/DealerCard'
 import { MapPin } from 'lucide-react'
 
 interface PageProps {
-  searchParams: Promise<{ ciudad?: string; plan?: string }>
+  searchParams: Promise<{ ciudad?: string }>
 }
 
-const CITIES = ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Bilbao', 'Málaga', 'Zaragoza', 'Marbella']
+const CITIES = [
+  'Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Bilbao', 'Málaga',
+  'Zaragoza', 'Marbella', 'San Sebastián', 'Palma', 'Alicante',
+  'Valladolid', 'Girona', 'Murcia', 'Vigo', 'Ibiza',
+]
 
 export default async function DealersPage({ searchParams }: PageProps) {
   const params = await searchParams
@@ -16,21 +20,20 @@ export default async function DealersPage({ searchParams }: PageProps) {
     .from('dealers')
     .select(`
       *,
-      vehicle_count:vehicles(count)
+      vehicles(status)
     `)
     .eq('status', 'active')
     .order('is_featured', { ascending: false })
     .order('subscription_plan', { ascending: false })
 
   if (params.ciudad) query = query.ilike('location_city', `%${params.ciudad}%`)
-  if (params.plan)   query = query.eq('subscription_plan', params.plan)
 
-  const { data: rawDealers, count } = await query
+  const { data: rawDealers } = await query
 
-  // Flatten count
+  // Count only active vehicles per dealer
   const dealers = rawDealers?.map((d: any) => ({
     ...d,
-    vehicle_count: d.vehicle_count?.[0]?.count ?? 0,
+    vehicle_count: d.vehicles?.filter((v: any) => v.status === 'active').length ?? 0,
   }))
 
   return (
@@ -42,7 +45,7 @@ export default async function DealersPage({ searchParams }: PageProps) {
         </div>
         <h1 className="section-title mb-2">Showrooms seleccionados</h1>
         <p className="text-bsm-text-muted text-sm">
-          {count || 0} concesionarios y especialistas en el marketplace
+          {dealers?.length || 0} concesionarios y especialistas en el marketplace
         </p>
       </div>
 
@@ -72,7 +75,7 @@ export default async function DealersPage({ searchParams }: PageProps) {
       {dealers?.some((d: any) => d.is_featured) && (
         <div className="mb-12">
           <h2 className="font-display text-xl font-light mb-6 pb-3 border-b border-bsm-border">
-            Showrooms seleccionados
+            Showrooms destacados
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {dealers
@@ -82,25 +85,26 @@ export default async function DealersPage({ searchParams }: PageProps) {
         </div>
       )}
 
-      {/* All dealers */}
-      <div>
-        {dealers?.some((d: any) => !d.is_featured) && (
+      {/* All non-featured dealers */}
+      {dealers?.some((d: any) => !d.is_featured) && (
+        <div>
           <h2 className="font-display text-xl font-light mb-6 pb-3 border-b border-bsm-border">
             Todos los concesionarios
           </h2>
-        )}
-        {dealers && dealers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {dealers
               .filter((d: any) => !d.is_featured)
               .map((d: any) => <DealerCard key={d.id} dealer={d} />)}
           </div>
-        ) : (
-          <div className="text-center py-16 text-bsm-text-muted">
-            No hay concesionarios{params.ciudad ? ` en ${params.ciudad}` : ''} disponibles.
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {(!dealers || dealers.length === 0) && (
+        <div className="text-center py-16 text-bsm-text-muted border border-bsm-border bg-surface">
+          No hay concesionarios{params.ciudad ? ` en ${params.ciudad}` : ''} disponibles.
+        </div>
+      )}
 
       {/* CTA join */}
       <div className="mt-16 bg-surface border border-bsm-border p-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
