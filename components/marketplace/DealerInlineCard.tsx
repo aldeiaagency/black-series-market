@@ -67,11 +67,6 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
         {dealer.is_verified && (
           <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" aria-label="Profesional verificado" />
         )}
-        {dealer.subscription_plan === 'elite' && (
-          <span className="text-[8px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/30 px-1 py-0.5 leading-none flex-shrink-0">
-            Elite
-          </span>
-        )}
       </Link>
     )
   }
@@ -110,11 +105,6 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
           <span className="flex items-center gap-1.5 mt-0.5">
             {dealer.is_verified && <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />}
             {dealer.is_verified && <span className="text-[10px] text-emerald-400 uppercase tracking-widest">Verificado</span>}
-            {dealer.subscription_plan === 'elite' && (
-              <span className="text-[8px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/30 px-1 py-0.5 leading-none">
-                Elite
-              </span>
-            )}
           </span>
         </div>
       </div>

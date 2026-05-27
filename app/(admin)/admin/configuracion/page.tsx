@@ -25,7 +25,7 @@ const DEFAULT_PLANS = [
     name: 'Elite',
     price: 699,
     slots: 100,
-    features: ['Hasta 100 vehículos activos', 'Badge Elite exclusivo', 'Posición prioritaria', 'Account manager dedicado'],
+    features: ['Hasta 100 vehículos activos', 'Badge Destacado', 'Posición prioritaria', 'Account manager dedicado'],
     highlighted: false,
   },
 ]

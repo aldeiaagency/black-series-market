@@ -63,12 +63,6 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
                 Destacado
               </div>
             )}
-            {dealer.subscription_plan === 'elite' && (
-              <div className="inline-flex items-center px-2 py-0.5 text-[9px]
-                tracking-[0.15em] uppercase text-[#C6A64B]/80 bg-[#0D0D0D]/90 border border-[#C6A64B]/20">
-                Elite
-              </div>
-            )}
           </div>
         </div>
 

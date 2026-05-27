@@ -39,7 +39,7 @@ const PLANS = [
     features: [
       'Vehículos ilimitados',
       'Aparición en homepage del marketplace',
-      'Badge Elite verificado',
+      'Showroom Destacado en el marketplace',
       'Analíticas premium con benchmarks',
       'Account manager dedicado',
       'Acceso a eventos exclusivos',

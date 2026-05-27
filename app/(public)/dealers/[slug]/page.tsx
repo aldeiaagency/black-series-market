@@ -151,12 +151,6 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-[10px] tracking-[0.1em] uppercase font-medium">Verificado</span>
                   </div>
-                  {dealer.subscription_plan === 'elite' && (
-                    <div className="inline-flex items-center px-2.5 py-1 text-[9px] tracking-[0.15em] uppercase
-                      text-[#C6A64B] bg-[#0D0D0D] border border-[#C6A64B]/30">
-                      Elite
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-5 text-sm text-bsm-text-secondary">

@@ -476,12 +476,6 @@ export default function VehicleDetailContent({
                         {vehicle.dealer.name}
                       </Link>
                       <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" aria-label="Profesional verificado" />
-                      {vehicle.dealer.subscription_plan === 'elite' && (
-                        <span className="inline-flex items-center px-2 py-0.5 text-[9px] tracking-[0.15em] uppercase
-                          text-[#C6A64B] bg-[#0D0D0D] border border-[#C6A64B]/30">
-                          Elite
-                        </span>
-                      )}
                     </div>
                     {vehicle.dealer.location_city && (
                       <div className="flex items-center gap-1 text-xs text-bsm-text-muted">

@@ -43,7 +43,7 @@ const PLANS = [
     features: [
       'Vehículos ilimitados',
       'Aparición permanente en homepage',
-      'Badge Elite verificado',
+      'Showroom Destacado en el marketplace',
       'Analíticas premium con benchmarks de mercado',
       'Account manager dedicado',
       'Acceso a eventos exclusivos Black Series',
