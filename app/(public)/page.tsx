@@ -56,24 +56,27 @@ export default async function HomePage() {
           <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#050505] to-transparent" />
         </div>
 
-        {/* ── Hero image — desktop: anchored bottom-right, natural 16:9 ratio ── */}
-        <div className="hidden lg:block absolute right-0 bottom-0 w-[56%]">
-          <Image
-            src="/images/hero/black-label-hero-gt3rs-ducati.webp"
-            alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
-            width={1365}
-            height={768}
-            priority
-            quality={100}
-            className="w-full h-auto block"
-            sizes="(max-width: 1280px) 56vw, 860px"
-          />
+        {/* ── Hero image — desktop: vertically centered right panel ── */}
+        <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[56%]">
+          {/* Image centered vertically inside the full-height panel */}
+          <div className="absolute inset-0 flex flex-col justify-center">
+            <Image
+              src="/images/hero/black-label-hero-gt3rs-ducati.webp"
+              alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
+              width={1365}
+              height={716}
+              priority
+              quality={100}
+              className="w-full h-auto block"
+              sizes="(max-width: 1280px) 56vw, 860px"
+            />
+          </div>
           {/* Left fade — blends into text column */}
           <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-[#050505] to-transparent pointer-events-none" />
-          {/* Top fade — dissolves image into dark hero above */}
-          <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#050505] to-transparent pointer-events-none" />
-          {/* Bottom fade */}
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none" />
+          {/* Top fade */}
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#050505] to-transparent pointer-events-none" />
+          {/* Bottom fade — fills dark space below the image */}
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent pointer-events-none" />
           {/* Right edge vignette */}
           <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#050505]/40 to-transparent pointer-events-none" />
         </div>
@@ -128,7 +131,7 @@ export default async function HomePage() {
               src="/images/hero/black-label-hero-gt3rs-ducati.webp"
               alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
               width={1365}
-              height={768}
+              height={716}
               quality={100}
               className="w-full h-auto block"
               sizes="100vw"
