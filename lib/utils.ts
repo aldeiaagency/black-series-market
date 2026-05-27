@@ -134,8 +134,10 @@ export const BODY_TYPES_CAR = [
 ]
 
 export const BODY_TYPES_MOTO = [
-  'Naked', 'Superbike', 'Sport Touring', 'Cruiser', 'Custom', 'Scrambler',
-  'Adventure', 'Enduro', 'Chopper', 'Café Racer', 'Eléctrica',
+  'Superbike', 'Deportiva', 'Naked', 'Naked deportiva', 'Hypernaked',
+  'Trail / Adventure', 'Maxitrail', 'Turismo', 'Sport Touring',
+  'Custom / Cruiser', 'Scrambler', 'Café Racer', 'Clásica / Neo-retro',
+  'Maxi scooter', 'Scooter premium', 'Supermotard / Enduro', 'Especial / Collector',
 ]
 
 export const COLORS = [

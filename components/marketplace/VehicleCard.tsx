@@ -162,7 +162,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             <p className="text-[12px] text-[#8A8A8A] mb-2.5 leading-tight">{vehicle.version}</p>
           )}
 
-          {/* Specs row: year · km · cambio · combustible */}
+          {/* Specs row: year · km · (moto: cc · carnet | car: cambio · combustible) */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-[12px] text-[#8A8A8A]">
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-[#737373]" />
@@ -172,15 +172,32 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <Gauge className="w-3 h-3 text-[#737373]" />
               {formatMileage(vehicle.mileage_km)}
             </span>
-            {vehicle.transmission && (
-              <span className="hidden sm:block text-[#808080]">
-                {TRANSMISSION_LABELS[vehicle.transmission]}
-              </span>
-            )}
-            {vehicle.fuel_type && (
-              <span className="hidden md:block text-[#808080]">
-                {FUEL_LABELS[vehicle.fuel_type]}
-              </span>
+            {vehicle.vehicle_type === 'motorcycle' ? (
+              <>
+                {vehicle.displacement_cc && (
+                  <span className="hidden sm:block text-[#808080]">
+                    {vehicle.displacement_cc} cc
+                  </span>
+                )}
+                {vehicle.license_type && (
+                  <span className="hidden md:block text-[#808080]">
+                    Carnet {vehicle.license_type}
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                {vehicle.transmission && (
+                  <span className="hidden sm:block text-[#808080]">
+                    {TRANSMISSION_LABELS[vehicle.transmission]}
+                  </span>
+                )}
+                {vehicle.fuel_type && (
+                  <span className="hidden md:block text-[#808080]">
+                    {FUEL_LABELS[vehicle.fuel_type]}
+                  </span>
+                )}
+              </>
             )}
           </div>
 

@@ -48,6 +48,15 @@ async function MotoList({ params }: { params: Record<string, string> }) {
     const [ccMin, ccMax] = params.cc.split('-').map(Number)
     query = query.gte('displacement_cc', ccMin).lte('displacement_cc', ccMax)
   }
+  if (params.colorExterior)         query = query.ilike('color_exterior', `%${params.colorExterior}%`)
+  if (params.provincia)             query = query.ilike('location_province', `%${params.provincia}%`)
+  if (params.showroom)              query = query.eq('dealer_id', params.showroom)
+  if (params.condicion)             query = query.eq('condition_type', params.condicion)
+  if (params.ivaDeducible === 'si') query = query.eq('iva_deducible', true)
+  if (params.combustible)           query = query.eq('fuel_type', params.combustible)
+  if (params.cambio)                query = query.eq('transmission', params.cambio)
+  if (params.equipamiento)          query = query.contains('equipment', [params.equipamiento])
+  if (params.historial === 'si')    query = query.eq('has_service_history', true)
   if (params.search) query = query.or(
     `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,title.ilike.%${params.search}%,version.ilike.%${params.search}%`
   )

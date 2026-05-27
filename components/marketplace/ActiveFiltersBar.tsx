@@ -59,7 +59,7 @@ function getLabel(key: string, value: string): string | null {
     case 'cvMin':       return `Desde ${value} CV`
     case 'cvMax':       return `Hasta ${value} CV`
     case 'tipo':        return value
-    case 'estilo':      return value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    case 'estilo':      return value
     case 'combustible': return FUEL_LABELS[value] || value
     case 'cambio':      return TRANSMISSION_LABELS[value] || value
     case 'carnet':      return LICENSE_LABELS[value] || value

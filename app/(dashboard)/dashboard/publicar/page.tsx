@@ -41,6 +41,7 @@ export default function PublicarPage() {
     power_hp: '',
     torque_nm: '',
     displacement_cc: '',
+    license_type: '',
     zero_to_hundred: '',
     top_speed_kmh: '',
     weight_kg: '',
@@ -224,24 +225,35 @@ export default function PublicarPage() {
               </select>
             </div>
 
-            {form.vehicle_type === 'car' && (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label-base">Estado del vehículo</label>
-                  <select value={form.condition_type} onChange={(e) => update('condition_type', e.target.value)} className="select-base">
-                    <option value="">Seleccionar...</option>
-                    {Object.entries(VEHICLE_CONDITION_LABELS).map(([k, v]) => (
-                      <option key={k} value={k}>{v}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="label-base">Provincia</label>
-                  <select value={form.location_province} onChange={(e) => update('location_province', e.target.value)} className="select-base">
-                    <option value="">Seleccionar...</option>
-                    {SPAIN_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label-base">Estado del vehículo</label>
+                <select value={form.condition_type} onChange={(e) => update('condition_type', e.target.value)} className="select-base">
+                  <option value="">Seleccionar...</option>
+                  {Object.entries(VEHICLE_CONDITION_LABELS).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label-base">Provincia</label>
+                <select value={form.location_province} onChange={(e) => update('location_province', e.target.value)} className="select-base">
+                  <option value="">Seleccionar...</option>
+                  {SPAIN_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+            </div>
+            {form.vehicle_type === 'motorcycle' && (
+              <div>
+                <label className="label-base">Carnet requerido</label>
+                <select value={form.license_type || ''} onChange={(e) => update('license_type', e.target.value || '')} className="select-base">
+                  <option value="">No especificado</option>
+                  <option value="AM">AM — Ciclomotor</option>
+                  <option value="A1">A1 — Hasta 125 cc</option>
+                  <option value="A2">A2 — Hasta 35 kW</option>
+                  <option value="A">A — Sin restricciones</option>
+                  <option value="B">B — Convalidado a moto</option>
+                </select>
               </div>
             )}
           </div>

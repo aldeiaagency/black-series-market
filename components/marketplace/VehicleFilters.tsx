@@ -19,14 +19,14 @@ const CAR_CATEGORIES = [
 ]
 
 const MOTO_CATEGORIES = [
-  { value: 'premium_modern_bikes',      label: 'Motos Premium Modernas' },
-  { value: 'sport_supersport',          label: 'Sport y Supersport' },
-  { value: 'naked_hypernaked',          label: 'Naked y Hypernaked' },
-  { value: 'adventure_touring_premium', label: 'Adventure y Touring Premium' },
-  { value: 'custom_cruiser_premium',    label: 'Custom y Cruiser Premium' },
-  { value: 'classic_youngtimer_bikes',  label: 'Clásica y Youngtimer' },
-  { value: 'scooter_urban_premium',     label: 'Scooter Urbano Premium' },
-  { value: 'enthusiast_selection',      label: 'Selección Entusiasta' },
+  { value: 'sport_supersport',          label: 'Sport & Supersport' },
+  { value: 'naked_hypernaked',          label: 'Naked & Hypernaked' },
+  { value: 'premium_modern_bikes',      label: 'Premium moderno' },
+  { value: 'adventure_touring_premium', label: 'Adventure & Touring premium' },
+  { value: 'custom_cruiser_premium',    label: 'Custom & Cruiser' },
+  { value: 'classic_youngtimer_bikes',  label: 'Clásicas y youngtimers' },
+  { value: 'scooter_urban_premium',     label: 'Scooter premium' },
+  { value: 'enthusiast_selection',      label: 'Selección entusiasta' },
   { value: 'black_label_selection',     label: 'Black Label Selection' },
   { value: 'black_label_icon',          label: 'Black Label Icon' },
 ]
@@ -160,31 +160,59 @@ const FEATURED_EQUIPMENT = [
 ]
 
 const MOTO_STYLES = [
-  { value: 'superbike',       label: 'Superbike' },
-  { value: 'deportiva',       label: 'Deportiva' },
-  { value: 'naked',           label: 'Naked' },
-  { value: 'hypernaked',      label: 'Hypernaked' },
-  { value: 'maxitrail',       label: 'Maxitrail' },
-  { value: 'adventure',       label: 'Adventure' },
-  { value: 'trail',           label: 'Trail' },
-  { value: 'touring',         label: 'Touring' },
-  { value: 'sport_touring',   label: 'Sport Touring' },
-  { value: 'custom',          label: 'Custom' },
-  { value: 'cruiser',         label: 'Cruiser' },
-  { value: 'scrambler',       label: 'Scrambler / Café Racer' },
-  { value: 'clasica',         label: 'Clásica' },
-  { value: 'youngtimer',      label: 'Youngtimer' },
-  { value: 'maxiscooter',     label: 'Maxiscooter' },
-  { value: 'scooter_premium', label: 'Scooter Premium' },
-  { value: 'electrica',       label: 'Eléctrica' },
-  { value: 'enduro_supermoto',label: 'Enduro / Supermotard' },
-  { value: 'especial',        label: 'Especial / Collector' },
+  { value: 'Superbike',            label: 'Superbike' },
+  { value: 'Deportiva',            label: 'Deportiva' },
+  { value: 'Naked',                label: 'Naked' },
+  { value: 'Naked deportiva',      label: 'Naked deportiva' },
+  { value: 'Hypernaked',           label: 'Hypernaked' },
+  { value: 'Trail / Adventure',    label: 'Trail / Adventure' },
+  { value: 'Maxitrail',            label: 'Maxitrail' },
+  { value: 'Turismo',              label: 'Turismo' },
+  { value: 'Sport Touring',        label: 'Sport Touring' },
+  { value: 'Custom / Cruiser',     label: 'Custom / Cruiser' },
+  { value: 'Scrambler',            label: 'Scrambler' },
+  { value: 'Café Racer',           label: 'Café Racer' },
+  { value: 'Clásica / Neo-retro',  label: 'Clásica / Neo-retro' },
+  { value: 'Maxi scooter',         label: 'Maxi scooter' },
+  { value: 'Scooter premium',      label: 'Scooter premium' },
+  { value: 'Supermotard / Enduro', label: 'Supermotard / Enduro' },
+  { value: 'Especial / Collector', label: 'Especial / Collector' },
+]
+
+const MOTO_COLOR_OPTIONS = [
+  { value: 'Negro',          label: 'Negro' },
+  { value: 'Blanco',         label: 'Blanco' },
+  { value: 'Gris',           label: 'Gris' },
+  { value: 'Plata',          label: 'Plata' },
+  { value: 'Rojo',           label: 'Rojo' },
+  { value: 'Azul',           label: 'Azul' },
+  { value: 'Verde',          label: 'Verde' },
+  { value: 'Amarillo',       label: 'Amarillo' },
+  { value: 'Naranja',        label: 'Naranja' },
+  { value: 'Tricolor',       label: 'Tricolor' },
+  { value: 'Color especial', label: 'Color especial' },
+]
+
+const MOTO_EQUIPMENT = [
+  'Quickshifter', 'ABS en curva', 'Control de tracción', 'Modos de conducción',
+  'Suspensión electrónica', 'Control de crucero', 'Puños calefactables',
+  'Maletas originales', 'Escape deportivo', 'Escape Akrapovic', 'Escape Termignoni',
+  'Carbono', 'Llantas forjadas', 'Telemetría', 'Launch Control',
+]
+
+const PROPULSION_OPTIONS = [
+  { value: 'gasoline', label: 'Gasolina' },
+  { value: 'electric', label: 'Eléctrica' },
+  { value: 'hybrid',   label: 'Híbrida' },
+  { value: 'other',    label: 'Otro' },
 ]
 
 const LICENSE_TYPES = [
   { value: 'A',  label: 'A — Sin restricciones' },
   { value: 'A2', label: 'A2 — Hasta 35 kW' },
   { value: 'A1', label: 'A1 — Hasta 125 cc' },
+  { value: 'AM', label: 'AM — Ciclomotor' },
+  { value: 'B',  label: 'B — Convalidado a moto' },
 ]
 
 const MOTO_CC_RANGES = [
@@ -194,7 +222,21 @@ const MOTO_CC_RANGES = [
   { value: '1200-9999',label: 'Más de 1.200 cc' },
 ]
 
-const KM_OPTIONS = [
+const MOTO_KM_OPTIONS = [
+  { value: '5000',   label: 'Hasta 5.000 km' },
+  { value: '10000',  label: 'Hasta 10.000 km' },
+  { value: '20000',  label: 'Hasta 20.000 km' },
+  { value: '30000',  label: 'Hasta 30.000 km' },
+  { value: '40000',  label: 'Hasta 40.000 km' },
+  { value: '50000',  label: 'Hasta 50.000 km' },
+  { value: '60000',  label: 'Hasta 60.000 km' },
+  { value: '70000',  label: 'Hasta 70.000 km' },
+  { value: '80000',  label: 'Hasta 80.000 km' },
+  { value: '90000',  label: 'Hasta 90.000 km' },
+  { value: '100000', label: 'Hasta 100.000 km' },
+]
+
+const CAR_KM_OPTIONS = [
   { value: '5000',   label: 'Hasta 5.000 km' },
   { value: '10000',  label: 'Hasta 10.000 km' },
   { value: '20000',  label: 'Hasta 20.000 km' },
@@ -308,13 +350,11 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   // Fetch featured dealers for showroom filter
   useEffect(() => {
-    if (!isMoto) {
-      fetch('/api/featured-dealers')
-        .then((r) => r.json())
-        .then((data) => setFeaturedDealers(data || []))
-        .catch(() => {})
-    }
-  }, [isMoto])
+    fetch('/api/featured-dealers')
+      .then((r) => r.json())
+      .then((data) => setFeaturedDealers(data || []))
+      .catch(() => {})
+  }, [])
 
   // Open advanced section automatically if an advanced filter is active
   useEffect(() => {
@@ -536,24 +576,22 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           <select className="select-base" value={searchParams.get('kmMax') || ''}
             onChange={(e) => updateParam('kmMax', e.target.value)}>
             <option value="">Sin límite</option>
-            {KM_OPTIONS.map((o) => (
+            {(isMoto ? MOTO_KM_OPTIONS : CAR_KM_OPTIONS).map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
         </FilterGroup>
 
-        {/* Location — cars only */}
-        {!isMoto && (
-          <FilterGroup title="Ubicación" defaultOpen={false}>
-            <select className="select-base" value={searchParams.get('provincia') || ''}
-              onChange={(e) => updateParam('provincia', e.target.value || null)}>
-              <option value="">Cualquier provincia</option>
-              {SPAIN_PROVINCES.map((p) => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-          </FilterGroup>
-        )}
+        {/* Ubicación */}
+        <FilterGroup title="Ubicación" defaultOpen={false}>
+          <select className="select-base" value={searchParams.get('provincia') || ''}
+            onChange={(e) => updateParam('provincia', e.target.value || null)}>
+            <option value="">Cualquier provincia</option>
+            {SPAIN_PROVINCES.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </FilterGroup>
 
         {/* Vehicle-type-specific main filters */}
         {isMoto ? (
@@ -576,6 +614,27 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               <div className="space-y-2">
                 {LICENSE_TYPES.map((o) => (
                   <CheckOption key={o.value} param="carnet" value={o.value} label={o.label} />
+                ))}
+              </div>
+            </FilterGroup>
+            <FilterGroup title="Propulsión" defaultOpen={false}>
+              <div className="space-y-2">
+                {PROPULSION_OPTIONS.map((o) => (
+                  <CheckOption key={o.value} param="combustible" value={o.value} label={o.label} />
+                ))}
+              </div>
+            </FilterGroup>
+            <FilterGroup title="Transmisión" defaultOpen={false}>
+              <div className="space-y-2">
+                {TRANSMISSION_OPTIONS.map((o) => (
+                  <CheckOption key={o.value} param="cambio" value={o.value} label={o.label} />
+                ))}
+              </div>
+            </FilterGroup>
+            <FilterGroup title="Color" defaultOpen={false}>
+              <div className="space-y-2">
+                {MOTO_COLOR_OPTIONS.map((o) => (
+                  <CheckOption key={o.value} param="colorExterior" value={o.value} label={o.label} />
                 ))}
               </div>
             </FilterGroup>
@@ -618,109 +677,107 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           <div className="space-y-2">
             <CheckOption param="garantia"     value="si"   label="Con garantía" />
             <CheckOption param="financiacion" value="si"   label="Con financiación" />
-            {!isMoto && (
-              <CheckOption param="ivaDeducible" value="si" label="IVA deducible" />
-            )}
+            <CheckOption param="ivaDeducible" value="si" label="IVA deducible" />
             <CheckOption param="destacados"   value="true" label="Solo destacados" />
           </div>
         </FilterGroup>
 
         {/* ── ADVANCED FILTERS ── */}
-        {!isMoto && (
-          <div className="border-b border-bsm-border pb-5 mb-5">
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center justify-between w-full mb-1 text-left"
-            >
-              <span className="label-base mb-0 text-gold/80">Más filtros</span>
-              {showAdvanced
-                ? <ChevronUp className="w-4 h-4 text-bsm-text-muted" />
-                : <ChevronDown className="w-4 h-4 text-bsm-text-muted" />
-              }
-            </button>
-            {showAdvanced && (
-              <div className="mt-4 space-y-0">
+        <div className="border-b border-bsm-border pb-5 mb-5">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center justify-between w-full mb-1 text-left"
+          >
+            <span className="label-base mb-0 text-gold/80">Más filtros</span>
+            {showAdvanced
+              ? <ChevronUp className="w-4 h-4 text-bsm-text-muted" />
+              : <ChevronDown className="w-4 h-4 text-bsm-text-muted" />
+            }
+          </button>
+          {showAdvanced && (
+            <div className="mt-4 space-y-0">
 
-                {/* Estado del vehículo */}
-                <FilterGroup title="Estado del vehículo" defaultOpen={false}>
-                  <div className="space-y-2">
-                    {CONDITION_OPTIONS.map((o) => (
-                      <CheckOption key={o.value} param="condicion" value={o.value} label={o.label} />
-                    ))}
+              {/* Estado */}
+              <FilterGroup title="Estado" defaultOpen={false}>
+                <div className="space-y-2">
+                  {CONDITION_OPTIONS.map((o) => (
+                    <CheckOption key={o.value} param="condicion" value={o.value} label={o.label} />
+                  ))}
+                </div>
+              </FilterGroup>
+
+              {/* Potencia CV */}
+              <FilterGroup title="Potencia (CV)" defaultOpen={false}>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <label className="label-base">Desde</label>
+                    <input type="number" placeholder="0" className="input-base"
+                      value={searchParams.get('cvMin') || ''}
+                      onChange={(e) => updateParam('cvMin', e.target.value)} />
                   </div>
-                </FilterGroup>
-
-                {/* Potencia CV */}
-                <FilterGroup title="Potencia (CV)" defaultOpen={false}>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <label className="label-base">Desde</label>
-                      <input type="number" placeholder="0" className="input-base"
-                        value={searchParams.get('cvMin') || ''}
-                        onChange={(e) => updateParam('cvMin', e.target.value)} />
-                    </div>
-                    <div className="flex-1">
-                      <label className="label-base">Hasta</label>
-                      <input type="number" placeholder="Sin límite" className="input-base"
-                        value={searchParams.get('cvMax') || ''}
-                        onChange={(e) => updateParam('cvMax', e.target.value)} />
-                    </div>
+                  <div className="flex-1">
+                    <label className="label-base">Hasta</label>
+                    <input type="number" placeholder="Sin límite" className="input-base"
+                      value={searchParams.get('cvMax') || ''}
+                      onChange={(e) => updateParam('cvMax', e.target.value)} />
                   </div>
-                </FilterGroup>
+                </div>
+              </FilterGroup>
 
-                {/* Tracción */}
-                <FilterGroup title="Tracción" defaultOpen={false}>
-                  <div className="space-y-2">
-                    {DRIVE_OPTIONS.map((o) => (
-                      <CheckOption key={o.value} param="traccion" value={o.value} label={o.label} />
-                    ))}
-                  </div>
-                </FilterGroup>
-
-                {/* Etiqueta DGT */}
-                <FilterGroup title="Etiqueta DGT" defaultOpen={false}>
-                  <div className="space-y-2">
-                    {DGT_OPTIONS.map((o) => (
-                      <CheckOption key={o.value} param="etiquetaDgt" value={o.value} label={o.label} />
-                    ))}
-                  </div>
-                </FilterGroup>
-
-                {/* Historial */}
-                <FilterGroup title="Historial" defaultOpen={false}>
-                  <div className="space-y-2">
-                    <CheckOption param="historial" value="si" label="Historial completo" />
-                  </div>
-                </FilterGroup>
-
-                {/* Equipamiento destacado */}
-                <FilterGroup title="Equipamiento destacado" defaultOpen={false}>
-                  <div className="space-y-2">
-                    {FEATURED_EQUIPMENT.map((item) => (
-                      <CheckOption key={item} param="equipamiento" value={item} label={item} />
-                    ))}
-                  </div>
-                </FilterGroup>
-
-                {/* Showroom — only featured dealers */}
-                {featuredDealers.length > 0 && (
-                  <FilterGroup title="Showroom" defaultOpen={false}>
+              {/* Car-only: Tracción, Etiqueta DGT */}
+              {!isMoto && (
+                <>
+                  <FilterGroup title="Tracción" defaultOpen={false}>
                     <div className="space-y-2">
-                      {featuredDealers.map((d) => (
-                        <CheckOption
-                          key={d.id}
-                          param="showroom"
-                          value={d.id}
-                          label={d.location_city ? `${d.name} · ${d.location_city}` : d.name}
-                        />
+                      {DRIVE_OPTIONS.map((o) => (
+                        <CheckOption key={o.value} param="traccion" value={o.value} label={o.label} />
                       ))}
                     </div>
                   </FilterGroup>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                  <FilterGroup title="Etiqueta DGT" defaultOpen={false}>
+                    <div className="space-y-2">
+                      {DGT_OPTIONS.map((o) => (
+                        <CheckOption key={o.value} param="etiquetaDgt" value={o.value} label={o.label} />
+                      ))}
+                    </div>
+                  </FilterGroup>
+                </>
+              )}
+
+              {/* Historial */}
+              <FilterGroup title="Historial" defaultOpen={false}>
+                <div className="space-y-2">
+                  <CheckOption param="historial" value="si" label="Historial completo" />
+                </div>
+              </FilterGroup>
+
+              {/* Equipamiento destacado */}
+              <FilterGroup title="Equipamiento destacado" defaultOpen={false}>
+                <div className="space-y-2">
+                  {(isMoto ? MOTO_EQUIPMENT : FEATURED_EQUIPMENT).map((item) => (
+                    <CheckOption key={item} param="equipamiento" value={item} label={item} />
+                  ))}
+                </div>
+              </FilterGroup>
+
+              {/* Showroom — only featured dealers */}
+              {featuredDealers.length > 0 && (
+                <FilterGroup title="Showroom" defaultOpen={false}>
+                  <div className="space-y-2">
+                    {featuredDealers.map((d) => (
+                      <CheckOption
+                        key={d.id}
+                        param="showroom"
+                        value={d.id}
+                        label={d.location_city ? `${d.name} · ${d.location_city}` : d.name}
+                      />
+                    ))}
+                  </div>
+                </FilterGroup>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Clear all */}
         {activeFilterCount > 0 && (
