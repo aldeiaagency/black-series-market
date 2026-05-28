@@ -104,7 +104,7 @@ export default async function HomePage() {
 
             {/* Subclaim */}
             <p className="text-[#858585] text-[17px] leading-relaxed mb-10 max-w-xl">
-              Encuentra coches deportivos, clásicos, motos premium y unidades especiales publicadas por concesionarios, compraventas y especialistas previamente verificados.
+              Encuentra coches deportivos, clásicos, motos premium y unidades especiales publicadas por concesionarios, compraventas y especialistas seleccionados por su seriedad y reputación.
             </p>
 
             <SearchBar size="hero" className="max-w-xl mb-10" />
