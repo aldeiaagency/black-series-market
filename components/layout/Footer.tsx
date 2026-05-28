@@ -12,7 +12,7 @@ const LINKS = {
     { label: 'Cómo funciona', href: '/como-funciona' },
   ],
   Profesionales: [
-    { label: 'Solicitar acceso profesional', href: '/registro' },
+    { label: 'Quiero publicar en Black Label', href: '/registro' },
     { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
     { label: 'Planes de publicación', href: '/precios' },
     { label: 'Soporte', href: '/contacto' },

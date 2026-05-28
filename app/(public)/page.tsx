@@ -489,7 +489,7 @@ export default async function HomePage() {
         </ul>
 
         <Link href="/registro" className="btn-outline px-8 py-3 text-sm inline-flex">
-          Solicitar acceso profesional
+          Quiero publicar en Black Label
         </Link>
       </div>
 
@@ -533,7 +533,7 @@ export default async function HomePage() {
                 href="/registro"
                 className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
               >
-                Solicitar acceso profesional <ArrowRight className="w-3 h-3" />
+                Quiero publicar en Black Label <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>

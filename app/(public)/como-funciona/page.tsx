@@ -128,7 +128,7 @@ export default function ComoFuncionaPage() {
           ))}
         </div>
         <div className="mt-8">
-          <Link href="/registro" className="btn-gold px-6">Solicitar acceso profesional</Link>
+          <Link href="/registro" className="btn-gold px-6">Quiero publicar en Black Label</Link>
         </div>
       </section>
 
@@ -166,7 +166,7 @@ export default function ComoFuncionaPage() {
             Solicita acceso para publicar tu inventario y llegar a compradores con criterio real.
           </p>
           <Link href="/registro" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
-            Solicitar acceso profesional <ArrowRight className="w-4 h-4" />
+            Quiero publicar en Black Label <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
