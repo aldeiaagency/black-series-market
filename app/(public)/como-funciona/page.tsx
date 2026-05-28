@@ -10,28 +10,28 @@ export const metadata: Metadata = {
 const BUYER_STEPS = [
   {
     icon: Search,
-    title: 'Explora coches y motos seleccionados',
-    desc: 'Filtra por marca, modelo, precio, kilómetros, tipo y otros criterios. Todos los vehículos publicados han superado los criterios mínimos de calidad editorial.',
+    title: 'Explora coches y motos premium',
+    desc: 'Filtra por marca, modelo, precio, kilometraje, ubicación y otros criterios útiles para encontrar unidades que encajan con lo que buscas.',
   },
   {
     icon: Heart,
-    title: 'Guarda unidades de interés',
-    desc: 'Usa el botón "Guardar" en cualquier ficha o card para guardar vehículos. Los favoritos quedan en tu dispositivo para que puedas revisarlos cuando quieras.',
+    title: 'Guarda tus vehículos favoritos',
+    desc: 'Marca los vehículos que te interesan y vuelve a ellos cuando quieras. Así puedes comparar opciones con calma antes de contactar.',
   },
   {
     icon: GitCompareArrows,
     title: 'Compara hasta 3 vehículos',
-    desc: 'Selecciona vehículos con el botón "Comparar" y accede a una vista comparativa de especificaciones, condiciones y ficha técnica.',
+    desc: 'Revisa varias unidades en una vista comparativa con datos clave, condiciones, ubicación, vendedor y ficha técnica.',
   },
   {
     icon: Bell,
-    title: 'Solicita búsqueda privada',
-    desc: 'Si no encuentras la unidad que buscas, registra tu demanda. Si aparece una oportunidad compatible, te contactamos.',
+    title: 'Solicita tu vehículo a la carta',
+    desc: 'Si no encuentras la unidad que buscas, dinos qué coche o moto tienes en mente. Si aparece una oportunidad compatible, podremos avisarte.',
   },
   {
     icon: MessageSquare,
-    title: 'Contacta con profesionales seleccionados',
-    desc: 'El formulario de contacto cualificado permite que tu solicitud llegue al vendedor con más contexto: plazo, financiación, parte de pago y preferencia de contacto.',
+    title: 'Contacta con profesionales verificados',
+    desc: 'Habla directamente con concesionarios, compraventas y especialistas seleccionados por su reputación, especialización y calidad de atención.',
   },
 ]
 
@@ -39,7 +39,7 @@ const DEALER_STEPS = [
   {
     icon: ShieldCheck,
     title: 'Solicita acceso',
-    desc: 'Black Label selecciona profesionales que trabajan con criterio: presentación cuidada, información real y disponibilidad verificada. El acceso es por solicitud.',
+    desc: 'En Black Label revisamos cada solicitud para mantener un estándar de reputación, presentación y calidad de servicio.',
   },
   {
     icon: Package,
@@ -49,21 +49,21 @@ const DEALER_STEPS = [
   {
     icon: MessageSquare,
     title: 'Recibe solicitudes más cualificadas',
-    desc: 'Cada solicitud llega con el contexto del comprador: plazo de compra, interés en financiación, entrega de vehículo y mensaje. Menos ruido, más intención real.',
+    desc: 'Las solicitudes llegan con información útil sobre el comprador: plazo, financiación, entrega, preferencias y forma de contacto.',
   },
   {
     icon: BarChart2,
-    title: 'Accede a analítica básica',
-    desc: 'Consulta vistas por unidad, número de leads recibidos y estado de cada solicitud. Base para tomar decisiones sobre tu inventario publicado.',
+    title: 'Controla el rendimiento de tus publicaciones',
+    desc: 'Consulta visitas, contactos recibidos, estado de cada solicitud y señales básicas para entender qué vehículos están generando más interés',
   },
 ]
 
 const NOT_BL = [
-  'Un portal abierto sin criterio de publicación',
-  'Una garantía de venta ni de contacto cualificado',
-  'Un sustituto de la revisión independiente del vehículo',
-  'Una plataforma sin mínimos de calidad para el stock publicado',
-  'Un intermediario con responsabilidad en la operación de compraventa',
+  'No somos un portal masivo de anuncios',
+  'No aceptamos cualquier vendedor ni cualquier unidad',
+  'No trabajamos por volumen, sino por encaje y presentación',
+  'No intervenimos como parte en la operación de compraventa',
+  'No sustituimos las comprobaciones técnicas y documentales del comprador',
 ]
 
 export default function ComoFuncionaPage() {
@@ -80,7 +80,7 @@ export default function ComoFuncionaPage() {
           Cómo funciona Black Label Market
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
-          Black Label Market reúne coches y motos premium, deportivos, clásicos y unidades especiales en un entorno más selectivo u especializado que un portal generalista. Sólo pueden publicar profesionales revisados y verificados por nosotros y cada unidad debe encajar con nuestro estándar de presentación, información y calidad.
+          Black Label Market reúne coches y motos premium, deportivos, clásicos y unidades especiales en un entorno más selectivo y especializado que un portal generalista. Sólo pueden publicar profesionales revisados y verificados por nosotros y cada unidad debe encajar con nuestro estándar de presentación, información y calidad.
         </p>
       </div>
 
@@ -88,7 +88,7 @@ export default function ComoFuncionaPage() {
       <section className="mb-20">
         <div className="mb-8">
           <h2 className="font-display text-3xl font-light mb-2">Para compradores</h2>
-          <p className="text-bsm-text-muted text-sm">Encuentra la unidad correcta, con menos ruido y más criterio.</p>
+          <p className="text-bsm-text-muted text-sm">Encuentra, compara y contacta con más confianza y garantías.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {BUYER_STEPS.map((step) => (
@@ -104,7 +104,7 @@ export default function ComoFuncionaPage() {
         <div className="mt-8 flex flex-wrap gap-4">
           <Link href="/coches" className="btn-gold px-6">Explorar coches</Link>
           <Link href="/motos" className="btn-outline px-6">Explorar motos</Link>
-          <Link href="/busqueda-privada" className="btn-ghost px-6 text-sm">Solicitar búsqueda privada</Link>
+          <Link href="/busqueda-privada" className="btn-ghost px-6 text-sm">Solicitar vehículos a la carta</Link>
         </div>
       </section>
 
@@ -112,7 +112,7 @@ export default function ComoFuncionaPage() {
       <section className="mb-20">
         <div className="mb-8">
           <h2 className="font-display text-3xl font-light mb-2">Para profesionales</h2>
-          <p className="text-bsm-text-muted text-sm">Un canal pensado para oportunidades reales, no para generar curiosidad vacía.</p>
+          <p className="text-bsm-text-muted text-sm">Un entorno pensado para presentar mejor tu stock y conectar con compradores más cualificados.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {DEALER_STEPS.map((step) => (
@@ -152,7 +152,7 @@ export default function ComoFuncionaPage() {
         <div className="border border-bsm-border p-8">
           <h3 className="font-display text-2xl font-light mb-3">Soy comprador</h3>
           <p className="text-sm text-bsm-text-muted mb-6 leading-relaxed">
-            Explora el catálogo, guarda favoritos y solicita la unidad que buscas si no la encuentras.
+            Explora el catálogo, guarda en favoritos y solicita la unidad que buscas si no la encuentras.
           </p>
           <Link href="/coches" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
             Explorar vehículos <ArrowRight className="w-4 h-4" />
@@ -161,7 +161,7 @@ export default function ComoFuncionaPage() {
         <div className="border border-[#C6A64B]/20 bg-[#C6A64B]/3 p-8">
           <h3 className="font-display text-2xl font-light mb-3 text-bsm-text-primary">Soy profesional</h3>
           <p className="text-sm text-bsm-text-muted mb-6 leading-relaxed">
-            Solicita acceso para publicar tu inventario y llegar a compradores con criterio real.
+            Solicita acceso para publicar tu inventario y llegar a compradores cualificados.
           </p>
           <Link href="/registro" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
             Quiero publicar en Black Label <ArrowRight className="w-4 h-4" />
