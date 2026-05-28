@@ -312,7 +312,7 @@ export default async function HomePage() {
         </span>
       </div>
       <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA]">
-        Una forma más clara de encontrar tu próximo vehículo
+        Una forma más fácil de encontrar el vehículo de tus sueños
       </h2>
     </div>
 
@@ -320,18 +320,18 @@ export default async function HomePage() {
       {[
         {
           n: '01',
-          title: 'Menos anuncios sin interés',
-          desc: 'No queremos que pierdas tiempo entre miles de resultados. Black Label reúne coches y motos que encajan con una búsqueda más especial.',
+          title: 'Menos ruido. Sólo vehículos premium',
+          desc: 'No queremos que pierdas tiempo entre miles de resultados. Black Label reúne los coches y motos que estás buscando.',
         },
         {
           n: '02',
-          title: 'Profesionales identificados',
-          desc: 'Cada vehículo está publicado por un concesionario, compraventa o especialista reconocible, con ficha propia y datos claros.',
+          title: 'Profesionales verificados',
+          desc: 'Trabajamos solo con concesionarios, compraventas y especialistas cuya reputación y nivel de servicio estén a la altura del vehículo que ofrecen.',
         },
         {
           n: '03',
-          title: 'Información útil desde el primer vistazo',
-          desc: 'Fichas visuales, datos clave, ubicación, estado, vendedor y condiciones principales para comparar con más tranquilidad.',
+          title: 'Información clara para decidir mejor',
+          desc: 'Cada vehículo muestra la información esencial para entender rápido qué ofrece, quién lo publica y en qué condiciones está disponible.',
         },
         {
           n: '04',
