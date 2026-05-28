@@ -546,7 +546,7 @@ export default function VehicleDetailContent({
                 </div>
                 <div className="pt-4 border-t border-bsm-border">
                   <p className="text-sm text-bsm-text-muted mb-5 leading-relaxed">
-                    Esta unidad ya no está disponible. Puedes explorar unidades similares o registrar una búsqueda privada.
+                    Esta unidad ya no está disponible. Puedes explorar unidades similares o solicitar un vehículo a la carta.
                   </p>
                   <div className="space-y-3">
                     <Link href={backHref} className="btn-outline w-full justify-center text-sm">
@@ -555,7 +555,7 @@ export default function VehicleDetailContent({
                     </Link>
                     <Link href="/busqueda-privada" className="btn-gold w-full justify-center text-sm">
                       <ArrowRight className="w-4 h-4" />
-                      Solicitar búsqueda privada
+                      Solicitar vehículo a la carta
                     </Link>
                   </div>
                 </div>
@@ -617,7 +617,7 @@ export default function VehicleDetailContent({
                     />
                     <Link href="/busqueda-privada" className="flex items-center justify-center gap-2 text-xs
                       text-bsm-text-muted hover:text-gold transition-colors py-2">
-                      ¿No consigues esta unidad? Búsqueda privada →
+                      ¿No consigues esta unidad? Vehículos a la carta →
                     </Link>
                   </div>
                 </div>

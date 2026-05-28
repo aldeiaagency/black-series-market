@@ -79,7 +79,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
               hover:border-[#3A3A3A] hover:text-[#C9C9C9]
               transition-all duration-200"
           >
-            Búsqueda privada
+            Vehículos a la carta
           </Link>
         </div>
 
