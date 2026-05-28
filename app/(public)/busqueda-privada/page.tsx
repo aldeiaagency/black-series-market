@@ -4,8 +4,8 @@ import { AlertCircle, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Búsqueda privada de vehículos — Black Label Market',
-  description: 'Si no encuentras la unidad que buscas, Black Label puede registrar tu demanda y conectarla con profesionales seleccionados cuando aparezca una oportunidad compatible.',
+  title: 'Búsqueda de vehículos a la carta — Black Label Market',
+  description: 'Si no encuentras la unidad que buscas, registramos tu demanda y conectamos con profesionales cualificados y verificados. Nos ponemos en contacto contigo cuando aparezca una oportunidad compatible.',
 }
 
 const EXAMPLES = [
@@ -26,7 +26,7 @@ export default function BusquedaPrivadaPage() {
           <span className="text-xs text-gold tracking-widest uppercase">Servicio premium</span>
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary mb-4 leading-tight">
-          Búsqueda privada de vehículos especiales
+          Búsqueda de vehículos a la carta
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
           Si no encuentras la unidad que buscas, Black Label puede registrar tu demanda
@@ -35,8 +35,7 @@ export default function BusquedaPrivadaPage() {
         <div className="flex items-start gap-2 mt-5 p-4 border border-[#1A1A1A] bg-[#0A0A0A]">
           <AlertCircle className="w-4 h-4 text-[#737373] flex-shrink-0 mt-0.5" />
           <p className="text-[11px] text-[#808080] leading-relaxed">
-            Este servicio no garantiza disponibilidad. Registra tu interés para detectar oportunidades
-            compatibles con tu perfil de búsqueda.
+            Si no encuentras la unidad que buscas, registramos tu demanda y conectamos con profesionales cualificados y verificados. Nos ponemos en contacto contigo cuando aparezca una oportunidad compatible.
           </p>
         </div>
       </div>
@@ -122,7 +121,7 @@ export default function BusquedaPrivadaPage() {
                 href="/dealers"
                 className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
               >
-                Ver showrooms seleccionados
+                Ver showrooms verificados
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
