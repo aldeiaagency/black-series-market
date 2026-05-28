@@ -74,15 +74,13 @@ export default function ComoFuncionaPage() {
       <div className="mb-16 max-w-2xl">
         <div className="flex items-center gap-3 mb-5">
           <div className="h-px w-8 bg-gold" />
-          <span className="text-xs text-gold tracking-widest uppercase">Marketplace curado</span>
+          <span className="text-xs text-gold tracking-widest uppercase">CÓMO FUNCIONA</span>
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary mb-4 leading-tight">
           Cómo funciona Black Label Market
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
-          Black Label Market es un marketplace curado de coches y motos premium, deportivos,
-          clásicos y unidades especiales. No somos un portal de anuncios genérico. Seleccionamos
-          qué se publica y quién lo publica.
+          Black Label Market reúne coches y motos premium, deportivos, clásicos y unidades especiales en un entorno más selectivo u especializado que un portal generalista. Sólo pueden publicar profesionales revisados y verificados por nosotros y cada unidad debe encajar con nuestro estándar de presentación, información y calidad.
         </p>
       </div>
 
