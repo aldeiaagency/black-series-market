@@ -202,11 +202,11 @@ export default function PrivateSearchForm() {
         disabled={isSubmitting}
         className="btn-gold w-full justify-center text-sm py-3"
       >
-        {isSubmitting ? 'Enviando solicitud...' : 'Solicitar búsqueda privada'}
+        {isSubmitting ? 'Enviando solicitud...' : 'Solicitar vehículo a la carta'}
       </button>
 
       <p className="text-[10px] text-bsm-text-muted text-center leading-relaxed">
-        La búsqueda privada registra tu interés para detectar oportunidades compatibles. No garantiza disponibilidad, precio ni localización concreta. Al enviar aceptas la política de privacidad.
+        El servicio de vehículos a la carta registra tu interés para detectar oportunidades compatibles. No garantiza disponibilidad, precio ni localización concreta. Al enviar aceptas la política de privacidad.
       </p>
     </form>
   )

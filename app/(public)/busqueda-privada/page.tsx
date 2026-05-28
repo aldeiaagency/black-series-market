@@ -4,7 +4,7 @@ import { AlertCircle, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Búsqueda de vehículos a la carta — Black Label Market',
+  title: 'Vehículos a la carta — Black Label Market',
   description: 'Si no encuentras la unidad que buscas, registramos tu demanda y conectamos con profesionales cualificados y verificados. Nos ponemos en contacto contigo cuando aparezca una oportunidad compatible.',
 }
 
@@ -26,7 +26,7 @@ export default function BusquedaPrivadaPage() {
           <span className="text-xs text-gold tracking-widest uppercase">Servicio premium</span>
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary mb-4 leading-tight">
-          Búsqueda de vehículos a la carta
+          Vehículos a la carta
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
           Si no encuentras la unidad que buscas, Black Label puede registrar tu demanda
