@@ -111,7 +111,11 @@ export default async function HomePage() {
 
             <div className="flex flex-wrap gap-3">
               <Link href="/coches" className="btn-gold">
-                Ver vehículos
+                Ver coches
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link href="/motos" className="btn-gold">
+                Ver motos
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
