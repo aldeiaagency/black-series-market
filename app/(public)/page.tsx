@@ -453,8 +453,58 @@ export default async function HomePage() {
       {/* PROFESSIONAL BLOCK */}
 <section className="border-t border-[#141414] py-20">
   <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-    <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-16 items-stretch">
-      <div className="max-w-xl">
+    <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-stretch">
+
+      {/* Imagen — izquierda en desktop, arriba en mobile */}
+      <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden order-first">
+        <img
+          src="/images/hero/professional-showroom-black-label.webp"
+          alt="Showroom profesional premium con vehículo revisado para Black Label"
+          className="absolute inset-0 h-full w-full object-cover opacity-90"
+          loading="lazy"
+          decoding="async"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-l from-[#080808]/35 via-[#080808]/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080808]/85 via-[#080808]/15 to-[#080808]/20" />
+
+        <div className="relative z-10 h-full flex flex-col justify-end p-5 md:p-7 lg:p-8">
+          <div className="w-full max-w-lg border border-[#1E1E1E] bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
+            <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
+              Qué queremos publicar
+            </p>
+
+            <ul className="space-y-3">
+              {[
+                'Vehículos con historia, configuración, versión o atractivo real',
+                'Fotos cuidadas, información clara y disponibilidad actualizada',
+                'Concesionarios, compraventas y especialistas con buena reputación online',
+                'Stock premium, deportivo, clásico, enthusiast o unidades especiales',
+              ].map((c) => (
+                <li
+                  key={c}
+                  className="flex items-start gap-2.5 text-[12px] text-[#9A9A9A] leading-relaxed"
+                >
+                  <span className="text-[#C6A64B]/50 mt-0.5 flex-shrink-0">→</span>
+                  {c}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-6 pt-5 border-t border-[#1A1A1A]">
+              <Link
+                href="/registro"
+                className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
+              >
+                Quiero publicar en Black Label <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Texto — derecha en desktop */}
+      <div className="max-w-xl lg:py-4">
         <div className="flex items-center gap-3 mb-5">
           <div className="h-px w-8 bg-[#C6A64B]/30" />
           <span className="text-[10px] text-[#C6A64B]/50 tracking-[0.3em] uppercase">
@@ -495,53 +545,6 @@ export default async function HomePage() {
         <Link href="/registro" className="btn-outline px-8 py-3 text-sm inline-flex">
           Quiero publicar en Black Label
         </Link>
-      </div>
-
-      <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
-        <img
-          src="/images/hero/professional-showroom-black-label.webp"
-          alt="Showroom profesional premium con vehículo revisado para Black Label"
-          className="absolute inset-0 h-full w-full object-cover opacity-90"
-          loading="lazy"
-          decoding="async"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-r from-[#080808]/35 via-[#080808]/10 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080808]/85 via-[#080808]/15 to-[#080808]/20" />
-
-        <div className="relative z-10 h-full flex flex-col justify-end p-5 md:p-7 lg:p-8">
-          <div className="w-full max-w-lg border border-[#1E1E1E] bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
-            <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
-              Qué queremos publicar
-            </p>
-
-            <ul className="space-y-3">
-              {[
-                'Vehículos con historia, configuración, versión o atractivo real',
-                'Fotos cuidadas, información clara y disponibilidad actualizada',
-                'Concesionarios, compraventas y especialistas con buena reputación online',
-                'Stock premium, deportivo, clásico, enthusiast o unidades especiales',
-              ].map((c) => (
-                <li
-                  key={c}
-                  className="flex items-start gap-2.5 text-[12px] text-[#9A9A9A] leading-relaxed"
-                >
-                  <span className="text-[#C6A64B]/50 mt-0.5 flex-shrink-0">→</span>
-                  {c}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-6 pt-5 border-t border-[#1A1A1A]">
-              <Link
-                href="/registro"
-                className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
-              >
-                Quiero publicar en Black Label <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
