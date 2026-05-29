@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from 'lucide-react'
+import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search, Star } from 'lucide-react'
 import { cn, SPAIN_PROVINCES } from '@/lib/utils'
 
 // ─── Categories ──────────────────────────────────────────────────────────────
@@ -304,19 +304,15 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const pathname     = usePathname()
   const searchParams = useSearchParams()
   const [mobileOpen, setMobileOpen]             = useState(false)
-  const [showAllBrands, setShowAllBrands]       = useState(false)
   const [models, setModels]                     = useState<string[]>([])
   const [loadingModels, setLoadingModels]       = useState(false)
   const [searchDraft, setSearchDraft]           = useState(searchParams.get('search') || '')
   const [showAdvanced, setShowAdvanced]         = useState(false)
   const [featuredDealers, setFeaturedDealers]   = useState<{ id: string; name: string; location_city: string | null }[]>([])
 
-  const isMoto          = vehicleType === 'motorcycle'
-  const categories      = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
-  const allBrands       = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
-  const featuredBrands  = isMoto ? FEATURED_BRANDS_MOTO : FEATURED_BRANDS_CAR
-  const displayedBrands = showAllBrands ? allBrands : featuredBrands
-  const hiddenCount     = allBrands.length - featuredBrands.length
+  const isMoto      = vehicleType === 'motorcycle'
+  const categories  = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
+  const allBrands   = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
 
   const currentBrand = searchParams.get('marca') || ''
   const currentModel = searchParams.get('modelo') || ''
@@ -358,7 +354,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   // Open advanced section automatically if an advanced filter is active
   useEffect(() => {
-    const advancedParams = ['condicion', 'ivaDeducible', 'showroom', 'traccion', 'etiquetaDgt', 'equipamiento', 'historial']
+    const advancedParams = ['condicion', 'ivaDeducible', 'traccion', 'etiquetaDgt', 'equipamiento', 'historial']
     if (advancedParams.some((p) => searchParams.has(p))) {
       setShowAdvanced(true)
     }
@@ -475,29 +471,18 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               </div>
             )}
             {!currentBrand && (
-              <div>
-                <div className="flex flex-wrap gap-1.5">
-                  {displayedBrands.map((brand) => (
-                    <button
-                      key={brand}
-                      onClick={() => updateBrand(brand.toLowerCase().replace(/ /g, '-'))}
-                      className="text-xs px-2.5 py-1 border border-bsm-border text-bsm-text-secondary
-                        hover:border-gold/40 hover:text-gold transition-all duration-150 whitespace-nowrap"
-                    >
-                      {brand}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setShowAllBrands(!showAllBrands)}
-                  className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-3"
-                >
-                  {showAllBrands
-                    ? <><ChevronUp className="w-3 h-3" />Ver menos</>
-                    : <><ChevronDown className="w-3 h-3" />Ver todas las marcas ({hiddenCount} más)</>
-                  }
-                </button>
-              </div>
+              <select
+                className="select-base"
+                value=""
+                onChange={(e) => e.target.value && updateBrand(e.target.value)}
+              >
+                <option value="">Cualquier marca</option>
+                {allBrands.map((brand) => (
+                  <option key={brand} value={brand.toLowerCase().replace(/ /g, '-')}>
+                    {brand}
+                  </option>
+                ))}
+              </select>
             )}
             {currentBrand && !currentModel && (
               <select
@@ -592,6 +577,34 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             ))}
           </select>
         </FilterGroup>
+
+        {/* Showroom — featured dealers, moved here from Más filtros */}
+        {featuredDealers.length > 0 && (
+          <FilterGroup title="Showroom" defaultOpen={false}>
+            <div className="space-y-2">
+              {featuredDealers.map((d) => (
+                <label key={d.id} className="flex items-center gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    className="accent-gold w-3.5 h-3.5"
+                    checked={searchParams.get('showroom') === d.id}
+                    onChange={(e) => updateParam('showroom', e.target.checked ? d.id : null)}
+                  />
+                  <span className="flex items-center gap-1.5 text-sm text-bsm-text-secondary group-hover:text-bsm-text-primary transition-colors min-w-0">
+                    <span className="truncate">
+                      {d.location_city ? `${d.name} · ${d.location_city}` : d.name}
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 shrink-0 px-1 py-0.5 text-[9px] tracking-wider uppercase
+                      border border-gold/30 text-gold/80 bg-gold/5">
+                      <Star className="w-2.5 h-2.5" />
+                      Dest.
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </FilterGroup>
+        )}
 
         {/* Vehicle-type-specific main filters */}
         {isMoto ? (
@@ -695,7 +708,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             }
           </button>
           {showAdvanced && (
-            <div className="mt-4 space-y-0">
+            <div className="mt-4">
 
               {/* Estado */}
               <FilterGroup title="Estado" defaultOpen={false}>
@@ -760,21 +773,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 </div>
               </FilterGroup>
 
-              {/* Showroom — only featured dealers */}
-              {featuredDealers.length > 0 && (
-                <FilterGroup title="Showroom" defaultOpen={false}>
-                  <div className="space-y-2">
-                    {featuredDealers.map((d) => (
-                      <CheckOption
-                        key={d.id}
-                        param="showroom"
-                        value={d.id}
-                        label={d.location_city ? `${d.name} · ${d.location_city}` : d.name}
-                      />
-                    ))}
-                  </div>
-                </FilterGroup>
-              )}
             </div>
           )}
         </div>
