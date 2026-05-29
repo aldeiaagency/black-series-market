@@ -58,7 +58,7 @@ async function MotoList({ params }: { params: Record<string, string> }) {
   if (params.equipamiento)          query = query.contains('equipment', [params.equipamiento])
   if (params.historial === 'si')    query = query.eq('has_service_history', true)
   if (params.search) query = query.or(
-    `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,title.ilike.%${params.search}%,version.ilike.%${params.search}%`
+    `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`
   )
 
   const sorts = SORT_MAP[params.sort || 'featured'] || SORT_MAP.featured

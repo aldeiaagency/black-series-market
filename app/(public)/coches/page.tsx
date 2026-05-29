@@ -55,7 +55,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
   if (params.garantia === 'si')     query = query.eq('has_warranty', true)
   if (params.financiacion === 'si') query = query.eq('financing_available', true)
   if (params.search)             query = query.or(
-    `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%,title.ilike.%${params.search}%,version.ilike.%${params.search}%`
+    `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`
   )
 
   const sorts = SORT_MAP[params.sort || 'featured'] || SORT_MAP.featured
