@@ -539,14 +539,12 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         <FilterGroup title="Precio">
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <label className="label-base">Desde (€)</label>
-              <input type="number" placeholder="0" className="input-base"
+              <input type="number" placeholder="Desde (€)" className="input-base"
                 value={searchParams.get('precioMin') || ''}
                 onChange={(e) => updateParam('precioMin', e.target.value)} />
             </div>
             <div className="flex-1">
-              <label className="label-base">Hasta (€)</label>
-              <input type="number" placeholder="Sin límite" className="input-base"
+              <input type="number" placeholder="Hasta (€)" className="input-base"
                 value={searchParams.get('precioMax') || ''}
                 onChange={(e) => updateParam('precioMax', e.target.value)} />
             </div>
