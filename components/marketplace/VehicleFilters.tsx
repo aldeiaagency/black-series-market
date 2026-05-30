@@ -4,19 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search, Star } from 'lucide-react'
 import { cn, SPAIN_PROVINCES } from '@/lib/utils'
+import { CAR_CATEGORIES_ALL } from '@/lib/vehicle-categories'
 
-// ─── Categories ──────────────────────────────────────────────────────────────
-
-const CAR_CATEGORIES = [
-  { value: 'supercars',            label: 'Supercars & Hypercars' },
-  { value: 'luxury_executive',     label: 'Lujo y Ejecutivo' },
-  { value: 'premium_modern',       label: 'Premium Moderno' },
-  { value: 'sport_performance',    label: 'Sport y Performance' },
-  { value: 'classics_youngtimers', label: 'Clásicos y Youngtimers' },
-  { value: 'enthusiast_selection', label: 'Selección Entusiasta' },
-  { value: 'black_label_selection','label': 'Black Label Selection' },
-  { value: 'black_label_icon',     label: 'Black Label Icon' },
-]
+// alias local para mantener el nombre usado en el resto del archivo
+const CAR_CATEGORIES = CAR_CATEGORIES_ALL
 
 const MOTO_CATEGORIES = [
   { value: 'sport_supersport',          label: 'Sport & Supersport' },
@@ -309,6 +300,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const [searchDraft, setSearchDraft]           = useState(searchParams.get('search') || '')
   const [showAdvanced, setShowAdvanced]         = useState(false)
   const [featuredDealers, setFeaturedDealers]   = useState<{ id: string; name: string; location_city: string | null }[]>([])
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
   const isMoto      = vehicleType === 'motorcycle'
   const categories  = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
@@ -446,9 +438,43 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         {/* Category */}
         <FilterGroup title="Categoría" defaultOpen={false}>
           <div className="space-y-2">
-            {categories.map((cat) => (
-              <CheckOption key={cat.value} param="categoria" value={cat.value} label={cat.label} />
-            ))}
+            {categories.map((cat) => {
+              const hasExamples = 'examples' in cat
+              const isExpanded  = expandedCategory === cat.value
+              return (
+                <div key={cat.value}>
+                  <label className="flex items-center gap-2.5 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="accent-gold w-3.5 h-3.5 flex-shrink-0"
+                      checked={searchParams.get('categoria') === cat.value}
+                      onChange={(e) => updateParam('categoria', e.target.checked ? cat.value : null)}
+                    />
+                    <span className="flex items-center gap-1.5 text-sm text-bsm-text-secondary group-hover:text-bsm-text-primary transition-colors leading-tight">
+                      {cat.label}
+                    </span>
+                    {hasExamples && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); setExpandedCategory(isExpanded ? null : cat.value) }}
+                        className="ml-auto flex-shrink-0 w-4 h-4 rounded-full border border-[#444] text-[#666]
+                          hover:border-gold hover:text-gold transition-colors text-[9px]
+                          flex items-center justify-center select-none"
+                        aria-label={`Ejemplos de ${cat.label}`}
+                      >
+                        i
+                      </button>
+                    )}
+                  </label>
+                  {hasExamples && isExpanded && (
+                    <p className="mt-1.5 ml-6 text-[10px] text-[#737373] leading-relaxed">
+                      <span className="text-[#555] mr-1">Ej:</span>
+                      {(cat as { examples: string }).examples}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </FilterGroup>
 

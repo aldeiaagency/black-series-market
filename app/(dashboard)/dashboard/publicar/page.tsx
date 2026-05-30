@@ -11,6 +11,7 @@ import {
 } from '@/lib/utils'
 import { CheckCircle, ChevronRight } from 'lucide-react'
 import ImageUploader from '@/components/dashboard/ImageUploader'
+import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
 
 const STEPS = ['Tipo y marca', 'Especificaciones', 'Equipamiento', 'Imágenes', 'Precio y publicar']
 
@@ -52,6 +53,7 @@ export default function PublicarPage() {
     has_service_history: false,
     has_carfax: false,
     condition_type: '',
+    category: '',
     iva_deducible: false,
     location_province: '',
     description: '',
@@ -224,6 +226,29 @@ export default function PublicarPage() {
                 {bodyTypes.map((b) => <option key={b} value={b}>{b}</option>)}
               </select>
             </div>
+
+            {/* Categoría — solo coches */}
+            {form.vehicle_type !== 'motorcycle' && (
+              <div>
+                <label className="label-base">Categoría del vehículo</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => update('category', e.target.value)}
+                  className="select-base"
+                >
+                  <option value="">Seleccionar categoría...</option>
+                  {CAR_CATEGORIES_PUBLIC.map((cat) => (
+                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  ))}
+                </select>
+                {form.category && (
+                  <p className="mt-1.5 text-[11px] text-[#737373] leading-relaxed">
+                    <span className="text-[#555] mr-1">Ej:</span>
+                    {CAR_CATEGORIES_PUBLIC.find((c) => c.value === form.category)?.examples}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
