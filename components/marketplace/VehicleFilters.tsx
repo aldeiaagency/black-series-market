@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search, Star } from 'lucide-react'
 import { cn, SPAIN_PROVINCES } from '@/lib/utils'
-import { CAR_CATEGORIES_ALL } from '@/lib/vehicle-categories'
+import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
 
-// alias local para mantener el nombre usado en el resto del archivo
-const CAR_CATEGORIES = CAR_CATEGORIES_ALL
+const CAR_CATEGORIES = CAR_CATEGORIES_PUBLIC
 
 const MOTO_CATEGORIES = [
   { value: 'sport_supersport',          label: 'Sport & Supersport' },
@@ -749,14 +748,12 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               <FilterGroup title="Potencia (CV)" defaultOpen={false}>
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
-                    <label className="label-base">Desde</label>
-                    <input type="number" placeholder="0" className="input-base"
+                    <input type="number" placeholder="Desde (CV)" className="input-base"
                       value={searchParams.get('cvMin') || ''}
                       onChange={(e) => updateParam('cvMin', e.target.value)} />
                   </div>
                   <div className="flex-1">
-                    <label className="label-base">Hasta</label>
-                    <input type="number" placeholder="Sin límite" className="input-base"
+                    <input type="number" placeholder="Hasta (CV)" className="input-base"
                       value={searchParams.get('cvMax') || ''}
                       onChange={(e) => updateParam('cvMax', e.target.value)} />
                   </div>
