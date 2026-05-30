@@ -236,16 +236,7 @@ export default function VehicleDetailContent({
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="text-sm font-medium text-gold tracking-widest uppercase">{vehicle.brand_name}</span>
-              {vehicle.is_editors_pick && (
-                <span className="badge-gold text-[10px]">Editor&apos;s Pick</span>
-              )}
-              {vehicle.is_exclusive && !vehicle.is_editors_pick && (
-                <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-                  text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 font-medium">
-                  Exclusivo
-                </span>
-              )}
-              {vehicle.is_featured && !vehicle.is_editors_pick && (
+              {vehicle.is_featured && (
                 <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
                   text-gold bg-gold/10 border border-gold/20 font-medium">
                   Destacado

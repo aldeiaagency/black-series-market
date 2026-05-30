@@ -39,11 +39,8 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
     ? STATUS_CONFIG[vehicle.status as keyof typeof STATUS_CONFIG]
     : null
 
-  // Badge priority: featured > editors_pick > new arrival > custom; max 2 badges total
   const showFeatured = vehicle.is_featured && isActive
-  const showPick     = vehicle.is_editors_pick && !vehicle.is_featured && isActive
-  const showNew      = !showFeatured && !showPick && isActive && isNewVehicle(vehicle.published_at)
-  const showBadge    = vehicle.badge && !showFeatured && !showPick && !showNew && isActive
+  const showNew      = !showFeatured && isActive && isNewVehicle(vehicle.published_at)
 
   // Extra meta badges (prioritized, max 2)
   const showIva      = isActive && vehicle.iva_deducible === true
@@ -96,7 +93,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           </div>
         )}
 
-        {/* Top badges — max 2 */}
+        {/* Top badges */}
         <div className="absolute top-3 left-3 z-20 pointer-events-none flex flex-col gap-1">
           {showFeatured && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
@@ -104,22 +101,10 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               Destacado
             </span>
           )}
-          {showPick && (
-            <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-[#C9C9C9] bg-[#0A0A0A] border border-[#2A2A2A] font-medium">
-              Selection
-            </span>
-          )}
           {showNew && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
               text-emerald-400 bg-[#0A0A0A] border border-emerald-400/30 font-medium">
               Recién llegado
-            </span>
-          )}
-          {showBadge && (
-            <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-[#9A9A9A] bg-[#0A0A0A] border border-[#2A2A2A] font-medium">
-              {vehicle.badge}
             </span>
           )}
         </div>
