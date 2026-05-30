@@ -846,22 +846,25 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
       )}
 
       {/* ── DESKTOP sidebar ── */}
-      <aside className="hidden lg:block w-64 xl:w-72 flex-shrink-0">
-        <div className="sticky top-24">
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-xs text-bsm-text-muted uppercase tracking-widest">
-              {totalCount} vehículos
-            </span>
-            {activeFilterCount > 0 && (
-              <button
-                onClick={clearAll}
-                className="text-xs text-gold hover:text-gold-light transition-colors flex items-center gap-1"
-              >
-                <X className="w-3 h-3" />
-                Borrar {activeFilterCount > 1 ? `${activeFilterCount} filtros` : 'filtro'}
-              </button>
-            )}
-          </div>
+      <aside
+        className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 self-start sticky top-24 overflow-y-auto"
+        style={{ height: 'calc(100vh - 6rem)' }}
+      >
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+          <span className="text-xs text-bsm-text-muted uppercase tracking-widest">
+            {totalCount} vehículos
+          </span>
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearAll}
+              className="text-xs text-gold hover:text-gold-light transition-colors flex items-center gap-1"
+            >
+              <X className="w-3 h-3" />
+              Borrar {activeFilterCount > 1 ? `${activeFilterCount} filtros` : 'filtro'}
+            </button>
+          )}
+        </div>
+        <div className="flex-1 pb-8">
           {renderFilters()}
         </div>
       </aside>
