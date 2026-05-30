@@ -523,16 +523,13 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         <FilterGroup title="Año">
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <label className="label-base">Desde</label>
-              <input type="number" placeholder="1970" min="1960" max={new Date().getFullYear()}
+              <input type="number" placeholder="Desde"
                 className="input-base" value={searchParams.get('anioMin') || ''}
                 onChange={(e) => updateParam('anioMin', e.target.value)} />
             </div>
             <div className="flex-1">
-              <label className="label-base">Hasta</label>
-              <input type="number" placeholder={String(new Date().getFullYear())}
-                min="1960" max={new Date().getFullYear()} className="input-base"
-                value={searchParams.get('anioMax') || ''}
+              <input type="number" placeholder="Hasta"
+                className="input-base" value={searchParams.get('anioMax') || ''}
                 onChange={(e) => updateParam('anioMax', e.target.value)} />
             </div>
           </div>
