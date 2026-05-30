@@ -10,11 +10,15 @@ import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import { getProvinciasByComunidad } from '@/lib/utils'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
-  featured:    [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
-  newest:      [{ col: 'published_at', asc: false }],
-  price_asc:   [{ col: 'price', asc: true }],
-  price_desc:  [{ col: 'price', asc: false }],
-  mileage_asc: [{ col: 'mileage_km', asc: true }],
+  featured:     [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
+  newest:       [{ col: 'published_at', asc: false }],
+  oldest:       [{ col: 'published_at', asc: true }],
+  price_asc:    [{ col: 'price', asc: true }],
+  price_desc:   [{ col: 'price', asc: false }],
+  mileage_asc:  [{ col: 'mileage_km', asc: true }],
+  mileage_desc: [{ col: 'mileage_km', asc: false }],
+  year_desc:    [{ col: 'year', asc: false }],
+  year_asc:     [{ col: 'year', asc: true }],
 }
 
 interface PageProps {

@@ -3,11 +3,15 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 const OPTIONS = [
-  { value: 'featured', label: 'Destacados' },
-  { value: 'newest', label: 'Más recientes' },
-  { value: 'price_asc', label: 'Precio: menor a mayor' },
-  { value: 'price_desc', label: 'Precio: mayor a menor' },
-  { value: 'mileage_asc', label: 'Menor kilometraje' },
+  { value: 'featured',     label: 'Destacados' },
+  { value: 'newest',       label: 'Más recientes' },
+  { value: 'oldest',       label: 'Más antiguos' },
+  { value: 'price_asc',    label: 'Precio: menor a mayor' },
+  { value: 'price_desc',   label: 'Precio: mayor a menor' },
+  { value: 'mileage_asc',  label: 'Menor kilometraje' },
+  { value: 'mileage_desc', label: 'Mayor kilometraje' },
+  { value: 'year_desc',    label: 'Año: más nuevo primero' },
+  { value: 'year_asc',     label: 'Año: más antiguo primero' },
 ]
 
 export default function SortSelector() {
