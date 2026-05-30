@@ -582,7 +582,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </FilterGroup>
 
         {/* Potencia CV — moved from Más filtros */}
-        <FilterGroup title="Potencia (CV)" defaultOpen={false}>
+        <FilterGroup title="Potencia (CV)">
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <input type="number" placeholder="Desde (CV)" className="input-base"
