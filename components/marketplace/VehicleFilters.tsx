@@ -264,12 +264,33 @@ function FilterGroup({
   title,
   children,
   defaultOpen = true,
+  compact = false,
 }: {
   title: string
   children: React.ReactNode
   defaultOpen?: boolean
+  compact?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
+
+  if (compact) {
+    return (
+      <div className="border-b border-[#1A1A1A] last:border-0">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center justify-between w-full py-[14px] text-left"
+        >
+          <span className="label-base mb-0">{title}</span>
+          {open
+            ? <ChevronUp className="w-3.5 h-3.5 text-bsm-text-muted" />
+            : <ChevronDown className="w-3.5 h-3.5 text-bsm-text-muted" />
+          }
+        </button>
+        {open && <div className="pb-4">{children}</div>}
+      </div>
+    )
+  }
+
   return (
     <div className="border-b border-bsm-border pb-5 mb-5 last:border-0 last:mb-0 last:pb-0">
       <button
@@ -560,6 +581,22 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           </div>
         </FilterGroup>
 
+        {/* Potencia CV — moved from Más filtros */}
+        <FilterGroup title="Potencia (CV)" defaultOpen={false}>
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <input type="number" placeholder="Desde (CV)" className="input-base"
+                value={searchParams.get('cvMin') || ''}
+                onChange={(e) => updateParam('cvMin', e.target.value)} />
+            </div>
+            <div className="flex-1">
+              <input type="number" placeholder="Hasta (CV)" className="input-base"
+                value={searchParams.get('cvMax') || ''}
+                onChange={(e) => updateParam('cvMax', e.target.value)} />
+            </div>
+          </div>
+        </FilterGroup>
+
         {/* Price */}
         <FilterGroup title="Precio">
           <div className="flex items-center gap-3">
@@ -733,10 +770,10 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             }
           </button>
           {showAdvanced && (
-            <div className="mt-4">
+            <div className="mt-4 border-t border-[#1A1A1A]">
 
               {/* Estado */}
-              <FilterGroup title="Estado" defaultOpen={false}>
+              <FilterGroup title="Estado" defaultOpen={false} compact>
                 <div className="space-y-2">
                   {CONDITION_OPTIONS.map((o) => (
                     <CheckOption key={o.value} param="condicion" value={o.value} label={o.label} />
@@ -744,33 +781,17 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 </div>
               </FilterGroup>
 
-              {/* Potencia CV */}
-              <FilterGroup title="Potencia (CV)" defaultOpen={false}>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <input type="number" placeholder="Desde (CV)" className="input-base"
-                      value={searchParams.get('cvMin') || ''}
-                      onChange={(e) => updateParam('cvMin', e.target.value)} />
-                  </div>
-                  <div className="flex-1">
-                    <input type="number" placeholder="Hasta (CV)" className="input-base"
-                      value={searchParams.get('cvMax') || ''}
-                      onChange={(e) => updateParam('cvMax', e.target.value)} />
-                  </div>
-                </div>
-              </FilterGroup>
-
               {/* Car-only: Tracción, Etiqueta DGT */}
               {!isMoto && (
                 <>
-                  <FilterGroup title="Tracción" defaultOpen={false}>
+                  <FilterGroup title="Tracción" defaultOpen={false} compact>
                     <div className="space-y-2">
                       {DRIVE_OPTIONS.map((o) => (
                         <CheckOption key={o.value} param="traccion" value={o.value} label={o.label} />
                       ))}
                     </div>
                   </FilterGroup>
-                  <FilterGroup title="Etiqueta DGT" defaultOpen={false}>
+                  <FilterGroup title="Etiqueta DGT" defaultOpen={false} compact>
                     <div className="space-y-2">
                       {DGT_OPTIONS.map((o) => (
                         <CheckOption key={o.value} param="etiquetaDgt" value={o.value} label={o.label} />
@@ -781,14 +802,14 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               )}
 
               {/* Historial */}
-              <FilterGroup title="Historial" defaultOpen={false}>
+              <FilterGroup title="Historial" defaultOpen={false} compact>
                 <div className="space-y-2">
                   <CheckOption param="historial" value="si" label="Historial completo" />
                 </div>
               </FilterGroup>
 
               {/* Equipamiento destacado */}
-              <FilterGroup title="Equipamiento destacado" defaultOpen={false}>
+              <FilterGroup title="Equipamiento destacado" defaultOpen={false} compact>
                 <div className="space-y-2">
                   {(isMoto ? MOTO_EQUIPMENT : FEATURED_EQUIPMENT).map((item) => (
                     <CheckOption key={item} param="equipamiento" value={item} label={item} />
