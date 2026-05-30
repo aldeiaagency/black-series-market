@@ -155,18 +155,43 @@ export const VEHICLE_CONDITION_LABELS: Record<VehicleCondition, string> = {
   coleccion:  'Colección',
 }
 
-export const SPAIN_PROVINCES = [
-  'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila',
-  'Badajoz', 'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria',
-  'Castellón', 'Ciudad Real', 'Córdoba', 'A Coruña', 'Cuenca',
-  'Girona', 'Granada', 'Guadalajara', 'Guipúzcoa', 'Huelva', 'Huesca',
-  'Islas Baleares', 'Jaén', 'León', 'Lleida', 'La Rioja', 'Lugo',
-  'Madrid', 'Málaga', 'Murcia', 'Navarra', 'Ourense', 'Palencia',
-  'Las Palmas', 'Pontevedra', 'Salamanca', 'Santa Cruz de Tenerife',
-  'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel', 'Toledo',
-  'Valencia', 'Valladolid', 'Vizcaya', 'Zamora', 'Zaragoza',
-  'Ceuta', 'Melilla',
-]
+// ─── Spain locations — single source of truth ────────────────────────────────
+// Province names match those stored in vehicles.location_province
+
+export const SPAIN_LOCATIONS = [
+  { comunidad: 'Andalucía',                    provincias: ['Almería', 'Cádiz', 'Córdoba', 'Granada', 'Huelva', 'Jaén', 'Málaga', 'Sevilla'] },
+  { comunidad: 'Aragón',                       provincias: ['Huesca', 'Teruel', 'Zaragoza'] },
+  { comunidad: 'Asturias',                     provincias: ['Asturias'] },
+  { comunidad: 'Islas Baleares',               provincias: ['Islas Baleares'] },
+  { comunidad: 'Canarias',                     provincias: ['Las Palmas', 'Santa Cruz de Tenerife'] },
+  { comunidad: 'Cantabria',                    provincias: ['Cantabria'] },
+  { comunidad: 'Castilla-La Mancha',           provincias: ['Albacete', 'Ciudad Real', 'Cuenca', 'Guadalajara', 'Toledo'] },
+  { comunidad: 'Castilla y León',              provincias: ['Ávila', 'Burgos', 'León', 'Palencia', 'Salamanca', 'Segovia', 'Soria', 'Valladolid', 'Zamora'] },
+  { comunidad: 'Cataluña',                     provincias: ['Barcelona', 'Girona', 'Lleida', 'Tarragona'] },
+  { comunidad: 'Comunitat Valenciana',         provincias: ['Alicante', 'Castellón', 'Valencia'] },
+  { comunidad: 'Extremadura',                  provincias: ['Badajoz', 'Cáceres'] },
+  { comunidad: 'Galicia',                      provincias: ['A Coruña', 'Lugo', 'Ourense', 'Pontevedra'] },
+  { comunidad: 'La Rioja',                     provincias: ['La Rioja'] },
+  { comunidad: 'Comunidad de Madrid',          provincias: ['Madrid'] },
+  { comunidad: 'Región de Murcia',             provincias: ['Murcia'] },
+  { comunidad: 'Comunidad Foral de Navarra',   provincias: ['Navarra'] },
+  { comunidad: 'País Vasco',                   provincias: ['Álava', 'Vizcaya', 'Guipúzcoa'] },
+  { comunidad: 'Ceuta',                        provincias: ['Ceuta'] },
+  { comunidad: 'Melilla',                      provincias: ['Melilla'] },
+] as const
+
+export type ComunidadName = typeof SPAIN_LOCATIONS[number]['comunidad']
+
+export function getProvinciasByComunidad(comunidad: string): string[] {
+  return (SPAIN_LOCATIONS.find(c => c.comunidad === comunidad)?.provincias as readonly string[] | undefined)?.slice() ?? []
+}
+
+export function getComunidadByProvincia(provincia: string): string | null {
+  return SPAIN_LOCATIONS.find(c => (c.provincias as readonly string[]).includes(provincia))?.comunidad ?? null
+}
+
+// Flat list kept for backward compatibility with existing selects
+export const SPAIN_PROVINCES = SPAIN_LOCATIONS.flatMap(c => c.provincias)
 
 export const UPHOLSTERY = ['Piel', 'Alcántara', 'Cuero Nappa', 'Tela', 'Cuero sintético', 'Otro']
 

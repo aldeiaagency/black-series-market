@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search, Star } from 'lucide-react'
-import { cn, SPAIN_PROVINCES } from '@/lib/utils'
+import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from 'lucide-react'
+import { cn, SPAIN_LOCATIONS, getProvinciasByComunidad } from '@/lib/utils'
 import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
 
 const CAR_CATEGORIES = CAR_CATEGORIES_PUBLIC
@@ -319,7 +319,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const [loadingModels, setLoadingModels]       = useState(false)
   const [searchDraft, setSearchDraft]           = useState(searchParams.get('search') || '')
   const [showAdvanced, setShowAdvanced]         = useState(false)
-  const [featuredDealers, setFeaturedDealers]   = useState<{ id: string; name: string; location_city: string | null }[]>([])
+  const [allDealers, setAllDealers]             = useState<{ id: string; name: string; location_city: string | null; isFeatured: boolean }[]>([])
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
   const isMoto      = vehicleType === 'motorcycle'
@@ -356,13 +356,24 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     setSearchDraft(searchParams.get('search') || '')
   }, [searchParams])
 
-  // Fetch featured dealers for showroom filter
+  // Fetch all dealers with active stock, filtered by current location
   useEffect(() => {
-    fetch('/api/featured-dealers')
+    const provincia  = searchParams.get('provincia')
+    const comunidad  = searchParams.get('comunidad')
+    const qs         = new URLSearchParams()
+    qs.set('type', isMoto ? 'motorcycle' : 'car')
+    if (provincia) {
+      qs.set('provincias', provincia)
+    } else if (comunidad) {
+      const ps = getProvinciasByComunidad(comunidad)
+      if (ps.length) qs.set('provincias', ps.join(','))
+    }
+    fetch(`/api/featured-dealers?${qs}`)
       .then((r) => r.json())
-      .then((data) => setFeaturedDealers(data || []))
+      .then((data) => setAllDealers(Array.isArray(data) ? data : []))
       .catch(() => {})
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('provincia'), searchParams.get('comunidad'), isMoto])
 
   // Open advanced section automatically if an advanced filter is active
   useEffect(() => {
@@ -384,6 +395,15 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     const params = new URLSearchParams(searchParams.toString())
     if (!brand) { params.delete('marca'); params.delete('modelo') }
     else { params.set('marca', brand); params.delete('modelo') }
+    params.delete('page')
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  function updateComunidad(comunidad: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (!comunidad) { params.delete('comunidad'); params.delete('provincia') }
+    else { params.set('comunidad', comunidad); params.delete('provincia') }
+    params.delete('showroom')
     params.delete('page')
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
@@ -629,22 +649,56 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           </div>
         </FilterGroup>
 
-        {/* Ubicación */}
+        {/* Ubicación — 2 niveles: comunidad → provincia */}
         <FilterGroup title="Ubicación" defaultOpen={false}>
-          <select className="select-base" value={searchParams.get('provincia') || ''}
-            onChange={(e) => updateParam('provincia', e.target.value || null)}>
-            <option value="">Cualquier provincia</option>
-            {SPAIN_PROVINCES.map((p) => (
-              <option key={p} value={p}>{p}</option>
+          {/* Nivel 1: comunidad autónoma */}
+          <select
+            className="select-base"
+            value={searchParams.get('comunidad') || ''}
+            onChange={(e) => updateComunidad(e.target.value)}
+          >
+            <option value="">Cualquier comunidad</option>
+            {SPAIN_LOCATIONS.map(({ comunidad }) => (
+              <option key={comunidad} value={comunidad}>{comunidad}</option>
             ))}
           </select>
+
+          {/* Nivel 2: provincias (solo si hay comunidad con >1 provincia) */}
+          {(() => {
+            const comunidad = searchParams.get('comunidad')
+            if (!comunidad) return (
+              <p className="mt-2 text-[10px] text-[#555] leading-relaxed">
+                Selecciona una comunidad para ver sus provincias.
+              </p>
+            )
+            const provincias = getProvinciasByComunidad(comunidad)
+            if (provincias.length <= 1) return null
+            return (
+              <div className="mt-3">
+                <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-2">
+                  Provincia (opcional)
+                </p>
+                <div className="space-y-1.5">
+                  {provincias.map((p) => (
+                    <CheckOption key={p} param="provincia" value={p} label={p} />
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
         </FilterGroup>
 
-        {/* Showroom — featured dealers, moved here from Más filtros */}
-        {featuredDealers.length > 0 && (
-          <FilterGroup title="Showroom" defaultOpen={false}>
+        {/* Showroom — todos los dealers con stock en la ubicación seleccionada */}
+        <FilterGroup title="Showroom" defaultOpen={false}>
+          {allDealers.length === 0 ? (
+            <p className="text-[11px] text-[#555] leading-relaxed">
+              {searchParams.get('comunidad') || searchParams.get('provincia')
+                ? 'No hay showrooms con stock en esta ubicación.'
+                : 'Cargando showrooms…'}
+            </p>
+          ) : (
             <div className="space-y-2">
-              {featuredDealers.map((d) => (
+              {allDealers.map((d) => (
                 <label key={d.id} className="flex items-center gap-2.5 cursor-pointer group">
                   <input
                     type="checkbox"
@@ -652,21 +706,21 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                     checked={searchParams.get('showroom') === d.id}
                     onChange={(e) => updateParam('showroom', e.target.checked ? d.id : null)}
                   />
-                  <span className="flex items-center gap-1.5 text-sm text-bsm-text-secondary group-hover:text-bsm-text-primary transition-colors min-w-0">
+                  <span className="flex items-center gap-1.5 text-sm text-bsm-text-secondary group-hover:text-bsm-text-primary transition-colors min-w-0 flex-wrap">
                     <span className="truncate">
                       {d.location_city ? `${d.name} · ${d.location_city}` : d.name}
                     </span>
-                    <span className="inline-flex items-center gap-0.5 shrink-0 px-1 py-0.5 text-[9px] tracking-wider uppercase
-                      border border-gold/30 text-gold/80 bg-gold/5">
-                      <Star className="w-2.5 h-2.5" />
-                      Dest.
-                    </span>
+                    {d.isFeatured && (
+                      <span className="shrink-0 border border-[#C6A64B]/35 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-[#C6A64B]/75">
+                        Destacado
+                      </span>
+                    )}
                   </span>
                 </label>
               ))}
             </div>
-          </FilterGroup>
-        )}
+          )}
+        </FilterGroup>
 
         {/* Vehicle-type-specific main filters */}
         {isMoto ? (

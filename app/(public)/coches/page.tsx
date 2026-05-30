@@ -7,6 +7,7 @@ import SortSelector from '@/components/marketplace/SortSelector'
 import ActiveFiltersBar from '@/components/marketplace/ActiveFiltersBar'
 import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
+import { getProvinciasByComunidad } from '@/lib/utils'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   featured:    [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
@@ -44,7 +45,12 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
   if (params.combustible)        query = query.eq('fuel_type', params.combustible)
   if (params.cambio)             query = query.eq('transmission', params.cambio)
   if (params.colorExterior)      query = query.ilike('color_exterior', `%${params.colorExterior}%`)
-  if (params.provincia)          query = query.ilike('location_province', `%${params.provincia}%`)
+  if (params.provincia) {
+    query = query.eq('location_province', params.provincia)
+  } else if (params.comunidad) {
+    const ps = getProvinciasByComunidad(params.comunidad)
+    if (ps.length) query = query.in('location_province', ps)
+  }
   if (params.showroom)           query = query.eq('dealer_id', params.showroom)
   if (params.condicion)          query = query.eq('condition_type', params.condicion)
   if (params.traccion)           query = query.eq('drive_type', params.traccion)

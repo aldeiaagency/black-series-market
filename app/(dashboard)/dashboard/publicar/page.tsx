@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import {
   FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS,
   BODY_TYPES_CAR, BODY_TYPES_MOTO, COLORS, UPHOLSTERY,
-  EQUIPMENT_CATEGORIES, VEHICLE_CONDITION_LABELS, SPAIN_PROVINCES,
+  EQUIPMENT_CATEGORIES, VEHICLE_CONDITION_LABELS,
+  SPAIN_LOCATIONS, getProvinciasByComunidad,
   slugify, vehicleSlug,
 } from '@/lib/utils'
 import { CheckCircle, ChevronRight } from 'lucide-react'
@@ -55,6 +56,7 @@ export default function PublicarPage() {
     condition_type: '',
     category: '',
     iva_deducible: false,
+    location_comunidad: '',  // UI-only: drives province cascading, not sent to DB
     location_province: '',
     description: '',
     equipment: [] as string[],
@@ -106,8 +108,10 @@ export default function PublicarPage() {
 
     const slug = vehicleSlug(form.brand_name, form.model_name, form.year, editId || crypto.randomUUID())
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { location_comunidad: _comunidad, ...formData } = form
     const payload = {
-      ...form,
+      ...formData,
       dealer_id: dealerId,
       slug: editId ? form.slug : slug,
       price: form.price_on_request ? null : parseFloat(form.price) || null,
@@ -261,13 +265,37 @@ export default function PublicarPage() {
                 </select>
               </div>
               <div>
-                <label className="label-base">Provincia</label>
-                <select value={form.location_province} onChange={(e) => update('location_province', e.target.value)} className="select-base">
+                <label className="label-base">Comunidad autónoma</label>
+                <select
+                  value={form.location_comunidad}
+                  onChange={(e) => {
+                    update('location_comunidad', e.target.value)
+                    update('location_province', '') // reset province when community changes
+                  }}
+                  className="select-base"
+                >
                   <option value="">Seleccionar...</option>
-                  {SPAIN_PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                  {SPAIN_LOCATIONS.map(({ comunidad }) => (
+                    <option key={comunidad} value={comunidad}>{comunidad}</option>
+                  ))}
                 </select>
               </div>
             </div>
+            {form.location_comunidad && (
+              <div>
+                <label className="label-base">Provincia</label>
+                <select
+                  value={form.location_province}
+                  onChange={(e) => update('location_province', e.target.value)}
+                  className="select-base"
+                >
+                  <option value="">Seleccionar provincia...</option>
+                  {getProvinciasByComunidad(form.location_comunidad).map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             {form.vehicle_type === 'motorcycle' && (
               <div>
                 <label className="label-base">Carnet requerido</label>
