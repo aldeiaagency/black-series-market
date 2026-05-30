@@ -123,7 +123,18 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           <div className="absolute top-3 right-3 z-20 flex gap-1.5
             opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <FavoriteButton vehicleId={vehicle.id} variant="card" />
-            <CompareButton vehicleId={vehicle.id} variant="card" />
+            <CompareButton
+              vehicle={{
+                id: vehicle.id,
+                brand_name: vehicle.brand_name,
+                model_name: vehicle.model_name,
+                year: vehicle.year,
+                slug: vehicle.slug,
+                vehicle_type: vehicle.vehicle_type,
+                primaryImage: vehicle.images?.[0]?.url ?? null,
+              }}
+              variant="card"
+            />
           </div>
         )}
       </div>

@@ -262,7 +262,18 @@ export default function VehicleDetailContent({
             <div className="flex items-center gap-3 mt-5 flex-wrap">
               <FavoriteButton vehicleId={vehicle.id} variant="detail" />
               {vehicle.status === 'active' && (
-                <CompareButton vehicleId={vehicle.id} variant="detail" />
+                <CompareButton
+                  vehicle={{
+                    id: vehicle.id,
+                    brand_name: vehicle.brand_name,
+                    model_name: vehicle.model_name,
+                    year: vehicle.year,
+                    slug: vehicle.slug,
+                    vehicle_type: vehicle.vehicle_type,
+                    primaryImage: vehicle.images?.[0]?.url ?? null,
+                  }}
+                  variant="detail"
+                />
               )}
               <CreateAlertButton
                 vehicleType={vehicleTypeParam}

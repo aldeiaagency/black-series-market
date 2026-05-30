@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
+import { ComparatorProvider } from '@/lib/comparator-context'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -41,7 +42,9 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${cormorant.variable}`}>
       <body className="bg-obsidian text-bsm-text-primary antialiased">
-        {children}
+        <ComparatorProvider>
+          {children}
+        </ComparatorProvider>
       </body>
     </html>
   )

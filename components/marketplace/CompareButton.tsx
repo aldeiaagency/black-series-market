@@ -1,28 +1,33 @@
-﻿'use client'
+'use client'
 
 import { GitCompareArrows } from 'lucide-react'
-import { useComparator } from '@/hooks/useComparator'
+import { useComparator, type CompareVehicle } from '@/hooks/useComparator'
 import { cn } from '@/lib/utils'
 
 interface CompareButtonProps {
-  vehicleId: string
+  vehicle: CompareVehicle
   variant?: 'card' | 'detail'
   className?: string
 }
 
-export default function CompareButton({ vehicleId, variant = 'card', className }: CompareButtonProps) {
+export default function CompareButton({ vehicle, variant = 'card', className }: CompareButtonProps) {
   const { isSelected, toggle, canAdd, mounted } = useComparator()
-  const selected = mounted && isSelected(vehicleId)
-  const disabled = !selected && !canAdd
+  const sel      = mounted && isSelected(vehicle.id)
+  const disabled = !sel && !canAdd
+
+  function handleClick(e?: React.MouseEvent) {
+    if (variant === 'card') { e?.preventDefault(); e?.stopPropagation() }
+    if (!disabled) toggle(vehicle)
+  }
 
   if (variant === 'detail') {
     return (
       <button
-        onClick={() => { if (!disabled) toggle(vehicleId) }}
+        onClick={handleClick}
         disabled={disabled}
         className={cn(
           'flex items-center gap-2 px-4 py-2.5 border text-sm transition-all duration-200',
-          selected
+          sel
             ? 'border-[#C6A64B]/40 text-[#C6A64B] bg-[#C6A64B]/5'
             : disabled
               ? 'border-[#1A1A1A] text-[#8A8A8A] cursor-not-allowed'
@@ -32,26 +37,26 @@ export default function CompareButton({ vehicleId, variant = 'card', className }
         title={disabled ? 'Máximo 3 vehículos en comparador' : undefined}
       >
         <GitCompareArrows className="w-4 h-4" />
-        <span>{selected ? 'En comparador' : 'Comparar'}</span>
+        <span>{sel ? 'En comparador' : 'Comparar'}</span>
       </button>
     )
   }
 
   return (
     <button
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!disabled) toggle(vehicleId) }}
+      onClick={handleClick}
       disabled={disabled}
       className={cn(
         'w-8 h-8 flex items-center justify-center bg-[#0A0A0A]/80 backdrop-blur-sm border transition-all duration-200',
-        selected
+        sel
           ? 'border-[#C6A64B]/40 text-[#C6A64B]'
           : disabled
             ? 'border-[#1A1A1A] text-[#2A2A2A] cursor-not-allowed'
             : 'border-[#2A2A2A]/60 text-[#757575] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
         className
       )}
-      title={disabled ? 'Máximo 3 vehículos' : selected ? 'Quitar del comparador' : 'Añadir al comparador'}
-      aria-label={selected ? 'Quitar del comparador' : 'Añadir al comparador'}
+      title={disabled ? 'Máximo 3 vehículos' : sel ? 'Quitar del comparador' : 'Añadir al comparador'}
+      aria-label={sel ? 'Quitar del comparador' : 'Añadir al comparador'}
     >
       <GitCompareArrows className="w-3.5 h-3.5" />
     </button>
