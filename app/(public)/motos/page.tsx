@@ -38,6 +38,7 @@ async function MotoList({ params }: { params: Record<string, string> }) {
   if (params.precioMax)    query = query.lte('price', parseInt(params.precioMax))
   if (params.cvMin)        query = query.gte('power_hp', parseInt(params.cvMin))
   if (params.cvMax)        query = query.lte('power_hp', parseInt(params.cvMax))
+  if (params.kmMin)        query = query.gte('mileage_km', parseInt(params.kmMin))
   if (params.kmMax)        query = query.lte('mileage_km', parseInt(params.kmMax))
   if (params.estilo)       query = query.eq('body_type', params.estilo)
   if (params.carnet)       query = query.eq('license_type', params.carnet)

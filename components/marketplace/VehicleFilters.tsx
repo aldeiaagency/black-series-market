@@ -552,14 +552,19 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </FilterGroup>
 
         {/* Mileage */}
-        <FilterGroup title="Kilometraje máximo">
-          <select className="select-base" value={searchParams.get('kmMax') || ''}
-            onChange={(e) => updateParam('kmMax', e.target.value)}>
-            <option value="">Sin límite</option>
-            {(isMoto ? MOTO_KM_OPTIONS : CAR_KM_OPTIONS).map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+        <FilterGroup title="Kilometraje">
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <input type="number" placeholder="Desde (km)" className="input-base"
+                value={searchParams.get('kmMin') || ''}
+                onChange={(e) => updateParam('kmMin', e.target.value)} />
+            </div>
+            <div className="flex-1">
+              <input type="number" placeholder="Hasta (km)" className="input-base"
+                value={searchParams.get('kmMax') || ''}
+                onChange={(e) => updateParam('kmMax', e.target.value)} />
+            </div>
+          </div>
         </FilterGroup>
 
         {/* Ubicación */}

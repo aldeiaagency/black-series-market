@@ -38,6 +38,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
   if (params.precioMax)          query = query.lte('price', parseInt(params.precioMax))
   if (params.cvMin)              query = query.gte('power_hp', parseInt(params.cvMin))
   if (params.cvMax)              query = query.lte('power_hp', parseInt(params.cvMax))
+  if (params.kmMin)              query = query.gte('mileage_km', parseInt(params.kmMin))
   if (params.kmMax)              query = query.lte('mileage_km', parseInt(params.kmMax))
   if (params.tipo)               query = query.eq('body_type', params.tipo)
   if (params.combustible)        query = query.eq('fuel_type', params.combustible)
