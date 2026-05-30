@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { X, GitCompareArrows } from 'lucide-react'
 import { useComparator } from '@/hooks/useComparator'
 
@@ -36,15 +35,12 @@ export default function CompareBar() {
               className="flex items-center gap-2 border border-[#2A2A2A] bg-[#111] px-2 py-1.5 shrink-0"
             >
               {v.primaryImage ? (
-                <div className="w-10 h-7 overflow-hidden shrink-0 bg-[#0D0D0D]">
-                  <Image
-                    src={v.primaryImage}
-                    alt={`${v.brand_name} ${v.model_name}`}
-                    width={40}
-                    height={28}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={v.primaryImage}
+                  alt=""
+                  className="w-10 h-7 object-cover shrink-0 bg-[#0D0D0D]"
+                />
               ) : (
                 <div className="w-10 h-7 bg-[#1A1A1A] flex items-center justify-center shrink-0">
                   <span className="text-[9px] text-[#444] font-display">{v.brand_name[0]}</span>

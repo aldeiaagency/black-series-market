@@ -39,8 +39,19 @@ export function ComparatorProvider({ children }: { children: ReactNode }) {
     setMounted(true)
     try {
       const raw = localStorage.getItem(KEY)
-      if (raw) setSelected(JSON.parse(raw))
-    } catch {}
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        // Guard against old format (array of strings) from previous version
+        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null) {
+          setSelected(parsed)
+        } else {
+          // Old format — clear it
+          localStorage.removeItem(KEY)
+        }
+      }
+    } catch {
+      try { localStorage.removeItem(KEY) } catch {}
+    }
   }, [])
 
   function save(next: CompareVehicle[]) {
@@ -98,8 +109,17 @@ export function ComparatorProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export function useComparator() {
-  const ctx = useContext(Ctx)
-  if (!ctx) throw new Error('useComparator must be inside ComparatorProvider')
-  return ctx
+const NOOP_CTX: ComparatorCtx = {
+  selected: [],
+  add: () => {},
+  remove: () => {},
+  toggle: () => {},
+  clear: () => {},
+  isSelected: () => false,
+  canAdd: true,
+  mounted: false,
+}
+
+export function useComparator(): ComparatorCtx {
+  return useContext(Ctx) ?? NOOP_CTX
 }
