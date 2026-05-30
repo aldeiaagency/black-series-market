@@ -108,8 +108,7 @@ export default function PublicarPage() {
 
     const slug = vehicleSlug(form.brand_name, form.model_name, form.year, editId || crypto.randomUUID())
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { location_comunidad: _comunidad, ...formData } = form
+    const { location_comunidad: _loc, ...formData } = form; void _loc
     const payload = {
       ...formData,
       dealer_id: dealerId,
