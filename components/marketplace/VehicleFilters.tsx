@@ -456,7 +456,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </FilterGroup>
 
         {/* Category */}
-        <FilterGroup title="Categoría" defaultOpen={false}>
+        <FilterGroup title="Categoría">
           <div className="space-y-2">
             {categories.map((cat) => {
               const hasExamples = 'examples' in cat
