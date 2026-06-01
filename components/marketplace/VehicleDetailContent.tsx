@@ -367,7 +367,7 @@ export default function VehicleDetailContent({
             <div className="border border-bsm-border mb-4">
               {[
                 { label: 'Financiación disponible', value: vehicle.financing_available ? 'Sí' : null },
-                { label: 'Acepta parte de pago',    value: vehicle.accepts_trade_in ? 'Sí' : null },
+                { label: 'Entrega de tu vehículo',  value: vehicle.accepts_trade_in ? 'Aceptada' : null },
                 { label: 'Prueba disponible',       value: vehicle.has_test_drive != null ? (vehicle.has_test_drive ? 'Sí' : 'No') : null },
                 { label: 'IVA deducible',           value: vehicle.has_ibi != null ? (vehicle.has_ibi ? 'Sí' : 'No') : null },
                 { label: 'Transporte nacional',     value: null },
@@ -390,31 +390,6 @@ export default function VehicleDetailContent({
             </div>
           </div>
 
-          {/* Certifications */}
-          {(vehicle.has_service_history || vehicle.has_carfax || vehicle.financing_available || vehicle.accepts_trade_in) && (
-            <div className="flex flex-wrap gap-3">
-              {vehicle.has_service_history && (
-                <div className="flex items-center gap-2 px-4 py-2 border border-emerald-400/20 text-emerald-400 text-xs">
-                  <Shield className="w-4 h-4" />Historial de servicio
-                </div>
-              )}
-              {vehicle.has_carfax && (
-                <div className="flex items-center gap-2 px-4 py-2 border border-emerald-400/20 text-emerald-400 text-xs">
-                  <Shield className="w-4 h-4" />Informe Carfax
-                </div>
-              )}
-              {vehicle.financing_available && (
-                <div className="flex items-center gap-2 px-4 py-2 border border-gold/20 text-gold text-xs">
-                  <CheckCircle className="w-4 h-4" />Financiación disponible
-                </div>
-              )}
-              {vehicle.accepts_trade_in && (
-                <div className="flex items-center gap-2 px-4 py-2 border border-gold/20 text-gold text-xs">
-                  <CheckCircle className="w-4 h-4" />Acepta parte de pago
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Sobre el vendedor (expanded body section) */}
           {vehicle.dealer && (
@@ -580,7 +555,7 @@ export default function VehicleDetailContent({
                   </div>
                 </div>
                 {vehicle.dealer && (
-                  <div className="bg-surface border border-bsm-border p-5">
+                  <div className="bg-surface border border-bsm-border overflow-hidden">
                     <DealerInlineCard dealer={vehicle.dealer} variant="sidebar" />
                   </div>
                 )}
@@ -658,14 +633,11 @@ export default function VehicleDetailContent({
                         hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
                     />
                   </div>
-                  <p className="text-[10px] text-[#808080] text-center mt-3 leading-relaxed">
-                    Tu interés llega al vendedor con el contexto necesario para que la conversación empiece bien.
-                  </p>
                 </div>
 
                 {/* Dealer card (sidebar) */}
                 {vehicle.dealer && (
-                  <div className="bg-surface border border-bsm-border p-5">
+                  <div className="bg-surface border border-bsm-border overflow-hidden">
                     <DealerInlineCard dealer={vehicle.dealer} variant="sidebar" />
                   </div>
                 )}

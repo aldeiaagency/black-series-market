@@ -72,28 +72,32 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
     )
   }
 
-  // sidebar variant
+  // sidebar variant — cover image fills the entire card, info overlaid with gradient
   return (
-    <div className={cn('', className)}>
-      {/* Cover image */}
-      {dealer.cover_url && (
-        <div className="w-full h-20 mb-4 overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={dealer.cover_url}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-        </div>
+    <div className={cn('relative min-h-[190px] overflow-hidden', className)}>
+      {/* Background: cover image or solid dark */}
+      {dealer.cover_url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={dealer.cover_url}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-[#0D0D0D]" />
       )}
 
-      <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3 text-center">
-        Profesional seleccionado
-      </p>
+      {/* Gradient overlay: transparent top → solid black bottom */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/30" />
 
-      {/* Logo centered */}
-      <div className="flex justify-center mb-3">
-        <div className="w-10 h-10 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center text-center px-5 pt-6 pb-5">
+        <p className="text-[10px] text-white/40 uppercase tracking-widest mb-3">
+          Profesional seleccionado
+        </p>
+
+        {/* Logo */}
+        <div className="w-10 h-10 mb-3 flex-shrink-0 bg-black/60 border border-white/15 flex items-center justify-center overflow-hidden">
           {dealer.logo_url ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -102,35 +106,35 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
               className="w-full h-full object-contain p-0.5"
             />
           ) : (
-            <span className="font-display text-sm font-light text-[#C6A64B]/60 select-none">
+            <span className="font-display text-sm font-light text-[#C6A64B]/70 select-none">
               {initial}
             </span>
           )}
         </div>
-      </div>
 
-      {/* Name + verified centered */}
-      <div className="text-center mb-1">
+        {/* Name */}
         <Link
           href={`/dealers/${dealer.slug}`}
-          className="font-medium text-bsm-text-primary hover:text-gold transition-colors text-sm"
+          className="font-medium text-white hover:text-gold transition-colors text-sm mb-1"
         >
           {dealer.name}
         </Link>
+
+        {/* Verified */}
         {dealer.is_verified && (
-          <div className="flex items-center justify-center gap-1 mt-0.5">
+          <div className="flex items-center justify-center gap-1 mb-1.5">
             <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
             <span className="text-[10px] text-emerald-400 uppercase tracking-widest">Verificado</span>
           </div>
         )}
-      </div>
 
-      <div className="flex items-center justify-center gap-1 text-xs text-bsm-text-muted mb-4">
-        <MapPin className="w-3 h-3 flex-shrink-0" />
-        {locationLabel}
-      </div>
+        {/* Location */}
+        <div className="flex items-center justify-center gap-1 text-xs text-white/50 mb-4">
+          <MapPin className="w-3 h-3 flex-shrink-0" />
+          {locationLabel}
+        </div>
 
-      <div className="text-center">
+        {/* Link */}
         <Link
           href={`/dealers/${dealer.slug}`}
           className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
