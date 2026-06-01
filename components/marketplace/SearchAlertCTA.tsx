@@ -73,7 +73,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
             Crear alerta
           </button>
           <Link
-            href="/busqueda-privada"
+            href="/vehiculos-a-la-carta"
             className="inline-flex items-center gap-2 px-6 py-3 text-[12px] tracking-[0.1em] font-medium uppercase
               border border-[#2A2A2A] text-[#8A8A8A]
               hover:border-[#3A3A3A] hover:text-[#C9C9C9]

@@ -7,7 +7,7 @@ const LINKS = {
     { label: 'Motos', href: '/motos' },
     { label: 'Marcas', href: '/marcas' },
     { label: 'Concesionarios', href: '/dealers' },
-    { label: 'Vehículos a la carta', href: '/busqueda-privada' },
+    { label: 'Vehículos a la carta', href: '/vehiculos-a-la-carta' },
     { label: 'Mis favoritos', href: '/mis-favoritos' },
     { label: 'Cómo funciona', href: '/como-funciona' },
   ],

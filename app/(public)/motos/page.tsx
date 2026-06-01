@@ -93,11 +93,11 @@ async function MotoList({ params }: { params: Record<string, string> }) {
         <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
           <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay motos con esos criterios</h3>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
-            Ajusta los filtros o solicita una moto a la carta para que te avisemos cuando entre una compatible.
+            Ajusta los filtros o dinos qué estás buscando y lo tendremos en cuenta si aparece una unidad compatible.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/motos" className="btn-outline text-sm px-4">Limpiar filtros</Link>
-            <Link href="/busqueda-privada" className="btn-gold text-sm px-4">Vehículo a la carta</Link>
+            <Link href="/vehiculos-a-la-carta" className="btn-gold text-sm px-4">Solicitar vehículo a la carta</Link>
             <CreateAlertButton
               vehicleType="motorcycle"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-bsm-border text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"
