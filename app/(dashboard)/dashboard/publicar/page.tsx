@@ -7,7 +7,6 @@ import {
   FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS,
   BODY_TYPES_CAR, BODY_TYPES_MOTO, COLORS, UPHOLSTERY,
   EQUIPMENT_CATEGORIES, VEHICLE_CONDITION_LABELS,
-  SPAIN_LOCATIONS, getProvinciasByComunidad,
   slugify, vehicleSlug,
 } from '@/lib/utils'
 import { CheckCircle, ChevronRight } from 'lucide-react'
@@ -19,6 +18,7 @@ const STEPS = ['Tipo y marca', 'Especificaciones', 'Equipamiento', 'Imágenes', 
 export default function PublicarPage() {
   const [step, setStep] = useState(0)
   const [dealerId, setDealerId] = useState<string | null>(null)
+  const [dealerLocation, setDealerLocation] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -56,8 +56,6 @@ export default function PublicarPage() {
     condition_type: '',
     category: '',
     iva_deducible: false,
-    location_comunidad: '',  // UI-only: drives province cascading, not sent to DB
-    location_province: '',
     description: '',
     equipment: [] as string[],
     equipment_extra: '',
@@ -104,9 +102,10 @@ export default function PublicarPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      const { data: dealer } = await supabase.from('dealers').select('id').eq('profile_id', user.id).single()
+      const { data: dealer } = await supabase.from('dealers').select('id, location_city, location_region').eq('profile_id', user.id).single()
       if (!dealer) { router.push('/registro'); return }
       setDealerId(dealer.id)
+      setDealerLocation(dealer.location_region || dealer.location_city || null)
 
       if (editId) {
         const { data: vehicle } = await supabase.from('vehicles').select('*').eq('id', editId).single()
@@ -123,10 +122,10 @@ export default function PublicarPage() {
 
     const slug = vehicleSlug(form.brand_name, form.model_name, form.year, editId || crypto.randomUUID())
 
-    const { location_comunidad: _loc, ...formData } = form; void _loc
     const payload = {
-      ...formData,
+      ...form,
       dealer_id: dealerId,
+      location_province: dealerLocation,
       slug: editId ? form.slug : slug,
       price: form.price_on_request ? null : parseFloat(form.price) || null,
       power_hp: form.power_hp ? parseInt(form.power_hp) : null,
@@ -274,48 +273,15 @@ export default function PublicarPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="label-base">Estado del vehículo</label>
-                <select value={form.condition_type} onChange={(e) => update('condition_type', e.target.value)} className="select-base">
-                  <option value="">Seleccionar...</option>
-                  {Object.entries(VEHICLE_CONDITION_LABELS).map(([k, v]) => (
-                    <option key={k} value={k}>{v}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="label-base">Comunidad autónoma</label>
-                <select
-                  value={form.location_comunidad}
-                  onChange={(e) => {
-                    update('location_comunidad', e.target.value)
-                    update('location_province', '') // reset province when community changes
-                  }}
-                  className="select-base"
-                >
-                  <option value="">Seleccionar...</option>
-                  {SPAIN_LOCATIONS.map(({ comunidad }) => (
-                    <option key={comunidad} value={comunidad}>{comunidad}</option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="label-base">Estado del vehículo</label>
+              <select value={form.condition_type} onChange={(e) => update('condition_type', e.target.value)} className="select-base">
+                <option value="">Seleccionar...</option>
+                {Object.entries(VEHICLE_CONDITION_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
             </div>
-            {form.location_comunidad && (
-              <div>
-                <label className="label-base">Provincia</label>
-                <select
-                  value={form.location_province}
-                  onChange={(e) => update('location_province', e.target.value)}
-                  className="select-base"
-                >
-                  <option value="">Seleccionar provincia...</option>
-                  {getProvinciasByComunidad(form.location_comunidad).map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-              </div>
-            )}
             {form.vehicle_type === 'motorcycle' && (
               <div>
                 <label className="label-base">Carnet requerido</label>
