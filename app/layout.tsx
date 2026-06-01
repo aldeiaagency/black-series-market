@@ -19,15 +19,19 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Black Label Market | Coches y motos premium, deportivos y especiales',
+    default: 'Black Label Market | Coches y motos premium en España',
     template: '%s | Black Label Market',
   },
   description:
-    'Marketplace curado de coches y motos premium, deportivos, clásicos y unidades especiales. Publicados por concesionarios y especialistas seleccionados.',
-  keywords: ['coches premium', 'motos deportivas', 'superdeportivos', 'clásicos', 'Ferrari', 'Lamborghini', 'Porsche', 'marketplace curado', 'vehículos especiales'],
+    'Coches y motos premium, deportivos, clásicos y unidades especiales en venta en España. Concesionarios, compraventas y especialistas verificados.',
+  keywords: [
+    'coches premium', 'motos premium', 'superdeportivos', 'coches clásicos', 'motos clásicas',
+    'Ferrari', 'Lamborghini', 'Porsche', 'Ducati', 'BMW',
+    'vehículos especiales', 'concesionarios verificados', 'compraventa premium', 'España',
+  ],
   openGraph: {
-    title: 'Black Label Market',
-    description: 'Marketplace curado de coches y motos premium, deportivos, clásicos y unidades especiales.',
+    title: 'Black Label Market | Coches y motos premium en España',
+    description: 'Coches y motos premium, deportivos, clásicos y unidades especiales. Concesionarios y especialistas verificados.',
     type: 'website',
     locale: 'es_ES',
   },

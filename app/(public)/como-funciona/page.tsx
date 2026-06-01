@@ -104,7 +104,7 @@ export default function ComoFuncionaPage() {
         <div className="mt-8 flex flex-wrap gap-4">
           <Link href="/coches" className="btn-gold px-6">Explorar coches</Link>
           <Link href="/motos" className="btn-outline px-6">Explorar motos</Link>
-          <Link href="/busqueda-privada" className="btn-ghost px-6 text-sm">Solicitar vehículos a la carta</Link>
+          <Link href="/vehiculos-a-la-carta" className="btn-ghost px-6 text-sm">Solicitar vehículos a la carta</Link>
         </div>
       </section>
 
