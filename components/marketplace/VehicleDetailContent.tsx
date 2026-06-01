@@ -636,10 +636,7 @@ export default function VehicleDetailContent({
                       <a
                         href={`https://wa.me/${vehicle.dealer.whatsapp.replace(/\D/g, '')}?text=Hola, me interesa el ${encodeURIComponent(title)}`}
                         target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 w-full px-5 py-2.5 text-sm font-medium tracking-wide text-white transition-colors duration-200"
-                        style={{ backgroundColor: '#25D366' }}
-                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#1ebe5d')}
-                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#25D366')}
+                        className="inline-flex items-center justify-center gap-2 w-full px-5 py-2.5 text-sm font-medium tracking-wide text-white bg-[#25D366] hover:bg-[#1ebe5d] transition-colors duration-200"
                       >
                         {/* WhatsApp icon */}
                         <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
