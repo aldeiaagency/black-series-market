@@ -155,7 +155,7 @@ async function runImport(
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   if (!body || !Array.isArray(body.rows)) {
-    return NextResponse.json({ error: 'Body must be { rows: [...] }' }, { status: 400 })
+    return NextResponse.json({ error: 'Formato incorrecto. Se esperaba { rows: [...] }' }, { status: 400 })
   }
 
   const supabase = await createClient()
@@ -167,26 +167,26 @@ export async function POST(req: NextRequest) {
     const token = authHeader.slice(7)
     const envKey = process.env.IMPORT_API_KEY
     if (!envKey || token !== envKey) {
-      return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
+      return NextResponse.json({ error: 'Clave de API no válida.' }, { status: 401 })
     }
     // Caller must provide dealer_slug to identify the target dealer
     const slug = body.dealer_slug as string | undefined
     if (!slug) {
-      return NextResponse.json({ error: 'dealer_slug required when using API key' }, { status: 400 })
+      return NextResponse.json({ error: 'Se requiere dealer_slug al usar clave de API.' }, { status: 400 })
     }
     const { data: dealer } = await supabase.from('dealers').select('id').eq('slug', slug).single()
-    if (!dealer) return NextResponse.json({ error: 'Dealer not found' }, { status: 404 })
+    if (!dealer) return NextResponse.json({ error: 'Showroom no encontrado.' }, { status: 404 })
     dealerId = dealer.id
   } else {
     // Auth method 2 — Supabase session (dashboard upload)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Sesión no válida. Inicia sesión de nuevo.' }, { status: 401 })
     const { data: dealer } = await supabase.from('dealers').select('id').eq('profile_id', user.id).single()
-    if (!dealer) return NextResponse.json({ error: 'No dealer profile found' }, { status: 403 })
+    if (!dealer) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
     dealerId = dealer.id
   }
 
-  if (!dealerId) return NextResponse.json({ error: 'Could not resolve dealer' }, { status: 403 })
+  if (!dealerId) return NextResponse.json({ error: 'No se pudo identificar el showroom.' }, { status: 403 })
   const result = await runImport(body.rows as ImportRow[], dealerId, supabase)
   return NextResponse.json(result, { status: 200 })
 }

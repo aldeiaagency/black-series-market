@@ -21,6 +21,6 @@ export async function POST(request: NextRequest) {
     const session = await createPortalSession(dealer.stripe_customer_id)
     return NextResponse.redirect(session.url, 303)
   } catch (error) {
-    return NextResponse.json({ error: 'Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Error al acceder al portal de facturación. Inténtalo de nuevo.' }, { status: 500 })
   }
 }

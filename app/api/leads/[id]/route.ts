@@ -8,15 +8,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'Sesión no válida. Inicia sesión de nuevo.' }, { status: 401 })
 
   const { data: dealer } = await supabase
     .from('dealers').select('id').eq('profile_id', user.id).single()
-  if (!dealer) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!dealer) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
 
   const { status } = await req.json()
   if (!status || !VALID_STATUSES.includes(status)) {
-    return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    return NextResponse.json({ error: 'Estado no válido.' }, { status: 400 })
   }
 
   const { error } = await supabase
@@ -25,6 +25,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .eq('id', id)
     .eq('dealer_id', dealer.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Error al actualizar el lead. Inténtalo de nuevo.' }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

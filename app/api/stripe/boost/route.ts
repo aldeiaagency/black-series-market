@@ -7,17 +7,17 @@ const BOOST_PRICE_EUR = 4900 // €49 in cents
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'Sesión no válida. Inicia sesión de nuevo.' }, { status: 401 })
 
   const { vehicleId } = await req.json()
-  if (!vehicleId) return NextResponse.json({ error: 'vehicleId required' }, { status: 400 })
+  if (!vehicleId) return NextResponse.json({ error: 'Vehículo no especificado.' }, { status: 400 })
 
   const { data: dealer } = await supabase
     .from('dealers')
     .select('id, stripe_customer_id, email')
     .eq('profile_id', user.id)
     .single()
-  if (!dealer) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!dealer) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
 
   const { data: vehicle } = await supabase
     .from('vehicles')
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     .eq('id', vehicleId)
     .eq('dealer_id', dealer.id)
     .single()
-  if (!vehicle) return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 })
+  if (!vehicle) return NextResponse.json({ error: 'Vehículo no encontrado.' }, { status: 404 })
 
   let customerId = dealer.stripe_customer_id
   if (!customerId) {
