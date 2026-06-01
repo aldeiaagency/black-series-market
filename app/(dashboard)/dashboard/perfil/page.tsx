@@ -5,15 +5,33 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckCircle, Upload, X } from 'lucide-react'
 
+const SPECIALTIES = [
+  { value: 'sport',      label: 'Deportivos' },
+  { value: 'classic',    label: 'Clásicos y youngtimers' },
+  { value: 'premium',    label: 'Premium moderno' },
+  { value: 'motorcycle', label: 'Motos premium' },
+  { value: 'import',     label: 'Importación' },
+  { value: 'suv',        label: 'Luxury SUVs' },
+  { value: 'supercar',   label: 'Supercars' },
+  { value: 'custom',     label: 'Custom bikes' },
+]
+
 export default function PerfilPage() {
   const [dealer, setDealer] = useState<any>(null)
   const [form, setForm] = useState<any>({})
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
+
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [logoUploading, setLogoUploading] = useState(false)
   const [logoError, setLogoError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const logoInputRef = useRef<HTMLInputElement>(null)
+
+  const [coverUrl, setCoverUrl] = useState<string | null>(null)
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [coverError, setCoverError] = useState<string | null>(null)
+  const coverInputRef = useRef<HTMLInputElement>(null)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -25,38 +43,54 @@ export default function PerfilPage() {
       setDealer(data)
       setForm(data || {})
       setLogoUrl(data?.logo_url || null)
+      setCoverUrl(data?.cover_url || null)
     }
     load()
   }, [router])
 
-  function update(key: string, value: string) {
+  function update(key: string, value: any) {
     setForm((f: any) => ({ ...f, [key]: value }))
   }
 
-  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setLogoError(null)
-    setLogoUploading(true)
+  function toggleSpecialty(value: string) {
+    setForm((f: any) => {
+      const current: string[] = f.certifications || []
+      return {
+        ...f,
+        certifications: current.includes(value)
+          ? current.filter((s) => s !== value)
+          : [...current, value],
+      }
+    })
+  }
+
+  async function handleImageUpload(
+    file: File,
+    type: 'logo' | 'cover',
+    setUploading: (v: boolean) => void,
+    setError: (v: string | null) => void,
+    setUrl: (v: string) => void,
+  ) {
+    setError(null)
+    setUploading(true)
     try {
       const fd = new FormData()
       fd.append('file', file)
-      const res = await fetch('/api/upload?type=logo', { method: 'POST', body: fd })
+      const res = await fetch(`/api/upload?type=${type}`, { method: 'POST', body: fd })
       const json = await res.json()
-      if (!res.ok) { setLogoError(json.error || 'Error al subir el logo'); return }
-      setLogoUrl(json.url)
+      if (!res.ok) { setError(json.error || 'Error al subir la imagen'); return }
+      setUrl(json.url)
     } catch {
-      setLogoError('Error de conexión al subir el logo')
+      setError('Error de conexión al subir la imagen')
     } finally {
-      setLogoUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      setUploading(false)
     }
   }
 
-  async function handleRemoveLogo() {
+  async function handleRemoveImage(field: 'logo_url' | 'cover_url', setUrl: (v: null) => void) {
     const supabase = createClient()
-    await supabase.from('dealers').update({ logo_url: null }).eq('id', dealer.id)
-    setLogoUrl(null)
+    await supabase.from('dealers').update({ [field]: null }).eq('id', dealer.id)
+    setUrl(null)
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -64,17 +98,18 @@ export default function PerfilPage() {
     setLoading(true)
     const supabase = createClient()
     await supabase.from('dealers').update({
-      name:             form.name,
-      description:      form.description,
-      location_city:    form.location_city,
-      location_region:  form.location_region,
-      address:          form.address,
-      phone:            form.phone,
-      whatsapp:         form.whatsapp,
-      email:            form.email,
-      website:          form.website,
-      instagram:        form.instagram,
+      name:              form.name,
+      description:       form.description,
+      location_city:     form.location_city,
+      location_region:   form.location_region,
+      address:           form.address,
+      phone:             form.phone,
+      whatsapp:          form.whatsapp,
+      email:             form.email,
+      website:           form.website,
+      instagram:         form.instagram,
       years_in_business: form.years_in_business ? parseInt(form.years_in_business) : null,
+      certifications:    form.certifications || [],
     }).eq('id', dealer.id)
     setLoading(false)
     setSaved(true)
@@ -94,43 +129,42 @@ export default function PerfilPage() {
   return (
     <div className="p-8 max-w-2xl">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-light mb-1">Perfil del concesionario</h1>
+        <h1 className="font-display text-3xl font-light mb-1">Perfil del showroom</h1>
         <p className="text-sm text-bsm-text-muted">
           Esta información es visible en tu página pública del marketplace.
         </p>
       </div>
 
-      {/* Logo upload */}
+      {/* Logo */}
       <div className="bg-surface border border-bsm-border p-6 mb-6">
-        <h2 className="font-medium text-bsm-text-primary mb-1">Logo del concesionario</h2>
+        <h2 className="font-medium text-bsm-text-primary mb-1">Logo</h2>
         <p className="text-xs text-bsm-text-muted mb-5">
-          Se muestra en las tarjetas de vehículos y en tu página de showroom. JPG, PNG o WebP, máx. 2 MB.
+          Se muestra en las tarjetas de vehículos y en tu página de showroom. JPG, PNG o WebP, máx. 10 MB.
         </p>
-
         <div className="flex items-center gap-5">
-          {/* Preview */}
           <div className="w-16 h-16 flex-shrink-0 bg-[#0D0D0D] border border-bsm-border flex items-center justify-center overflow-hidden">
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1.5" />
             ) : (
-              <span className="font-display text-2xl font-light text-[#C6A64B]/40 select-none">
-                {initial}
-              </span>
+              <span className="font-display text-2xl font-light text-[#C6A64B]/40 select-none">{initial}</span>
             )}
           </div>
-
           <div className="flex flex-col gap-2">
             <input
-              ref={fileInputRef}
+              ref={logoInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="sr-only"
-              onChange={handleLogoChange}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleImageUpload(file, 'logo', setLogoUploading, setLogoError, setLogoUrl)
+                if (logoInputRef.current) logoInputRef.current.value = ''
+              }}
             />
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => logoInputRef.current?.click()}
               disabled={logoUploading}
               className="btn-outline text-sm px-4 py-2 flex items-center gap-2"
             >
@@ -140,33 +174,82 @@ export default function PerfilPage() {
             {logoUrl && (
               <button
                 type="button"
-                onClick={handleRemoveLogo}
+                onClick={() => handleRemoveImage('logo_url', () => setLogoUrl(null))}
                 className="flex items-center gap-1.5 text-xs text-bsm-text-muted hover:text-red-400 transition-colors"
               >
-                <X className="w-3 h-3" />
-                Eliminar logo
+                <X className="w-3 h-3" />Eliminar logo
               </button>
             )}
           </div>
         </div>
-
-        {logoError && (
-          <p className="mt-3 text-xs text-red-400">{logoError}</p>
-        )}
+        {logoError && <p className="mt-3 text-xs text-red-400">{logoError}</p>}
         {logoUrl && !logoUploading && (
           <p className="mt-3 text-xs text-emerald-400 flex items-center gap-1.5">
-            <CheckCircle className="w-3 h-3" />
-            Logo guardado correctamente
+            <CheckCircle className="w-3 h-3" />Logo guardado
+          </p>
+        )}
+      </div>
+
+      {/* Imagen de portada */}
+      <div className="bg-surface border border-bsm-border p-6 mb-6">
+        <h2 className="font-medium text-bsm-text-primary mb-1">Imagen de portada</h2>
+        <p className="text-xs text-bsm-text-muted mb-5">
+          Aparece como fondo en tu recuadro de perfil dentro de las fichas de vehículo. Recomendado: 1200×400 px, formato horizontal. JPG, PNG o WebP, máx. 10 MB.
+        </p>
+        <div className="flex flex-col gap-4">
+          {coverUrl && (
+            <div className="w-full h-28 overflow-hidden border border-bsm-border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={coverUrl} alt="Portada" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleImageUpload(file, 'cover', setCoverUploading, setCoverError, setCoverUrl)
+                if (coverInputRef.current) coverInputRef.current.value = ''
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => coverInputRef.current?.click()}
+              disabled={coverUploading}
+              className="btn-outline text-sm px-4 py-2 flex items-center gap-2"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              {coverUploading ? 'Subiendo...' : coverUrl ? 'Cambiar portada' : 'Subir portada'}
+            </button>
+            {coverUrl && (
+              <button
+                type="button"
+                onClick={() => handleRemoveImage('cover_url', () => setCoverUrl(null))}
+                className="flex items-center gap-1.5 text-xs text-bsm-text-muted hover:text-red-400 transition-colors"
+              >
+                <X className="w-3 h-3" />Eliminar
+              </button>
+            )}
+          </div>
+        </div>
+        {coverError && <p className="mt-3 text-xs text-red-400">{coverError}</p>}
+        {coverUrl && !coverUploading && (
+          <p className="mt-3 text-xs text-emerald-400 flex items-center gap-1.5">
+            <CheckCircle className="w-3 h-3" />Portada guardada
           </p>
         )}
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
+
+        {/* Información básica */}
         <div className="bg-surface border border-bsm-border p-6 space-y-4">
           <h2 className="font-medium text-bsm-text-primary mb-4">Información básica</h2>
-
           <div>
-            <label className="label-base">Nombre del concesionario</label>
+            <label className="label-base">Nombre del showroom</label>
             <input value={form.name || ''} onChange={(e) => update('name', e.target.value)} className="input-base" required />
           </div>
           <div>
@@ -176,7 +259,7 @@ export default function PerfilPage() {
               onChange={(e) => update('description', e.target.value)}
               rows={4}
               className="input-base resize-none"
-              placeholder="Describe tu concesionario, especialización, años de experiencia..."
+              placeholder="Describe tu especialización, años de experiencia, qué tipo de vehículos trabajas..."
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -199,6 +282,35 @@ export default function PerfilPage() {
           </div>
         </div>
 
+        {/* Especialidades */}
+        <div className="bg-surface border border-bsm-border p-6">
+          <h2 className="font-medium text-bsm-text-primary mb-1">Especialidades</h2>
+          <p className="text-xs text-bsm-text-muted mb-4">Selecciona las categorías en las que te especializas. Aparecen como badges en tu perfil público.</p>
+          <div className="grid grid-cols-2 gap-2">
+            {SPECIALTIES.map(({ value, label }) => {
+              const selected = (form.certifications || []).includes(value)
+              return (
+                <label
+                  key={value}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 border cursor-pointer transition-colors
+                    ${selected
+                      ? 'border-gold/40 bg-gold/5 text-gold'
+                      : 'border-bsm-border text-bsm-text-muted hover:border-bsm-border-light'}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => toggleSpecialty(value)}
+                    className="accent-gold w-4 h-4"
+                  />
+                  <span className="text-sm">{label}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Contacto */}
         <div className="bg-surface border border-bsm-border p-6 space-y-4">
           <h2 className="font-medium text-bsm-text-primary mb-4">Contacto</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -217,11 +329,11 @@ export default function PerfilPage() {
           </div>
           <div>
             <label className="label-base">Web</label>
-            <input type="url" value={form.website || ''} onChange={(e) => update('website', e.target.value)} placeholder="https://tuconcesionario.com" className="input-base" />
+            <input type="url" value={form.website || ''} onChange={(e) => update('website', e.target.value)} placeholder="https://tushowroom.com" className="input-base" />
           </div>
           <div>
             <label className="label-base">Instagram (@)</label>
-            <input value={form.instagram || ''} onChange={(e) => update('instagram', e.target.value)} placeholder="@tuconcesionario" className="input-base" />
+            <input value={form.instagram || ''} onChange={(e) => update('instagram', e.target.value)} placeholder="@tushowroom" className="input-base" />
           </div>
         </div>
 

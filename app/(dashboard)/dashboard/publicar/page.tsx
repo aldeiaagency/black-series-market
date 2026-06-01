@@ -67,8 +67,23 @@ export default function PublicarPage() {
     is_negotiable: false,
     accepts_trade_in: false,
     financing_available: false,
+    has_test_drive: false,
+    has_warranty: false,
+    warranty_months: '',
     video_url: '',
     status: 'pending_review',
+    // vehicle details
+    power_kw: '',
+    doors: '',
+    seats: '',
+    dgt_label: '',
+    num_owners: '',
+    // moto electronics
+    has_abs: false,
+    has_traction_control: false,
+    has_riding_modes: false,
+    has_electronic_suspension: false,
+    has_panniers: false,
   })
 
   function update(key: string, value: any) {
@@ -121,6 +136,12 @@ export default function PublicarPage() {
       top_speed_kmh: form.top_speed_kmh ? parseInt(form.top_speed_kmh) : null,
       weight_kg: form.weight_kg ? parseInt(form.weight_kg) : null,
       cylinders: form.cylinders ? parseInt(form.cylinders) : null,
+      power_kw: form.power_kw ? parseInt(form.power_kw) : null,
+      doors: form.doors ? parseInt(form.doors) : null,
+      seats: form.seats ? parseInt(form.seats) : null,
+      num_owners: form.num_owners ? parseInt(form.num_owners) : null,
+      warranty_months: form.warranty_months ? parseInt(form.warranty_months) : null,
+      dgt_label: form.dgt_label || null,
       year: parseInt(form.year),
       mileage_km: parseInt(form.mileage_km),
       status: publish ? 'pending_review' : 'draft',
@@ -321,6 +342,10 @@ export default function PublicarPage() {
                 <input type="number" value={form.power_hp} onChange={(e) => update('power_hp', e.target.value)} placeholder="710" className="input-base" />
               </div>
               <div>
+                <label className="label-base">Potencia (kW)</label>
+                <input type="number" value={form.power_kw} onChange={(e) => update('power_kw', e.target.value)} placeholder="522" className="input-base" />
+              </div>
+              <div>
                 <label className="label-base">Par motor (Nm)</label>
                 <input type="number" value={form.torque_nm} onChange={(e) => update('torque_nm', e.target.value)} placeholder="770" className="input-base" />
               </div>
@@ -394,6 +419,56 @@ export default function PublicarPage() {
               </div>
             </div>
 
+            {/* Carrocería y habitáculo — solo coches */}
+            {form.vehicle_type !== 'motorcycle' && (
+              <>
+                <div className="h-px bg-bsm-border my-4" />
+                <h3 className="font-medium text-bsm-text-primary">Carrocería y habitáculo</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label-base">Puertas</label>
+                    <input type="number" min="2" max="6" value={form.doors} onChange={(e) => update('doors', e.target.value)} placeholder="2" className="input-base" />
+                  </div>
+                  <div>
+                    <label className="label-base">Plazas</label>
+                    <input type="number" min="1" max="9" value={form.seats} onChange={(e) => update('seats', e.target.value)} placeholder="4" className="input-base" />
+                  </div>
+                  <div>
+                    <label className="label-base">Etiqueta DGT</label>
+                    <select value={form.dgt_label} onChange={(e) => update('dgt_label', e.target.value)} className="select-base">
+                      <option value="">Sin etiqueta / No aplica</option>
+                      <option value="0">0 (Cero emisiones)</option>
+                      <option value="ECO">ECO</option>
+                      <option value="C">C</option>
+                      <option value="B">B</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Electrónica y sistemas — solo motos */}
+            {form.vehicle_type === 'motorcycle' && (
+              <>
+                <div className="h-px bg-bsm-border my-4" />
+                <h3 className="font-medium text-bsm-text-primary">Electrónica y sistemas</h3>
+                <div className="grid grid-cols-2 gap-y-3 gap-x-6">
+                  {[
+                    { key: 'has_abs',                  label: 'ABS' },
+                    { key: 'has_traction_control',     label: 'Control de tracción' },
+                    { key: 'has_riding_modes',         label: 'Modos de conducción' },
+                    { key: 'has_electronic_suspension',label: 'Suspensión electrónica' },
+                    { key: 'has_panniers',             label: 'Maletas incluidas' },
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form[key]} onChange={(e) => update(key, e.target.checked)} className="accent-gold w-4 h-4" />
+                      <span className="text-sm text-bsm-text-secondary">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+
             <div className="h-px bg-bsm-border my-4" />
             <h3 className="font-medium text-bsm-text-primary">Historial y documentación</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -404,6 +479,10 @@ export default function PublicarPage() {
               <div>
                 <label className="label-base">ITV válida hasta</label>
                 <input type="date" value={form.itv_valid_until} onChange={(e) => update('itv_valid_until', e.target.value)} className="input-base" />
+              </div>
+              <div>
+                <label className="label-base">Nº de propietarios anteriores</label>
+                <input type="number" min="0" max="20" value={form.num_owners} onChange={(e) => update('num_owners', e.target.value)} placeholder="1" className="input-base" />
               </div>
             </div>
             <div className="flex gap-6">
@@ -534,9 +613,10 @@ export default function PublicarPage() {
             <div className="space-y-3">
               {[
                 { key: 'is_negotiable',      label: 'Precio negociable' },
-                { key: 'accepts_trade_in',   label: 'Acepta parte de pago' },
+                { key: 'accepts_trade_in',   label: 'Acepta entrega de tu vehículo (parte de pago)' },
                 { key: 'financing_available',label: 'Financiación disponible' },
                 { key: 'iva_deducible',      label: 'IVA deducible (venta a empresa)' },
+                { key: 'has_test_drive',     label: 'Prueba disponible' },
               ].map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                   <input
@@ -548,6 +628,33 @@ export default function PublicarPage() {
                   <span className="text-sm text-bsm-text-secondary">{label}</span>
                 </label>
               ))}
+            </div>
+
+            {/* Garantía */}
+            <div className="space-y-3 pt-1">
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.has_warranty}
+                  onChange={(e) => update('has_warranty', e.target.checked)}
+                  className="accent-gold w-4 h-4"
+                />
+                <span className="text-sm text-bsm-text-secondary">Garantía disponible</span>
+              </label>
+              {form.has_warranty && (
+                <div className="ml-6">
+                  <label className="label-base">Meses de garantía</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={form.warranty_months}
+                    onChange={(e) => update('warranty_months', e.target.value)}
+                    placeholder="12"
+                    className="input-base max-w-[120px]"
+                  />
+                </div>
+              )}
             </div>
 
             {error && (
