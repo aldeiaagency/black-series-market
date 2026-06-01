@@ -106,10 +106,10 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
         <CheckCircle className="w-10 h-10 text-emerald-400 mb-3" />
         <p className="font-medium text-bsm-text-primary mb-1">Solicitud registrada</p>
         <p className="text-xs text-bsm-text-muted max-w-[240px]">
-          El vendedor recibirá tu interés con el contexto necesario.
+          Tu consulta ha llegado al showroom. Te responderán directamente.
         </p>
         <p className="text-[10px] text-[#808080] mt-3 max-w-[220px] leading-relaxed italic">
-          Tu solicitud se enviará al vendedor profesional responsable de la unidad. El envío no garantiza disponibilidad ni reserva del vehículo.
+          Esta solicitud no implica reserva ni confirma disponibilidad de la unidad.
         </p>
       </div>
     )
@@ -246,7 +246,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
       <div className="flex items-start gap-2 pt-1">
         <Info className="w-3.5 h-3.5 text-bsm-text-muted flex-shrink-0 mt-0.5" />
         <p className="text-[10px] text-bsm-text-muted leading-relaxed">
-          Tu solicitud se enviará al vendedor profesional responsable de la unidad. El envío no garantiza disponibilidad ni reserva del vehículo.
+          Tu consulta llegará directamente al showroom. No implica reserva ni confirma disponibilidad.
         </p>
       </div>
     </form>

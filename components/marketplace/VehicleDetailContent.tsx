@@ -722,9 +722,9 @@ export default function VehicleDetailContent({
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-px w-6 bg-gold" />
-                <span className="text-[10px] text-gold tracking-widest uppercase">Mismo showroom</span>
+                <span className="text-[10px] text-gold tracking-widest uppercase">También disponible</span>
               </div>
-              <h2 className="font-display text-2xl font-light">Más de {vehicle.dealer?.name}</h2>
+              <h2 className="font-display text-2xl font-light">Más vehículos disponibles en {vehicle.dealer?.name}</h2>
             </div>
             {vehicle.dealer?.slug && (
               <Link

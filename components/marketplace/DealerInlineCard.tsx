@@ -6,6 +6,7 @@ interface DealerProps {
   name: string
   slug: string
   logo_url?: string | null
+  cover_url?: string | null
   location_city?: string | null
   location_region?: string | null
   is_verified?: boolean
@@ -74,13 +75,25 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
   // sidebar variant
   return (
     <div className={cn('', className)}>
-      <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">
+      {/* Cover image */}
+      {dealer.cover_url && (
+        <div className="w-full h-20 mb-4 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={dealer.cover_url}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
+      <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3 text-center">
         Profesional seleccionado
       </p>
 
-      <div className="flex items-center gap-2.5 mb-2">
-        {/* Logo or initial */}
-        <div className="w-8 h-8 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+      {/* Logo centered */}
+      <div className="flex justify-center mb-3">
+        <div className="w-10 h-10 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
           {dealer.logo_url ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -94,32 +107,37 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
             </span>
           )}
         </div>
-
-        <div className="flex-1 min-w-0">
-          <Link
-            href={`/dealers/${dealer.slug}`}
-            className="font-medium text-bsm-text-primary hover:text-gold transition-colors block truncate text-sm"
-          >
-            {dealer.name}
-          </Link>
-          <span className="flex items-center gap-1.5 mt-0.5">
-            {dealer.is_verified && <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />}
-            {dealer.is_verified && <span className="text-[10px] text-emerald-400 uppercase tracking-widest">Verificado</span>}
-          </span>
-        </div>
       </div>
 
-      <div className="flex items-center gap-1 text-xs text-bsm-text-muted mb-3">
+      {/* Name + verified centered */}
+      <div className="text-center mb-1">
+        <Link
+          href={`/dealers/${dealer.slug}`}
+          className="font-medium text-bsm-text-primary hover:text-gold transition-colors text-sm"
+        >
+          {dealer.name}
+        </Link>
+        {dealer.is_verified && (
+          <div className="flex items-center justify-center gap-1 mt-0.5">
+            <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+            <span className="text-[10px] text-emerald-400 uppercase tracking-widest">Verificado</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-center gap-1 text-xs text-bsm-text-muted mb-4">
         <MapPin className="w-3 h-3 flex-shrink-0" />
         {locationLabel}
       </div>
 
-      <Link
-        href={`/dealers/${dealer.slug}`}
-        className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
-      >
-        Ver showroom completo <ChevronRight className="w-3 h-3" />
-      </Link>
+      <div className="text-center">
+        <Link
+          href={`/dealers/${dealer.slug}`}
+          className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
+        >
+          Ver showroom completo <ChevronRight className="w-3 h-3" />
+        </Link>
+      </div>
     </div>
   )
 }
