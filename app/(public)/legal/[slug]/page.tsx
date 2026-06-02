@@ -7,46 +7,86 @@ const LEGAL_CONTENT: Record<string, { title: string; content: string }> = {
     content: `
 **Identificación del titular**
 
+En cumplimiento de lo dispuesto en la Ley 34/2002, de 11 de julio, de servicios de la sociedad de la información y de comercio electrónico, se informa de que el sitio web Black Label Market, accesible desde blackseriesmarket.com, es titularidad de:
+
 Titular: KAZAWEB, S.L.U.
 NIF: B42761254
 Domicilio fiscal: Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña
 Nombre comercial: Black Label Market
-Dominio: [PENDIENTE_DEFINIR_DOMINIO]
-Email de contacto: [PENDIENTE_EMAIL_CONTACTO]
-Email legal: [PENDIENTE_EMAIL_LEGAL]
+Dominio: blackseriesmarket.com
+Email de contacto: hola@blackseriesmarket.com
+Email legal: hola@blackseriesmarket.com
 Actividad: Intermediarios del comercio — Epígrafe IAE 631
 
 **Objeto del sitio web**
 
-Black Label Market es una plataforma digital orientada a la presentación de coches y motos premium, deportivos, clásicos, de colección, enthusiast y unidades especiales publicados por vendedores profesionales seleccionados.
+Black Label Market es una plataforma digital especializada en la presentación de coches y motos premium, deportivos, clásicos, de colección y unidades especiales publicados por concesionarios, compraventas y especialistas verificados.
+
+El sitio web permite a los usuarios consultar vehículos publicados, contactar con los vendedores profesionales responsables, guardar vehículos, crear solicitudes de vehículos a la carta y acceder a servicios relacionados con la publicación profesional de stock.
 
 **Naturaleza de la plataforma**
 
-Black Label Market actúa como plataforma de publicación y contacto. La operación comercial, negociación, documentación, garantía, pago, entrega y cualquier acuerdo posterior se realiza directamente entre el comprador interesado y el vendedor profesional responsable del vehículo.
+Black Label Market actúa como plataforma de publicación, presentación y contacto entre compradores interesados y vendedores profesionales.
 
-- Black Label Market no vende directamente los vehículos.
-- La información de cada anuncio es proporcionada por el vendedor profesional responsable.
-- La disponibilidad debe confirmarse directamente con el vendedor antes de cualquier operación.
-- Las condiciones de venta, garantía, financiación, entrega, reserva o prueba dependen del vendedor profesional.
-- Black Label Market puede revisar, editar, suspender o retirar anuncios que no cumplan criterios editoriales, comerciales o legales.
+Salvo que se indique expresamente lo contrario, Black Label Market no vende directamente los vehículos publicados, no interviene como parte compradora o vendedora en la compraventa y no garantiza por sí misma la disponibilidad, estado, precio final, historial, documentación, garantía o características concretas de los vehículos anunciados.
 
-**Propiedad intelectual**
+La operación comercial, negociación, documentación, garantía, pago, reserva, financiación, entrega y cualquier acuerdo posterior se realiza directamente entre el comprador interesado y el vendedor profesional responsable del vehículo.
 
-El diseño, textos, marca, logotipos, imágenes propias, contenidos editoriales y la estructura de la plataforma son propiedad de KAZAWEB, S.L.U. o de sus licenciantes, y están protegidos por la legislación sobre propiedad intelectual e industrial vigente.
+La información de cada anuncio es facilitada por el vendedor profesional responsable, sin perjuicio de los procesos internos de revisión, verificación o control de calidad que Black Label Market pueda aplicar antes o después de la publicación.
 
-Las marcas, modelos y logotipos de terceros pertenecen a sus respectivos titulares y se utilizan únicamente con finalidad identificativa cuando proceda.
+**Uso del sitio web**
 
-**Limitación de responsabilidad**
+El acceso y uso de este sitio web atribuye la condición de usuario e implica la aceptación de este Aviso Legal, así como del resto de textos legales aplicables, incluyendo la Política de Privacidad, la Política de Cookies, los Términos y Condiciones de Uso y, en su caso, las condiciones aplicables a profesionales.
 
-- Black Label Market no garantiza la disponibilidad continua del servicio.
-- Black Label Market no garantiza la exactitud absoluta de la información facilitada por los vendedores profesionales.
-- Black Label Market no es responsable de las negociaciones, acuerdos o transacciones realizadas directamente entre comprador y vendedor.
-- Black Label Market no sustituye la revisión técnica, documental o legal que el comprador deba realizar antes de cualquier operación.
-- Las decisiones de compra son responsabilidad exclusiva de las partes implicadas.
+El usuario se compromete a utilizar el sitio web de forma lícita, diligente y conforme a la buena fe, absteniéndose de realizar cualquier uso que pueda dañar, inutilizar, sobrecargar o deteriorar el funcionamiento de la plataforma, sus contenidos o los derechos de terceros.
 
-**Legislación aplicable**
+Queda prohibido utilizar el sitio web para fines ilícitos, fraudulentos, contrarios a la buena fe, al orden público o que puedan perjudicar los intereses de Black Label Market, de otros usuarios, de los profesionales anunciantes o de terceros.
 
-Este aviso legal se rige por la legislación española. Los conflictos se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.
+**Responsabilidad sobre la información publicada**
+
+Black Label Market procura que la información publicada sea clara, actualizada y coherente con el posicionamiento de la plataforma. No obstante, los datos relativos a vehículos, precios, disponibilidad, características técnicas, kilometraje, historial, imágenes, financiación, garantías u otras condiciones comerciales son responsabilidad del vendedor profesional que los facilita.
+
+El usuario deberá verificar directamente con el vendedor profesional cualquier información relevante antes de tomar una decisión de compra, reserva, desplazamiento, contratación, entrega de señal o formalización de cualquier operación.
+
+Black Label Market podrá corregir, editar, suspender, limitar la visibilidad o retirar anuncios, perfiles profesionales o contenidos cuando detecte información inexacta, incompleta, desactualizada, engañosa, ilícita o contraria a sus criterios de publicación o a la normativa aplicable.
+
+**Propiedad intelectual e industrial**
+
+Todos los contenidos del sitio web, incluyendo textos, fotografías, vídeos, diseño gráfico, logotipos, marcas, iconos, estructura, código, interfaz, selección de contenidos y demás elementos que formen parte de Black Label Market, están protegidos por derechos de propiedad intelectual e industrial propios o de terceros autorizados.
+
+Queda prohibida la reproducción, distribución, comunicación pública, transformación, extracción, reutilización o explotación de dichos contenidos sin autorización previa y expresa del titular correspondiente, salvo en los casos permitidos por la ley.
+
+Las marcas, nombres comerciales, logotipos, modelos o referencias de fabricantes, concesionarios, compraventas, especialistas o terceros que puedan aparecer en la plataforma pertenecen a sus respectivos titulares y se muestran únicamente con finalidad informativa o identificativa.
+
+**Enlaces a terceros**
+
+El sitio web puede incluir enlaces a páginas, servicios o contenidos de terceros, incluyendo sitios web de profesionales anunciantes, proveedores de informes, financiación, seguros, transporte u otros servicios relacionados.
+
+Black Label Market no controla necesariamente dichos sitios externos y no asume responsabilidad por sus contenidos, políticas, funcionamiento, disponibilidad o prácticas. El acceso a páginas de terceros se realizará bajo la exclusiva responsabilidad del usuario.
+
+**Comunicaciones legales e incidencias**
+
+Para cualquier cuestión relacionada con este Aviso Legal, el usuario puede contactar con Black Label Market a través del siguiente correo electrónico:
+
+hola@blackseriesmarket.com
+
+Este canal también podrá utilizarse para comunicar incidencias legales, anuncios incorrectos, contenidos presuntamente ilícitos o cualquier información que pueda vulnerar los Términos y Condiciones de Uso o la normativa aplicable.
+
+Black Label Market revisará las comunicaciones recibidas y podrá adoptar las medidas que considere oportunas, incluyendo la corrección, suspensión o retirada de contenidos.
+
+**Protección de datos y cookies**
+
+El tratamiento de datos personales realizado a través de Black Label Market se regula en la Política de Privacidad.
+
+El uso de cookies y tecnologías similares se regula en la Política de Cookies. El usuario puede configurar sus preferencias de cookies a través del panel habilitado en la web.
+
+**Legislación aplicable y jurisdicción**
+
+Este Aviso Legal se rige por la legislación española y, cuando resulte aplicable, por la normativa de la Unión Europea.
+
+Para cualquier controversia relacionada con el acceso o uso del sitio web, las partes se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.
+
+Cuando el usuario tenga la condición de consumidor, serán competentes los juzgados y tribunales que correspondan conforme a la legislación de consumidores y usuarios.
     `.trim(),
   },
 

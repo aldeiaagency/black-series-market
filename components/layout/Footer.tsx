@@ -14,7 +14,7 @@ const LINKS = {
   Profesionales: [
     { label: 'Quiero publicar en Black Label', href: '/registro' },
     { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
-    { label: 'Planes de publicación', href: '/precios' },
+    { label: 'Planes de suscripción', href: '/precios' },
     { label: 'Soporte', href: '/contacto' },
   ],
   Legal: [
