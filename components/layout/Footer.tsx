@@ -21,8 +21,9 @@ const LINKS = {
     { label: 'Aviso legal', href: '/legal/aviso-legal' },
     { label: 'Política de privacidad', href: '/legal/privacidad' },
     { label: 'Política de cookies', href: '/legal/cookies' },
-    { label: 'Términos de uso', href: '/legal/terminos' },
+    { label: 'Términos y condiciones', href: '/legal/terminos' },
     { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
+    { label: 'Condiciones para profesionales', href: '/legal/condiciones-profesionales' },
   ],
 }
 
