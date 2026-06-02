@@ -108,7 +108,7 @@ export default function PublicarPage() {
       setDealerLocation(dealer.location_region || dealer.location_city || null)
 
       if (editId) {
-        const { data: vehicle } = await supabase.from('vehicles').select('*').eq('id', editId).single()
+        const { data: vehicle } = await supabase.from('vehicles').select('*').eq('id', editId).eq('dealer_id', dealer.id).single()
         if (vehicle) setForm({ ...vehicle, price: vehicle.price || '', power_hp: vehicle.power_hp || '' })
       }
     }
@@ -149,7 +149,7 @@ export default function PublicarPage() {
 
     let err
     if (editId) {
-      const { error: e } = await supabase.from('vehicles').update(payload).eq('id', editId)
+      const { error: e } = await supabase.from('vehicles').update(payload).eq('id', editId).eq('dealer_id', dealerId)
       err = e
     } else {
       const { error: e } = await supabase.from('vehicles').insert(payload)
