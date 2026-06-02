@@ -64,11 +64,11 @@ export default async function AdminAnaliticasPage() {
       .select('brand_name')
       .eq('status', 'active'),
 
-    // Total views proxy (sum of vehicle views for active)
+    // Total views in 30 days — matches event_type inserted by vehicle detail pages
     supabase
       .from('analytics_events')
       .select('*', { count: 'exact', head: true })
-      .eq('event_type', 'vehicle_view')
+      .eq('event_type', 'view')
       .gte('created_at', thirtyDaysAgoISO),
   ])
 
