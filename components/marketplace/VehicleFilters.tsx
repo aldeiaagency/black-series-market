@@ -9,16 +9,53 @@ import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
 const CAR_CATEGORIES = CAR_CATEGORIES_PUBLIC
 
 const MOTO_CATEGORIES = [
-  { value: 'sport_supersport',          label: 'Sport & Supersport' },
-  { value: 'naked_hypernaked',          label: 'Naked & Hypernaked' },
-  { value: 'premium_modern_bikes',      label: 'Premium moderno' },
-  { value: 'adventure_touring_premium', label: 'Adventure & Touring premium' },
-  { value: 'custom_cruiser_premium',    label: 'Custom & Cruiser' },
-  { value: 'classic_youngtimer_bikes',  label: 'Clásicas y youngtimers' },
-  { value: 'scooter_urban_premium',     label: 'Scooter premium' },
-  { value: 'enthusiast_selection',      label: 'Selección entusiasta' },
-  { value: 'black_label_selection',     label: 'Black Label Selection' },
-  { value: 'black_label_icon',          label: 'Black Label Icon' },
+  {
+    value: 'deportivas',
+    label: 'Deportivas',
+    examples: 'Ducati Panigale V4, BMW M1000RR, Kawasaki Ninja H2, Aprilia RSV4, Honda CBR1000RR, Yamaha R1',
+  },
+  {
+    value: 'naked',
+    label: 'Naked',
+    examples: 'BMW S1000R, Ducati Streetfighter V4, KTM 1290 Super Duke R, Yamaha MT-10, Kawasaki Z H2',
+  },
+  {
+    value: 'touring_adventure',
+    label: 'Touring / Adventure',
+    examples: 'BMW R1250GS, Honda Gold Wing, BMW K1600 GTL, Ducati Multistrada V4, Triumph Tiger 1200',
+  },
+  {
+    value: 'custom_cruiser',
+    label: 'Custom / Cruiser',
+    examples: 'Harley-Davidson CVO, Indian Challenger, Triumph Bobber TFC, BMW R18, Yamaha V-Max',
+  },
+  {
+    value: 'clasicas_youngtimers',
+    label: 'Clásicas y youngtimers',
+    examples: 'Honda CB750, Ducati 900 SS, Triumph T120, BMW R90S, Kawasaki ZXR750, café racers y neo-retro',
+  },
+  {
+    value: 'scooter_premium',
+    label: 'Scooter premium',
+    examples: 'BMW C650 GT, Yamaha T-Max 560, Honda Forza 750, Vespa GTS Super, Kymco AK 550',
+  },
+  {
+    value: 'trail_premium',
+    label: 'Trail premium',
+    examples: 'Honda Africa Twin, Yamaha Ténéré 700, KTM 890 Adventure, Triumph Tiger 900, Royal Enfield Himalayan',
+  },
+  {
+    value: 'ediciones_especiales',
+    label: 'Ediciones especiales',
+    examples: 'Ediciones limitadas, aniversario, homologaciones especiales, unidades numeradas, colecciones TFC',
+  },
+  {
+    value: 'entusiastas',
+    label: 'Motos para entusiastas',
+    examples: 'Motos de carácter especial, historia o piezas raras. Cagiva Mito, Honda VFR, piezas de colección únicas',
+  },
+  { value: 'black_label_selection', label: 'Black Label Selection' },
+  { value: 'black_label_icon',      label: 'Black Label Icon' },
 ]
 
 // ─── Brands ───────────────────────────────────────────────────────────────────
