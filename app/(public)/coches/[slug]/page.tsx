@@ -45,7 +45,7 @@ export default async function CocheDetailPage({ params }: PageProps) {
   supabase.from('analytics_events').insert({
     vehicle_id: vehicle.id,
     dealer_id: vehicle.dealer_id,
-    event_type: 'view',
+    event_type: 'vehicle_view',
   }).then(() => {})
 
   // Increment view counter

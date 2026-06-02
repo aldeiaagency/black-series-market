@@ -47,6 +47,12 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
 
   if (!dealer) notFound()
 
+  // Track profile view (non-blocking)
+  supabase.from('analytics_events').insert({
+    dealer_id: dealer.id,
+    event_type: 'professional_profile_view',
+  }).then(() => {})
+
   const { data: vehicles } = await supabase
     .from('vehicles')
     .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)')

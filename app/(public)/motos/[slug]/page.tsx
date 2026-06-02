@@ -41,10 +41,11 @@ export default async function MotoDetailPage({ params }: PageProps) {
   // draft/pending_review/expired → 404; sold/paused → visible with adapted CTAs
   if (!vehicle || ['draft', 'pending_review', 'expired'].includes(vehicle.status)) notFound()
 
+  // Track view (non-blocking)
   supabase.from('analytics_events').insert({
     vehicle_id: vehicle.id,
     dealer_id: vehicle.dealer_id,
-    event_type: 'view',
+    event_type: 'vehicle_view',
   }).then(() => {})
 
   supabase.from('vehicles').update({ views: vehicle.views + 1 }).eq('id', vehicle.id).then(() => {})

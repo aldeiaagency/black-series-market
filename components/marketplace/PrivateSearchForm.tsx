@@ -45,6 +45,13 @@ export default function PrivateSearchForm() {
       localStorage.setItem('blm_private_searches', JSON.stringify(stored))
     } catch {}
 
+    // Track request event (non-blocking)
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: 'vehicle_request_submit' }),
+    }).catch(() => {})
+
     await new Promise((r) => setTimeout(r, 800))
     setSubmitted(true)
   }

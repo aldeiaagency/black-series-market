@@ -71,6 +71,16 @@ export function useFavorites() {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)) } catch {}
       }
 
+      // Track save/unsave (non-blocking, fire-and-forget)
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: isSaved ? 'vehicle_unsaved' : 'vehicle_saved',
+          vehicle_id: vehicleId,
+        }),
+      }).catch(() => {})
+
       return next
     })
   }, [])
