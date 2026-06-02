@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link'
 import Logo from '@/components/brand/Logo'
+import CookieSettingsButton from '@/components/legal/CookieSettingsButton'
 
 const LINKS = {
   Explorar: [
@@ -20,7 +21,7 @@ const LINKS = {
   Legal: [
     { label: 'Aviso legal', href: '/legal/aviso-legal' },
     { label: 'Política de privacidad', href: '/legal/privacidad' },
-    { label: 'Política de cookies', href: '/legal/cookies' },
+    { label: 'Política de cookies', href: '/politica-de-cookies' },
     { label: 'Términos de uso', href: '/legal/terminos' },
     { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
   ],
@@ -106,9 +107,14 @@ export default function Footer() {
           <p className="text-[11px] text-[#737373]">
             © {new Date().getFullYear()} Black Label Market. Todos los derechos reservados.
           </p>
-          <p className="text-[11px] text-[#737373]">
-            Operado por <span className="text-[#8A8A8A]">KAZAWEB, S.L.U.</span> · NIF B42761254
-          </p>
+          <div className="flex items-center gap-4">
+            <CookieSettingsButton
+              className="text-[11px] text-[#737373] hover:text-[#8A8A8A] transition-colors underline-offset-2 hover:underline"
+            />
+            <p className="text-[11px] text-[#737373]">
+              Operado por <span className="text-[#8A8A8A]">KAZAWEB, S.L.U.</span> · NIF B42761254
+            </p>
+          </div>
         </div>
       </div>
     </footer>
