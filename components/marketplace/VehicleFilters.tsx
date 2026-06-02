@@ -54,8 +54,6 @@ const MOTO_CATEGORIES = [
     label: 'Motos para entusiastas',
     examples: 'Motos de carácter especial, historia o piezas raras. Cagiva Mito, Honda VFR, piezas de colección únicas',
   },
-  { value: 'black_label_selection', label: 'Black Label Selection' },
-  { value: 'black_label_icon',      label: 'Black Label Icon' },
 ]
 
 // ─── Brands ───────────────────────────────────────────────────────────────────
