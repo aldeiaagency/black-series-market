@@ -436,14 +436,10 @@ export default function VehicleDetailContent({
                     {vehicle.dealer.description}
                   </p>
                 )}
-                <div className="border-t border-bsm-border pt-4 space-y-2">
-                  <p className="text-[11px] text-[#808080] leading-relaxed">
-                    Unidad publicada por un profesional seleccionado. Black Label prioriza operadores con stock cuidado,
-                    presentación clara y disponibilidad real.
-                  </p>
+                <div className="border-t border-bsm-border pt-4">
                   <Link
                     href={`/dealers/${vehicle.dealer.slug}`}
-                    className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors mt-2"
+                    className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
                   >
                     Ver showroom completo <ChevronRight className="w-3 h-3" />
                   </Link>
