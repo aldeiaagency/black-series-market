@@ -1,6 +1,7 @@
-﻿'use client'
+'use client'
 
 import { Heart } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useFavorites } from '@/hooks/useFavorites'
 import { cn } from '@/lib/utils'
 
@@ -11,13 +12,25 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({ vehicleId, variant = 'card', className }: FavoriteButtonProps) {
-  const { isFavorite, toggle, mounted } = useFavorites()
+  const { isFavorite, toggle, mounted, isAuthenticated } = useFavorites()
+  const router = useRouter()
   const saved = mounted && isFavorite(vehicleId)
+
+  function handleClick(e?: React.MouseEvent) {
+    if (e) { e.preventDefault(); e.stopPropagation() }
+    if (!mounted) return
+    if (!isAuthenticated) {
+      router.push('/login')
+      return
+    }
+    toggle(vehicleId)
+  }
 
   if (variant === 'detail') {
     return (
       <button
-        onClick={() => toggle(vehicleId)}
+        onClick={() => handleClick()}
+        title={mounted && !isAuthenticated ? 'Inicia sesión para guardar vehículos' : undefined}
         className={cn(
           'flex items-center gap-2 px-4 py-2.5 border text-sm transition-all duration-200',
           saved
@@ -28,14 +41,19 @@ export default function FavoriteButton({ vehicleId, variant = 'card', className 
         aria-label={saved ? 'Quitar de guardados' : 'Guardar vehículo'}
       >
         <Heart className={cn('w-4 h-4', saved ? 'fill-[#C6A64B] text-[#C6A64B]' : '')} />
-        <span>{saved ? 'Guardado' : 'Guardar vehículo'}</span>
+        <span>{saved ? 'Guardado' : 'Guardar'}</span>
       </button>
     )
   }
 
   return (
     <button
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(vehicleId) }}
+      onClick={(e) => handleClick(e)}
+      title={
+        mounted
+          ? (isAuthenticated ? (saved ? 'Quitar de guardados' : 'Guardar vehículo') : 'Inicia sesión para guardar vehículos')
+          : undefined
+      }
       className={cn(
         'w-8 h-8 flex items-center justify-center bg-[#0A0A0A]/80 backdrop-blur-sm border transition-all duration-200',
         saved

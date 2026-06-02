@@ -186,7 +186,7 @@ export default function Header() {
             {user ? (
               <>
                 {/* Heart → cuenta/favoritos */}
-                <Link href="/cuenta/favoritos" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+                <Link href="/cuenta/favoritos" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Guardados">
                   <Heart className="w-4 h-4" />
                 </Link>
 
@@ -214,7 +214,7 @@ export default function Header() {
                         <Link href="/cuenta/favoritos"
                           className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#9A9A9A] hover:text-[#C9C9C9] hover:bg-[#141414] transition-colors">
                           <Heart className="w-3.5 h-3.5" />
-                          Mis favoritos
+                          Guardados
                         </Link>
                         <Link href="/cuenta/alertas"
                           className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#9A9A9A] hover:text-[#C9C9C9] hover:bg-[#141414] transition-colors">
@@ -307,7 +307,7 @@ export default function Header() {
                 <>
                   <Link href="/cuenta/favoritos" className="btn-outline w-full justify-center text-sm">
                     <Heart className="w-4 h-4" />
-                    Mis favoritos
+                    Guardados
                   </Link>
                   <Link href="/cuenta/alertas" className="btn-outline w-full justify-center text-sm">
                     <Bell className="w-4 h-4" />
