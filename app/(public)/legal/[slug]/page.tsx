@@ -116,33 +116,85 @@ Este servicio no está dirigido a menores de edad. Black Label Market no recaba 
     content: `
 **¿Qué son las cookies?**
 
-Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas un sitio web. Permiten al sitio recordar información sobre tu visita y mejorar tu experiencia.
+Las cookies son pequeños archivos que se almacenan en el dispositivo del usuario cuando visita una página web. También existen tecnologías similares, como el almacenamiento local del navegador, que pueden utilizarse para recordar información, permitir el funcionamiento de la web o mejorar la experiencia del usuario.
 
-**Tipos de cookies**
+En esta Política de Cookies usamos el término "cookies" para referirnos de forma general a cookies y tecnologías similares de almacenamiento o acceso a información en el dispositivo del usuario.
 
-- Técnicas: necesarias para el funcionamiento básico del sitio. Sin ellas, el servicio no puede prestarse correctamente.
-- Preferencias: permiten recordar configuraciones seleccionadas por el usuario.
-- Analíticas: recogen información estadística sobre el uso del sitio, de forma agregada y anonimizada.
-- Publicidad: utilizadas para mostrar contenidos relevantes según el perfil del usuario.
-- Terceros: instaladas por servicios externos integrados en la plataforma.
+**Responsable**
 
-**Cookies utilizadas actualmente**
+El responsable del uso de cookies en Black Label Market es:
 
-Actualmente la configuración definitiva de cookies está pendiente de validación técnica.
+KAZAWEB, S.L.U.
+NIF: B42761254
+Domicilio: Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña
+Nombre comercial: Black Label Market
 
-- Técnicas — Funcionamiento básico de la plataforma — Black Label Market — Duración: [PENDIENTE]
-- Analítica — Medición del uso del sitio — Proveedor: [PENDIENTE_ANALYTICS] — Duración: [PENDIENTE]
-- Publicidad — Remarketing y audiencias — Proveedor: [PENDIENTE_PIXEL] — Duración: [PENDIENTE]
+Para cuestiones relacionadas con privacidad o cookies, el usuario puede contactar a través del email indicado en la Política de Privacidad.
 
-**Gestión de cookies**
+**Tipos de cookies según su finalidad**
 
-Puedes configurar tu navegador para rechazar o eliminar cookies en cualquier momento. Ten en cuenta que algunas funcionalidades del sitio pueden no estar disponibles si rechazas las cookies técnicas.
+Black Label Market puede utilizar las siguientes categorías:
 
-Cuando se activen cookies no estrictamente técnicas, la plataforma incorporará un sistema de consentimiento adecuado conforme a la normativa aplicable.
+- Cookies técnicas o necesarias: permiten el funcionamiento básico de la web, la navegación, la seguridad, la gestión de sesión y el acceso a áreas privadas. No requieren consentimiento cuando son estrictamente necesarias para prestar el servicio solicitado por el usuario.
+- Cookies de preferencias: permiten recordar opciones elegidas por el usuario, como configuración de cookies u otras preferencias de navegación.
+- Cookies de análisis: permiten medir de forma agregada cómo se utiliza la web. Solo se utilizarán cuando el usuario haya dado su consentimiento, si están activas.
+- Cookies de marketing o publicidad: permiten medir campañas, crear audiencias o mostrar contenido personalizado. Solo se utilizarán cuando el usuario haya dado su consentimiento, si están activas.
+- Cookies de terceros: gestionadas por proveedores externos que prestan servicios integrados en la web, como analítica, infraestructura u otras funcionalidades, si se utilizan.
 
-**Actualización de esta política**
+**Cookies y tecnologías utilizadas actualmente**
 
-Esta política puede actualizarse cuando se modifique la configuración técnica del sitio o cuando la normativa lo requiera. La fecha de última actualización aparece al inicio de esta página.
+Técnicas necesarias — Cookies de sesión de autenticación
+
+Black Label Market utiliza Supabase como proveedor de infraestructura y autenticación. Cuando un usuario inicia sesión o accede a áreas privadas, Supabase establece cookies de sesión en el navegador.
+
+- Nombre o identificador: cookies de sesión de Supabase (patrón: sb-[referencia-proyecto]-auth-token)
+- Responsable: Supabase Inc., como proveedor de infraestructura de autenticación
+- Finalidad: gestionar la sesión autenticada del usuario cuando accede a áreas privadas (cuenta, panel de profesional)
+- Duración: duración de la sesión activa o hasta que el usuario cierre sesión
+- Base de legitimación: necesarias para la prestación del servicio de autenticación solicitado por el usuario
+
+Estas cookies solo están presentes para usuarios que acceden con cuenta propia. Los usuarios que navegan sin autenticación no generan estas cookies.
+
+Tecnologías similares — Almacenamiento local del navegador (localStorage)
+
+Black Label Market utiliza el almacenamiento local del navegador para guardar preferencias y datos funcionales directamente en el dispositivo del usuario, sin transmitirlos a servidores externos ni utilizarlos con fines de seguimiento o publicidad.
+
+- blm_favorites: guarda los vehículos marcados como favoritos por usuarios no autenticados. Finalidad: conservar la selección de favoritos entre sesiones sin necesidad de cuenta. Duración: persiste en el dispositivo hasta que el usuario borra los datos del navegador o elimina los favoritos.
+- blm_compare: guarda los vehículos añadidos al comparador. Finalidad: mantener la selección activa durante la navegación. Duración: sesión de navegación activa o hasta que se vacía el comparador.
+- blacklabel_alerts: guarda las alertas de vehículos configuradas localmente. Finalidad: conservar las alertas seleccionadas sin necesidad de cuenta. Duración: persiste hasta que el usuario borra los datos del navegador.
+- blm_private_searches: guarda localmente los datos de solicitudes de vehículos a la carta completadas. Finalidad: conservar los detalles de búsquedas enviadas. Duración: persiste hasta que el usuario borra los datos del navegador.
+
+Análisis
+
+Actualmente Black Label Market no carga cookies de análisis ni herramientas de medición de terceros. Si en el futuro se incorporan herramientas de analítica, se informará en esta política y solo se activarán cuando el usuario haya prestado su consentimiento, cuando este sea exigible.
+
+Marketing y publicidad
+
+Actualmente Black Label Market no utiliza cookies de marketing, publicidad comportamental ni remarketing. Si en el futuro se incorporan herramientas de este tipo, se informará en esta política y solo se activarán cuando el usuario haya prestado su consentimiento.
+
+**Gestión y configuración de cookies**
+
+Actualmente Black Label Market no carga cookies no técnicas ni herramientas de seguimiento de terceros que requieran consentimiento activo del usuario.
+
+Si en el futuro se incorporan cookies o tecnologías similares no técnicas, se habilitará un panel de configuración de cookies donde el usuario podrá aceptar, rechazar o configurar sus preferencias. La retirada del consentimiento no afectará a la licitud del tratamiento realizado antes de su retirada.
+
+**Cookies técnicas y almacenamiento funcional**
+
+Las cookies técnicas y el almacenamiento local de carácter funcional no pueden desactivarse desde un panel de configuración cuando son imprescindibles para el funcionamiento de la web, la seguridad, la gestión de sesión, el acceso a áreas privadas o la conservación de preferencias solicitadas por el usuario.
+
+El usuario puede bloquearlas o eliminarlas desde la configuración de su navegador, aunque en ese caso algunas funcionalidades de la web podrían no estar disponibles.
+
+**Configuración desde el navegador**
+
+El usuario puede permitir, bloquear o eliminar cookies y el almacenamiento local del navegador desde la configuración de su navegador.
+
+La configuración depende del navegador utilizado. El usuario puede consultar las instrucciones correspondientes en la ayuda oficial de su navegador.
+
+**Actualización de esta Política de Cookies**
+
+Black Label Market podrá actualizar esta Política de Cookies cuando cambien las cookies utilizadas, se incorporen nuevos proveedores, se modifique la configuración técnica de la web o resulte necesario por cambios normativos.
+
+La versión vigente será la publicada en la plataforma en cada momento.
     `.trim(),
   },
 
