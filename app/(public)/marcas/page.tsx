@@ -66,15 +66,20 @@ export default async function MarcasPage() {
     return (
       <Link
         href={`/marcas/${brand.slug}`}
-        className="group bg-surface border border-bsm-border p-6 flex flex-col items-center text-center
+        className="group bg-surface border border-bsm-border p-5 flex flex-col items-center text-center
           hover:border-gold/30 hover:shadow-card transition-all duration-300"
       >
-        <div className="w-12 h-12 flex items-center justify-center mb-4">
+        <div className="w-24 h-24 flex items-center justify-center mb-4 p-3
+          bg-white rounded-sm overflow-hidden flex-shrink-0">
           {brand.logo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={brand.logo_url} alt={brand.name} className="w-full h-full object-contain" />
+            <img
+              src={brand.logo_url}
+              alt={brand.name}
+              className="w-full h-full object-contain"
+            />
           ) : (
-            <span className="font-display text-2xl font-light text-gold group-hover:text-gold-light transition-colors">
+            <span className="font-display text-3xl font-light text-[#1A1A1A]">
               {brand.name[0]}
             </span>
           )}

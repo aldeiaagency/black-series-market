@@ -54,7 +54,7 @@ export default async function BrandPage({ params }: PageProps) {
 
         <div className="flex flex-col md:flex-row md:items-end gap-6">
           {brandData.logo_url && (
-            <div className="w-20 h-20 bg-surface border border-bsm-border flex items-center justify-center p-3 flex-shrink-0">
+            <div className="w-24 h-24 bg-white rounded-sm flex items-center justify-center p-3 flex-shrink-0 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={brandData.logo_url} alt={brandData.name} className="w-full h-full object-contain" />
             </div>
