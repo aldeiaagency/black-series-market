@@ -83,6 +83,14 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
     })
 
     if (err) { setError('Error al enviar. Inténtalo de nuevo.'); return }
+
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: 'vehicle_contact_submit', vehicle_id: vehicleId, dealer_id: dealerId }),
+    }).catch(() => {})
+
+
     setSubmitted(true)
   }
 

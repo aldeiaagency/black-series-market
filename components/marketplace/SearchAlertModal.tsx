@@ -68,6 +68,13 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
       await new Promise((r) => setTimeout(r, 600))
     }
 
+    // Track alert creation (non-blocking)
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: 'search_alert_created' }),
+    }).catch(() => {})
+
     setSubmitted(true)
   }
 
