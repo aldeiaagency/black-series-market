@@ -31,6 +31,7 @@ export default function PerfilPage() {
   const [dealer, setDealer] = useState<any>(null)
   const [form, setForm] = useState<any>({})
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
@@ -107,8 +108,10 @@ export default function PerfilPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
+    setSaveError(null)
     const supabase = createClient()
-    await supabase.from('dealers').update({
+
+    const baseFields = {
       name:              form.name,
       description:       form.description,
       location_city:     form.location_city,
@@ -119,14 +122,39 @@ export default function PerfilPage() {
       email:             form.email,
       website:           sanitizeUrl(form.website),
       instagram:         sanitizeUrl(form.instagram),
-      facebook_url:      sanitizeUrl(form.facebook_url),
-      youtube_url:       sanitizeUrl(form.youtube_url),
-      tiktok_url:        sanitizeUrl(form.tiktok_url),
-      linkedin_url:      sanitizeUrl(form.linkedin_url),
       years_in_business: form.years_in_business ? parseInt(form.years_in_business) : null,
       certifications:    form.certifications || [],
+    }
+
+    const socialFields = {
+      facebook_url: sanitizeUrl(form.facebook_url),
+      youtube_url:  sanitizeUrl(form.youtube_url),
+      tiktok_url:   sanitizeUrl(form.tiktok_url),
+      linkedin_url: sanitizeUrl(form.linkedin_url),
+    }
+
+    // Try full save including new social columns
+    let { error } = await supabase.from('dealers').update({
+      ...baseFields,
+      ...socialFields,
     }).eq('id', dealer.id)
+
+    // If new columns don't exist yet (migration pending), fall back to base fields only
+    if (error && error.message?.includes('column')) {
+      const fallback = await supabase.from('dealers').update(baseFields).eq('id', dealer.id)
+      error = fallback.error
+      if (!fallback.error) {
+        setSaveError('Guardado parcialmente. Las redes sociales (Facebook, YouTube, TikTok, LinkedIn) requieren aplicar la migración 006 en Supabase para guardarse.')
+      }
+    }
+
     setLoading(false)
+
+    if (error) {
+      setSaveError(`Error al guardar: ${error.message}`)
+      return
+    }
+
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
   }
@@ -373,15 +401,20 @@ export default function PerfilPage() {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <button type="submit" disabled={loading} className="btn-gold">
-            {loading ? 'Guardando...' : 'Guardar cambios'}
-          </button>
-          {saved && (
-            <div className="flex items-center gap-2 text-emerald-400 text-sm">
-              <CheckCircle className="w-4 h-4" />
-              Guardado correctamente
-            </div>
+        <div className="space-y-3">
+          <div className="flex items-center gap-4">
+            <button type="submit" disabled={loading} className="btn-gold">
+              {loading ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+            {saved && !saveError && (
+              <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                <CheckCircle className="w-4 h-4" />
+                Guardado correctamente
+              </div>
+            )}
+          </div>
+          {saveError && (
+            <p className="text-xs text-amber-400 leading-relaxed max-w-lg">{saveError}</p>
           )}
         </div>
       </form>
