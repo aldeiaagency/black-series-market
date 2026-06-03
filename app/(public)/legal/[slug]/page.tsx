@@ -330,55 +330,168 @@ La versión vigente será la publicada en la plataforma en cada momento.
   },
 
   'terminos': {
-    title: 'Términos de Uso',
+    title: 'Términos y Condiciones de Uso',
     content: `
+**Objeto de los Términos**
+
+Estos Términos y Condiciones regulan el acceso, navegación y uso de Black Label Market, plataforma digital gestionada por KAZAWEB, S.L.U. bajo el nombre comercial Black Label Market.
+
+Black Label Market está orientada a la presentación de coches y motos premium, deportivos, clásicos, de colección y unidades especiales publicados por concesionarios, compraventas, showrooms y especialistas verificados.
+
+El acceso y uso de la plataforma atribuye la condición de usuario e implica la aceptación de estos Términos, sin perjuicio de las condiciones particulares que puedan aplicarse a determinados servicios, cuentas profesionales, planes de suscripción o publicaciones.
+
+**Naturaleza de la plataforma**
+
+Black Label Market actúa como plataforma de publicación, presentación y contacto entre compradores interesados y vendedores profesionales.
+
+Salvo que se indique expresamente lo contrario, Black Label Market no vende directamente los vehículos publicados, no interviene como parte compradora o vendedora en la compraventa y no garantiza por sí misma la disponibilidad, estado, precio final, historial, documentación, garantía o características concretas de los vehículos anunciados.
+
+La operación comercial, negociación, documentación, garantía, pago, reserva, financiación, transporte, entrega y cualquier acuerdo posterior se realiza directamente entre el comprador interesado y el vendedor profesional responsable del vehículo.
+
 **Uso de la plataforma**
 
-Black Label Market es un marketplace de vehículos premium de navegación pública. Cualquier persona puede explorar los vehículos publicados sin necesidad de registro. Para enviar solicitudes de información, búsquedas privadas o acceder como profesional, el usuario debe facilitar datos de contacto veraces.
+Cualquier usuario puede explorar los vehículos publicados sin necesidad de registro, salvo en aquellas funcionalidades que requieran cuenta de usuario o identificación.
+
+Para enviar solicitudes de información, guardar vehículos, crear alertas, solicitar vehículos a la carta o acceder como profesional, el usuario deberá facilitar datos veraces, actualizados y suficientes para gestionar correctamente la solicitud.
+
+El usuario se compromete a utilizar Black Label Market de forma lícita, diligente y conforme a la buena fe, evitando cualquier uso fraudulento, abusivo, automatizado, ilícito o contrario a estos Términos.
 
 **Obligaciones del usuario comprador**
 
-- Facilitar datos de contacto veraces al utilizar los formularios de la plataforma.
-- No usar la plataforma para fines fraudulentos, ilegales o contrarios a la buena fe.
+El usuario comprador o interesado se compromete a:
+
+- Facilitar datos de contacto veraces al utilizar formularios o funcionalidades de la plataforma.
 - No suplantar la identidad de terceros.
-- No intentar acceder a áreas restringidas o sistemas de la plataforma.
-- Confirmar disponibilidad, condiciones y documentación directamente con el vendedor antes de formalizar cualquier operación.
+- No utilizar la plataforma para fines fraudulentos, ilícitos, abusivos o contrarios a la buena fe.
+- No intentar acceder a áreas restringidas, sistemas internos, cuentas de terceros o funcionalidades no autorizadas.
+- Confirmar directamente con el vendedor profesional la disponibilidad, precio, estado, kilometraje, documentación, garantía, financiación y cualquier condición relevante antes de formalizar una operación.
+- Realizar las comprobaciones técnicas, documentales, administrativas o legales que considere necesarias antes de comprar, reservar, financiar, entregar señal o desplazarse para ver un vehículo.
+- No remitir mensajes ofensivos, falsos, comerciales no solicitados, automatizados o ajenos al interés legítimo en un vehículo o servicio.
+
+**Cuentas de usuario, favoritos y alertas**
+
+Black Label Market puede permitir la creación de cuentas de usuario para acceder a funcionalidades como vehículos guardados, favoritos, alertas, solicitudes o historial de actividad.
+
+El usuario será responsable de mantener la confidencialidad de sus credenciales y de utilizar su cuenta de forma adecuada.
+
+La funcionalidad de vehículos guardados, favoritos o alertas tiene carácter informativo y no implica reserva, bloqueo, disponibilidad garantizada ni derecho preferente sobre ningún vehículo.
+
+Black Label Market podrá modificar, suspender o eliminar funcionalidades de cuenta, favoritos o alertas por motivos técnicos, legales, de seguridad o de evolución del servicio.
+
+**Vehículos a la carta**
+
+La funcionalidad de vehículos a la carta permite al usuario indicar qué tipo de coche o moto está buscando para que Black Label Market pueda revisar posibles opciones compatibles entre profesionales verificados.
+
+El envío de una solicitud de vehículo a la carta no garantiza la localización de una unidad concreta, la disponibilidad de stock, un precio determinado, ni la formalización de operación alguna.
+
+Black Label Market podrá contactar con el usuario para ampliar información o comunicar opciones disponibles, siempre conforme a la Política de Privacidad.
 
 **Obligaciones del vendedor profesional**
 
-- Publicar información veraz y actualizada sobre los vehículos.
-- Mantener la disponibilidad actualizada y retirar unidades vendidas o no disponibles.
-- Declarar el estado, kilometraje, documentación y condiciones relevantes del vehículo.
-- No publicar imágenes falsas ni correspondientes a otra unidad.
-- No ocultar defectos o incidencias relevantes que afecten al valor o estado del vehículo.
-- Atender solicitudes de interesados de forma diligente.
-- Respetar la normativa aplicable en la comercialización de vehículos.
+El vendedor profesional, concesionario, compraventa, showroom o especialista que solicite acceso o publique vehículos en Black Label Market se compromete a:
+
+- Facilitar información veraz, actualizada y completa sobre su identidad profesional.
+- Publicar información veraz, completa y actualizada sobre los vehículos.
+- Mantener la disponibilidad actualizada y retirar o marcar correctamente unidades vendidas, reservadas o no disponibles.
+- Declarar de forma clara el estado, kilometraje, historial, documentación, garantías, condiciones comerciales y cualquier circunstancia relevante del vehículo.
+- No publicar imágenes falsas, de archivo, manipuladas de forma engañosa o correspondientes a otra unidad.
+- No ocultar defectos, incidencias, cargas, limitaciones documentales o información relevante que pueda afectar al valor, estado o decisión de compra.
+- Atender las solicitudes de interesados de forma diligente y profesional.
+- Respetar la normativa aplicable en materia de venta de vehículos, garantías, consumo, publicidad, protección de datos, comercio electrónico y cualquier otra que resulte aplicable.
+- Cumplir los criterios de publicación y, en su caso, las condiciones específicas para profesionales.
+
+Estas obligaciones se entienden sin perjuicio de los Criterios de Publicación, las condiciones específicas para profesionales y las condiciones particulares de los planes de suscripción que puedan resultar aplicables.
+
+**Publicación, revisión y retirada de contenidos**
+
+Black Label Market no es un clasificado abierto. La publicación de vehículos, perfiles profesionales o contenidos puede estar sujeta a revisión previa o posterior.
+
+Black Label Market podrá aceptar, rechazar, editar, pausar, limitar la visibilidad o retirar anuncios, perfiles, imágenes, textos o contenidos cuando considere que incumplen estos Términos, los criterios de publicación, las condiciones profesionales, la normativa aplicable o los estándares de calidad de la plataforma.
+
+También podrá adoptar medidas cuando detecte información incompleta, inexacta, desactualizada, engañosa, ilícita, fraudulenta, ofensiva, no autorizada o que pueda perjudicar a usuarios, profesionales, terceros o a la propia plataforma.
+
+**Notificación de contenidos incorrectos o ilícitos**
+
+Los usuarios, profesionales o terceros pueden comunicar a Black Label Market la existencia de anuncios incorrectos, contenidos presuntamente ilícitos, información engañosa, uso indebido de marcas, imágenes no autorizadas, suplantación, fraude o cualquier vulneración de estos Términos.
+
+Las comunicaciones deberán enviarse a través del canal legal o de contacto indicado en el Aviso Legal, incluyendo información suficiente para identificar el contenido afectado y explicar el motivo de la comunicación.
+
+Black Label Market revisará las comunicaciones recibidas y podrá adoptar las medidas que considere oportunas, incluyendo la solicitud de información adicional, corrección, suspensión, limitación de visibilidad, retirada del contenido o suspensión de la cuenta afectada.
 
 **Operaciones entre comprador y vendedor**
 
-Black Label Market no interviene como parte compradora ni vendedora en la compraventa del vehículo. Cualquier acuerdo, pago, reserva, financiación, garantía, transporte o entrega se realiza directamente entre las partes implicadas.
+Black Label Market no interviene como parte compradora ni vendedora en las operaciones sobre vehículos publicados por terceros.
 
-Black Label Market actúa exclusivamente como plataforma de publicación y contacto. La operación comercial, negociación, documentación y cualquier acuerdo posterior son responsabilidad de las partes.
+Cualquier acuerdo, reserva, señal, pago, financiación, garantía, transporte, entrega, revisión técnica, documentación, contrato de compraventa o reclamación derivada de la operación será responsabilidad de las partes implicadas.
 
-**Suscripciones y pagos profesionales**
+Black Label Market no se responsabiliza de incumplimientos, desacuerdos, daños, pérdidas, reclamaciones, defectos, retrasos, cancelaciones o controversias surgidas entre comprador y vendedor, sin perjuicio de las medidas que pueda adoptar sobre el uso de la plataforma cuando corresponda.
 
-Los planes de publicación se facturan mensualmente mediante pago automático a través de Stripe. La cancelación es posible en cualquier momento con efecto al final del periodo facturado.
+**Planes de suscripción y pagos profesionales**
 
-**Limitaciones del servicio**
+Black Label Market puede ofrecer planes de suscripción o servicios de pago dirigidos a profesionales para publicar vehículos, acceder a funcionalidades, destacar stock o gestionar su presencia en la plataforma.
 
-- Black Label Market puede modificar, pausar o retirar contenido que no cumpla sus criterios editoriales, comerciales o legales.
-- Black Label Market puede suspender o cancelar el acceso de un profesional que incumpla estos términos.
-- Black Label Market puede rechazar solicitudes de publicación o acceso sin necesidad de justificación adicional.
-- Black Label Market puede modificar los criterios de publicación, planes y funcionamiento del servicio.
-- La disponibilidad continua del servicio no está garantizada.
+Las condiciones económicas, duración, renovación, cancelación, impuestos, facturación y servicios incluidos se indicarán en cada plan o en las condiciones específicas aplicables a profesionales.
 
-**Modificaciones**
+Si el pago se gestiona mediante un proveedor externo, el profesional deberá aceptar, cuando corresponda, las condiciones de dicho proveedor.
 
-Black Label Market puede actualizar estos términos en cualquier momento. Los cambios relevantes serán comunicados a los usuarios registrados con la antelación razonable.
+Salvo que se indique otra cosa, la cancelación de un plan de suscripción tendrá efecto al final del periodo ya facturado, sin perjuicio de las condiciones particulares aplicables.
 
-**Legislación aplicable**
+**Disponibilidad y funcionamiento del servicio**
 
-Estos términos se rigen por la legislación española. Los conflictos se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.
+Black Label Market trabaja para mantener la plataforma disponible y operativa, pero no garantiza la disponibilidad continua, ausencia de errores, interrupciones, fallos técnicos, pérdida de información o compatibilidad permanente con todos los dispositivos, navegadores o sistemas.
+
+La plataforma podrá ser suspendida, modificada o interrumpida por mantenimiento, mejoras, incidencias técnicas, motivos de seguridad, fuerza mayor o causas ajenas al control de Black Label Market.
+
+**Limitación de responsabilidad**
+
+Black Label Market no será responsable de:
+
+- La exactitud absoluta de la información facilitada por vendedores profesionales.
+- La disponibilidad real de los vehículos anunciados.
+- Las decisiones de compra adoptadas por los usuarios.
+- Las negociaciones, acuerdos o transacciones realizadas directamente entre comprador y vendedor.
+- La revisión técnica, documental, administrativa o legal que las partes deban realizar.
+- Los contenidos, servicios o páginas de terceros enlazados desde la plataforma.
+- El uso indebido de la plataforma por usuarios o profesionales.
+- Daños derivados de interrupciones, errores técnicos o incidencias ajenas a su control, dentro de los límites permitidos por la normativa aplicable.
+
+Nada en estos Términos limitará los derechos que la normativa imperativa reconozca a los consumidores y usuarios cuando resulte aplicable.
+
+**Propiedad intelectual e industrial**
+
+El diseño, textos, logotipos, marca, estructura, código, interfaz, contenidos propios y elementos distintivos de Black Label Market son titularidad de KAZAWEB, S.L.U. o de sus licenciantes.
+
+Queda prohibida la reproducción, distribución, comunicación pública, transformación, extracción, reutilización o explotación de dichos elementos sin autorización previa y expresa, salvo en los casos permitidos por la ley.
+
+Las marcas, nombres comerciales, modelos, logotipos o referencias de fabricantes, concesionarios, compraventas, showrooms, especialistas o terceros pertenecen a sus respectivos titulares y se utilizan con finalidad informativa o identificativa.
+
+**Suspensión o cancelación de acceso**
+
+Black Label Market podrá suspender, limitar o cancelar el acceso de un usuario o profesional cuando detecte incumplimientos de estos Términos, usos fraudulentos, riesgos de seguridad, información falsa, actividad abusiva, contenidos ilícitos, impagos, infracción de derechos de terceros o cualquier conducta contraria a la buena fe o a la normativa aplicable.
+
+Cuando resulte razonable y posible, Black Label Market podrá comunicar los motivos principales de la medida adoptada, sin perjuicio de aquellas situaciones en las que deba proteger la seguridad, confidencialidad, investigación de fraudes o cumplimiento legal.
+
+**Modificaciones de los Términos**
+
+Black Label Market podrá actualizar estos Términos cuando sea necesario por cambios legales, técnicos, operativos, comerciales o de funcionamiento de la plataforma.
+
+La versión vigente será la publicada en la plataforma en cada momento. Cuando los cambios sean relevantes para usuarios registrados o profesionales, se procurará informar por medios razonables.
+
+El uso continuado de la plataforma tras la publicación de cambios supondrá la aceptación de la versión actualizada, sin perjuicio de los derechos que correspondan al usuario conforme a la normativa aplicable.
+
+**Protección de datos y cookies**
+
+El tratamiento de datos personales se regula en la Política de Privacidad.
+
+El uso de cookies y tecnologías similares se regula en la Política de Cookies. El usuario puede configurar sus preferencias mediante el panel habilitado en la web cuando resulte aplicable.
+
+**Legislación aplicable y jurisdicción**
+
+Estos Términos se rigen por la legislación española y, cuando resulte aplicable, por la normativa de la Unión Europea.
+
+Para cualquier controversia relacionada con el acceso o uso de la plataforma, las partes se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.
+
+Cuando el usuario tenga la condición de consumidor, serán competentes los juzgados y tribunales que correspondan conforme a la normativa de consumidores y usuarios.
     `.trim(),
   },
 
