@@ -1,6 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
+// Slugs canónicos por tipo — determina sección cuando no hay vehículos publicados.
+// Honda aparece en ambas listas porque fabrica coches y motos.
+const CAR_BRAND_SLUGS = new Set([
+  'abarth','alfa-romeo','alpine','ariel','aston-martin','audi',
+  'bentley','bmw','brabus','bugatti','caterham','corvette','cupra',
+  'dodge','ferrari','fiat','ford','genesis','honda','hyundai',
+  'jaguar','kia','koenigsegg','lamborghini','lancia','land-rover',
+  'lexus','lotus','maserati','maybach','mazda','mclaren',
+  'mercedes-benz','mini','mitsubishi','morgan','nissan','opel',
+  'pagani','peugeot','polestar','porsche','renault','rimac',
+  'rolls-royce','seat','subaru','tesla','toyota','volkswagen','volvo',
+])
+
+const MOTO_BRAND_SLUGS = new Set([
+  'aprilia','benelli','bimota','bmw-motorrad','cagiva','can-am',
+  'ducati','energica','harley-davidson','honda','husqvarna',
+  'indian','kawasaki','ktm','livewire','moto-guzzi','mv-agusta',
+  'piaggio','royal-enfield','suzuki','triumph','vespa','yamaha',
+  'zero-motorcycles',
+])
+
 export default async function MarcasPage() {
   const supabase = await createClient()
 
@@ -10,12 +31,12 @@ export default async function MarcasPage() {
     .eq('is_active', true)
     .order('name')
 
+  // Count active vehicles per brand and track which types each brand has
   const { data: vehicles } = await supabase
     .from('vehicles')
     .select('brand_name, vehicle_type')
     .eq('status', 'active')
 
-  // Count vehicles per brand and track which types each brand has
   const countMap: Record<string, number> = {}
   const typeMap: Record<string, Set<string>> = {}
 
@@ -29,24 +50,17 @@ export default async function MarcasPage() {
   const enriched = (brands || []).map((b: any) => ({
     ...b,
     count: countMap[b.name.toLowerCase()] || 0,
-    types: typeMap[b.name.toLowerCase()] || new Set(),
+    types: typeMap[b.name.toLowerCase()] || new Set<string>(),
   }))
 
-  // A brand belongs to a section if it has that type in inventory.
-  // Brands with no inventory at all go to cars by default.
-  const MOTO_SLUGS = new Set([
-    'aprilia','benelli','bimota','bmw-motorrad','cagiva','can-am',
-    'ducati','energica','harley-davidson','husqvarna','indian',
-    'kawasaki','ktm','livewire','moto-guzzi','mv-agusta',
-    'piaggio','royal-enfield','triumph','vespa','zero-motorcycles',
-  ])
+  // A brand appears in a section if it has vehicles of that type OR is in the slug set.
+  // Honda is in both sets → appears in both sections.
+  const carBrands  = enriched.filter((b: any) => b.types.has('car')        || CAR_BRAND_SLUGS.has(b.slug))
+  const motoBrands = enriched.filter((b: any) => b.types.has('motorcycle') || MOTO_BRAND_SLUGS.has(b.slug))
 
-  const carBrands = enriched.filter((b: any) =>
-    b.types.has('car') || (!b.types.has('motorcycle') && !MOTO_SLUGS.has(b.slug))
-  )
-  const motoBrands = enriched.filter((b: any) =>
-    b.types.has('motorcycle') || MOTO_SLUGS.has(b.slug)
-  )
+  function vehicleLabel(count: number) {
+    return count === 1 ? '1 vehículo' : `${count} vehículos`
+  }
 
   function BrandCard({ brand }: { brand: any }) {
     return (
@@ -69,7 +83,7 @@ export default async function MarcasPage() {
           {brand.name}
         </h3>
         <p className="text-xs text-bsm-text-muted">
-          {brand.count > 0 ? `${brand.count} vehículo${brand.count !== 1 ? 's' : ''}` : 'Próximamente'}
+          {vehicleLabel(brand.count)}
         </p>
       </Link>
     )

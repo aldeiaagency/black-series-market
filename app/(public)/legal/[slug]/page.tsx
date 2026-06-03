@@ -500,56 +500,72 @@ Cuando el usuario tenga la condición de consumidor, serán competentes los juzg
     content: `
 **Black Label Market no es un clasificado abierto**
 
-La publicación de vehículos en Black Label Market está sujeta a criterios editoriales, comerciales y de calidad. Cada solicitud de publicación es revisada por el equipo antes de activarse.
+La publicación de vehículos en Black Label Market está sujeta a criterios de calidad y criterios comerciales. Cada solicitud de publicación es revisada por el equipo antes de activarse.
 
-**Tipos de vehículos que encajan**
+**Criterio general**
 
-Coches: premium modernos y de altas prestaciones, deportivos, supercars, hypercars, luxury y executive, clásicos de colección, youngtimers de interés enthusiast, ediciones especiales y series limitadas.
+Black Label Market no funciona como un clasificado abierto. La publicación de vehículos se revisa caso por caso para mantener una selección coherente con el posicionamiento premium, deportivo, clásico o especial de la plataforma.
 
-Motos: deportivas premium de altas prestaciones, touring y adventure de gama alta, custom y cruiser premium, scooters premium de segmento alto, clásicas de colección y unidades especiales.
+No existe un único criterio automático por precio, kilometraje o antigüedad. Estos factores se tienen en cuenta, pero siempre dentro del contexto de cada unidad.
 
-También se consideran vehículos con historia documentada, comunidad activa o valor diferencial claro.
-
-**Criterios que valoramos**
+**Qué valoramos en un coche o moto**
 
 - Marca, modelo y versión.
-- Estado general y configuración de la unidad.
+- Configuración concreta de la unidad.
+- Estado general.
+- Kilometraje en relación con el tipo de vehículo.
 - Historial documental y de mantenimiento.
-- Demanda y relevancia en el mercado actual.
 - Rareza, edición limitada o valor de colección.
-- Comunidad y valor cultural del modelo.
+- Demanda y relevancia en el mercado.
 - Calidad de la presentación fotográfica.
-- Documentación disponible.
-- Coherencia del precio con el mercado.
-- Vendedor profesional responsable e identificado.
+- Coherencia del precio con la unidad.
+- Disponibilidad real.
+- Vendedor profesional identificado y verificado.
+
+**Marcas premium y marcas generalistas**
+
+Algunas marcas encajan de forma natural en Black Label por su posicionamiento premium, deportivo o de lujo.
+
+Otras marcas más generalistas también pueden formar parte del catálogo cuando la unidad lo justifique por modelo, versión, preparación, historia, estado, rareza o atractivo especial.
+
+No todos los vehículos de una marca generalista encajan en Black Label, pero sí pueden hacerlo versiones deportivas, ediciones limitadas, unidades de colección, modelos icónicos, configuraciones especiales o vehículos con una demanda clara entre entusiastas.
+
+**Ejemplos de encaje**
+
+- Deportivos y altas prestaciones.
+- Supercars e hypercars.
+- Luxury, executive y gran turismo.
+- Clásicos y youngtimers con interés real.
+- Ediciones especiales o series limitadas.
+- Modelos icónicos o con comunidad activa.
+- Motos deportivas, touring premium, custom y cruiser premium, clásicas, adventure de gama alta y unidades especiales.
 
 **Requisitos mínimos para publicar**
 
 - Vendedor profesional identificado y aprobado por Black Label Market.
-- Disponibilidad real confirmada en el momento de la publicación.
+- Vehículo real y disponible.
 - Fotografías reales de la unidad concreta, no de archivo ni de otra unidad.
-- Datos técnicos completos y verificables.
-- Precio indicado o condición de consulta clara.
-- Ubicación del vehículo.
+- Información técnica completa y verificable.
 - Estado declarado con honestidad.
-- Garantía o condiciones de venta indicadas.
-- Sin incidencias o defectos relevantes ocultos.
+- Ubicación clara.
+- Precio indicado o condición de consulta clara.
+- Garantía o condiciones de venta indicadas cuando aplique.
+- Ausencia de incidencias relevantes ocultas.
 
 **Motivos habituales de rechazo**
 
-- Stock sin criterio editorial o comercial.
-- Fotografías de archivo o no correspondientes a la unidad concreta.
-- Unidad no disponible en el momento de solicitar la publicación.
-- Información incompleta o engañosa.
-- Precio sin justificación coherente.
-- Documentación con dudas sin resolver.
-- Daños o incidencias relevantes no declarados.
-- Vendedor no profesional o no aprobado por Black Label Market.
-- Vehículos sin encaje con el perfil del marketplace.
+- Información incompleta, inexacta o engañosa.
+- Fotografías de archivo o de otra unidad.
+- Vehículo no disponible.
+- Estado, kilometraje, historial o documentación con dudas relevantes.
+- Precio sin coherencia con la unidad.
+- Daños o incidencias importantes no declarados.
+- Vendedor no profesional o no aprobado.
+- Unidad sin encaje suficiente con el perfil de Black Label Market.
 
-**Derecho editorial**
+**Derecho de publicación**
 
-Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o retirar publicaciones conforme a sus criterios editoriales, comerciales y de calidad, sin necesidad de justificación adicional.
+Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o retirar publicaciones conforme a sus criterios de calidad y criterios comerciales, sin necesidad de justificación adicional.
 
 **¿Quieres publicar en Black Label Market?**
 
