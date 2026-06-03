@@ -1,42 +1,49 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import Logo from '@/components/brand/Logo'
+import CookieSettingsButton from '@/components/legal/CookieSettingsButton'
 
-const LINKS = {
-  Explorar: [
-    { label: 'Coches', href: '/coches' },
-    { label: 'Motos', href: '/motos' },
-    { label: 'Marcas', href: '/marcas' },
-    { label: 'Concesionarios', href: '/dealers' },
-    { label: 'Vehículos a la carta', href: '/vehiculos-a-la-carta' },
-    { label: 'Mis favoritos', href: '/mis-favoritos' },
-    { label: 'Cómo funciona', href: '/como-funciona' },
-  ],
-  Profesionales: [
-    { label: 'Quiero publicar en Black Label', href: '/registro' },
-    { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
-    { label: 'Planes de publicación', href: '/precios' },
-    { label: 'Soporte', href: '/contacto' },
-  ],
-  Legal: [
-    { label: 'Aviso legal', href: '/legal/aviso-legal' },
-    { label: 'Política de privacidad', href: '/legal/privacidad' },
-    { label: 'Política de cookies', href: '/legal/cookies' },
-    { label: 'Términos de uso', href: '/legal/terminos' },
-    { label: 'Criterios de publicación', href: '/legal/criterios-publicacion' },
-  ],
-}
+// ── Navigation columns ────────────────────────────────────────────────────────
+
+const EXPLORAR = [
+  { label: 'Coches',                        href: '/coches' },
+  { label: 'Motos',                         href: '/motos' },
+  { label: 'Marcas',                        href: '/marcas' },
+  { label: 'Concesionarios y compraventas', href: '/dealers' },
+  { label: 'Vehículos a la carta',          href: '/vehiculos-a-la-carta' },
+  { label: 'Mis favoritos',                 href: '/mis-favoritos' },
+  { label: 'Cómo funciona',                 href: '/como-funciona' },
+]
+
+const PROFESIONALES = [
+  { label: 'Publicar vehículos',      href: '/registro' },
+  { label: 'Criterios para publicar', href: '/legal/criterios-publicacion' },
+  { label: 'Planes de publicación',   href: '/precios' },
+  { label: 'Soporte',                 href: '/contacto' },
+]
+
+// Legal: "Configurar cookies" rendered separately as a client button
+const LEGAL = [
+  { label: 'Aviso legal',            href: '/legal/aviso-legal' },
+  { label: 'Política de privacidad', href: '/legal/privacidad' },
+  { label: 'Política de cookies',    href: '/legal/cookies' },
+  { label: 'Términos y condiciones', href: '/legal/terminos' },
+]
+
+// ── Brand featured ────────────────────────────────────────────────────────────
 
 const FEATURED_BRANDS = [
   'Ferrari', 'Lamborghini', 'McLaren', 'Bugatti', 'Porsche', 'Bentley',
   'Rolls-Royce', 'Aston Martin', 'Maserati', 'BMW M', 'Mercedes AMG', 'Ducati',
 ]
 
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function Footer() {
   return (
     <footer className="bg-[#080808] border-t border-[#1A1A1A] mt-24">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-16">
 
-        {/* Top */}
+        {/* Top grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
 
           {/* Brand */}
@@ -48,30 +55,73 @@ export default function Footer() {
               </p>
             </div>
             <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xs">
-              Marketplace especializado en coches y motos premium, deportivos, clásicos y unidades especiales.
+              Selección de coches y motos premium, deportivos, clásicos y unidades especiales publicados por profesionales verificados.
             </p>
           </div>
 
-          {/* Links */}
-          {Object.entries(LINKS).map(([category, items]) => (
-            <div key={category}>
-              <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
-                {category}
-              </h4>
-              <ul className="space-y-3">
-                {items.map((item) => (
-                  <li key={item.label}>
-                    <Link
-                      href={item.href}
-                      className="text-[13px] text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors duration-150"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Explorar */}
+          <div>
+            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
+              Explorar
+            </h4>
+            <ul className="space-y-3">
+              {EXPLORAR.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="text-[13px] text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors duration-150"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Profesionales */}
+          <div>
+            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
+              Profesionales
+            </h4>
+            <ul className="space-y-3">
+              {PROFESIONALES.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="text-[13px] text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors duration-150"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
+              Legal
+            </h4>
+            <ul className="space-y-3">
+              {LEGAL.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="text-[13px] text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors duration-150"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              {/* Configurar cookies — opens consent panel via CustomEvent */}
+              <li>
+                <CookieSettingsButton
+                  className="text-[13px] text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors duration-150"
+                />
+              </li>
+            </ul>
+          </div>
+
         </div>
 
         {/* Brands */}
@@ -101,7 +151,7 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Bottom */}
+        {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[11px] text-[#737373]">
             © {new Date().getFullYear()} Black Label Market. Todos los derechos reservados.
@@ -110,6 +160,7 @@ export default function Footer() {
             Operado por <span className="text-[#8A8A8A]">KAZAWEB, S.L.U.</span> · NIF B42761254
           </p>
         </div>
+
       </div>
     </footer>
   )
