@@ -349,16 +349,11 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
   Trabajamos con profesionales que cuidan la presentación, mantienen su stock actualizado
   y ofrecen unidades con disponibilidad real.
 </p>
-<p className="text-sm text-bsm-text-secondary leading-relaxed">
-  Aun así, te recomendamos confirmar siempre los detalles del vehículo directamente con el vendedor:
-  estado, historial, garantía, documentación y condiciones de compra.
-</p>
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-3.5 h-3.5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
                 <p className="text-[11px] text-[#737373] leading-relaxed">
-                  La presencia en Black Label Market no implica garantía legal total, verificación documental
-                  completa ni ausencia de fraude. Recomendamos siempre realizar una inspección independiente
-                  antes de formalizar cualquier operación.
+                  Aun así, te recomendamos confirmar siempre los detalles del vehículo directamente con el vendedor:
+  estado, historial, garantía, documentación y condiciones de compra.
                 </p>
               </div>
             </div>
