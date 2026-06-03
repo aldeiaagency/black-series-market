@@ -17,6 +17,7 @@ Dominio: blackseriesmarket.com
 Email de contacto: hola@blackseriesmarket.com
 Email legal: hola@blackseriesmarket.com
 Actividad: Intermediarios del comercio — Epígrafe IAE 631
+Datos registrales: Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Libro 0, Folio 51, Sección 8, Hoja SC-51053, Inscripción 1ª
 
 **Objeto del sitio web**
 
@@ -95,59 +96,149 @@ Cuando el usuario tenga la condición de consumidor, serán competentes los juzg
     content: `
 **Responsable del tratamiento**
 
-KAZAWEB, S.L.U.
+El responsable del tratamiento de los datos personales tratados a través de Black Label Market es:
+
+Responsable: KAZAWEB, S.L.U.
 NIF: B42761254
 Domicilio: Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña
-Email privacidad: [PENDIENTE_EMAIL_PRIVACIDAD]
+Nombre comercial: Black Label Market
+Email de privacidad: privacidad@blackseriesmarket.com
+Datos registrales: Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Libro 0, Folio 51, Sección 8, Hoja SC-51053, Inscripción 1ª
 
-De conformidad con el Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD).
+Esta Política de Privacidad se aplica a los tratamientos de datos personales realizados a través de Black Label Market, de conformidad con el Reglamento (UE) 2016/679, General de Protección de Datos, y la Ley Orgánica 3/2018, de Protección de Datos Personales y garantía de los derechos digitales.
 
-**Datos que recogemos**
+**Datos personales que tratamos**
 
-Formulario de solicitud de información sobre vehículos: nombre, email, teléfono (opcional), vehículo de interés, plazo de compra, financiación, entrega de vehículo, preferencia de contacto y mensaje.
+Black Label Market puede tratar distintas categorías de datos personales en función del uso que realice el usuario de la plataforma:
 
-Formulario de búsqueda privada: nombre, email, teléfono (opcional), tipo de vehículo, marca y modelo buscados, presupuesto, ubicación, plazo de compra y comentarios.
+- Datos identificativos y de contacto: nombre, apellidos si se facilitan, email, teléfono y datos de comunicación.
+- Datos relativos a solicitudes sobre vehículos: vehículo de interés, mensaje enviado, plazo aproximado de compra, preferencias de contacto, financiación, entrega de vehículo usado u otros datos que el usuario decida incluir.
+- Datos relativos a vehículos a la carta: tipo de vehículo buscado, marca, modelo, versión, presupuesto aproximado, ubicación preferida, plazo de compra, preferencias y comentarios.
+- Datos de cuenta de usuario: identificador de usuario, email, fecha de registro, accesos, preferencias, vehículos guardados y actividad asociada a la cuenta.
+- Datos de profesionales o showrooms: nombre de contacto, empresa, email, teléfono, tipo de negocio, ubicación, stock aproximado, información profesional y datos necesarios para valorar o gestionar el acceso profesional.
+- Datos de publicación profesional: vehículos publicados, imágenes, características del stock, estado de anuncios, contactos recibidos y métricas agregadas de rendimiento.
+- Datos técnicos y de navegación: dirección IP, identificadores técnicos, dispositivo, navegador, logs de seguridad, preferencias de cookies y eventos de uso de la plataforma cuando proceda.
+- Datos de analítica interna: vistas de vehículos, clics, contactos, vehículos guardados, filtros utilizados y otros eventos de uso, tratados de forma agregada o limitada para mejorar la plataforma.
 
-Formulario de acceso profesional: nombre, empresa, email, teléfono, tipo de negocio, ubicación, stock aproximado y mensaje.
-
-Datos técnicos de navegación: [PENDIENTE_DEFINIR_ANALYTICS_COOKIES]
+Black Label Market no solicita categorías especiales de datos personales. El usuario debe evitar incluir datos especialmente protegidos en campos libres o mensajes.
 
 **Finalidades del tratamiento**
 
+Los datos personales podrán tratarse para las siguientes finalidades:
+
 - Gestionar solicitudes de información sobre vehículos.
-- Contactar con usuarios que han enviado un formulario.
-- Registrar y tramitar búsquedas privadas.
+- Poner en contacto al usuario interesado con el vendedor profesional responsable del vehículo.
+- Gestionar solicitudes de vehículos a la carta.
+- Gestionar alertas, favoritos y vehículos guardados.
+- Crear y mantener cuentas de usuario.
 - Valorar solicitudes de acceso profesional.
-- Mejorar la plataforma y prevenir usos indebidos o fraude.
-- Cumplir las obligaciones legales aplicables.
-- Enviar comunicaciones si el usuario lo acepta expresamente.
+- Gestionar perfiles de concesionarios, compraventas, especialistas y showrooms.
+- Gestionar la publicación profesional de vehículos.
+- Prestar soporte al usuario o al profesional.
+- Gestionar planes de suscripción, facturación y relación contractual con profesionales, cuando proceda.
+- Mejorar la plataforma, analizar su uso y entender la demanda de vehículos.
+- Prevenir abusos, fraude, accesos no autorizados o usos indebidos.
+- Cumplir obligaciones legales aplicables.
+- Enviar comunicaciones comerciales o informativas cuando el usuario lo haya autorizado o exista otra base jurídica válida.
 
-**Base jurídica**
+**Base jurídica del tratamiento**
 
-- Consentimiento del usuario para el envío de formularios y comunicaciones opcionales.
-- Interés legítimo para seguridad, prevención de abuso y mejora del servicio.
-- Ejecución de medidas precontractuales cuando el usuario solicita información sobre un vehículo.
-- Cumplimiento de obligaciones legales.
+La base jurídica depende de cada tratamiento:
+
+- Consentimiento del usuario: para el envío voluntario de formularios, solicitudes, comunicaciones comerciales opcionales, aceptación de cookies no necesarias y otras acciones basadas en autorización expresa.
+- Ejecución de medidas precontractuales o contractuales: cuando el usuario solicita información sobre un vehículo, pide un vehículo a la carta, crea una cuenta, solicita acceso profesional o contrata un plan de suscripción.
+- Interés legítimo: para mantener la seguridad de la plataforma, prevenir abusos, mejorar el servicio, elaborar analítica interna no invasiva, proteger derechos e intereses de Black Label Market y gestionar comunicaciones operativas relacionadas con solicitudes previas.
+- Cumplimiento de obligaciones legales: para atender obligaciones fiscales, contables, mercantiles, de protección de datos, consumidores, servicios digitales o requerimientos de autoridades competentes.
+
+Cuando el tratamiento se base en el consentimiento, el usuario podrá retirarlo en cualquier momento sin que ello afecte a la licitud del tratamiento realizado antes de su retirada.
 
 **Comunicación de datos a terceros**
 
 Cuando el usuario solicita información sobre un vehículo, Black Label Market podrá comunicar los datos necesarios al vendedor profesional responsable de dicha unidad para que pueda responder a la solicitud.
 
-Herramientas de gestión previstas pendientes de configuración: [PENDIENTE_HERRAMIENTA_FORMULARIOS] · [PENDIENTE_CRM] · [PENDIENTE_EMAIL_MARKETING] · [PENDIENTE_ANALYTICS]
+También podrán acceder a datos personales proveedores que prestan servicios a Black Label Market como encargados del tratamiento, por ejemplo proveedores de hosting, infraestructura, base de datos, email transaccional, gestión de formularios, analítica, soporte técnico, pagos o herramientas de gestión interna, siempre que sean necesarios para prestar el servicio.
 
-**Conservación de datos**
+Black Label Market también podrá comunicar datos cuando exista obligación legal, requerimiento de autoridad competente o necesidad de proteger derechos, seguridad o intereses legítimos.
 
-Los datos se conservarán durante el tiempo necesario para gestionar la solicitud y, posteriormente, durante los plazos legalmente exigibles o mientras puedan derivarse responsabilidades.
+No se venderán datos personales de usuarios a terceros.
 
-**Tus derechos**
+**Transferencias internacionales**
 
-Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad de datos, así como retirar el consentimiento en cualquier momento, escribiendo a: [PENDIENTE_EMAIL_PRIVACIDAD]
+Algunos proveedores tecnológicos utilizados por Black Label Market pueden estar ubicados fuera del Espacio Económico Europeo o prestar servicios mediante infraestructuras internacionales.
 
-Puedes presentar una reclamación ante la Agencia Española de Protección de Datos (www.aepd.es).
+Cuando se produzcan transferencias internacionales de datos, Black Label Market procurará que se realicen conforme a las garantías previstas por la normativa aplicable, incluyendo decisiones de adecuación, cláusulas contractuales tipo u otros mecanismos reconocidos por el RGPD.
+
+**Conservación de los datos**
+
+Los datos se conservarán durante el tiempo necesario para cumplir la finalidad para la que fueron recogidos y, posteriormente, durante los plazos en los que puedan derivarse responsabilidades legales, contractuales o administrativas.
+
+Con carácter general:
+
+- Las solicitudes de información se conservarán durante el tiempo necesario para gestionarlas y atender posibles responsabilidades.
+- Las solicitudes de vehículos a la carta se conservarán mientras resulten útiles para gestionar la búsqueda o hasta que el usuario solicite su eliminación, salvo obligación legal de conservación.
+- Los datos de cuenta se conservarán mientras la cuenta permanezca activa y, después, durante los plazos legalmente exigibles.
+- Los datos de profesionales se conservarán mientras exista relación profesional, contractual o precontractual con Black Label Market y durante los plazos legales aplicables.
+- Los datos de facturación o contratación se conservarán durante los plazos fiscales, contables y mercantiles exigibles.
+- Los datos técnicos y de seguridad se conservarán durante el tiempo necesario para proteger la plataforma y prevenir usos indebidos.
+- Las preferencias de cookies se conservarán conforme a lo indicado en la Política de Cookies.
+
+**Derechos de los usuarios**
+
+El usuario puede ejercer los siguientes derechos en materia de protección de datos:
+
+- Acceso.
+- Rectificación.
+- Supresión.
+- Oposición.
+- Limitación del tratamiento.
+- Portabilidad.
+- Retirada del consentimiento cuando el tratamiento se base en consentimiento.
+
+Para ejercer estos derechos, el usuario puede escribir a:
+
+privacidad@blackseriesmarket.com
+
+La solicitud deberá indicar el derecho que se desea ejercer y permitir identificar razonablemente al solicitante.
+
+El usuario también tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos a través de www.aepd.es si considera que el tratamiento de sus datos no se ajusta a la normativa aplicable.
+
+**Comunicaciones comerciales**
+
+Black Label Market solo enviará comunicaciones comerciales electrónicas cuando exista una base jurídica válida para ello, especialmente consentimiento del usuario o una relación previa que permita comunicaciones relacionadas con servicios similares.
+
+El usuario podrá solicitar la baja o retirar su consentimiento en cualquier momento a través de los mecanismos habilitados en cada comunicación o escribiendo a privacidad@blackseriesmarket.com.
+
+**Cookies y tecnologías similares**
+
+El uso de cookies y tecnologías similares se regula en la Política de Cookies.
+
+Las cookies técnicas necesarias pueden utilizarse para el funcionamiento básico de la web. Las cookies de análisis, publicidad o similares solo se utilizarán cuando exista consentimiento válido del usuario, cuando resulte exigible.
+
+El usuario puede configurar o modificar sus preferencias de cookies desde el panel habilitado en la web.
+
+**Seguridad de los datos**
+
+Black Label Market aplica medidas técnicas y organizativas orientadas a proteger los datos personales frente a accesos no autorizados, pérdida, alteración, divulgación o destrucción.
+
+No obstante, ningún sistema conectado a internet puede garantizar una seguridad absoluta. El usuario debe utilizar la plataforma de forma diligente y evitar enviar información innecesaria o sensible a través de campos libres.
+
+**Decisiones automatizadas y elaboración de perfiles**
+
+Black Label Market no adopta decisiones automatizadas con efectos jurídicos o significativamente similares sobre los usuarios.
+
+La plataforma puede utilizar métricas internas y datos agregados para entender el uso del servicio, mejorar la experiencia, analizar demanda o mostrar información de rendimiento a profesionales sobre sus propios vehículos, sin que ello implique decisiones automatizadas individuales con efectos jurídicos para el usuario.
 
 **Menores de edad**
 
-Este servicio no está dirigido a menores de edad. Black Label Market no recaba datos de personas menores de edad de forma consciente.
+Black Label Market no está dirigido a menores de edad.
+
+El usuario declara ser mayor de edad y contar con capacidad suficiente para utilizar la plataforma. Black Label Market no recaba datos de menores de forma consciente. Si se detecta que se han recogido datos de un menor sin autorización válida, se adoptarán las medidas oportunas para su eliminación.
+
+**Actualización de esta Política de Privacidad**
+
+Black Label Market podrá actualizar esta Política de Privacidad cuando sea necesario por cambios normativos, técnicos, operativos o de tratamiento de datos.
+
+Cuando los cambios sean relevantes, se informará a los usuarios por medios razonables. La versión vigente será la publicada en la plataforma en cada momento.
     `.trim(),
   },
 
