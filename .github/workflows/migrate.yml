@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'supabase/migrations/**'
-  workflow_dispatch: # permite lanzarlo manualmente desde GitHub
+  workflow_dispatch:
 
 jobs:
   migrate:
@@ -23,9 +23,10 @@ jobs:
       - name: Apply migrations
         env:
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PGSSLMODE: require
         run: |
           for file in $(ls supabase/migrations/*.sql | sort); do
             echo "Applying: $file"
-            psql "$DATABASE_URL" -f "$file"
+            psql "$DATABASE_URL" -f "$file" -v ON_ERROR_STOP=0
           done
-          echo "All migrations applied."
+          echo "Done."
