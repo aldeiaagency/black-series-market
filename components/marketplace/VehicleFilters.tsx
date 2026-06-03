@@ -9,16 +9,15 @@ import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
 const CAR_CATEGORIES = CAR_CATEGORIES_PUBLIC
 
 const MOTO_CATEGORIES = [
-  { value: 'sport_supersport',          label: 'Sport & Supersport' },
-  { value: 'naked_hypernaked',          label: 'Naked & Hypernaked' },
-  { value: 'premium_modern_bikes',      label: 'Premium moderno' },
-  { value: 'adventure_touring_premium', label: 'Adventure & Touring premium' },
-  { value: 'custom_cruiser_premium',    label: 'Custom & Cruiser' },
+  { value: 'sport_supersport',          label: 'Deportivas' },
+  { value: 'naked_hypernaked',          label: 'Naked' },
+  { value: 'adventure_touring_premium', label: 'Touring / Adventure' },
+  { value: 'custom_cruiser_premium',    label: 'Custom / Cruiser' },
   { value: 'classic_youngtimer_bikes',  label: 'Clásicas y youngtimers' },
   { value: 'scooter_urban_premium',     label: 'Scooter premium' },
-  { value: 'enthusiast_selection',      label: 'Selección entusiasta' },
-  { value: 'black_label_selection',     label: 'Black Label Selection' },
-  { value: 'black_label_icon',          label: 'Black Label Icon' },
+  { value: 'trail_premium',             label: 'Trail premium' },
+  { value: 'premium_modern_bikes',      label: 'Ediciones especiales' },
+  { value: 'enthusiast_selection',      label: 'Motos para entusiastas' },
 ]
 
 // ─── Brands ───────────────────────────────────────────────────────────────────

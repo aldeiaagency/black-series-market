@@ -119,7 +119,7 @@ export default async function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="/busqueda-privada"
+                href="/vehiculos-a-la-carta"
                 className="inline-flex items-center gap-2 px-6 py-3 text-sm text-[#9A9A9A]
                   border border-[#2A2A2A] hover:border-[#3A3A3A] hover:text-[#C9C9C9]
                   transition-all duration-200 tracking-wide"
@@ -403,7 +403,7 @@ export default async function HomePage() {
         </ul>
 
         <div className="flex flex-wrap gap-3">
-          <Link href="/busqueda-privada" className="btn-gold px-6 py-3 text-sm">
+          <Link href="/vehiculos-a-la-carta" className="btn-gold px-6 py-3 text-sm">
             Solicitar vehículo a la carta
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -438,7 +438,7 @@ export default async function HomePage() {
             </p>
 
             <Link
-              href="/busqueda-privada"
+              href="/vehiculos-a-la-carta"
               className="flex items-center gap-2 text-xs text-gold hover:text-gold-light transition-colors"
             >
               Solicitar vehículo a la carta <ArrowRight className="w-3.5 h-3.5" />

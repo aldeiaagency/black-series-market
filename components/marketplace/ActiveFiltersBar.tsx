@@ -34,14 +34,15 @@ const DRIVE_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
+  // Coches
   supercars: 'Supercars', luxury_executive: 'Lujo y Ejecutivo',
   premium_modern: 'Premium Moderno', sport_performance: 'Sport y Performance',
   classics_youngtimers: 'Clásicos y Youngtimers', enthusiast_selection: 'Selección Entusiasta',
-  black_label_selection: 'Black Label Selection', black_label_icon: 'Black Label Icon',
-  premium_modern_bikes: 'Motos Premium', sport_supersport: 'Sport y Supersport',
-  naked_hypernaked: 'Naked y Hypernaked', adventure_touring_premium: 'Adventure y Touring',
-  custom_cruiser_premium: 'Custom y Cruiser', classic_youngtimer_bikes: 'Clásica y Youngtimer',
-  scooter_urban_premium: 'Scooter Urbano',
+  // Motos
+  sport_supersport: 'Deportivas', naked_hypernaked: 'Naked',
+  adventure_touring_premium: 'Touring / Adventure', custom_cruiser_premium: 'Custom / Cruiser',
+  classic_youngtimer_bikes: 'Clásicas y youngtimers', scooter_urban_premium: 'Scooter premium',
+  trail_premium: 'Trail premium', premium_modern_bikes: 'Ediciones especiales',
 }
 
 function getLabel(key: string, value: string): string | null {

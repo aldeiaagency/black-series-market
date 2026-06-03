@@ -97,7 +97,7 @@ async function MotoList({ params }: { params: Record<string, string> }) {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/motos" className="btn-outline text-sm px-4">Limpiar filtros</Link>
-            <Link href="/busqueda-privada" className="btn-gold text-sm px-4">Vehículo a la carta</Link>
+            <Link href="/vehiculos-a-la-carta" className="btn-gold text-sm px-4">Vehículo a la carta</Link>
             <CreateAlertButton
               vehicleType="motorcycle"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-bsm-border text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"

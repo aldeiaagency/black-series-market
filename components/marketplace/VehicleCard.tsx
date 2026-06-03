@@ -104,7 +104,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           {showNew && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
               text-emerald-400 bg-[#0A0A0A] border border-emerald-400/30 font-medium">
-              Recién llegado
+              Novedad
             </span>
           )}
         </div>

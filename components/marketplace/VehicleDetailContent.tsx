@@ -486,7 +486,7 @@ export default function VehicleDetailContent({
                       <Search className="w-4 h-4" />
                       Consultar similares
                     </Link>
-                    <Link href="/busqueda-privada" className="btn-gold w-full justify-center text-sm">
+                    <Link href="/vehiculos-a-la-carta" className="btn-gold w-full justify-center text-sm">
                       <ArrowRight className="w-4 h-4" />
                       Solicitar vehículo a la carta
                     </Link>
@@ -548,7 +548,7 @@ export default function VehicleDetailContent({
                       className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted
                         hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
                     />
-                    <Link href="/busqueda-privada" className="flex items-center justify-center gap-2 text-xs
+                    <Link href="/vehiculos-a-la-carta" className="flex items-center justify-center gap-2 text-xs
                       text-bsm-text-muted hover:text-gold transition-colors py-2">
                       ¿No consigues esta unidad? Vehículos a la carta →
                     </Link>
