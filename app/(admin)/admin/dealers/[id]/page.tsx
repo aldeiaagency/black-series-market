@@ -69,6 +69,7 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
 
   const [
     { data: vehicles, count: vehicleCount },
+    { count: activeVehiclesCount },
     { data: leads, count: leadCount },
   ] = await Promise.all([
     supabase
@@ -77,6 +78,12 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
       .eq('dealer_id', id)
       .order('created_at', { ascending: false })
       .limit(20),
+    // Contador real de activos — HEAD request, sin traer filas
+    supabase
+      .from('vehicles')
+      .select('*', { count: 'exact', head: true })
+      .eq('dealer_id', id)
+      .eq('status', 'active'),
     supabase
       .from('leads')
       .select('id, buyer_name, buyer_email, status, created_at, vehicle:vehicles(brand_name, model_name)', { count: 'exact' })
@@ -85,7 +92,7 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
       .limit(10),
   ])
 
-  const activeVehicles = vehicles?.filter((v: any) => v.status === 'active').length || 0
+  const activeVehicles = activeVehiclesCount ?? 0
   const totalViews = vehicles?.reduce((sum: number, v: any) => sum + (v.views || 0), 0) || 0
 
   const PLAN_OPTIONS = [

@@ -97,6 +97,13 @@ export default async function AdminAnaliticasPage() {
 
     // Plan distribution
     supabase.from('dealers').select('subscription_plan').eq('status', 'active'),
+
+    // Total views in 30 days — matches event_type inserted by vehicle detail pages
+    supabase
+      .from('analytics_events')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_type', 'view')
+      .gte('created_at', thirtyDaysAgoISO),
   ])
 
   // ── Aggregations from events ────────────────────────────────────────────
