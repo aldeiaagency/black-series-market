@@ -556,6 +556,130 @@ Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o 
 Si eres un profesional del sector y quieres solicitar acceso para publicar vehículos, puedes hacerlo a través del formulario de registro profesional. Tu perfil será revisado antes de habilitar la publicación de vehículos.
     `.trim(),
   },
+
+  'condiciones-profesionales': {
+    title: 'Condiciones para profesionales',
+    content: `
+**Objeto**
+
+Estas Condiciones para Profesionales regulan el acceso y uso de Black Label Market por parte de concesionarios, compraventas, showrooms, especialistas y otros profesionales del sector que soliciten publicar vehículos o utilizar servicios profesionales de la plataforma.
+
+Black Label Market es una plataforma especializada en la presentación de coches y motos premium, deportivos, clásicos, de colección y unidades especiales publicados por profesionales verificados.
+
+El uso de la plataforma como profesional implica la aceptación de estas Condiciones, así como del Aviso Legal, la Política de Privacidad, la Política de Cookies, los Términos y Condiciones de Uso y los Criterios de Publicación vigentes en cada momento.
+
+**Titular de la plataforma**
+
+Black Label Market es gestionado por KAZAWEB, S.L.U., con NIF B42761254 y domicilio fiscal en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña.
+
+**Acceso profesional**
+
+El acceso profesional a Black Label Market no es automático. La plataforma podrá revisar cada solicitud de alta antes de activar una cuenta profesional o permitir la publicación de vehículos.
+
+Black Label Market podrá valorar, entre otros aspectos, la identidad profesional del solicitante, su actividad, reputación, tipo de stock, calidad de presentación, ubicación, especialización y adecuación al posicionamiento de la plataforma.
+
+Black Label Market se reserva el derecho de aceptar, rechazar, suspender o cancelar solicitudes de acceso profesional cuando considere que no encajan con los criterios comerciales, legales o de calidad de la plataforma.
+
+**Obligaciones del profesional**
+
+El profesional se compromete a:
+
+- Facilitar información veraz, actualizada y completa sobre su identidad, empresa, actividad y datos de contacto.
+- Utilizar la plataforma de forma lícita, diligente y conforme a la buena fe.
+- Publicar únicamente vehículos reales, disponibles y sobre los que tenga autorización suficiente para comercializar.
+- Mantener actualizada la disponibilidad de los vehículos publicados.
+- Retirar, pausar o marcar correctamente vehículos vendidos, reservados o no disponibles.
+- Facilitar información veraz y completa sobre marca, modelo, versión, año, kilometraje, estado, historial, documentación, garantías, financiación, precio, ubicación y demás condiciones relevantes.
+- No ocultar defectos, incidencias, cargas, limitaciones documentales o cualquier circunstancia relevante que pueda afectar a la decisión de compra.
+- No utilizar imágenes falsas, de archivo, manipuladas de forma engañosa o correspondientes a otra unidad.
+- Atender las solicitudes de compradores de forma profesional y diligente.
+- Cumplir la normativa aplicable en materia de venta de vehículos, consumo, garantías, publicidad, protección de datos, comercio electrónico, fiscalidad y cualquier otra que resulte aplicable a su actividad.
+
+**Responsabilidad sobre los anuncios**
+
+El profesional es el único responsable de la información, imágenes, precios, disponibilidad, características, garantías, condiciones comerciales y demás contenidos incluidos en sus anuncios.
+
+Black Label Market podrá revisar, editar, suspender, limitar la visibilidad o retirar cualquier anuncio cuando detecte información incompleta, desactualizada, inexacta, engañosa, ilícita, contraria a estas Condiciones o no alineada con los criterios de publicación de la plataforma.
+
+La revisión o validación de un anuncio por parte de Black Label Market no implica garantía sobre el vehículo ni exime al profesional de su responsabilidad frente a compradores, usuarios, autoridades o terceros.
+
+**Relación con compradores**
+
+Black Label Market actúa como plataforma de publicación, presentación y contacto entre compradores interesados y profesionales.
+
+La operación comercial, negociación, reserva, pago, financiación, garantía, documentación, entrega, transporte y cualquier acuerdo posterior se realiza directamente entre el comprador y el profesional responsable del vehículo.
+
+Black Label Market no interviene como parte compradora ni vendedora en la compraventa de los vehículos publicados, salvo que se indique expresamente lo contrario.
+
+**Solicitudes y contactos recibidos**
+
+El profesional podrá recibir solicitudes de información, contactos o leads generados a través de la plataforma.
+
+El profesional deberá utilizar dichos datos únicamente para gestionar la solicitud concreta del usuario y conforme a la normativa de protección de datos aplicable.
+
+Queda prohibido utilizar los datos recibidos para finalidades no relacionadas con la solicitud, cesiones no autorizadas, comunicaciones abusivas, spam o acciones comerciales no permitidas.
+
+**Planes de suscripción y servicios profesionales**
+
+Black Label Market podrá ofrecer planes de suscripción o servicios de pago para profesionales, incluyendo publicación de vehículos, funcionalidades de visibilidad, gestión de showroom, analíticas, soporte u otros servicios asociados.
+
+Las condiciones económicas, duración, renovación, cancelación, impuestos, facturación y servicios incluidos se indicarán en cada plan o comunicación comercial correspondiente.
+
+Salvo que se indique otra cosa, la cancelación de un plan de suscripción tendrá efecto al finalizar el periodo ya facturado.
+
+El impago, uso indebido o incumplimiento de estas Condiciones podrá dar lugar a la suspensión del servicio, retirada de publicaciones o cancelación del acceso profesional.
+
+**Criterios de publicación**
+
+La publicación de vehículos está sujeta a los criterios de publicación vigentes en Black Label Market.
+
+Black Label Market podrá modificar sus criterios de publicación para mantener la calidad, coherencia y posicionamiento de la plataforma.
+
+El cumplimiento de los criterios mínimos no garantiza necesariamente la publicación o mantenimiento de un vehículo si Black Label Market considera que no encaja con el perfil del marketplace.
+
+**Propiedad intelectual e imágenes**
+
+El profesional garantiza que dispone de derechos, licencias o autorización suficiente para publicar las imágenes, textos, logotipos, marcas, información comercial y demás contenidos que aporte a la plataforma.
+
+Al facilitar contenidos a Black Label Market, el profesional autoriza su uso, reproducción, adaptación técnica, comunicación pública y publicación dentro de la plataforma, canales asociados y materiales necesarios para la promoción del vehículo o del showroom, mientras el contenido permanezca activo o exista relación profesional con la plataforma.
+
+El profesional responderá frente a cualquier reclamación de terceros derivada del uso de contenidos aportados por él.
+
+**Suspensión o cancelación de cuenta profesional**
+
+Black Label Market podrá suspender, limitar o cancelar una cuenta profesional cuando detecte:
+
+- Información falsa, incompleta o engañosa.
+- Publicación de vehículos no disponibles o no autorizados.
+- Incumplimiento de criterios de publicación.
+- Falta de respuesta reiterada a solicitudes.
+- Uso indebido de datos de usuarios.
+- Impagos.
+- Reclamaciones graves o reiteradas.
+- Conductas contrarias a la buena fe, a estas Condiciones o a la normativa aplicable.
+- Riesgos para usuarios, terceros o para la reputación de la plataforma.
+
+Cuando resulte razonable, Black Label Market podrá comunicar al profesional los motivos principales de la medida adoptada.
+
+**Limitación de responsabilidad**
+
+Black Label Market no será responsable de incumplimientos del profesional frente a compradores, usuarios, autoridades o terceros.
+
+El profesional mantendrá indemne a Black Label Market frente a reclamaciones, daños, sanciones, costes o responsabilidades derivados de la información publicada, la comercialización de vehículos, el uso de datos personales, el incumplimiento de garantías, la falta de disponibilidad, defectos ocultos, documentación irregular o cualquier incumplimiento legal o contractual imputable al profesional.
+
+**Modificación de estas Condiciones**
+
+Black Label Market podrá actualizar estas Condiciones para Profesionales por cambios legales, técnicos, comerciales, operativos o de funcionamiento de la plataforma.
+
+La versión vigente será la publicada en la plataforma en cada momento. Cuando los cambios sean relevantes para profesionales registrados, se procurará informar por medios razonables.
+
+**Legislación aplicable y jurisdicción**
+
+Estas Condiciones se rigen por la legislación española y, cuando resulte aplicable, por la normativa de la Unión Europea.
+
+Para cualquier controversia relacionada con estas Condiciones, las partes se someterán a los juzgados y tribunales que resulten competentes conforme a la normativa aplicable.
+    `.trim(),
+  },
 }
 
 interface PageProps {
