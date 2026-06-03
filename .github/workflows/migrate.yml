@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'supabase/migrations/**'
+  workflow_dispatch: # permite lanzarlo manualmente desde GitHub
 
 jobs:
   migrate:
@@ -16,10 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
+      - name: Install psql
+        run: sudo apt-get install -y postgresql-client
 
       - name: Apply migrations
-        run: supabase db push --db-url "${{ secrets.SUPABASE_DB_URL }}"
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          for file in $(ls supabase/migrations/*.sql | sort); do
+            echo "Applying: $file"
+            psql "$DATABASE_URL" -f "$file"
+          done
+          echo "All migrations applied."
