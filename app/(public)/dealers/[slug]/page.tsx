@@ -340,15 +340,19 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
             <div className="max-w-3xl">
               <div className="flex items-center gap-3 mb-4">
                 <BadgeCheck className="w-5 h-5 text-gold" />
-                <h3 className="font-display text-xl font-light text-bsm-text-primary">
-                  Qué significa estar seleccionado
-                </h3>
-              </div>
-              <p className="text-sm text-bsm-text-secondary leading-relaxed mb-4">
-                Black Label prioriza concesionarios, especialistas y operadores que trabajan unidades con criterio,
-                presentación cuidada y disponibilidad real. La selección no sustituye la revisión independiente
-                del vehículo, pero ayuda a reducir ruido y mejorar la calidad del contacto.
-              </p>
+            <h3 className="font-display text-xl font-light text-bsm-text-primary">
+  Profesional verificado
+</h3>
+</div>
+<p className="text-sm text-bsm-text-secondary leading-relaxed mb-4">
+  Este showroom ha sido revisado por Black Label antes de publicar sus vehículos.
+  Trabajamos con profesionales que cuidan la presentación, mantienen su stock actualizado
+  y ofrecen unidades con disponibilidad real.
+</p>
+<p className="text-sm text-bsm-text-secondary leading-relaxed">
+  Aun así, te recomendamos confirmar siempre los detalles del vehículo directamente con el vendedor:
+  estado, historial, garantía, documentación y condiciones de compra.
+</p>
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-3.5 h-3.5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
                 <p className="text-[11px] text-[#737373] leading-relaxed">
