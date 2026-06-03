@@ -103,27 +103,20 @@ export default function VehiculosALaCartaPage() {
               Mientras tanto
             </p>
             <div className="space-y-3">
-              <Link
-                href="/coches"
-                className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
-              >
-                Explorar coches disponibles
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/motos"
-                className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
-              >
-                Explorar motos disponibles
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/dealers"
-                className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
-              >
-                Ver showrooms verificados
-                <ChevronRight className="w-4 h-4" />
-              </Link>
+              {[
+                { href: '/coches', label: 'Explorar coches disponibles' },
+                { href: '/motos', label: 'Explorar motos disponibles' },
+                { href: '/dealers', label: 'Ver showrooms verificados' },
+              ].map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center justify-between text-sm text-[#8A8A8A] hover:text-[#C9C9C9] transition-colors"
+                >
+                  {label}
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              ))}
             </div>
           </div>
         </div>

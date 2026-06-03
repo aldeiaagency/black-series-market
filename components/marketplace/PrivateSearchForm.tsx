@@ -54,11 +54,10 @@ export default function PrivateSearchForm() {
       <div className="flex flex-col items-center text-center py-12">
         <CheckCircle className="w-12 h-12 text-emerald-400 mb-4" />
         <h3 className="font-display text-2xl font-light text-bsm-text-primary mb-2">
-          Búsqueda registrada
+          Solicitud enviada
         </h3>
         <p className="text-sm text-bsm-text-muted max-w-sm leading-relaxed">
-          Hemos recibido tu solicitud. Nuestro equipo la revisará y te contactará
-          si detectamos una unidad compatible con tu búsqueda.
+          Hemos recibido tu búsqueda. Si encontramos una unidad compatible entre los profesionales verificados, te avisamos directamente.
         </p>
       </div>
     )
@@ -202,7 +201,7 @@ export default function PrivateSearchForm() {
         disabled={isSubmitting}
         className="btn-gold w-full justify-center text-sm py-3"
       >
-        {isSubmitting ? 'Enviando solicitud...' : 'Solicitar vehículo a la carta'}
+        {isSubmitting ? 'Enviando...' : 'Solicitar búsqueda'}
       </button>
 
       <p className="text-[10px] text-bsm-text-muted text-center leading-relaxed">

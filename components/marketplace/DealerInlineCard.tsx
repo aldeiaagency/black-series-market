@@ -11,6 +11,8 @@ interface DealerProps {
   location_region?: string | null
   is_verified?: boolean
   subscription_plan?: string | null
+  whatsapp?: string | null
+  phone?: string | null
 }
 
 interface DealerInlineCardProps {

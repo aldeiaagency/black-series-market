@@ -39,10 +39,11 @@ const CATEGORY_LABELS: Record<string, string> = {
   premium_modern: 'Premium Moderno', sport_performance: 'Sport y Performance',
   classics_youngtimers: 'Clásicos y Youngtimers', enthusiast_selection: 'Selección Entusiasta',
   // Motos
-  sport_supersport: 'Deportivas', naked_hypernaked: 'Naked',
-  adventure_touring_premium: 'Touring / Adventure', custom_cruiser_premium: 'Custom / Cruiser',
-  classic_youngtimer_bikes: 'Clásicas y youngtimers', scooter_urban_premium: 'Scooter premium',
-  trail_premium: 'Trail premium', premium_modern_bikes: 'Ediciones especiales',
+  deportivas: 'Deportivas', naked: 'Naked',
+  touring_adventure: 'Touring / Adventure', custom_cruiser: 'Custom / Cruiser',
+  clasicas_youngtimers: 'Clásicas y youngtimers', scooter_premium: 'Scooter premium',
+  trail_premium: 'Trail premium', ediciones_especiales: 'Ediciones especiales',
+  entusiastas: 'Motos para entusiastas',
 }
 
 function getLabel(key: string, value: string): string | null {
