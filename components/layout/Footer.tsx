@@ -156,9 +156,14 @@ export default function Footer() {
           <p className="text-[11px] text-[#737373]">
             © {new Date().getFullYear()} Black Label Market. Todos los derechos reservados.
           </p>
-          <p className="text-[11px] text-[#737373]">
-            Operado por <span className="text-[#8A8A8A]">KAZAWEB, S.L.U.</span> · NIF B42761254
-          </p>
+          <div className="flex items-center gap-4">
+            <CookieSettingsButton
+              className="text-[11px] text-[#737373] hover:text-[#8A8A8A] transition-colors underline-offset-2 hover:underline"
+            />
+            <p className="text-[11px] text-[#737373]">
+              Operado por <span className="text-[#8A8A8A]">KAZAWEB, S.L.U.</span> · NIF B42761254
+            </p>
+          </div>
         </div>
 
       </div>

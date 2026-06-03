@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
 import { ComparatorProvider } from '@/lib/comparator-context'
+import CookieConsentBanner from '@/components/legal/CookieConsentBanner'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -49,6 +50,7 @@ export default function RootLayout({
         <ComparatorProvider>
           {children}
         </ComparatorProvider>
+        <CookieConsentBanner />
       </body>
     </html>
   )
