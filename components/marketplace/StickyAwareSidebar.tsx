@@ -2,47 +2,63 @@
 
 import { useEffect, useRef } from 'react'
 
-interface Props {
-  children: React.ReactNode
-  className?: string
-}
-
-export default function StickyAwareSidebar({ children, className = '' }: Props) {
+export default function StickyAwareSidebar({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
 
-    const HEADER = 96  // top-24 = 6rem
-    const MARGIN = 16  // breathing room at bottom
+    const HEADER  = 96  // top-24
+    const MARGIN  = 16  // gap from bottom edge
 
-    function update() {
+    let currentTop  = HEADER
+    let lastScrollY = window.scrollY
+
+    function onScroll() {
       const sidebarH = el!.scrollHeight
       const viewH    = window.innerHeight
+      const scrollY  = window.scrollY
+      const delta    = scrollY - lastScrollY
+      lastScrollY    = scrollY
 
-      // If sidebar fits in viewport → stick at top
-      // If sidebar is taller      → stick so the bottom of sidebar aligns with viewport bottom
-      const top = sidebarH + HEADER + MARGIN <= viewH
-        ? HEADER
-        : viewH - sidebarH - MARGIN
+      // Move the sidebar in the opposite direction of the scroll delta
+      currentTop -= delta
 
-      el!.style.top = `${top}px`
+      // Clamp between two bounds:
+      //   max: HEADER  → sidebar can never go higher than the header offset
+      //   min: viewH - sidebarH - MARGIN → sidebar bottom never goes below the viewport
+      const minTop = Math.min(HEADER, viewH - sidebarH - MARGIN)
+      currentTop   = Math.max(minTop, Math.min(HEADER, currentTop))
+
+      el!.style.top = `${currentTop}px`
     }
 
-    update()
-    window.addEventListener('resize', update)
-    const ro = new ResizeObserver(update)
+    // Recalculate bounds when sidebar content changes height
+    function onResize() {
+      const sidebarH = el!.scrollHeight
+      const viewH    = window.innerHeight
+      const minTop   = Math.min(HEADER, viewH - sidebarH - MARGIN)
+      currentTop     = Math.max(minTop, Math.min(HEADER, currentTop))
+      el!.style.top  = `${currentTop}px`
+    }
+
+    el.style.top = `${HEADER}px`
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onResize)
+    const ro = new ResizeObserver(onResize)
     ro.observe(el)
 
     return () => {
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
       ro.disconnect()
     }
   }, [])
 
   return (
-    <div ref={ref} className={`sticky ${className}`}>
+    <div ref={ref} className="sticky space-y-5">
       {children}
     </div>
   )
