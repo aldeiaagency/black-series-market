@@ -103,7 +103,7 @@ export default async function AdminAnaliticasPage() {
       .from('analytics_events')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'view')
-      .gte('created_at', thirtyDaysAgoISO),
+      .gte('created_at', d30),
   ])
 
   // ── Aggregations from events ────────────────────────────────────────────
