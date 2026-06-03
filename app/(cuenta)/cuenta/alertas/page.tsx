@@ -65,7 +65,7 @@ export default async function CuentaAlertasPage() {
           className="flex items-center gap-2 pb-3 text-sm text-bsm-text-muted hover:text-bsm-text-primary transition-colors"
         >
           <Heart className="w-3.5 h-3.5" />
-          Favoritos
+          Guardados
         </Link>
         <Link
           href="/cuenta/alertas"

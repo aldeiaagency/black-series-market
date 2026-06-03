@@ -8,6 +8,7 @@ import ActiveFiltersBar from '@/components/marketplace/ActiveFiltersBar'
 import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import { getProvinciasByComunidad } from '@/lib/utils'
+import Pagination from '@/components/marketplace/Pagination'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   featured:     [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
@@ -108,17 +109,22 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
 
   return (
     <div className="flex-1 space-y-8">
-      <p className="text-sm text-bsm-text-muted">
-        {count} unidad{count !== 1 ? 'es' : ''} encontrada{count !== 1 ? 's' : ''}
-      </p>
+      {(count ?? 0) <= limit && (
+        <p className="text-sm text-bsm-text-muted">
+          {count} unidad{count !== 1 ? 'es' : ''} encontrada{count !== 1 ? 's' : ''}
+        </p>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
       </div>
-      {count && count > limit && (
-        <p className="text-center text-sm text-bsm-text-muted">
-          Mostrando {Math.min(page * limit, count)} de {count} vehículos
-        </p>
-      )}
+      <Pagination
+        page={page}
+        totalCount={count ?? 0}
+        limit={limit}
+        params={params}
+        basePath="/coches"
+        label="coches"
+      />
       <SearchAlertCTA vehicleType="car" compact />
     </div>
   )
