@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Logo from '@/components/brand/Logo'
 import CookieSettingsButton from '@/components/legal/CookieSettingsButton'
+import MarketSocialLinks from '@/components/social/MarketSocialLinks'
 
 // ── Navigation columns ────────────────────────────────────────────────────────
 
@@ -54,9 +55,10 @@ export default function Footer() {
                 by Black Series
               </p>
             </div>
-            <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xs">
+            <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xs mb-4">
               Selección de coches y motos premium, deportivos, clásicos y unidades especiales publicados por profesionales verificados.
             </p>
+            <MarketSocialLinks className="-ml-1.5" />
           </div>
 
           {/* Explorar */}

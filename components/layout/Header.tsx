@@ -7,6 +7,7 @@ import { Menu, X, ChevronDown, Search, Heart, LogOut, Bell, User } from 'lucide-
 import { cn } from '@/lib/utils'
 import Logo from '@/components/brand/Logo'
 import CompareBar from '@/components/marketplace/CompareBar'
+import MarketSocialLinks from '@/components/social/MarketSocialLinks'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
@@ -179,6 +180,7 @@ export default function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
+            <MarketSocialLinks className="mr-1 border-r border-[#2A2A2A] pr-2" />
             <Link href="/buscar" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Buscar">
               <Search className="w-4 h-4" />
             </Link>

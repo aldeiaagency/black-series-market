@@ -55,6 +55,10 @@ export interface Dealer {
   email: string | null
   website: string | null
   instagram: string | null
+  facebook_url: string | null
+  youtube_url: string | null
+  tiktok_url: string | null
+  linkedin_url: string | null
   years_in_business: number | null
   status: DealerStatus
   subscription_plan: SubscriptionPlan | null

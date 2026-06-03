@@ -16,6 +16,17 @@ const SPECIALTIES = [
   { value: 'custom',     label: 'Custom bikes' },
 ]
 
+function sanitizeUrl(value: string | undefined | null): string | null {
+  if (!value?.trim()) return null
+  try {
+    const u = new URL(value.trim())
+    if (!['http:', 'https:'].includes(u.protocol)) return null
+    return u.toString()
+  } catch {
+    return null
+  }
+}
+
 export default function PerfilPage() {
   const [dealer, setDealer] = useState<any>(null)
   const [form, setForm] = useState<any>({})
@@ -106,8 +117,12 @@ export default function PerfilPage() {
       phone:             form.phone,
       whatsapp:          form.whatsapp,
       email:             form.email,
-      website:           form.website,
-      instagram:         form.instagram,
+      website:           sanitizeUrl(form.website),
+      instagram:         sanitizeUrl(form.instagram),
+      facebook_url:      sanitizeUrl(form.facebook_url),
+      youtube_url:       sanitizeUrl(form.youtube_url),
+      tiktok_url:        sanitizeUrl(form.tiktok_url),
+      linkedin_url:      sanitizeUrl(form.linkedin_url),
       years_in_business: form.years_in_business ? parseInt(form.years_in_business) : null,
       certifications:    form.certifications || [],
     }).eq('id', dealer.id)
@@ -327,14 +342,35 @@ export default function PerfilPage() {
             <label className="label-base">Email de contacto</label>
             <input type="email" value={form.email || ''} onChange={(e) => update('email', e.target.value)} className="input-base" />
           </div>
+        </div>
+
+        {/* Redes y enlaces */}
+        <div className="bg-surface border border-bsm-border p-6 space-y-4">
           <div>
-            <label className="label-base">Web</label>
-            <input type="url" value={form.website || ''} onChange={(e) => update('website', e.target.value)} placeholder="https://tushowroom.com" className="input-base" />
+            <h2 className="font-medium text-bsm-text-primary mb-1">Redes y enlaces</h2>
+            <p className="text-xs text-bsm-text-muted mb-4">
+              Se mostrarán como iconos en tu perfil público. Usa URLs completas (https://…). Los campos son opcionales.
+            </p>
           </div>
-          <div>
-            <label className="label-base">Instagram (@)</label>
-            <input value={form.instagram || ''} onChange={(e) => update('instagram', e.target.value)} placeholder="@tushowroom" className="input-base" />
-          </div>
+          {[
+            { key: 'website',      label: 'Web oficial',  placeholder: 'https://tushowroom.com' },
+            { key: 'instagram',    label: 'Instagram',    placeholder: 'https://www.instagram.com/tushowroom' },
+            { key: 'facebook_url', label: 'Facebook',     placeholder: 'https://www.facebook.com/tushowroom' },
+            { key: 'youtube_url',  label: 'YouTube',      placeholder: 'https://www.youtube.com/@tushowroom' },
+            { key: 'tiktok_url',   label: 'TikTok',       placeholder: 'https://www.tiktok.com/@tushowroom' },
+            { key: 'linkedin_url', label: 'LinkedIn',     placeholder: 'https://www.linkedin.com/company/tushowroom' },
+          ].map(({ key, label, placeholder }) => (
+            <div key={key}>
+              <label className="label-base">{label}</label>
+              <input
+                type="url"
+                value={form[key] || ''}
+                onChange={(e) => update(key, e.target.value)}
+                placeholder={placeholder}
+                className="input-base"
+              />
+            </div>
+          ))}
         </div>
 
         <div className="flex items-center gap-4">

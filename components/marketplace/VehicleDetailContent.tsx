@@ -12,6 +12,7 @@ import CompareButton from '@/components/marketplace/CompareButton'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
 import TrackLink from '@/components/marketplace/TrackLink'
+import ShareButton from '@/components/social/ShareButton'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS, VEHICLE_CONDITION_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 
@@ -558,6 +559,12 @@ export default function VehicleDetailContent({
                       text-bsm-text-muted hover:text-gold transition-colors py-2">
                       ¿No encuentras esta unidad? Solicitar vehículo a la carta →
                     </Link>
+                    <ShareButton
+                      title={title}
+                      text="Mira este vehículo en Black Label Market"
+                      label="Compartir"
+                      className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
+                    />
                   </div>
                 </div>
                 {vehicle.dealer && (
@@ -645,6 +652,12 @@ export default function VehicleDetailContent({
                       label="Crear alerta de búsqueda"
                       className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted
                         hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
+                    />
+                    <ShareButton
+                      title={title}
+                      text="Mira este vehículo en Black Label Market"
+                      label="Compartir"
+                      className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
                     />
                   </div>
                 </div>

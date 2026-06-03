@@ -43,7 +43,7 @@ const DEFAULT_BRANDS = [
   { slug: 'mv-agusta', name: 'MV Agusta', tier: 'moto' },
 ]
 
-type SectionKey = 'planes' | 'marcas' | 'criterios' | 'email' | 'seo'
+type SectionKey = 'planes' | 'marcas' | 'criterios' | 'email' | 'seo' | 'social_links'
 
 export default function AdminConfiguracionPage() {
   const [saved, setSaved] = useState<SectionKey | null>(null)
@@ -57,6 +57,7 @@ export default function AdminConfiguracionPage() {
         if (cfg.planes) setPlans(cfg.planes)
         if (cfg.criterios) setCriteria(cfg.criterios)
         if (cfg.seo) setSeo((s) => ({ ...s, ...cfg.seo }))
+        if (cfg.social_links) setSocialLinks((s) => ({ ...s, ...cfg.social_links }))
       })
       .catch(() => {})
   }, [])
@@ -89,6 +90,14 @@ export default function AdminConfiguracionPage() {
     gtm_id: '',
   })
 
+  const [socialLinks, setSocialLinks] = useState({
+    instagram: '',
+    facebook: '',
+    youtube: '',
+    tiktok: '',
+    linkedin: '',
+  })
+
   async function handleSave(section: SectionKey) {
     const valueMap: Record<SectionKey, any> = {
       planes: plans,
@@ -96,6 +105,7 @@ export default function AdminConfiguracionPage() {
       criterios: criteria,
       email,
       seo,
+      social_links: socialLinks,
     }
     setSaving(true)
     try {
@@ -125,6 +135,7 @@ export default function AdminConfiguracionPage() {
     { key: 'criterios', label: 'Criterios de admisión', description: 'Reglas editoriales para publicación de vehículos' },
     { key: 'email', label: 'Configuración de emails', description: 'Plantillas y remitente de notificaciones' },
     { key: 'seo', label: 'SEO y analíticas', description: 'Metadatos globales, Google Analytics, Tag Manager' },
+    { key: 'social_links', label: 'Redes sociales de Black Label', description: 'URLs de las redes sociales propias del marketplace' },
   ]
 
   return (
@@ -368,6 +379,39 @@ export default function AdminConfiguracionPage() {
                       <button onClick={() => handleSave('email')} className="btn-gold flex items-center gap-2">
                         {saved === 'email' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
                         {saved === 'email' ? 'Guardado' : 'Guardar emails'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Social links */}
+                {key === 'social_links' && (
+                  <div className="p-5 space-y-4">
+                    <p className="text-xs text-bsm-text-muted">
+                      Introduce las URLs completas. Solo se mostrarán los iconos de las redes con URL configurada.
+                    </p>
+                    {([
+                      { key: 'instagram', label: 'Instagram', placeholder: 'https://www.instagram.com/blacklabelmarket' },
+                      { key: 'facebook',  label: 'Facebook',  placeholder: 'https://www.facebook.com/blacklabelmarket' },
+                      { key: 'youtube',   label: 'YouTube',   placeholder: 'https://www.youtube.com/@blacklabelmarket' },
+                      { key: 'tiktok',    label: 'TikTok',    placeholder: 'https://www.tiktok.com/@blacklabelmarket' },
+                      { key: 'linkedin',  label: 'LinkedIn',  placeholder: 'https://www.linkedin.com/company/blacklabelmarket' },
+                    ] as const).map(({ key: sk, label, placeholder }) => (
+                      <div key={sk}>
+                        <label className="label-base">{label}</label>
+                        <input
+                          type="url"
+                          value={socialLinks[sk]}
+                          onChange={(e) => setSocialLinks((s) => ({ ...s, [sk]: e.target.value }))}
+                          placeholder={placeholder}
+                          className="input-base"
+                        />
+                      </div>
+                    ))}
+                    <div className="flex justify-end">
+                      <button onClick={() => handleSave('social_links')} className="btn-gold flex items-center gap-2">
+                        {saved === 'social_links' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                        {saved === 'social_links' ? 'Guardado' : 'Guardar redes'}
                       </button>
                     </div>
                   </div>

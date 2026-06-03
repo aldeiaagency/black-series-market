@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone, Globe, Instagram, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle } from 'lucide-react'
+import { MapPin, Phone, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
+import SocialLinks from '@/components/social/SocialLinks'
+import ShareButton from '@/components/social/ShareButton'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -199,20 +201,21 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     Llamar
                   </a>
                 )}
-                {dealer.website && (
-                  <a href={dealer.website} target="_blank" rel="noopener noreferrer" className="btn-ghost px-4 py-2.5">
-                    <Globe className="w-4 h-4" />
-                  </a>
-                )}
-                {dealer.instagram && (
-                  <a
-                    href={`https://instagram.com/${dealer.instagram.replace('@', '')}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="btn-ghost px-4 py-2.5"
-                  >
-                    <Instagram className="w-4 h-4" />
-                  </a>
-                )}
+                <SocialLinks
+                  website={dealer.website}
+                  instagram={dealer.instagram}
+                  facebook_url={dealer.facebook_url}
+                  youtube_url={dealer.youtube_url}
+                  tiktok_url={dealer.tiktok_url}
+                  linkedin_url={dealer.linkedin_url}
+                  iconClassName="!p-2.5"
+                />
+                <ShareButton
+                  title={dealer.name}
+                  text={`Mira el showroom ${dealer.name} en Black Label Market`}
+                  label="Compartir"
+                  className="btn-ghost px-4 py-2.5 text-sm text-[#808080]"
+                />
               </div>
             </div>
 
