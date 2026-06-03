@@ -13,7 +13,6 @@ import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
 import TrackLink from '@/components/marketplace/TrackLink'
 import ShareButton from '@/components/social/ShareButton'
-import StickyAwareSidebar from '@/components/marketplace/StickyAwareSidebar'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS, VEHICLE_CONDITION_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 
@@ -462,7 +461,8 @@ export default function VehicleDetailContent({
 
         {/* ──────────────── RIGHT COLUMN ──────────────── */}
         <div className="lg:col-span-4 self-start">
-        <StickyAwareSidebar className="space-y-5">
+          <div className="sticky top-24 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 7rem)' }}>
+          <div className="space-y-5 pb-6">
 
             {vehicle.status === 'sold' ? (
               /* ── VENDIDO ── */
@@ -684,7 +684,8 @@ export default function VehicleDetailContent({
                 </div>
               </>
             )}
-        </StickyAwareSidebar>
+          </div>
+          </div>
         </div>
       </div>
 
