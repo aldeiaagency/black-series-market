@@ -18,12 +18,21 @@ export default async function DashboardPage() {
   if (!dealer) redirect('/registro')
 
   const [
-    { data: vehicles, count: vehicleCount },
+    { data: vehicles },
+    { count: activeVehicles },
+    { count: pendingVehicles },
     { data: leads, count: leadCount },
     { data: analytics },
   ] = await Promise.all([
-    supabase.from('vehicles').select('id, status, brand_name, model_name, year, views, leads_count, images', { count: 'exact' })
+    // Widget "vehículos recientes": solo los 5 últimos para mostrar en pantalla
+    supabase.from('vehicles').select('id, status, brand_name, model_name, year, views, leads_count, images')
       .eq('dealer_id', dealer.id).order('created_at', { ascending: false }).limit(5),
+    // Contador real de activos: HEAD request, sin traer filas
+    supabase.from('vehicles').select('*', { count: 'exact', head: true })
+      .eq('dealer_id', dealer.id).eq('status', 'active'),
+    // Contador real de en revisión: HEAD request, sin traer filas
+    supabase.from('vehicles').select('*', { count: 'exact', head: true })
+      .eq('dealer_id', dealer.id).eq('status', 'pending_review'),
     supabase.from('leads').select('*', { count: 'exact' })
       .eq('dealer_id', dealer.id).eq('status', 'new').limit(5),
     supabase.from('analytics_events').select('event_type')
@@ -32,14 +41,12 @@ export default async function DashboardPage() {
   ])
 
   const totalViews = analytics?.filter((e: any) => e.event_type === 'view').length || 0
-  const activeVehicles = vehicles?.filter((v: any) => v.status === 'active').length || 0
-  const pendingVehicles = vehicles?.filter((v: any) => v.status === 'pending_review').length || 0
 
   const STATS = [
-    { label: 'Vehículos activos', value: activeVehicles, icon: Car, color: 'text-gold' },
+    { label: 'Vehículos activos', value: activeVehicles ?? 0, icon: Car, color: 'text-gold' },
     { label: 'Visitas este mes', value: formatNumber(totalViews), icon: Eye, color: 'text-emerald-400' },
-    { label: 'Leads sin leer', value: leadCount || 0, icon: MessageSquare, color: 'text-blue-400' },
-    { label: 'En revisión', value: pendingVehicles, icon: TrendingUp, color: 'text-amber-400' },
+    { label: 'Leads sin leer', value: leadCount ?? 0, icon: MessageSquare, color: 'text-blue-400' },
+    { label: 'En revisión', value: pendingVehicles ?? 0, icon: TrendingUp, color: 'text-amber-400' },
   ]
 
   return (
@@ -51,7 +58,7 @@ export default async function DashboardPage() {
         </h1>
         <p className="text-sm text-bsm-text-muted">
           Plan {dealer.subscription_plan || 'Trial'} ·{' '}
-          {activeVehicles}/{dealer.vehicle_slots} slots usados
+          {activeVehicles ?? 0}/{dealer.vehicle_slots} slots usados
         </p>
       </div>
 
