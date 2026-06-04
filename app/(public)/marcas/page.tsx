@@ -5,8 +5,8 @@ import Link from 'next/link'
 // Honda aparece en ambas listas porque fabrica coches y motos.
 const CAR_BRAND_SLUGS = new Set([
   'abarth','alfa-romeo','alpine','ariel','aston-martin','audi',
-  'bentley','bmw','brabus','bugatti','caterham','corvette','cupra',
-  'dodge','ferrari','fiat','ford','genesis','honda','hyundai',
+  'bentley','bmw','brabus','bugatti','cadillac','caterham','corvette','cupra',
+  'dodge','ds','ferrari','fiat','ford','genesis','honda','hyundai',
   'jaguar','kia','koenigsegg','lamborghini','lancia','land-rover',
   'lexus','lotus','maserati','maybach','mazda','mclaren',
   'mercedes-benz','mini','mitsubishi','morgan','nissan','opel',
