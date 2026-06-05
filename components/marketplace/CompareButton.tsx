@@ -26,7 +26,7 @@ export default function CompareButton({ vehicle, variant = 'card', className }: 
         onClick={handleClick}
         disabled={disabled}
         className={cn(
-          'flex items-center gap-2 px-4 py-2.5 border text-sm transition-all duration-200',
+          'flex items-center gap-2 px-3 py-1.5 border text-xs transition-all duration-200',
           sel
             ? 'border-[#C6A64B]/40 text-[#C6A64B] bg-[#C6A64B]/5'
             : disabled
@@ -36,7 +36,7 @@ export default function CompareButton({ vehicle, variant = 'card', className }: 
         )}
         title={disabled ? 'Máximo 3 vehículos en comparador' : undefined}
       >
-        <GitCompareArrows className="w-4 h-4" />
+        <GitCompareArrows className="w-3.5 h-3.5" />
         <span>{sel ? 'En comparador' : 'Comparar'}</span>
       </button>
     )

@@ -164,14 +164,14 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <Calendar className="w-3 h-3 text-[#737373]" />
               {vehicle.year}
             </span>
-            <span className="text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+            <span className="text-[#505050] mx-2 select-none" aria-hidden="true">·</span>
             <span className="flex items-center gap-1.5">
               <Gauge className="w-3 h-3 text-[#737373]" />
               {formatMileage(vehicle.mileage_km)}
             </span>
             {vehicle.power_hp && (
               <>
-                <span className="text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                <span className="text-[#505050] mx-2 select-none" aria-hidden="true">·</span>
                 <span className="text-[13px] font-medium text-[#C6A64B]/80">
                   {vehicle.power_hp} CV
                 </span>
@@ -181,7 +181,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <>
                 {vehicle.displacement_cc && (
                   <>
-                    <span className="hidden sm:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden sm:inline text-[#505050] mx-2 select-none" aria-hidden="true">·</span>
                     <span className="hidden sm:inline text-[#808080]">
                       {vehicle.displacement_cc} cc
                     </span>
@@ -189,7 +189,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
                 )}
                 {vehicle.license_type && (
                   <>
-                    <span className="hidden md:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden md:inline text-[#505050] mx-2 select-none" aria-hidden="true">·</span>
                     <span className="hidden md:inline text-[#808080]">
                       Carnet {vehicle.license_type}
                     </span>
@@ -200,7 +200,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <>
                 {vehicle.transmission && (
                   <>
-                    <span className="hidden sm:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden sm:inline text-[#505050] mx-2 select-none" aria-hidden="true">·</span>
                     <span className="hidden sm:inline text-[#808080]">
                       {TRANSMISSION_LABELS[vehicle.transmission]}
                     </span>
@@ -208,7 +208,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
                 )}
                 {vehicle.fuel_type && (
                   <>
-                    <span className="hidden md:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden md:inline text-[#505050] mx-2 select-none" aria-hidden="true">·</span>
                     <span className="hidden md:inline text-[#808080]">
                       {FUEL_LABELS[vehicle.fuel_type]}
                     </span>

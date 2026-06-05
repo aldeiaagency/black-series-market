@@ -284,7 +284,7 @@ export default function VehicleDetailContent({
 
           {/* Resumen de la unidad */}
           <div>
-            <SectionTitle>Resumen de la unidad</SectionTitle>
+            <SectionTitle>Resumen del vehículo</SectionTitle>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {summarySpecs.map((spec) => (
                 <SummaryCell key={spec.label} label={spec.label} value={spec.value} />
@@ -672,9 +672,9 @@ export default function VehicleDetailContent({
 
                 {/* Qualified lead form */}
                 <div className="bg-surface border border-bsm-border p-6">
-                  <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">Contactar sobre este vehículo</h3>
+                  <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">Pedir información sobre este vehículo</h3>
                   <p className="text-xs text-bsm-text-muted mb-5">
-                    Escribe tu consulta y el vendedor te responderá directamente.
+                    Déjanos tus datos y el vendedor te responderá directamente.
                   </p>
                   <QualifiedLeadForm
                     vehicleId={vehicle.id}
