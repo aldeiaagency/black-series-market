@@ -66,7 +66,8 @@ const FEATURED_BRANDS_CAR = [
 const ALL_BRANDS_CAR = [
   'Abarth', 'Alfa Romeo', 'Alpine', 'Ariel', 'Aston Martin', 'Audi',
   'Bentley', 'BMW', 'Brabus', 'Bugatti',
-  'Caterham', 'Corvette', 'Cupra',
+  'Cadillac', 'Caterham', 'Corvette', 'Cupra',
+  'Dodge', 'DS',
   'Ferrari', 'Fiat', 'Ford',
   'Genesis',
   'Honda', 'Hyundai',
@@ -74,7 +75,7 @@ const ALL_BRANDS_CAR = [
   'Lamborghini', 'Land Rover', 'Lancia', 'Lexus', 'Lotus',
   'Maserati', 'Maybach', 'Mazda', 'McLaren', 'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Morgan',
   'Nissan', 'Opel',
-  'Pagani', 'Peugeot', 'Porsche',
+  'Pagani', 'Peugeot', 'Polestar', 'Porsche',
   'Renault', 'Rimac', 'Rolls-Royce',
   'Seat', 'Subaru',
   'Tesla', 'Toyota',
@@ -997,7 +998,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             </button>
           )}
         </div>
-        <div className="flex-1 pb-8">
+        <div className="flex-1 pb-8 pr-3">
           {renderFilters()}
         </div>
       </aside>

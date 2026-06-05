@@ -127,7 +127,7 @@ export default function Header() {
       }
     >
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-[70px]">
 
           {/* Logo */}
           <Link href="/" className="flex items-center group shrink-0">
