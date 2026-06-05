@@ -117,9 +117,11 @@ export default function PerfilPage() {
       location_city:     form.location_city,
       location_region:   form.location_region,
       address:           form.address,
-      phone:             form.phone,
-      whatsapp:          form.whatsapp,
-      email:             form.email,
+      postal_code:       form.postal_code   || null,
+      phone:             form.phone         || null,
+      whatsapp:          form.whatsapp      || null,
+      email:             form.email         || null,
+      attention_note:    form.attention_note || null,
       website:           sanitizeUrl(form.website),
       instagram:         sanitizeUrl(form.instagram),
       years_in_business: form.years_in_business ? parseInt(form.years_in_business) : null,
@@ -317,7 +319,17 @@ export default function PerfilPage() {
           </div>
           <div>
             <label className="label-base">Dirección completa</label>
-            <input value={form.address || ''} onChange={(e) => update('address', e.target.value)} className="input-base" />
+            <input value={form.address || ''} onChange={(e) => update('address', e.target.value)} placeholder="Calle, número, piso..." className="input-base" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="label-base">Código postal</label>
+              <input value={form.postal_code || ''} onChange={(e) => update('postal_code', e.target.value)} placeholder="36619" className="input-base" />
+            </div>
+            <div>
+              <label className="label-base">País</label>
+              <input value={form.location_country || 'España'} onChange={(e) => update('location_country', e.target.value)} className="input-base" />
+            </div>
           </div>
           <div>
             <label className="label-base">Años en el sector</label>
@@ -353,12 +365,15 @@ export default function PerfilPage() {
           </div>
         </div>
 
-        {/* Contacto */}
+        {/* Datos de contacto y ubicación */}
         <div className="bg-surface border border-bsm-border p-6 space-y-4">
-          <h2 className="font-medium text-bsm-text-primary mb-4">Contacto</h2>
+          <div>
+            <h2 className="font-medium text-bsm-text-primary mb-1">Datos de contacto y ubicación</h2>
+            <p className="text-xs text-bsm-text-muted mb-4">Visible en tu perfil público. Solo introduce datos que quieras mostrar a compradores.</p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label-base">Teléfono</label>
+              <label className="label-base">Teléfono público</label>
               <input type="tel" value={form.phone || ''} onChange={(e) => update('phone', e.target.value)} placeholder="+34 600 000 000" className="input-base" />
             </div>
             <div>
@@ -367,8 +382,19 @@ export default function PerfilPage() {
             </div>
           </div>
           <div>
-            <label className="label-base">Email de contacto</label>
-            <input type="email" value={form.email || ''} onChange={(e) => update('email', e.target.value)} className="input-base" />
+            <label className="label-base">Email público</label>
+            <input type="email" value={form.email || ''} onChange={(e) => update('email', e.target.value)} placeholder="contacto@tushowroom.com" className="input-base" />
+          </div>
+          <div>
+            <label className="label-base">Información de atención <span className="text-bsm-text-muted font-normal">(opcional)</span></label>
+            <input
+              value={form.attention_note || ''}
+              onChange={(e) => update('attention_note', e.target.value)}
+              placeholder="Visitas bajo cita previa"
+              className="input-base"
+              maxLength={120}
+            />
+            <p className="text-[10px] text-bsm-text-muted mt-1">Ej: Visitas bajo cita previa · Lunes a viernes 10–19h…</p>
           </div>
         </div>
 

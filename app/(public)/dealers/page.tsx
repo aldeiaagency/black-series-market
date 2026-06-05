@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import DealerCard from '@/components/marketplace/DealerCard'
-import { MapPin, Car, Bike } from 'lucide-react'
+import { MapPin, Car, Bike, CheckCircle } from 'lucide-react'
 
 interface PageProps {
   searchParams: Promise<{ tipo?: string; zona?: string }>
@@ -97,7 +97,10 @@ function renderPage(
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Red de profesionales</span>
         </div>
-        <h1 className="section-title mb-2">Showrooms seleccionados</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="section-title mb-0">Showrooms verificados</h1>
+          <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+        </div>
         <p className="text-bsm-text-muted text-sm">
           {dealers.length} {dealers.length === 1 ? 'profesional' : 'profesionales'}
           {tipoLabel ? ` de ${tipoLabel}` : ''}

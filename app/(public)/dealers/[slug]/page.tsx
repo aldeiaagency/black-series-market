@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle, Mail } from 'lucide-react'
+import { MapPin, Phone, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle, Mail, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import SocialLinks from '@/components/social/SocialLinks'
@@ -254,6 +254,60 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                           {brand}
                         </span>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Datos del showroom */}
+                {(dealer.address || dealer.phone || dealer.email || (dealer as any).attention_note) && (
+                  <div>
+                    <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Datos del showroom</p>
+                    <div className="space-y-3">
+                      {dealer.address && (() => {
+                        const fullAddress = [
+                          dealer.address,
+                          [(dealer as any).postal_code, dealer.location_city].filter(Boolean).join(' '),
+                          dealer.location_region,
+                        ].filter(Boolean).join(', ')
+                        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
+                        return (
+                          <div>
+                            <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-0.5">Dirección</p>
+                            <p className="text-sm text-bsm-text-secondary leading-relaxed">{fullAddress}</p>
+                            <a
+                              href={mapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-1 text-xs text-gold hover:text-gold-light transition-colors"
+                            >
+                              Ver en Google Maps
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        )
+                      })()}
+                      {dealer.phone && (
+                        <div>
+                          <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-0.5">Teléfono</p>
+                          <a href={`tel:${dealer.phone}`} className="text-sm text-bsm-text-secondary hover:text-gold transition-colors">
+                            {dealer.phone}
+                          </a>
+                        </div>
+                      )}
+                      {dealer.email && (
+                        <div>
+                          <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-0.5">Email</p>
+                          <a href={`mailto:${dealer.email}`} className="text-sm text-bsm-text-secondary hover:text-gold transition-colors">
+                            {dealer.email}
+                          </a>
+                        </div>
+                      )}
+                      {(dealer as any).attention_note && (
+                        <div>
+                          <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-0.5">Atención</p>
+                          <p className="text-sm text-bsm-text-secondary">{(dealer as any).attention_note}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
