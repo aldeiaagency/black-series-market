@@ -18,7 +18,7 @@ const EXPLORAR = [
 const PROFESIONALES = [
   { label: 'Publicar vehículos',      href: '/registro' },
   { label: 'Criterios para publicar', href: '/legal/criterios-publicacion' },
-  { label: 'Planes de publicación',   href: '/precios' },
+  { label: 'Planes de suscripción',    href: '/precios' },
   { label: 'Soporte',                 href: '/contacto' },
 ]
 
@@ -49,14 +49,14 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="mb-6">
+            <div className="mb-6 inline-block">
               <Logo width={152} variant="footer" />
-              <p className="mt-2 text-[12px] text-[#808080] tracking-[0.12em] uppercase">
+              <p className="mt-1 text-[10px] text-[#808080] tracking-[0.15em] uppercase text-center">
                 by Black Series
               </p>
             </div>
             <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xs mb-4">
-              Selección de coches y motos premium, deportivos, clásicos y unidades especiales publicados por profesionales verificados.
+              Black Label Market es un producto de Black Series, agencia especializada en el mundo del motor de alto rendimiento.
             </p>
             <MarketSocialLinks className="-ml-1.5" />
           </div>
@@ -128,10 +128,10 @@ export default function Footer() {
 
         {/* Brands */}
         <div className="border-t border-[#141414] pt-10 mb-10">
-          <p className="text-[10px] text-[#737373] uppercase tracking-[0.3em] mb-5">
+          <p className="text-[10px] text-[#737373] uppercase tracking-[0.3em] mb-5 text-center">
             Marcas disponibles
           </p>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             {FEATURED_BRANDS.map((brand) => (
               <Link
                 key={brand}

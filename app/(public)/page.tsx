@@ -189,7 +189,7 @@ export default async function HomePage() {
       <section className="border-t border-b border-[#141414] py-14">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
           <p className="text-[10px] text-[#737373] uppercase tracking-[0.35em] text-center mb-8">
-            Selección por marca
+            Marcas populares
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
             {BRANDS_SHOWCASE.map((brand) => (
@@ -550,20 +550,6 @@ export default async function HomePage() {
   </div>
 </section>
 
-      {/* POWERED BY BLACK SERIES */}
-      <section className="border-t border-[#0E0E0E] py-12">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-[11px] text-[#8A8A8A] tracking-[0.15em] uppercase">
-              Powered by Black Series
-            </p>
-            <p className="text-[12px] text-[#8A8A8A] max-w-md text-center md:text-right leading-relaxed">
-              Black Label Market es una producto de Black Series, agencia especializada en el mundo
-              del motor de alto rendimiento.
-            </p>
-          </div>
-        </div>
-      </section>
     </>
   )
 }
