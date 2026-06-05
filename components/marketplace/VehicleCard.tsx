@@ -120,7 +120,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
 
         {/* Action buttons — top right */}
         {isActive && (
-          <div className="absolute top-3 right-3 z-20 flex gap-1.5
+          <div className="absolute top-3 right-3 z-20 flex gap-2
             opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <FavoriteButton vehicleId={vehicle.id} variant="card" />
             <CompareButton
@@ -159,44 +159,60 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           )}
 
           {/* Specs row: year · km · power · (moto: cc · carnet | car: cambio · combustible) */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-[12px] text-[#8A8A8A]">
+          <div className="flex flex-wrap items-center gap-y-1 mb-3 text-[12px] text-[#8A8A8A]">
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-[#737373]" />
               {vehicle.year}
             </span>
+            <span className="text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
             <span className="flex items-center gap-1.5">
               <Gauge className="w-3 h-3 text-[#737373]" />
               {formatMileage(vehicle.mileage_km)}
             </span>
             {vehicle.power_hp && (
-              <span className="text-[13px] font-medium text-[#C6A64B]/80">
-                {vehicle.power_hp} CV
-              </span>
+              <>
+                <span className="text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                <span className="text-[13px] font-medium text-[#C6A64B]/80">
+                  {vehicle.power_hp} CV
+                </span>
+              </>
             )}
             {vehicle.vehicle_type === 'motorcycle' ? (
               <>
                 {vehicle.displacement_cc && (
-                  <span className="hidden sm:block text-[#808080]">
-                    {vehicle.displacement_cc} cc
-                  </span>
+                  <>
+                    <span className="hidden sm:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden sm:inline text-[#808080]">
+                      {vehicle.displacement_cc} cc
+                    </span>
+                  </>
                 )}
                 {vehicle.license_type && (
-                  <span className="hidden md:block text-[#808080]">
-                    Carnet {vehicle.license_type}
-                  </span>
+                  <>
+                    <span className="hidden md:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden md:inline text-[#808080]">
+                      Carnet {vehicle.license_type}
+                    </span>
+                  </>
                 )}
               </>
             ) : (
               <>
                 {vehicle.transmission && (
-                  <span className="hidden sm:block text-[#808080]">
-                    {TRANSMISSION_LABELS[vehicle.transmission]}
-                  </span>
+                  <>
+                    <span className="hidden sm:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden sm:inline text-[#808080]">
+                      {TRANSMISSION_LABELS[vehicle.transmission]}
+                    </span>
+                  </>
                 )}
                 {vehicle.fuel_type && (
-                  <span className="hidden md:block text-[#808080]">
-                    {FUEL_LABELS[vehicle.fuel_type]}
-                  </span>
+                  <>
+                    <span className="hidden md:inline text-[#3A3A3A] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden md:inline text-[#808080]">
+                      {FUEL_LABELS[vehicle.fuel_type]}
+                    </span>
+                  </>
                 )}
               </>
             )}

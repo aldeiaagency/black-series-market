@@ -55,15 +55,15 @@ export default function FavoriteButton({ vehicleId, variant = 'card', className 
           : undefined
       }
       className={cn(
-        'w-8 h-8 flex items-center justify-center bg-[#0A0A0A]/80 backdrop-blur-sm border transition-all duration-200',
+        'w-9 h-9 flex items-center justify-center bg-black/75 backdrop-blur-md border transition-all duration-200',
         saved
-          ? 'border-[#C6A64B]/40 text-[#C6A64B]'
-          : 'border-[#2A2A2A]/60 text-[#757575] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
+          ? 'border-[#C6A64B]/50 text-[#C6A64B]'
+          : 'border-[#3A3A3A] text-[#A0A0A0] hover:border-[#C6A64B]/50 hover:text-white hover:bg-black/90',
         className
       )}
       aria-label={saved ? 'Quitar de guardados' : 'Guardar vehículo'}
     >
-      <Heart className={cn('w-3.5 h-3.5', saved ? 'fill-[#C6A64B]' : '')} />
+      <Heart className={cn('w-4 h-4', saved ? 'fill-[#C6A64B]' : '')} />
     </button>
   )
 }

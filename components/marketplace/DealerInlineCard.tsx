@@ -56,15 +56,15 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
         </div>
 
         <div className="flex-1 min-w-0">
-          <span className="text-[13px] text-[#8A8A8A] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate block leading-tight">
+          <p className="text-[13px] text-[#8A8A8A] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate leading-tight">
             {dealer.name}
-          </span>
-          {city && (
-            <span className="flex items-center gap-0.5 text-[11px] text-[#737373] leading-tight">
-              <MapPin className="w-2 h-2 flex-shrink-0" />
-              {city}
-            </span>
-          )}
+            {city && (
+              <>
+                <span className="text-[#3A3A3A] mx-1.5 select-none">·</span>
+                <span className="text-[11px] text-[#737373] group-hover/dealer:text-[#C6A64B]/60">{city}</span>
+              </>
+            )}
+          </p>
         </div>
 
         {dealer.is_verified && (

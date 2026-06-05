@@ -47,18 +47,18 @@ export default function CompareButton({ vehicle, variant = 'card', className }: 
       onClick={handleClick}
       disabled={disabled}
       className={cn(
-        'w-8 h-8 flex items-center justify-center bg-[#0A0A0A]/80 backdrop-blur-sm border transition-all duration-200',
+        'w-9 h-9 flex items-center justify-center bg-black/75 backdrop-blur-md border transition-all duration-200',
         sel
-          ? 'border-[#C6A64B]/40 text-[#C6A64B]'
+          ? 'border-[#C6A64B]/50 text-[#C6A64B]'
           : disabled
             ? 'border-[#1A1A1A] text-[#2A2A2A] cursor-not-allowed'
-            : 'border-[#2A2A2A]/60 text-[#757575] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
+            : 'border-[#3A3A3A] text-[#A0A0A0] hover:border-[#C6A64B]/50 hover:text-white hover:bg-black/90',
         className
       )}
       title={disabled ? 'Máximo 3 vehículos' : sel ? 'Quitar del comparador' : 'Añadir al comparador'}
       aria-label={sel ? 'Quitar del comparador' : 'Añadir al comparador'}
     >
-      <GitCompareArrows className="w-3.5 h-3.5" />
+      <GitCompareArrows className="w-4 h-4" />
     </button>
   )
 }
