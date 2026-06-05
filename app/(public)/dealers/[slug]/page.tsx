@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle } from 'lucide-react'
+import { MapPin, Phone, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle, Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import SocialLinks from '@/components/social/SocialLinks'
@@ -201,20 +201,34 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     Llamar
                   </a>
                 )}
-                <SocialLinks
-                  website={dealer.website}
-                  instagram={dealer.instagram}
-                  facebook_url={dealer.facebook_url}
-                  youtube_url={dealer.youtube_url}
-                  tiktok_url={dealer.tiktok_url}
-                  linkedin_url={dealer.linkedin_url}
-                  iconClassName="!p-2.5"
-                />
+                {dealer.email && (
+                  <a
+                    href={`mailto:${dealer.email}`}
+                    className="btn-outline px-5 py-2.5 text-sm"
+                  >
+                    <Mail className="w-4 h-4" />
+                    Email
+                  </a>
+                )}
+                {(dealer.website || dealer.instagram || dealer.facebook_url || dealer.youtube_url || dealer.tiktok_url || dealer.linkedin_url) && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#737373] whitespace-nowrap">Síguenos en</span>
+                    <SocialLinks
+                      website={dealer.website}
+                      instagram={dealer.instagram}
+                      facebook_url={dealer.facebook_url}
+                      youtube_url={dealer.youtube_url}
+                      tiktok_url={dealer.tiktok_url}
+                      linkedin_url={dealer.linkedin_url}
+                      iconClassName="!p-2.5"
+                    />
+                  </div>
+                )}
                 <ShareButton
                   title={dealer.name}
                   text={`Mira el showroom ${dealer.name} en Black Label Market`}
                   label="Compartir"
-                  className="btn-ghost px-4 py-2.5 text-sm text-[#808080]"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-[#2A2A2A] text-[#808080] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors"
                 />
               </div>
             </div>

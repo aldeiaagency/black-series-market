@@ -186,16 +186,16 @@ export default function VehicleDetailContent({
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-bsm-text-muted mb-8 flex-wrap">
         <Link href="/" className="hover:text-gold transition-colors">Inicio</Link>
-        <span className="text-[#2A2A2A]">/</span>
+        <span className="text-[#666666]">/</span>
         <Link href={backHref} className="hover:text-gold transition-colors">{backLabel}</Link>
-        <span className="text-[#2A2A2A]">/</span>
+        <span className="text-[#666666]">/</span>
         <Link
           href={`${backHref}?marca=${vehicle.brand_name.toLowerCase().replace(/\s+/g, '-')}`}
           className="hover:text-gold transition-colors"
         >
           {vehicle.brand_name}
         </Link>
-        <span className="text-[#2A2A2A]">/</span>
+        <span className="text-[#666666]">/</span>
         <span className="text-bsm-text-secondary truncate max-w-[180px]">{vehicle.model_name}</span>
       </nav>
 

@@ -28,10 +28,13 @@ export default function SortSelector() {
   }
 
   return (
-    <select className="select-base w-52 hidden lg:block" value={current} onChange={handleChange}>
-      {OPTIONS.map((o) => (
-        <option key={o.value} value={o.value}>{o.label}</option>
-      ))}
-    </select>
+    <div className="hidden lg:flex items-center gap-3">
+      <span className="text-xs text-[#737373] whitespace-nowrap">Ordenar por</span>
+      <select className="select-base w-52" value={current} onChange={handleChange} aria-label="Ordenar por">
+        {OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
   )
 }
