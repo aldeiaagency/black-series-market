@@ -158,7 +158,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             <p className="text-[12px] text-[#8A8A8A] mb-2.5 leading-tight">{vehicle.version}</p>
           )}
 
-          {/* Specs row: year · km · (moto: cc · carnet | car: cambio · combustible) */}
+          {/* Specs row: year · km · power · (moto: cc · carnet | car: cambio · combustible) */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-[12px] text-[#8A8A8A]">
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-[#737373]" />
@@ -168,6 +168,11 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <Gauge className="w-3 h-3 text-[#737373]" />
               {formatMileage(vehicle.mileage_km)}
             </span>
+            {vehicle.power_hp && (
+              <span className="text-[13px] font-medium text-[#C6A64B]/80">
+                {vehicle.power_hp} CV
+              </span>
+            )}
             {vehicle.vehicle_type === 'motorcycle' ? (
               <>
                 {vehicle.displacement_cc && (
@@ -218,22 +223,12 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           {/* Divider */}
           <div className="h-px bg-[#1A1A1A] mb-3.5" />
 
-          {/* Price + Power */}
-          <div className="flex items-end justify-between">
-            <div className={cn(
-              'font-display text-[20px] font-light leading-none',
-              vehicle.price_on_request ? 'text-[#8A8A8A] text-[16px]' : 'text-[#C6A64B]'
-            )}>
-              {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
-            </div>
-            {vehicle.power_hp && (
-              <div className="text-right">
-                <div className="font-display text-[18px] font-light text-[#D4D4D4]">
-                  {vehicle.power_hp}
-                </div>
-                <div className="text-[10px] text-[#808080] uppercase tracking-[0.12em]">CV</div>
-              </div>
-            )}
+          {/* Price */}
+          <div className={cn(
+            'font-display text-[20px] font-light leading-none',
+            vehicle.price_on_request ? 'text-[#8A8A8A] text-[16px]' : 'text-[#C6A64B]'
+          )}>
+            {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
           </div>
         </Link>
 

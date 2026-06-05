@@ -35,12 +35,12 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
       <Link
         href={`/dealers/${dealer.slug}`}
         className={cn(
-          'flex items-center gap-2 group/dealer',
+          'flex items-center gap-3 group/dealer',
           className
         )}
       >
         {/* Logo or initial */}
-        <div className="w-5 h-5 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+        <div className="w-7 h-7 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
           {dealer.logo_url ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
@@ -49,14 +49,14 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
               className="w-full h-full object-contain"
             />
           ) : (
-            <span className="text-[8px] font-medium text-[#C6A64B]/60 leading-none select-none">
+            <span className="text-[10px] font-medium text-[#C6A64B]/60 leading-none select-none">
               {initial}
             </span>
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          <span className="text-[12px] text-[#8A8A8A] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate block leading-tight">
+          <span className="text-[13px] text-[#8A8A8A] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate block leading-tight">
             {dealer.name}
           </span>
           {city && (

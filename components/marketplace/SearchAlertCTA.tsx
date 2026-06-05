@@ -20,14 +20,14 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
         <div className="flex items-center gap-3 border border-[#1E1E1E] bg-[#0D0D0D] px-4 py-3">
           <Bell className="w-4 h-4 text-[#C6A64B] flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-[#C9C9C9]">¿No encuentras lo que buscas?</p>
-            <p className="text-[11px] text-[#808080]">Registra tu demanda y avísanos cuando entre algo compatible</p>
+            <p className="text-xs text-[#C9C9C9]">¿No encuentras el vehículo que buscas?</p>
+            <p className="text-[11px] text-[#808080]">Cuéntanos qué buscas y te avisamos si aparece algo.</p>
           </div>
           <button
             onClick={() => setModalOpen(true)}
             className="text-[11px] text-[#C6A64B] hover:text-[#D4B560] transition-colors whitespace-nowrap flex-shrink-0"
           >
-            Crear alerta →
+            Avísame si aparece →
           </button>
         </div>
         <SearchAlertModal
@@ -48,11 +48,10 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
           </div>
           <div>
             <h3 className="font-display text-xl font-light text-[#F4F1EA] mb-2">
-              Crea una alerta de búsqueda
+              ¿No encuentras el vehículo que buscas?
             </h3>
             <p className="text-sm text-[#8A8A8A] leading-relaxed">
-              Si no encuentras el {typeLabel} que buscas, registra tu demanda.
-              Cuando entre una unidad compatible con tus criterios, podemos contactarte.
+              Cuéntanos qué {typeLabel} tienes en mente y te avisaremos si aparece una unidad compatible.
             </p>
           </div>
         </div>
@@ -70,7 +69,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
               transition-all duration-200"
           >
             <Bell className="w-3.5 h-3.5" />
-            Crear alerta
+            Avísame si aparece
           </button>
           <Link
             href="/vehiculos-a-la-carta"
@@ -79,7 +78,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
               hover:border-[#3A3A3A] hover:text-[#C9C9C9]
               transition-all duration-200"
           >
-            Vehículos a la carta
+            Solicitar búsqueda
           </Link>
         </div>
 
