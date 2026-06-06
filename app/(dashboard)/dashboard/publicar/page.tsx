@@ -12,6 +12,7 @@ import {
 import { CheckCircle, ChevronRight } from 'lucide-react'
 import ImageUploader from '@/components/dashboard/ImageUploader'
 import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
+import { brandSlugsForType } from '@/lib/brand-types'
 
 const STEPS = ['Tipo y marca', 'Especificaciones', 'Equipamiento', 'Imágenes', 'Precio y publicar']
 
@@ -20,7 +21,8 @@ export default function PublicarPage() {
   const [dealerId, setDealerId] = useState<string | null>(null)
   const [dealerLocation, setDealerLocation] = useState<string | null>(null)
   const [dealerPlan, setDealerPlan] = useState<string | null>(null)
-  const [brandOptions, setBrandOptions] = useState<string[]>([])
+  const [allBrands, setAllBrands] = useState<{ name: string; slug: string }[]>([])
+  const [customBrandMode, setCustomBrandMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -99,6 +101,18 @@ export default function PublicarPage() {
     }))
   }
 
+  function handleVehicleTypeChange(newType: string) {
+    const slugs = brandSlugsForType(newType === 'motorcycle' ? 'motorcycle' : 'car')
+    const currentSlug = allBrands.find((b) => b.name === form.brand_name)?.slug
+    const compatible = currentSlug ? slugs.has(currentSlug) : !form.brand_name
+    setForm((f: any) => ({
+      ...f,
+      vehicle_type: newType,
+      brand_name: compatible ? f.brand_name : '',
+    }))
+    if (!compatible) setCustomBrandMode(false)
+  }
+
   useEffect(() => {
     async function load() {
       const supabase = createClient()
@@ -118,20 +132,18 @@ export default function PublicarPage() {
     load()
   }, [router, editId])
 
-  // Reload brand options when vehicle_type changes
   useEffect(() => {
     async function loadBrands() {
       const supabase = createClient()
-      const vtype = form.vehicle_type === 'motorcycle' ? 'motorcycle' : 'car'
       const { data } = await supabase
         .from('brands')
-        .select('name')
+        .select('name, slug')
         .eq('is_active', true)
         .order('name')
-      setBrandOptions(data?.map((b: any) => b.name) ?? [])
+      setAllBrands(data ?? [])
     }
     loadBrands()
-  }, [form.vehicle_type])
+  }, [])
 
   async function handleSave(publish = false) {
     setError('')
@@ -198,6 +210,8 @@ export default function PublicarPage() {
   }
 
   const bodyTypes = form.vehicle_type === 'car' ? BODY_TYPES_CAR : BODY_TYPES_MOTO
+  const activeSlugs = brandSlugsForType(form.vehicle_type === 'motorcycle' ? 'motorcycle' : 'car')
+  const brandOptions = allBrands.filter((b) => activeSlugs.has(b.slug))
 
   return (
     <div className="p-8 max-w-3xl">
@@ -247,7 +261,7 @@ export default function PublicarPage() {
                   <button
                     key={t.value}
                     type="button"
-                    onClick={() => update('vehicle_type', t.value)}
+                    onClick={() => handleVehicleTypeChange(t.value)}
                     className={`py-3 border text-sm font-medium transition-colors
                       ${form.vehicle_type === t.value
                         ? 'border-gold bg-gold/5 text-gold'
@@ -261,24 +275,30 @@ export default function PublicarPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label-base">Marca *</label>
-                {brandOptions.length > 0 ? (
-                  <select
-                    value={form.brand_name}
-                    onChange={(e) => update('brand_name', e.target.value)}
-                    className="select-base"
-                    required
-                  >
-                    <option value="">Seleccionar marca…</option>
-                    {brandOptions.map((b) => <option key={b} value={b}>{b}</option>)}
-                    <option value="__other__">Otra marca (escribir)</option>
-                  </select>
-                ) : (
-                  <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="Ferrari, BMW, Ducati..." className="input-base" required />
-                )}
-                {form.brand_name === '__other__' && (
+                <select
+                  value={customBrandMode ? '__other__' : form.brand_name}
+                  onChange={(e) => {
+                    if (e.target.value === '__other__') {
+                      setCustomBrandMode(true)
+                      update('brand_name', '')
+                    } else {
+                      setCustomBrandMode(false)
+                      update('brand_name', e.target.value)
+                    }
+                  }}
+                  className="select-base"
+                  required={!customBrandMode}
+                >
+                  <option value="">Seleccionar marca…</option>
+                  {brandOptions.map((b) => (
+                    <option key={b.slug} value={b.name}>{b.name}</option>
+                  ))}
+                  <option value="__other__">Otra marca (escribir)</option>
+                </select>
+                {customBrandMode && (
                   <input
                     autoFocus
-                    value={''}
+                    value={form.brand_name}
                     onChange={(e) => update('brand_name', e.target.value)}
                     placeholder="Escribe la marca..."
                     className="input-base mt-2"
