@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Car, Eye, MessageSquare, TrendingUp, PlusCircle, ArrowRight } from 'lucide-react'
+import { Car, Eye, MessageSquare, TrendingUp, PlusCircle, ArrowRight, UserCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatNumber, VEHICLE_STATUS_LABELS } from '@/lib/utils'
 
@@ -40,11 +40,17 @@ export default async function DashboardPage() {
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
   ])
 
-  const totalViews = analytics?.filter((e: any) => e.event_type === 'view').length || 0
+  const totalViews = analytics?.filter((e: any) =>
+    e.event_type === 'vehicle_view' || e.event_type === 'view'
+  ).length || 0
+  const profileViews = analytics?.filter((e: any) =>
+    e.event_type === 'professional_profile_view'
+  ).length || 0
 
   const STATS = [
     { label: 'Vehículos activos', value: activeVehicles ?? 0, icon: Car, color: 'text-gold' },
     { label: 'Visitas este mes', value: formatNumber(totalViews), icon: Eye, color: 'text-emerald-400' },
+    { label: 'Visitas al perfil', value: formatNumber(profileViews), icon: UserCheck, color: 'text-purple-400' },
     { label: 'Leads sin leer', value: leadCount ?? 0, icon: MessageSquare, color: 'text-blue-400' },
     { label: 'En revisión', value: pendingVehicles ?? 0, icon: TrendingUp, color: 'text-amber-400' },
   ]
@@ -63,7 +69,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
         {STATS.map((stat) => (
           <div key={stat.label} className="stat-card">
             <div className={`${stat.color} mb-3`}>

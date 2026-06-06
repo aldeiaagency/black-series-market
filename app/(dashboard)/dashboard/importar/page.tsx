@@ -28,7 +28,6 @@ function parseCSVLine(line: string): string[] {
 }
 
 function parseCSV(text: string): { headers: string[]; rows: Record<string, string>[] } {
-  // Remove BOM if present
   const clean = text.replace(/^﻿/, '').trim()
   const lines = clean.split('\n').map(l => l.replace(/\r$/, '')).filter(Boolean)
   if (lines.length < 2) return { headers: [], rows: [] }
@@ -48,18 +47,36 @@ const ALIAS: Record<string, string> = {
   marca: 'brand_name',
   modelo: 'model_name',
   version: 'version',
-  ano: 'year', anio: 'year', year: 'year',
-  km: 'mileage_km', kilometros: 'mileage_km', kilómetros: 'mileage_km', kilometraje: 'mileage_km',
+  ano: 'year', anio: 'year', year: 'year', año: 'year',
+  km: 'mileage_km', kilometros: 'mileage_km', kilometraje: 'mileage_km',
   precio: 'price', price: 'price',
   precio_consultar: 'price_on_request',
   combustible: 'fuel_type',
   cambio: 'transmission', transmision: 'transmission',
   potencia_cv: 'power_hp', cv: 'power_hp', potencia: 'power_hp',
+  potencia_kw: 'power_kw',
+  par_nm: 'torque_nm', par_motor: 'torque_nm',
+  cilindrada: 'displacement_cc', cilindrada_cc: 'displacement_cc',
+  cilindros: 'cylinders',
+  traccion: 'drive_type', drive_type: 'drive_type',
   color: 'color_exterior', color_exterior: 'color_exterior',
   color_interior: 'color_interior',
-  carroceria: 'body_type', body_type: 'body_type',
+  tapiceria: 'upholstery', tapicería: 'upholstery',
+  carroceria: 'body_type', carrocería: 'body_type', body_type: 'body_type',
+  condicion: 'condition_type', estado_vehiculo: 'condition_type',
+  año_matriculacion: 'registration_year', ano_matriculacion: 'registration_year',
+  puertas: 'doors',
+  plazas: 'seats',
+  etiqueta_dgt: 'dgt_label',
+  num_propietarios: 'num_owners', propietarios: 'num_owners',
+  iva_deducible: 'iva_deducible',
   descripcion: 'description', description: 'description',
   vin: 'vin', bastidor: 'vin',
+  negociable: 'is_negotiable',
+  financiacion: 'financing_available', financiación: 'financing_available',
+  garantia: 'has_warranty', garantía: 'has_warranty',
+  meses_garantia: 'warranty_months',
+  prueba: 'has_test_drive',
 }
 
 function normaliseRow(raw: Record<string, string>): Record<string, string> {
@@ -81,10 +98,26 @@ function validateRow(r: Record<string, string>): string | null {
   return null
 }
 
-// ── CSV template ───────────────────────────────────────────────────────────────
+// ── CSV template (29 columns) ──────────────────────────────────────────────────
 
-const TEMPLATE_HEADERS = 'tipo,marca,modelo,version,año,km,precio,precio_consultar,combustible,cambio,potencia_cv,color,color_interior,descripcion,vin'
-const TEMPLATE_EXAMPLE = 'coche,Ferrari,488 GTB,Spider,2019,12000,280000,,gasolina,automatico,670,Rojo Corsa,Negro,Ferrari 488 GTB en perfecto estado,'
+const TEMPLATE_HEADERS = [
+  'tipo', 'marca', 'modelo', 'version', 'año', 'km',
+  'precio', 'precio_consultar', 'combustible', 'cambio', 'traccion',
+  'potencia_cv', 'potencia_kw', 'par_nm', 'cilindrada', 'cilindros',
+  'carroceria', 'condicion', 'color', 'color_interior', 'tapiceria',
+  'puertas', 'plazas', 'etiqueta_dgt', 'año_matriculacion', 'num_propietarios',
+  'iva_deducible', 'descripcion', 'vin',
+].join(',')
+
+const TEMPLATE_EXAMPLE = [
+  'coche', 'Ferrari', '488 GTB', 'Spider', '2019', '12000',
+  '280000', '', 'gasolina', 'automatico', 'rwd',
+  '670', '493', '760', '3902', '8',
+  'Coupé', 'seminuevo', 'Rojo Corsa', 'Negro', 'Cuero Nappa',
+  '2', '2', 'C', '2017', '1',
+  'no', 'Ferrari 488 GTB en perfecto estado con libro de revisiones.', '',
+].join(',')
+
 const TEMPLATE_CSV = `${TEMPLATE_HEADERS}\n${TEMPLATE_EXAMPLE}\n`
 
 function downloadTemplate() {
@@ -97,24 +130,38 @@ function downloadTemplate() {
   URL.revokeObjectURL(url)
 }
 
-// ── Column descriptions for the guide ─────────────────────────────────────────
+// ── Column descriptions ────────────────────────────────────────────────────────
 
 const COLUMNS = [
-  { name: 'tipo', req: false, note: 'coche (default) o moto' },
-  { name: 'marca', req: true, note: 'Ferrari, Porsche, Ducati…' },
-  { name: 'modelo', req: true, note: '911, 488, Panigale…' },
-  { name: 'version', req: false, note: 'GT3, Turbo S, S…' },
-  { name: 'año', req: true, note: '2015–2024' },
-  { name: 'km', req: true, note: 'número entero, sin puntos' },
-  { name: 'precio', req: false, note: 'número sin símbolo €' },
-  { name: 'precio_consultar', req: false, note: 'si / no' },
-  { name: 'combustible', req: false, note: 'gasolina · diesel · eléctrico · híbrido' },
-  { name: 'cambio', req: false, note: 'manual · automático · dct · cvt' },
-  { name: 'potencia_cv', req: false, note: 'número entero' },
-  { name: 'color', req: false, note: 'texto libre' },
-  { name: 'color_interior', req: false, note: 'texto libre' },
-  { name: 'descripcion', req: false, note: 'texto libre' },
-  { name: 'vin', req: false, note: 'número de bastidor (17 chars)' },
+  { name: 'tipo',            req: false, note: 'coche (default) o moto' },
+  { name: 'marca',           req: true,  note: 'Ferrari, Porsche, Ducati…' },
+  { name: 'modelo',          req: true,  note: '911, 488, Panigale…' },
+  { name: 'version',         req: false, note: 'GT3, Turbo S, S…' },
+  { name: 'año',             req: true,  note: '2010–2025' },
+  { name: 'km',              req: true,  note: 'número entero, sin puntos' },
+  { name: 'precio',          req: false, note: 'número sin símbolo €' },
+  { name: 'precio_consultar',req: false, note: 'si / no' },
+  { name: 'combustible',     req: false, note: 'gasolina · diesel · electrico · hibrido' },
+  { name: 'cambio',          req: false, note: 'manual · automatico · dct · cvt' },
+  { name: 'traccion',        req: false, note: 'rwd · fwd · awd · 4wd' },
+  { name: 'potencia_cv',     req: false, note: 'número entero' },
+  { name: 'potencia_kw',     req: false, note: 'número entero' },
+  { name: 'par_nm',          req: false, note: 'número entero (Nm)' },
+  { name: 'cilindrada',      req: false, note: 'cc — número entero' },
+  { name: 'cilindros',       req: false, note: '4, 6, 8, 12…' },
+  { name: 'carroceria',      req: false, note: 'Coupé · SUV · Berlina · Cabrio…' },
+  { name: 'condicion',       req: false, note: 'nuevo · seminuevo · ocasion · clasico · restaurado · preparado · coleccion' },
+  { name: 'color',           req: false, note: 'texto libre (color exterior)' },
+  { name: 'color_interior',  req: false, note: 'texto libre' },
+  { name: 'tapiceria',       req: false, note: 'Piel · Alcántara · Cuero Nappa…' },
+  { name: 'puertas',         req: false, note: '2, 3, 4, 5' },
+  { name: 'plazas',          req: false, note: 'número entero' },
+  { name: 'etiqueta_dgt',    req: false, note: '0 · ECO · C · B' },
+  { name: 'año_matriculacion',req: false, note: 'año de primera matriculación' },
+  { name: 'num_propietarios',req: false, note: 'número entero' },
+  { name: 'iva_deducible',   req: false, note: 'si / no' },
+  { name: 'descripcion',     req: false, note: 'texto libre' },
+  { name: 'vin',             req: false, note: 'número de bastidor (17 chars)' },
 ]
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -143,15 +190,10 @@ export default function ImportarPage() {
     reader.onload = (e) => {
       const buffer = e.target?.result as ArrayBuffer
       const bytes = new Uint8Array(buffer)
-
-      // Try UTF-8 first; Excel on Windows saves CSV as Windows-1252, which
-      // produces U+FFFD replacement chars when read as UTF-8. If that happens,
-      // re-decode with Windows-1252 (covers á é í ó ú ñ ü etc.).
       let text = new TextDecoder('utf-8', { fatal: false }).decode(bytes)
-      if (text.includes('�')) {
+      if (text.includes('')) {
         text = new TextDecoder('windows-1252').decode(bytes)
       }
-
       const { rows } = parseCSV(text)
       if (!rows.length) { setFileError('El archivo está vacío o no tiene filas de datos.'); return }
       const normalised = rows.map(r => normaliseRow(r))
@@ -211,7 +253,10 @@ export default function ImportarPage() {
       <div className="mb-8">
         <h1 className="font-display text-3xl font-light mb-1">Importar vehículos</h1>
         <p className="text-sm text-bsm-text-muted">
-          Sube un archivo CSV para añadir varios vehículos a la vez. Quedarán en revisión hasta ser aprobados.
+          Sube un archivo CSV para añadir varios vehículos a la vez. Quedarán en revisión hasta ser aprobados.{' '}
+          <Link href="/dashboard/publicar" className="text-gold hover:text-gold-light transition-colors">
+            ¿Añadir uno por uno? →
+          </Link>
         </p>
       </div>
 
@@ -220,7 +265,7 @@ export default function ImportarPage() {
         <div className="flex items-center gap-3">
           <FileText className="w-4 h-4 text-gold flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-bsm-text-primary">Plantilla oficial</p>
+            <p className="text-sm font-medium text-bsm-text-primary">Plantilla oficial (29 columnas)</p>
             <p className="text-xs text-bsm-text-muted">Descarga, rellena con tus vehículos y sube el archivo</p>
           </div>
         </div>
@@ -381,13 +426,13 @@ export default function ImportarPage() {
       {/* Column guide */}
       <div className="mt-10 border border-bsm-border bg-surface">
         <div className="px-5 py-4 border-b border-bsm-border">
-          <h2 className="text-sm font-medium text-bsm-text-primary">Columnas admitidas</h2>
+          <h2 className="text-sm font-medium text-bsm-text-primary">Columnas admitidas ({COLUMNS.length})</h2>
         </div>
         <div className="divide-y divide-bsm-border">
           {COLUMNS.map(col => (
             <div key={col.name} className="flex items-baseline gap-4 px-5 py-2.5">
-              <code className="text-[11px] text-gold font-mono w-36 flex-shrink-0">{col.name}</code>
-              <span className={cn('text-[11px] w-16 flex-shrink-0', col.req ? 'text-bsm-text-primary font-medium' : 'text-bsm-text-muted')}>
+              <code className="text-[11px] text-gold font-mono w-40 flex-shrink-0">{col.name}</code>
+              <span className={cn('text-[11px] w-20 flex-shrink-0', col.req ? 'text-bsm-text-primary font-medium' : 'text-bsm-text-muted')}>
                 {col.req ? 'Obligatorio' : 'Opcional'}
               </span>
               <span className="text-[11px] text-bsm-text-muted">{col.note}</span>

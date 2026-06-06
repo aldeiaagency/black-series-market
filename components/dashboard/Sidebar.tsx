@@ -15,7 +15,7 @@ const NAV = [
   { label: 'Inventario', href: '/dashboard/inventario', icon: Car },
   { label: 'Publicar vehículo', href: '/dashboard/publicar', icon: PlusCircle },
   { label: 'Importar CSV', href: '/dashboard/importar', icon: FileUp },
-  { label: 'Mensajes / Leads', href: '/dashboard/mensajes', icon: MessageSquare },
+  { label: 'Oportunidades', href: '/dashboard/mensajes', icon: MessageSquare },
   { label: 'Analíticas', href: '/dashboard/analiticas', icon: BarChart2 },
   { label: 'Mi perfil', href: '/dashboard/perfil', icon: User },
   { label: 'Suscripción', href: '/dashboard/suscripcion', icon: CreditCard },

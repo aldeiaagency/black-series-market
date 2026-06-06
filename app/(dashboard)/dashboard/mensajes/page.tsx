@@ -24,9 +24,9 @@ export default async function MensajesPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-light mb-1">Mensajes y leads</h1>
+        <h1 className="font-display text-3xl font-light mb-1">Oportunidades</h1>
         <p className="text-sm text-bsm-text-muted">
-          {newCount} leads nuevos · {leads?.length || 0} total
+          {newCount} nuevas · {leads?.length || 0} total
         </p>
       </div>
 
@@ -109,9 +109,9 @@ export default async function MensajesPage() {
         </div>
       ) : (
         <div className="bg-surface border border-bsm-border p-16 text-center">
-          <p className="text-sm text-bsm-text-muted">No has recibido leads todavía.</p>
+          <p className="text-sm text-bsm-text-muted">No has recibido oportunidades todavía.</p>
           <p className="text-xs text-bsm-text-muted mt-2">
-            Los leads aparecerán aquí cuando compradores contacten con tus vehículos.
+            Aparecerán aquí cuando compradores contacten con tus vehículos.
           </p>
         </div>
       )}

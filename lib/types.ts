@@ -6,7 +6,7 @@ export type SubscriptionPlan = 'essential' | 'professional' | 'elite'
 export type FuelType = 'gasoline' | 'diesel' | 'electric' | 'hybrid' | 'plugin_hybrid' | 'hydrogen' | 'other'
 export type TransmissionType = 'manual' | 'automatic' | 'semi_automatic' | 'dct' | 'cvt'
 export type DriveType = 'rwd' | 'fwd' | 'awd' | '4wd'
-export type LeadStatus = 'new' | 'contacted' | 'negotiating' | 'closed' | 'discarded'
+export type LeadStatus = 'new' | 'contacted' | 'negotiating' | 'appointment' | 'reserved' | 'closed' | 'lost' | 'discarded'
 export type UserRole = 'buyer' | 'dealer' | 'admin'
 
 export interface Profile {

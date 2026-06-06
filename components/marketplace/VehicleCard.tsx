@@ -17,7 +17,7 @@ interface VehicleCardProps {
 
 function isNewVehicle(publishedAt: string | null): boolean {
   if (!publishedAt) return false
-  return Date.now() - new Date(publishedAt).getTime() < 7 * 24 * 60 * 60 * 1000
+  return Date.now() - new Date(publishedAt).getTime() < 15 * 24 * 60 * 60 * 1000
 }
 
 const STATUS_CONFIG = {

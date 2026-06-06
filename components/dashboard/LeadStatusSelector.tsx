@@ -2,15 +2,14 @@
 
 import { useState } from 'react'
 import { LEAD_STATUS_LABELS, getLeadStatusColor } from '@/lib/utils'
-
-type LeadStatus = 'new' | 'contacted' | 'negotiating' | 'closed' | 'discarded'
+import type { LeadStatus } from '@/lib/types'
 
 interface Props {
   leadId: string
   currentStatus: LeadStatus
 }
 
-const STATUSES: LeadStatus[] = ['new', 'contacted', 'negotiating', 'closed', 'discarded']
+const STATUSES: LeadStatus[] = ['new', 'contacted', 'negotiating', 'appointment', 'reserved', 'closed', 'lost', 'discarded']
 
 export default function LeadStatusSelector({ leadId, currentStatus }: Props) {
   const [status, setStatus] = useState<LeadStatus>(currentStatus)

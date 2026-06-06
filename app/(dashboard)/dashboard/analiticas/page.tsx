@@ -110,15 +110,21 @@ export default async function AnaliticasPage() {
     const name = `${v.brand_name} ${v.model_name} ${v.year}`
     const age  = daysAgo(v.published_at)
 
-    if (s.contacts >= 1) {
+    if (s.contacts >= 3) {
       insights.push({ vehicleName: name, type: 'good',
-        message: 'Este vehículo está generando demanda. Mantén disponibilidad y respuesta actualizadas.' })
-    } else if (s.views > 8 && s.contacts === 0) {
+        message: `${s.contacts} contactos en 30 días. Alta demanda — responde rápido para no perder oportunidades.` })
+    } else if (s.contacts >= 1) {
+      insights.push({ vehicleName: name, type: 'good',
+        message: 'Está generando demanda. Mantén disponibilidad y tiempo de respuesta actualizados.' })
+    } else if (s.views >= 10 && s.contacts === 0) {
       insights.push({ vehicleName: name, type: 'warn',
-        message: 'Tiene interés, pero pocos contactos. Revisa precio, fotos o descripción.' })
-    } else if (s.views <= 3 && age > 7) {
+        message: `${s.views} visitas sin contacto. Revisa precio, calidad de fotos o descripción para mejorar la conversión.` })
+    } else if (s.views >= 5 && s.views < 10 && s.contacts === 0 && age > 14) {
+      insights.push({ vehicleName: name, type: 'warn',
+        message: 'Interés moderado sin contactos después de 2 semanas. Considera ajustar el precio o añadir más fotos.' })
+    } else if (s.views <= 3 && age > 10) {
       insights.push({ vehicleName: name, type: 'info',
-        message: 'Pocas visitas. Revisa si está publicado correctamente o considera destacarlo.' })
+        message: 'Pocas visitas en más de 10 días. Verifica que esté activo en el inventario o considera destacarlo con Boost.' })
     }
 
     const hasImages      = v.images?.length > 0
@@ -180,6 +186,12 @@ export default async function AnaliticasPage() {
         <p className="text-sm text-bsm-text-muted">Últimos 30 días · solo tus vehículos</p>
       </div>
 
+      {/* Disclaimer */}
+      <div className="flex items-start gap-2 px-4 py-3 border border-bsm-border bg-surface text-[11px] text-bsm-text-muted">
+        <span className="mt-0.5 flex-shrink-0">ℹ</span>
+        Recomendaciones automáticas basadas en la actividad de los últimos 30 días. Los datos se actualizan cada vez que cargas esta página.
+      </div>
+
       {/* ── KPIs ─────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {KPIS.map((k) => (
@@ -195,7 +207,8 @@ export default async function AnaliticasPage() {
       {/* ── Insights ─────────────────────────────────────────────────────── */}
       {sortedInsights.length > 0 && (
         <section>
-          <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-4">Qué puedes mejorar</h2>
+          <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-1">Recomendaciones</h2>
+          <p className="text-[11px] text-bsm-text-muted mb-4 opacity-70">Automáticas · últimos 30 días</p>
           <div className="space-y-3">
             {sortedInsights.map((ins, i) => (
               <div
