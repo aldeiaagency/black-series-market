@@ -35,18 +35,18 @@ export async function POST(req: NextRequest) {
       ? `covers/${dealer.id}/cover.${ext}`
       : `${dealer.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
   const { error } = await admin.storage.from(BUCKET).upload(path, file, {
     contentType: file.type,
     upsert: isLogo || isCover,
   })
 
-  if (error) return NextResponse.json({ error: 'Error al subir el archivo. Inténtalo de nuevo.' }, { status: 500 })
+  if (error) return NextResponse.json({ error: error.message || 'Error al subir el archivo. Inténtalo de nuevo.' }, { status: 500 })
 
   const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(path)
 
-  if (isLogo)  await supabase.from('dealers').update({ logo_url:  publicUrl }).eq('id', dealer.id)
-  if (isCover) await supabase.from('dealers').update({ cover_url: publicUrl }).eq('id', dealer.id)
+  if (isLogo)  await admin.from('dealers').update({ logo_url:  publicUrl }).eq('id', dealer.id)
+  if (isCover) await admin.from('dealers').update({ cover_url: publicUrl }).eq('id', dealer.id)
 
   return NextResponse.json({ url: publicUrl, path })
 }
