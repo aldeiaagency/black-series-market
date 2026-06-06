@@ -17,16 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install psql
-        run: sudo apt-get install -y postgresql-client
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-      - name: Apply migrations
+      - name: Push pending migrations
+        run: supabase db push
         env:
-          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
-          PGSSLMODE: require
-        run: |
-          for file in $(ls supabase/migrations/*.sql | sort); do
-            echo "Applying: $file"
-            psql "$DATABASE_URL" -f "$file" -v ON_ERROR_STOP=0
-          done
-          echo "Done."
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
