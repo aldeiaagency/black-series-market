@@ -67,7 +67,7 @@ export const VEHICLE_STATUS_LABELS: Record<VehicleStatus, string> = {
   draft: 'Borrador',
   pending_review: 'En revisión',
   active: 'Activo',
-  paused: 'Pausado',
+  paused: 'Reservado',
   sold: 'Vendido',
   expired: 'Caducado',
 }
@@ -83,7 +83,10 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   new: 'Nuevo',
   contacted: 'Contactado',
   negotiating: 'En negociación',
+  appointment: 'Cita / visita',
+  reserved: 'Reservado',
   closed: 'Cerrado',
+  lost: 'Perdido',
   discarded: 'Descartado',
 }
 
@@ -104,7 +107,10 @@ export function getLeadStatusColor(status: LeadStatus): string {
     new: 'text-gold bg-gold/10',
     contacted: 'text-blue-400 bg-blue-400/10',
     negotiating: 'text-amber-400 bg-amber-400/10',
+    appointment: 'text-purple-400 bg-purple-400/10',
+    reserved: 'text-[#C6A64B] bg-[#C6A64B]/10',
     closed: 'text-emerald-400 bg-emerald-400/10',
+    lost: 'text-red-400 bg-red-400/10',
     discarded: 'text-bsm-text-muted bg-surface',
   }
   return map[status]

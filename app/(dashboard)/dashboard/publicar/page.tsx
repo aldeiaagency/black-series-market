@@ -19,6 +19,8 @@ export default function PublicarPage() {
   const [step, setStep] = useState(0)
   const [dealerId, setDealerId] = useState<string | null>(null)
   const [dealerLocation, setDealerLocation] = useState<string | null>(null)
+  const [dealerPlan, setDealerPlan] = useState<string | null>(null)
+  const [brandOptions, setBrandOptions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -31,7 +33,7 @@ export default function PublicarPage() {
     brand_name: '',
     model_name: '',
     version: '',
-    year: new Date().getFullYear(),
+    year: '',
     mileage_km: 0,
     fuel_type: 'gasoline',
     transmission: 'automatic',
@@ -102,10 +104,11 @@ export default function PublicarPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      const { data: dealer } = await supabase.from('dealers').select('id, location_city, location_region').eq('profile_id', user.id).single()
+      const { data: dealer } = await supabase.from('dealers').select('id, location_city, location_region, subscription_plan').eq('profile_id', user.id).single()
       if (!dealer) { router.push('/registro'); return }
       setDealerId(dealer.id)
       setDealerLocation(dealer.location_region || dealer.location_city || null)
+      setDealerPlan(dealer.subscription_plan || null)
 
       if (editId) {
         const { data: vehicle } = await supabase.from('vehicles').select('*').eq('id', editId).eq('dealer_id', dealer.id).single()
@@ -114,6 +117,21 @@ export default function PublicarPage() {
     }
     load()
   }, [router, editId])
+
+  // Reload brand options when vehicle_type changes
+  useEffect(() => {
+    async function loadBrands() {
+      const supabase = createClient()
+      const vtype = form.vehicle_type === 'motorcycle' ? 'motorcycle' : 'car'
+      const { data } = await supabase
+        .from('brands')
+        .select('name')
+        .eq('is_active', true)
+        .order('name')
+      setBrandOptions(data?.map((b: any) => b.name) ?? [])
+    }
+    loadBrands()
+  }, [form.vehicle_type])
 
   async function handleSave(publish = false) {
     setError('')
@@ -216,6 +234,12 @@ export default function PublicarPage() {
         {/* STEP 0: Tipo y marca */}
         {step === 0 && (
           <div className="space-y-5">
+            <div className="flex items-center justify-between text-xs text-bsm-text-muted border-b border-bsm-border pb-3 -mt-1 mb-1">
+              <span>¿Tienes muchos vehículos? Usa la importación masiva.</span>
+              <a href="/dashboard/importar" className="text-gold hover:text-gold-light transition-colors flex-shrink-0 ml-3">
+                Importar CSV →
+              </a>
+            </div>
             <div>
               <label className="label-base">Tipo de vehículo</label>
               <div className="grid grid-cols-2 gap-3">
@@ -237,7 +261,30 @@ export default function PublicarPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label-base">Marca *</label>
-                <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="Ferrari, BMW, Ducati..." className="input-base" required />
+                {brandOptions.length > 0 ? (
+                  <select
+                    value={form.brand_name}
+                    onChange={(e) => update('brand_name', e.target.value)}
+                    className="select-base"
+                    required
+                  >
+                    <option value="">Seleccionar marca…</option>
+                    {brandOptions.map((b) => <option key={b} value={b}>{b}</option>)}
+                    <option value="__other__">Otra marca (escribir)</option>
+                  </select>
+                ) : (
+                  <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="Ferrari, BMW, Ducati..." className="input-base" required />
+                )}
+                {form.brand_name === '__other__' && (
+                  <input
+                    autoFocus
+                    value={''}
+                    onChange={(e) => update('brand_name', e.target.value)}
+                    placeholder="Escribe la marca..."
+                    className="input-base mt-2"
+                    required
+                  />
+                )}
               </div>
               <div>
                 <label className="label-base">Modelo *</label>
@@ -251,7 +298,7 @@ export default function PublicarPage() {
               </div>
               <div>
                 <label className="label-base">Año *</label>
-                <input type="number" min="1960" max={new Date().getFullYear() + 1} value={form.year} onChange={(e) => update('year', e.target.value)} className="input-base" required />
+                <input type="number" min="1960" max={new Date().getFullYear() + 1} value={form.year} onChange={(e) => update('year', e.target.value)} placeholder="Ej. 2022" className="input-base" required />
               </div>
             </div>
             <div>
@@ -673,6 +720,12 @@ export default function PublicarPage() {
             <p className="text-xs text-bsm-text-muted text-center">
               Los vehículos se revisan editorialmente antes de publicarse (habitualmente en menos de 24h).
             </p>
+            {(dealerPlan === 'professional' || dealerPlan === 'elite') && form.images?.length >= 5 && form.description?.trim().length > 20 && (
+              <div className="flex items-start gap-2 p-3 border border-emerald-400/20 bg-emerald-400/5 text-xs text-emerald-400">
+                <span className="mt-0.5">✓</span>
+                <span>Tu ficha cumple los requisitos de aprobación rápida (fotos + descripción completa). La activación puede ser inmediata.</span>
+              </div>
+            )}
           </div>
         )}
       </div>

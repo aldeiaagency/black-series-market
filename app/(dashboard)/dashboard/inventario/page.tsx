@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { PlusCircle, Edit, Eye } from 'lucide-react'
+import { PlusCircle, Edit, Eye, Zap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice, formatMileage } from '@/lib/utils'
 import BoostButton from '@/components/dashboard/BoostButton'
@@ -19,11 +19,24 @@ export default async function InventarioPage() {
 
   if (!dealer) redirect('/registro')
 
-  const { data: vehicles, count } = await supabase
-    .from('vehicles')
-    .select('*', { count: 'exact' })
-    .eq('dealer_id', dealer.id)
-    .order('created_at', { ascending: false })
+  const [{ data: vehicles }, { data: leadsRaw }] = await Promise.all([
+    supabase
+      .from('vehicles')
+      .select('*', { count: 'exact' })
+      .eq('dealer_id', dealer.id)
+      .order('created_at', { ascending: false }),
+    // Real contact counts — no stale leads_count column
+    supabase
+      .from('leads')
+      .select('vehicle_id')
+      .eq('dealer_id', dealer.id),
+  ])
+
+  // Build per-vehicle contact map
+  const contactsByVehicle: Record<string, number> = {}
+  for (const l of leadsRaw ?? []) {
+    if (l.vehicle_id) contactsByVehicle[l.vehicle_id] = (contactsByVehicle[l.vehicle_id] ?? 0) + 1
+  }
 
   const activeCount = vehicles?.filter((v) => v.status === 'active').length || 0
 
@@ -68,68 +81,84 @@ export default async function InventarioPage() {
                 <th className="text-left px-4 py-3 text-xs text-bsm-text-muted font-medium uppercase tracking-wide">Km</th>
                 <th className="text-left px-4 py-3 text-xs text-bsm-text-muted font-medium uppercase tracking-wide">Estado</th>
                 <th className="text-left px-4 py-3 text-xs text-bsm-text-muted font-medium uppercase tracking-wide">Visitas</th>
-                <th className="text-left px-4 py-3 text-xs text-bsm-text-muted font-medium uppercase tracking-wide">Leads</th>
-                <th className="px-4 py-3 w-32" />
+                <th className="text-left px-4 py-3 text-xs text-bsm-text-muted font-medium uppercase tracking-wide">Contactos</th>
+                <th className="px-4 py-3 w-36" />
               </tr>
             </thead>
             <tbody>
-              {vehicles.map((v: any) => (
-                <tr key={v.id} className="table-row">
-                  <td className="px-4 py-3">
-                    <div className="w-14 h-10 bg-surface-elevated overflow-hidden">
-                      {v.images?.[0] && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={v.images[0].url} alt="" className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-bsm-text-primary">
-                      {v.brand_name} {v.model_name}
-                    </p>
-                    <p className="text-xs text-bsm-text-muted">{v.year}{v.version ? ` · ${v.version}` : ''}</p>
-                  </td>
-                  <td className="px-4 py-3 text-bsm-text-primary">
-                    {formatPrice(v.price, v.currency, v.price_on_request)}
-                  </td>
-                  <td className="px-4 py-3 text-bsm-text-muted">
-                    {formatMileage(v.mileage_km)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <VehicleStatusSelector vehicleId={v.id} initialStatus={v.status} />
-                  </td>
-                  <td className="px-4 py-3 text-bsm-text-muted">{v.views}</td>
-                  <td className="px-4 py-3 text-bsm-text-muted">{v.leads_count}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3 justify-end">
-                      {v.status === 'active' && (
-                        <BoostButton
-                          vehicleId={v.id}
-                          isFeatured={v.is_featured}
-                          featuredUntil={v.featured_until}
-                        />
-                      )}
-                      <Link
-                        href={`/dashboard/publicar?edit=${v.id}`}
-                        className="p-2 text-bsm-text-muted hover:text-gold transition-colors"
-                        title="Editar"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Link>
-                      {v.status === 'active' && (
+              {vehicles.map((v: any) => {
+                const contacts = contactsByVehicle[v.id] ?? 0
+                return (
+                  <tr key={v.id} className="table-row">
+                    <td className="px-4 py-3">
+                      <div className="w-14 h-10 bg-surface-elevated overflow-hidden">
+                        {v.images?.[0] && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={v.images[0].url} alt="" className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-bsm-text-primary">
+                        {v.brand_name} {v.model_name}
+                      </p>
+                      <p className="text-xs text-bsm-text-muted">{v.year}{v.version ? ` · ${v.version}` : ''}</p>
+                    </td>
+                    <td className="px-4 py-3 text-bsm-text-primary">
+                      {formatPrice(v.price, v.currency, v.price_on_request)}
+                    </td>
+                    <td className="px-4 py-3 text-bsm-text-muted">
+                      {formatMileage(v.mileage_km)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <VehicleStatusSelector vehicleId={v.id} initialStatus={v.status} />
+                    </td>
+                    <td className="px-4 py-3 text-bsm-text-muted">{v.views}</td>
+                    <td className="px-4 py-3">
+                      <span className={contacts > 0 ? 'text-emerald-400 font-medium' : 'text-bsm-text-muted'}>
+                        {contacts}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2 justify-end">
+                        {v.status === 'active' && (
+                          <BoostButton
+                            vehicleId={v.id}
+                            isFeatured={v.is_featured}
+                            featuredUntil={v.featured_until}
+                          />
+                        )}
                         <Link
-                          href={`/${v.vehicle_type === 'car' ? 'coches' : 'motos'}/${v.slug}`}
-                          target="_blank"
+                          href={`/dashboard/publicar?edit=${v.id}`}
                           className="p-2 text-bsm-text-muted hover:text-gold transition-colors"
-                          title="Ver publicado"
+                          title="Editar"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Edit className="w-4 h-4" />
                         </Link>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {v.status === 'active' && (
+                          <Link
+                            href={`/${v.vehicle_type === 'car' ? 'coches' : 'motos'}/${v.slug}`}
+                            target="_blank"
+                            className="p-2 text-bsm-text-muted hover:text-gold transition-colors"
+                            title="Ver publicado"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Link>
+                        )}
+                        {v.status === 'draft' && (
+                          <Link
+                            href={`/dashboard/publicar?edit=${v.id}`}
+                            className="text-[10px] px-2 py-1 border border-gold/40 text-gold hover:bg-gold/5 transition-colors"
+                            title="Completar y publicar"
+                          >
+                            Publicar
+                          </Link>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
