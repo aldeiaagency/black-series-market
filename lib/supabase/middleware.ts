@@ -48,9 +48,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Protected admin routes
-  if (pathname.startsWith('/admin')) {
-    if (!user) return NextResponse.redirect(new URL('/login', request.url))
+  // Protected admin routes (/admin-login is the entry point — must remain public)
+  if (pathname.startsWith('/admin') && pathname !== '/admin-login') {
+    if (!user) return NextResponse.redirect(new URL('/admin-login', request.url))
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -61,9 +61,31 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  // Admin already logged in → skip /admin-login, go straight to panel
+  if (pathname === '/admin-login' && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
+  }
+
   // Redirect already-logged-in users away from auth pages
   const isAuthPage = pathname === '/login' || pathname === '/registro' || pathname === '/registro-comprador'
   if (isAuthPage && user) {
+    // Admin users at /login → send to admin panel
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
+
     const { data: dealer } = await supabase
       .from('dealers')
       .select('id, status')
@@ -71,7 +93,6 @@ export async function updateSession(request: NextRequest) {
       .single()
 
     if (dealer) {
-      // Pending dealers trying to access auth pages → send to holding page
       if (dealer.status === 'pending') {
         return NextResponse.redirect(new URL('/solicitud-enviada', request.url))
       }
