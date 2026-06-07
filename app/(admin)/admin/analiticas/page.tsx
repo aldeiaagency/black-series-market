@@ -286,11 +286,14 @@ export default async function AdminAnaliticasPage() {
               <h3 className="font-medium mb-4 text-sm">Estado de leads</h3>
               <div className="space-y-2.5">
                 {[
-                  { key: 'new',         label: 'Nuevos',       color: 'text-gold' },
-                  { key: 'contacted',   label: 'Contactados',  color: 'text-blue-400' },
-                  { key: 'qualified',   label: 'Cualificados', color: 'text-emerald-400' },
-                  { key: 'closed_won',  label: 'Ganados',      color: 'text-emerald-300' },
-                  { key: 'closed_lost', label: 'Perdidos',     color: 'text-red-400' },
+                  { key: 'new',         label: 'Nuevos',      color: 'text-gold' },
+                  { key: 'contacted',   label: 'Contactados', color: 'text-blue-400' },
+                  { key: 'negotiating', label: 'Negociando',  color: 'text-purple-400' },
+                  { key: 'appointment', label: 'Cita/visita', color: 'text-cyan-400' },
+                  { key: 'reserved',    label: 'Reservado',   color: 'text-[#C6A64B]' },
+                  { key: 'closed',      label: 'Cerrado',     color: 'text-emerald-400' },
+                  { key: 'lost',        label: 'Perdido',     color: 'text-red-400' },
+                  { key: 'discarded',   label: 'Descartado',  color: 'text-bsm-text-muted' },
                 ].map(({ key, label, color }) => (
                   <div key={key} className="flex items-center justify-between">
                     <span className={`text-sm ${color}`}>{label}</span>

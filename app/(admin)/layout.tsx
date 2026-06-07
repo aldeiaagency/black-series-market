@@ -2,15 +2,16 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
-  LayoutDashboard, Users, Car, Settings, LogOut, TrendingUp,
+  LayoutDashboard, Users, Car, Settings, TrendingUp, MessageSquare,
 } from 'lucide-react'
 
 const ADMIN_NAV = [
-  { label: 'Panel', href: '/admin', icon: LayoutDashboard },
-  { label: 'Concesionarios', href: '/admin/dealers', icon: Users },
-  { label: 'Vehículos', href: '/admin/vehiculos', icon: Car },
-  { label: 'Analíticas', href: '/admin/analiticas', icon: TrendingUp },
-  { label: 'Configuración', href: '/admin/configuracion', icon: Settings },
+  { label: 'Panel',           href: '/admin',                icon: LayoutDashboard },
+  { label: 'Showrooms',       href: '/admin/dealers',        icon: Users },
+  { label: 'Vehículos',       href: '/admin/vehiculos',      icon: Car },
+  { label: 'Contactos',       href: '/admin/contactos',      icon: MessageSquare },
+  { label: 'Analíticas',      href: '/admin/analiticas',     icon: TrendingUp },
+  { label: 'Configuración',   href: '/admin/configuracion',  icon: Settings },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
