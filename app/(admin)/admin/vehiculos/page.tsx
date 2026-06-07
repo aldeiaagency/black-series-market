@@ -150,6 +150,12 @@ export default async function AdminVehiculosPage({ searchParams }: PageProps) {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
+                      <Link
+                        href={`/admin/vehiculos/${v.id}`}
+                        className="text-xs text-gold hover:text-gold-light font-medium"
+                      >
+                        Ficha →
+                      </Link>
                       {v.status === 'pending_review' && (
                         <>
                           <form action={approveVehicle.bind(null, v.id)}>
@@ -162,15 +168,6 @@ export default async function AdminVehiculosPage({ searchParams }: PageProps) {
                             vehicleTitle={`${v.brand_name} ${v.model_name} ${v.year}`}
                           />
                         </>
-                      )}
-                      {v.status === 'active' && (
-                        <Link
-                          href={`/${v.vehicle_type === 'car' ? 'coches' : 'motos'}/${v.slug}`}
-                          target="_blank"
-                          className="text-xs text-gold hover:text-gold-light"
-                        >
-                          Ver →
-                        </Link>
                       )}
                       <Link
                         href={`/admin/dealers/${v.dealer?.id}`}

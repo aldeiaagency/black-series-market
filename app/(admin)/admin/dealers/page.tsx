@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { DEALER_STATUS_LABELS } from '@/lib/utils'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
@@ -9,7 +9,8 @@ interface PageProps {
 
 export default async function AdminDealersPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const supabase = await createClient()
+  // createAdminClient bypasses RLS — needed to see pending/trial dealers
+  const supabase = await createAdminClient()
 
   const { count: pendingCount } = await supabase
     .from('dealers')
