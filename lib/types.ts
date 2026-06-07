@@ -141,6 +141,7 @@ export interface Vehicle {
   has_panniers?: boolean
   has_ibi?: boolean
   has_test_drive?: boolean
+  national_delivery?: boolean
   price: number | null
   price_on_request: boolean
   is_negotiable: boolean

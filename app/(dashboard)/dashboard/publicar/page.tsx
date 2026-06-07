@@ -70,6 +70,7 @@ export default function PublicarPage() {
     accepts_trade_in: false,
     financing_available: false,
     has_test_drive: false,
+    national_delivery: false,
     has_warranty: false,
     warranty_months: '',
     video_url: '',
@@ -666,6 +667,7 @@ export default function PublicarPage() {
                 { key: 'financing_available',label: 'Financiación disponible' },
                 { key: 'iva_deducible',      label: 'IVA deducible (venta a empresa)' },
                 { key: 'has_test_drive',     label: 'Prueba disponible' },
+                { key: 'national_delivery',  label: 'Transporte nacional incluido' },
               ].map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                   <input

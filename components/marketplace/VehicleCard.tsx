@@ -42,8 +42,9 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
   const showFeatured = vehicle.is_featured && isActive
   const showNew      = !showFeatured && isActive && isNewVehicle(vehicle.published_at)
 
-  // Extra meta badges (prioritized, max 2)
-  const showIva      = isActive && vehicle.iva_deducible === true
+  // Extra meta badges
+  const showIva             = isActive && vehicle.iva_deducible === true
+  const showNationalDelivery = isActive && vehicle.national_delivery === true
 
   // Location: prefer vehicle's own province, fallback to dealer city
   const location = vehicle.location_province || vehicle.dealer?.location_city || null
@@ -226,13 +227,21 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             </div>
           )}
 
-          {/* Meta badges: IVA deducible + warranty */}
-          {showIva && (
+          {/* Meta badges: IVA deducible / Transporte nacional */}
+          {(showIva || showNationalDelivery) && (
             <div className="flex flex-wrap gap-1.5 mb-2.5">
-              <span className="inline-flex items-center px-2 py-0.5 text-[9px] tracking-[0.1em] uppercase
-                text-emerald-400/80 bg-[#0A0A0A] border border-emerald-400/20 font-medium">
-                IVA deducible
-              </span>
+              {showIva && (
+                <span className="inline-flex items-center px-2 py-0.5 text-[9px] tracking-[0.1em] uppercase
+                  text-emerald-400/80 bg-[#0A0A0A] border border-emerald-400/20 font-medium">
+                  IVA deducible
+                </span>
+              )}
+              {showNationalDelivery && (
+                <span className="inline-flex items-center px-2 py-0.5 text-[9px] tracking-[0.1em] uppercase
+                  text-[#7CB9E8]/80 bg-[#0A0A0A] border border-[#7CB9E8]/20 font-medium">
+                  Entrega nacional
+                </span>
+              )}
             </div>
           )}
 

@@ -402,6 +402,7 @@ export default function VehicleDetailContent({
                 { label: 'Financiación disponible', value: vehicle.financing_available ? 'Sí' : null },
                 { label: 'Entrega de tu vehículo',  value: vehicle.accepts_trade_in ? 'Aceptada' : null },
                 { label: 'Prueba disponible',       value: vehicle.has_test_drive ? 'Sí' : null },
+                { label: 'Transporte nacional',     value: vehicle.national_delivery ? 'Incluido' : null },
                 { label: 'IVA deducible',           value: vehicle.iva_deducible ? 'Sí' : null },
                 { label: 'Garantía',                value: vehicle.has_warranty ? (vehicle.warranty_months ? `${vehicle.warranty_months} meses` : 'Disponible') : null },
               ].map(({ label, value }) => (
