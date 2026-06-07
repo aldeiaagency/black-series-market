@@ -1,7 +1,7 @@
 ﻿import Link from 'next/link'
 import {
   MapPin, Phone, MessageCircle, Shield, CheckCircle, ArrowRight,
-  FileText, Clock, Wrench, BadgeCheck, AlertCircle, ChevronRight, Search,
+  FileText, Clock, Wrench, AlertCircle, ChevronRight, Search,
   Users,
 } from 'lucide-react'
 import VehicleGallery from '@/components/marketplace/VehicleGallery'
@@ -78,6 +78,21 @@ function HistoryRow({
   )
 }
 
+function youtubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url)
+    let id: string | null = null
+    if (u.hostname.includes('youtu.be')) {
+      id = u.pathname.slice(1)
+    } else if (u.hostname.includes('youtube.com')) {
+      id = u.searchParams.get('v')
+      if (!id && u.pathname.startsWith('/embed/')) id = u.pathname.split('/embed/')[1]
+      if (!id && u.pathname.startsWith('/shorts/')) id = u.pathname.split('/shorts/')[1]
+    }
+    return id ? `https://www.youtube.com/embed/${id}` : null
+  } catch { return null }
+}
+
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   active: { label: 'Disponible', cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5' },
   paused: { label: 'Reservado',  cls: 'text-[#C6A64B] border-[#C6A64B]/30' },
@@ -115,7 +130,6 @@ export default function VehicleDetailContent({
         { label: 'Ubicación',        value: loc },
         { label: 'Garantía',         value: vehicle.has_warranty ? (vehicle.warranty_months ? `${vehicle.warranty_months} meses` : 'Disponible') : null },
         { label: 'Financiación',     value: vehicle.financing_available ? 'Disponible' : null },
-        { label: 'IVA deducible',    value: vehicle.iva_deducible ? 'Sí' : null },
         { label: 'Categoría',        value: vehicle.category || null },
       ]
     : [
@@ -303,6 +317,32 @@ export default function VehicleDetailContent({
             )}
           </div>
 
+          {/* Vídeo del vehículo */}
+          {vehicle.video_url && (() => {
+            const embedUrl = youtubeEmbedUrl(vehicle.video_url)
+            return (
+              <div>
+                <SectionTitle>Vídeo</SectionTitle>
+                {embedUrl ? (
+                  <div className="w-full aspect-video border border-bsm-border overflow-hidden">
+                    <iframe
+                      src={embedUrl}
+                      title="Vídeo del vehículo"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  </div>
+                ) : (
+                  <a href={vehicle.video_url} target="_blank" rel="noopener noreferrer"
+                    className="text-sm text-gold hover:text-gold-light break-all">
+                    {vehicle.video_url}
+                  </a>
+                )}
+              </div>
+            )
+          })()}
+
           {/* Datos técnicos */}
           {technicalSpecs.length > 0 && (
             <div>
@@ -340,14 +380,11 @@ export default function VehicleDetailContent({
           <div>
             <SectionTitle>Historial y documentación</SectionTitle>
             <div className="border border-bsm-border mb-4">
-              <HistoryRow icon={MapPin}      label="País de origen"          value={vehicle.registration_country || null} />
+              <HistoryRow icon={MapPin}      label="País de origen"            value={vehicle.registration_country || null} />
               <HistoryRow icon={Users}       label="Número de propietarios"  value={vehicle.num_owners != null ? String(vehicle.num_owners) : null} />
-              <HistoryRow icon={Wrench}      label="Historial de servicio"   value={vehicle.has_service_history ? 'Disponible' : null} />
-              <HistoryRow icon={FileText}    label="Libro de mantenimiento"  value={null} />
+              <HistoryRow icon={Wrench}      label="Historial de mantenimiento" value={vehicle.has_service_history ? 'Disponible' : null} />
               <HistoryRow icon={FileText}    label="Informe Carfax"          value={vehicle.has_carfax ? 'Disponible' : null} />
               <HistoryRow icon={Clock}       label="ITV válida hasta"        value={vehicle.itv_valid_until || null} />
-              <HistoryRow icon={BadgeCheck}  label="IVA deducible"           value={vehicle.has_ibi != null ? (vehicle.has_ibi ? 'Sí' : 'No') : null} />
-              <HistoryRow icon={AlertCircle} label="Siniestros declarados"   value={null} />
             </div>
             <div className="flex items-start gap-2 p-4 bg-[#0D0D0D] border border-[#1A1A1A]">
               <AlertCircle className="w-4 h-4 text-[#808080] flex-shrink-0 mt-0.5" />
@@ -364,9 +401,8 @@ export default function VehicleDetailContent({
               {[
                 { label: 'Financiación disponible', value: vehicle.financing_available ? 'Sí' : null },
                 { label: 'Entrega de tu vehículo',  value: vehicle.accepts_trade_in ? 'Aceptada' : null },
-                { label: 'Prueba disponible',       value: vehicle.has_test_drive != null ? (vehicle.has_test_drive ? 'Sí' : 'No') : null },
-                { label: 'IVA deducible',           value: vehicle.has_ibi != null ? (vehicle.has_ibi ? 'Sí' : 'No') : null },
-                { label: 'Transporte nacional',     value: null },
+                { label: 'Prueba disponible',       value: vehicle.has_test_drive ? 'Sí' : null },
+                { label: 'IVA deducible',           value: vehicle.iva_deducible ? 'Sí' : null },
                 { label: 'Garantía',                value: vehicle.has_warranty ? (vehicle.warranty_months ? `${vehicle.warranty_months} meses` : 'Disponible') : null },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-5 py-3.5 border-b border-bsm-border last:border-0">
