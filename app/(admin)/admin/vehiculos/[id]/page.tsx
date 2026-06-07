@@ -69,6 +69,24 @@ export default async function AdminVehicleDetailPage({ params }: PageProps) {
     )
   }
 
+  // Extract YouTube embed URL from any YouTube link format
+  function youtubeEmbedUrl(url: string): string | null {
+    try {
+      const u = new URL(url)
+      let id: string | null = null
+      if (u.hostname.includes('youtu.be')) {
+        id = u.pathname.slice(1)
+      } else if (u.hostname.includes('youtube.com')) {
+        id = u.searchParams.get('v')
+        if (!id && u.pathname.startsWith('/embed/')) id = u.pathname.split('/embed/')[1]
+        if (!id && u.pathname.startsWith('/shorts/')) id = u.pathname.split('/shorts/')[1]
+      }
+      return id ? `https://www.youtube.com/embed/${id}` : null
+    } catch { return null }
+  }
+
+  const youtubeEmbed = vehicle.video_url ? youtubeEmbedUrl(vehicle.video_url) : null
+
   // Health issues
   const issues: string[] = []
   if (images.length === 0) issues.push('Sin fotografías')
@@ -268,12 +286,26 @@ export default async function AdminVehicleDetailPage({ params }: PageProps) {
 
           {/* Video */}
           {vehicle.video_url && (
-            <div className="bg-surface border border-bsm-border p-5">
-              <p className="text-xs text-bsm-text-muted mb-1">Video</p>
-              <a href={vehicle.video_url} target="_blank" rel="noopener noreferrer"
-                className="text-sm text-gold hover:text-gold-light break-all">
-                {vehicle.video_url}
-              </a>
+            <div className="bg-surface border border-bsm-border">
+              <div className="p-4 border-b border-bsm-border text-sm font-medium">Video</div>
+              {youtubeEmbed ? (
+                <div className="w-full aspect-video">
+                  <iframe
+                    src={youtubeEmbed}
+                    title="Vehicle video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+              ) : (
+                <div className="p-4">
+                  <a href={vehicle.video_url} target="_blank" rel="noopener noreferrer"
+                    className="text-sm text-gold hover:text-gold-light break-all">
+                    {vehicle.video_url}
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
