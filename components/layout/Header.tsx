@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import Logo from '@/components/brand/Logo'
 import CompareBar from '@/components/marketplace/CompareBar'
 import MarketSocialLinks from '@/components/social/MarketSocialLinks'
+import SearchAlertModal from '@/components/marketplace/SearchAlertModal'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
@@ -44,6 +45,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [alertModalOpen, setAlertModalOpen] = useState(false)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isDealer, setIsDealer] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -185,6 +187,17 @@ export default function Header() {
               <Search className="w-4 h-4" />
             </Link>
 
+            {/* Bell — logged-in → /cuenta/alertas, anonymous → modal */}
+            {user ? (
+              <Link href="/cuenta/alertas" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Alertas de búsqueda">
+                <Bell className="w-4 h-4" />
+              </Link>
+            ) : (
+              <button onClick={() => setAlertModalOpen(true)} className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Crear alerta de búsqueda">
+                <Bell className="w-4 h-4" />
+              </button>
+            )}
+
             {user ? (
               <>
                 {/* Heart → cuenta/favoritos */}
@@ -313,7 +326,7 @@ export default function Header() {
                   </Link>
                   <Link href="/cuenta/alertas" className="btn-outline w-full justify-center text-sm">
                     <Bell className="w-4 h-4" />
-                    Mis alertas
+                    Alertas de búsqueda
                   </Link>
                   {isDealer && (
                     <Link href="/dashboard" className="btn-outline w-full justify-center text-sm">
@@ -326,6 +339,13 @@ export default function Header() {
                 </>
               ) : (
                 <>
+                  <button
+                    onClick={() => { setMobileOpen(false); setAlertModalOpen(true) }}
+                    className="btn-outline w-full justify-center text-sm"
+                  >
+                    <Bell className="w-4 h-4" />
+                    Crear alerta de búsqueda
+                  </button>
                   <Link href="/login" className="btn-outline w-full justify-center text-sm">
                     Acceder
                   </Link>
@@ -340,6 +360,7 @@ export default function Header() {
       )}
     </header>
     <CompareBar />
+    <SearchAlertModal open={alertModalOpen} onClose={() => setAlertModalOpen(false)} />
     </>
   )
 }

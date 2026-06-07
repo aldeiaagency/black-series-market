@@ -9,7 +9,6 @@ import VehicleCard from '@/components/marketplace/VehicleCard'
 import QualifiedLeadForm from '@/components/marketplace/QualifiedLeadForm'
 import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
-import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
 import TrackLink from '@/components/marketplace/TrackLink'
 import ShareButton from '@/components/social/ShareButton'
@@ -247,12 +246,6 @@ export default function VehicleDetailContent({
                   variant="detail"
                 />
               )}
-              <CreateAlertButton
-                vehicleType={vehicleTypeParam}
-                label="Crear alerta"
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs border border-bsm-border
-                  text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"
-              />
             </div>
           </div>
 
@@ -559,12 +552,6 @@ export default function VehicleDetailContent({
                         Llamar al vendedor
                       </TrackLink>
                     )}
-                    <CreateAlertButton
-                      vehicleType={vehicleTypeParam}
-                      label="Crear alerta de búsqueda"
-                      className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted
-                        hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
-                    />
                     <Link href="/vehiculos-a-la-carta" className="flex items-center justify-center gap-2 text-xs
                       text-bsm-text-muted hover:text-gold transition-colors py-2">
                       ¿No encuentras esta unidad? Solicitar vehículo a la carta →
@@ -657,12 +644,6 @@ export default function VehicleDetailContent({
                         Llamar al vendedor
                       </TrackLink>
                     )}
-                    <CreateAlertButton
-                      vehicleType={vehicleTypeParam}
-                      label="Crear alerta de búsqueda"
-                      className="flex items-center justify-center gap-2 w-full py-2 text-xs text-bsm-text-muted
-                        hover:text-gold transition-colors border border-bsm-border hover:border-gold/30"
-                    />
                     <ShareButton
                       title={title}
                       text="Mira este vehículo en Black Label Market"
