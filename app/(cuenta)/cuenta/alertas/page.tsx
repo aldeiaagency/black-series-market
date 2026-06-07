@@ -110,7 +110,9 @@ export default async function CuentaAlertasPage() {
                   </div>
                   {/* Details */}
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#808080]">
-                    <span>Plazo: {TIMELINE_LABELS[alert.timeline] || alert.timeline}</span>
+                    {alert.timeline && (
+                      <span>Plazo: {TIMELINE_LABELS[alert.timeline] || alert.timeline}</span>
+                    )}
                     {alert.location && <span>Zona: {alert.location}</span>}
                     {alert.km_max && <span>Km máx: {alert.km_max}</span>}
                     <span className="text-[#8A8A8A]">

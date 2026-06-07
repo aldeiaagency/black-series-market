@@ -118,10 +118,10 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           </div>
         )}
 
-        {/* Action buttons — top right */}
+        {/* Action buttons — top right: always visible on touch, hover-reveal on desktop */}
         {isActive && (
           <div className="absolute top-3 right-3 z-20 flex gap-2
-            opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
             <FavoriteButton vehicleId={vehicle.id} variant="card" />
             <CompareButton
               vehicle={{

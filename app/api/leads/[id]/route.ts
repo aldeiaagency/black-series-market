@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-const VALID_STATUSES = ['new', 'contacted', 'negotiating', 'closed', 'discarded']
+const VALID_STATUSES = ['new', 'contacted', 'negotiating', 'appointment', 'reserved', 'closed', 'lost', 'discarded']
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

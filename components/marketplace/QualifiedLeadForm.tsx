@@ -79,7 +79,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
       buyer_name:  data.buyer_name,
       buyer_email: data.buyer_email,
       buyer_phone: data.buyer_phone || null,
-      message:     parts.join(' · ') || null,
+      message:     parts.join(' · ') || 'Solicitud de información',
     })
 
     if (err) { setError('Error al enviar. Inténtalo de nuevo.'); return }

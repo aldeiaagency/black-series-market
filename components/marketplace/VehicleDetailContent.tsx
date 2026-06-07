@@ -182,11 +182,11 @@ export default function VehicleDetailContent({
         vehicle.license_type       && { label: 'Carnet',                      value: vehicle.license_type },
         vehicle.body_type          && { label: 'Tipo de moto',                value: vehicle.body_type },
         vehicle.color_exterior     && { label: 'Color',                       value: vehicle.color_exterior },
-        vehicle.has_abs != null    && { label: 'ABS',                         value: vehicle.has_abs ? 'Sí' : 'No' },
-        vehicle.has_traction_control != null && { label: 'Control de tracción',      value: vehicle.has_traction_control ? 'Sí' : 'No' },
-        vehicle.has_riding_modes != null     && { label: 'Modos de conducción',      value: vehicle.has_riding_modes ? 'Sí' : 'No' },
-        vehicle.has_electronic_suspension != null && { label: 'Suspensión electrónica', value: vehicle.has_electronic_suspension ? 'Sí' : 'No' },
-        vehicle.has_panniers != null         && { label: 'Maletas',                  value: vehicle.has_panniers ? 'Sí' : 'No' },
+        vehicle.has_abs                && { label: 'ABS',                         value: 'Sí' },
+        vehicle.has_traction_control   && { label: 'Control de tracción',      value: 'Sí' },
+        vehicle.has_riding_modes       && { label: 'Modos de conducción',      value: 'Sí' },
+        vehicle.has_electronic_suspension && { label: 'Suspensión electrónica', value: 'Sí' },
+        vehicle.has_panniers           && { label: 'Maletas incluidas',        value: 'Sí' },
         vehicle.registration_year  && { label: 'Año de matriculación',        value: String(vehicle.registration_year) },
         vehicle.registration_country && { label: 'País de origen',            value: vehicle.registration_country },
         vehicle.itv_valid_until    && { label: 'ITV válida hasta',            value: vehicle.itv_valid_until },
@@ -203,7 +203,7 @@ export default function VehicleDetailContent({
         <Link href={backHref} className="hover:text-gold transition-colors">{backLabel}</Link>
         <span className="text-[#666666]">/</span>
         <Link
-          href={`${backHref}?marca=${vehicle.brand_name.toLowerCase().replace(/\s+/g, '-')}`}
+          href={`${backHref}?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}`}
           className="hover:text-gold transition-colors"
         >
           {vehicle.brand_name}
@@ -726,7 +726,7 @@ export default function VehicleDetailContent({
               <h2 className="font-display text-2xl font-light">Vehículos similares</h2>
             </div>
             <Link
-              href={`${backHref}?marca=${vehicle.brand_name.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`${backHref}?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}`}
               className="text-xs text-gold hover:text-gold-light transition-colors hidden sm:flex items-center gap-1"
             >
               Ver más de {vehicle.brand_name} <ChevronRight className="w-3 h-3" />
