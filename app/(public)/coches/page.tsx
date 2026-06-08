@@ -128,7 +128,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
           {count} unidad{count !== 1 ? 'es' : ''} encontrada{count !== 1 ? 's' : ''}
         </p>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
       </div>
       <Pagination
@@ -166,27 +166,26 @@ export default async function CochesPage({ searchParams }: PageProps) {
             <SortSelector />
           </Suspense>
         </div>
-        <Suspense fallback={null}>
-          <ActiveFiltersBar />
-        </Suspense>
-      </div>
-
-      <div className="flex gap-12">
+        {/* Filter bar — quick filters + 'Todos los filtros' drawer */}
         <Suspense fallback={null}>
           <VehicleFilters vehicleType="car" totalCount={count || 0} />
         </Suspense>
-        <Suspense fallback={<GridSkeleton />}>
-          <VehicleList params={params} />
+        <Suspense fallback={null}>
+          <ActiveFiltersBar className="mt-4" />
         </Suspense>
       </div>
+
+      <Suspense fallback={<GridSkeleton />}>
+        <VehicleList params={params} />
+      </Suspense>
     </div>
   )
 }
 
 function GridSkeleton() {
   return (
-    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-      {Array.from({ length: 6 }).map((_, i) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="bg-surface border border-bsm-border">
           <div className="aspect-[16/10] shimmer" />
           <div className="p-4 space-y-3">
