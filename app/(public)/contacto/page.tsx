@@ -39,7 +39,7 @@ export default function ContactoPage() {
         {/* Info */}
         <div className="space-y-8">
           {[
-            { icon: Mail, label: 'Email', value: 'hola@blackseriesmarket.com', href: 'mailto:hola@blackseriesmarket.com' },
+            { icon: Mail, label: 'Email', value: 'hola@blacklabelmarket.es', href: 'mailto:hola@blacklabelmarket.es' },
             { icon: Clock, label: 'Horario de atención', value: 'Lunes a Viernes\n9:00 – 19:00 h (CET)', href: null },
           ].map(({ icon: Icon, label, value, href }) => (
             <div key={label}>
@@ -75,7 +75,7 @@ export default function ContactoPage() {
               <p className="text-bsm-text-muted mb-4">Nos pondremos en contacto contigo en breve.</p>
               <p className="text-xs text-bsm-text-muted">
                 Si prefieres contacto inmediato, escríbenos a{' '}
-                <a href="mailto:hola@blackseriesmarket.com" className="text-gold">hola@blackseriesmarket.com</a>
+                <a href="mailto:hola@blacklabelmarket.es" className="text-gold">hola@blacklabelmarket.es</a>
               </p>
             </div>
           ) : (

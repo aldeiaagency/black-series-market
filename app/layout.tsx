@@ -19,6 +19,7 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'),
   title: {
     default: 'Black Label Market | Coches y motos premium en España',
     template: '%s | Black Label Market',
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_ES',
   },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 }
 
 export default function RootLayout({

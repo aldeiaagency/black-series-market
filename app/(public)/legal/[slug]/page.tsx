@@ -7,15 +7,15 @@ const LEGAL_CONTENT: Record<string, { title: string; content: string }> = {
     content: `
 **Identificación del titular**
 
-En cumplimiento de lo dispuesto en la Ley 34/2002, de 11 de julio, de servicios de la sociedad de la información y de comercio electrónico, se informa de que el sitio web Black Label Market, accesible desde blackseriesmarket.com, es titularidad de:
+En cumplimiento de lo dispuesto en la Ley 34/2002, de 11 de julio, de servicios de la sociedad de la información y de comercio electrónico, se informa de que el sitio web Black Label Market, accesible desde blacklabelmarket.es, es titularidad de:
 
 Titular: KAZAWEB, S.L.U.
 NIF: B42761254
 Domicilio fiscal: Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña
 Nombre comercial: Black Label Market
-Dominio: blackseriesmarket.com
-Email de contacto: hola@blackseriesmarket.com
-Email legal: hola@blackseriesmarket.com
+Dominio: blacklabelmarket.es
+Email de contacto: hola@blacklabelmarket.es
+Email legal: hola@blacklabelmarket.es
 Actividad: Intermediarios del comercio — Epígrafe IAE 631
 Datos registrales: Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Libro 0, Folio 51, Sección 8, Hoja SC-51053, Inscripción 1ª
 
@@ -69,7 +69,7 @@ Black Label Market no controla necesariamente dichos sitios externos y no asume 
 
 Para cualquier cuestión relacionada con este Aviso Legal, el usuario puede contactar con Black Label Market a través del siguiente correo electrónico:
 
-hola@blackseriesmarket.com
+hola@blacklabelmarket.es
 
 Este canal también podrá utilizarse para comunicar incidencias legales, anuncios incorrectos, contenidos presuntamente ilícitos o cualquier información que pueda vulnerar los Términos y Condiciones de Uso o la normativa aplicable.
 
@@ -102,7 +102,7 @@ Responsable: KAZAWEB, S.L.U.
 NIF: B42761254
 Domicilio: Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña
 Nombre comercial: Black Label Market
-Email de privacidad: privacidad@blackseriesmarket.com
+Email de privacidad: privacidad@blacklabelmarket.es
 Datos registrales: Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Libro 0, Folio 51, Sección 8, Hoja SC-51053, Inscripción 1ª
 
 Esta Política de Privacidad se aplica a los tratamientos de datos personales realizados a través de Black Label Market, de conformidad con el Reglamento (UE) 2016/679, General de Protección de Datos, y la Ley Orgánica 3/2018, de Protección de Datos Personales y garantía de los derechos digitales.
@@ -196,7 +196,7 @@ El usuario puede ejercer los siguientes derechos en materia de protección de da
 
 Para ejercer estos derechos, el usuario puede escribir a:
 
-privacidad@blackseriesmarket.com
+privacidad@blacklabelmarket.es
 
 La solicitud deberá indicar el derecho que se desea ejercer y permitir identificar razonablemente al solicitante.
 
@@ -206,7 +206,7 @@ El usuario también tiene derecho a presentar una reclamación ante la Agencia E
 
 Black Label Market solo enviará comunicaciones comerciales electrónicas cuando exista una base jurídica válida para ello, especialmente consentimiento del usuario o una relación previa que permita comunicaciones relacionadas con servicios similares.
 
-El usuario podrá solicitar la baja o retirar su consentimiento en cualquier momento a través de los mecanismos habilitados en cada comunicación o escribiendo a privacidad@blackseriesmarket.com.
+El usuario podrá solicitar la baja o retirar su consentimiento en cualquier momento a través de los mecanismos habilitados en cada comunicación o escribiendo a privacidad@blacklabelmarket.es.
 
 **Cookies y tecnologías similares**
 
