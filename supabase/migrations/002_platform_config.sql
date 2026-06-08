@@ -18,5 +18,5 @@ INSERT INTO platform_config (key, value) VALUES
     {"id":"elite","name":"Elite","price":699,"slots":100,"features":["Hasta 100 vehículos activos","Badge Elite exclusivo","Posición prioritaria","Account manager dedicado"],"highlighted":false}
   ]'::jsonb),
   ('criterios', '{"car_min_price":40000,"moto_min_price":15000,"max_vehicle_age":15,"requires_professional_photo":true,"requires_carfax":false}'::jsonb),
-  ('seo', '{"site_name":"Black Series Market","tagline":"El marketplace de vehículos premium","og_image":"","ga_id":"","gtm_id":""}'::jsonb)
+  ('seo', '{"site_name":"Black Label Market","tagline":"El marketplace de vehículos premium","og_image":"","ga_id":"","gtm_id":""}'::jsonb)
 ON CONFLICT (key) DO NOTHING;

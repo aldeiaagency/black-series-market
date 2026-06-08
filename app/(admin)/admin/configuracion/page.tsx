@@ -74,7 +74,7 @@ export default function AdminConfiguracionPage() {
   })
 
   const [email, setEmail] = useState({
-    from_name: 'Black Series Market',
+    from_name: 'Black Label Market',
     from_email: 'hola@blacklabelmarket.es',
     lead_notification: true,
     welcome_dealer: true,

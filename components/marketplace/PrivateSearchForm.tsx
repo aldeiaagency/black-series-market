@@ -26,6 +26,7 @@ type FormData = z.infer<typeof schema>
 
 export default function PrivateSearchForm() {
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -38,7 +39,25 @@ export default function PrivateSearchForm() {
   })
 
   async function onSubmit(data: FormData) {
-    // Store locally — prepared for CRM/n8n integration
+    setError(null)
+
+    // Persist server-side (table: custom_requests) — this is the operational store.
+    try {
+      const res = await fetch('/api/custom-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        setError('No se pudo enviar la solicitud. Inténtalo de nuevo en unos minutos.')
+        return
+      }
+    } catch {
+      setError('No se pudo enviar la solicitud. Revisa tu conexión e inténtalo de nuevo.')
+      return
+    }
+
+    // Keep a local copy only as a UX convenience (not the source of truth).
     try {
       const stored = JSON.parse(localStorage.getItem('blm_private_searches') || '[]')
       stored.push({ ...data, submitted_at: new Date().toISOString() })
@@ -52,7 +71,6 @@ export default function PrivateSearchForm() {
       body: JSON.stringify({ event_type: 'vehicle_request_submit' }),
     }).catch(() => {})
 
-    await new Promise((r) => setTimeout(r, 800))
     setSubmitted(true)
   }
 
@@ -202,6 +220,10 @@ export default function PrivateSearchForm() {
           />
         </div>
       </div>
+
+      {error && (
+        <p className="text-xs text-red-400 text-center" role="alert">{error}</p>
+      )}
 
       <button
         type="submit"

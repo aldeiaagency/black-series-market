@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
@@ -8,6 +9,7 @@ import ActiveFiltersBar from '@/components/marketplace/ActiveFiltersBar'
 import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import { getProvinciasByComunidad } from '@/lib/utils'
+import { resolveBrandNameFromSlug } from '@/lib/brands'
 import Pagination from '@/components/marketplace/Pagination'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
@@ -20,6 +22,12 @@ const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   mileage_desc: [{ col: 'mileage_km', asc: false }],
   year_desc:    [{ col: 'year', asc: false }],
   year_asc:     [{ col: 'year', asc: true }],
+}
+
+export const metadata: Metadata = {
+  title: 'Coches premium en venta',
+  description: 'Coches premium, deportivos, clásicos y unidades especiales en venta en España. Concesionarios y especialistas verificados.',
+  alternates: { canonical: '/coches' },
 }
 
 interface PageProps {
@@ -35,7 +43,13 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
     .eq('vehicle_type', 'car')
 
   if (params.categoria)          query = query.eq('category', params.categoria)
-  if (params.marca)              query = query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
+  if (params.marca) {
+    // Resolve slug → canonical brand name (handles hyphenated brands like Mercedes-Benz).
+    const brandName = await resolveBrandNameFromSlug(supabase, params.marca)
+    query = brandName
+      ? query.ilike('brand_name', brandName)
+      : query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
+  }
   if (params.modelo)             query = query.ilike('model_name', `%${params.modelo}%`)
   if (params.version)            query = query.ilike('version', `%${params.version}%`)
   if (params.anioMin)            query = query.gte('year', parseInt(params.anioMin))

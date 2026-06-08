@@ -40,6 +40,24 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
+// Organization schema for AI engines and rich results. "Black Label Market" is the
+// marketplace; KAZAWEB, S.L.U. is the legal entity; Black Series is the creating agency.
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Black Label Market',
+  legalName: 'KAZAWEB, S.L.U.',
+  url: SITE_URL,
+  description:
+    'Marketplace de coches y motos premium, deportivos, clásicos y unidades especiales en España, con concesionarios y especialistas verificados.',
+  brand: { '@type': 'Brand', name: 'Black Label Market' },
+  creator: { '@type': 'Organization', name: 'Black Series' },
+  areaServed: 'ES',
+  email: 'hola@blacklabelmarket.es',
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -48,6 +66,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${cormorant.variable}`}>
       <body className="bg-obsidian text-bsm-text-primary antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <ComparatorProvider>
           {children}
         </ComparatorProvider>

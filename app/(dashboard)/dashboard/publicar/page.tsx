@@ -195,16 +195,27 @@ export default function PublicarPage() {
     }
 
     let err
+    let savedVehicleId: string | null = editId || null
     if (editId) {
       const { error: e } = await supabase.from('vehicles').update(payload).eq('id', editId).eq('dealer_id', dealerId)
       err = e
     } else {
-      const { error: e } = await supabase.from('vehicles').insert(payload)
+      const { data: inserted, error: e } = await supabase.from('vehicles').insert(payload).select('id').single()
       err = e
+      savedVehicleId = inserted?.id ?? null
     }
 
     setLoading(false)
     if (err) { setError(err.message); return }
+
+    // Notify automations when the vehicle enters the review queue (non-blocking).
+    if (publish && savedVehicleId) {
+      fetch('/api/events/vehicle-submitted', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicle_id: savedVehicleId }),
+      }).catch(() => {})
+    }
 
     setSaved(true)
     setTimeout(() => router.push('/dashboard/inventario'), 1500)

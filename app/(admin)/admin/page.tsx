@@ -45,8 +45,8 @@ export default async function AdminPage() {
     supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('status', 'pending_review'),
     supabase.from('leads').select('*', { count: 'exact', head: true }),
     supabase.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', d30),
-    supabase.from('analytics_events').select('*', { count: 'exact', head: true })
-      .eq('event_type', 'vehicle_request_submit').gte('created_at', d30),
+    supabase.from('custom_requests').select('*', { count: 'exact', head: true })
+      .gte('created_at', d30),
     supabase.from('dealers')
       .select('id, name, status, subscription_plan, created_at')
       .order('created_at', { ascending: false })

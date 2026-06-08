@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { formatNumber } from '@/lib/utils'
 import {
   Eye, MessageSquare, Heart, Bell, Car, Users, TrendingUp,
@@ -24,7 +24,8 @@ function groupBy<T>(arr: T[], key: (item: T) => string): Record<string, number> 
 // ── component ─────────────────────────────────────────────────────────────────
 
 export default async function AdminAnaliticasPage() {
-  const supabase = await createClient()
+  // createAdminClient bypasses RLS — required to read cross-dealer metrics.
+  const supabase = createAdminClient()
 
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -53,11 +54,13 @@ export default async function AdminAnaliticasPage() {
     supabase.from('analytics_events').select('*', { count: 'exact', head: true })
       .eq('event_type', 'vehicle_contact_submit').gte('created_at', d30),
 
-    supabase.from('analytics_events').select('*', { count: 'exact', head: true })
-      .eq('event_type', 'vehicle_request_submit').gte('created_at', d30),
+    // Real persisted "vehículos a la carta" requests (custom_requests table)
+    supabase.from('custom_requests').select('*', { count: 'exact', head: true })
+      .gte('created_at', d30),
 
-    supabase.from('analytics_events').select('*', { count: 'exact', head: true })
-      .eq('event_type', 'search_alert_created').gte('created_at', d30),
+    // Real persisted search alerts (search_alerts table)
+    supabase.from('search_alerts').select('*', { count: 'exact', head: true })
+      .gte('created_at', d30),
 
     supabase.from('analytics_events').select('*', { count: 'exact', head: true })
       .eq('event_type', 'vehicle_saved').gte('created_at', d30),
