@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
-  LayoutDashboard, Users, Car, Settings, TrendingUp, MessageSquare,
+  LayoutDashboard, Users, Car, Settings, TrendingUp, MessageSquare, ClipboardList, Bell,
 } from 'lucide-react'
 
 const ADMIN_NAV = [
@@ -10,6 +10,8 @@ const ADMIN_NAV = [
   { label: 'Showrooms',       href: '/admin/dealers',        icon: Users },
   { label: 'Vehículos',       href: '/admin/vehiculos',      icon: Car },
   { label: 'Contactos',       href: '/admin/contactos',      icon: MessageSquare },
+  { label: 'Solicitudes',     href: '/admin/solicitudes',    icon: ClipboardList },
+  { label: 'Alertas',         href: '/admin/alertas',        icon: Bell },
   { label: 'Analíticas',      href: '/admin/analiticas',     icon: TrendingUp },
   { label: 'Configuración',   href: '/admin/configuracion',  icon: Settings },
 ]
@@ -27,8 +29,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="w-64 bg-surface border-r border-bsm-border flex flex-col h-screen sticky top-0">
         <div className="p-6 border-b border-bsm-border">
           <Link href="/admin">
-            <div className="font-display text-lg font-light tracking-[0.15em]">BLACK SERIES</div>
-            <div className="text-[9px] tracking-[0.4em] text-gold uppercase">Admin Panel</div>
+            <div className="font-display text-lg font-light tracking-[0.15em]">BLACK LABEL</div>
+            <div className="text-[9px] tracking-[0.4em] text-gold uppercase">Market · Admin</div>
           </Link>
         </div>
 

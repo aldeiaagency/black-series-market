@@ -1,5 +1,12 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Marcas premium',
+  description: 'Explora las marcas de coches y motos premium disponibles en Black Label Market.',
+  alternates: { canonical: '/marcas' },
+}
 
 // Slugs canónicos por tipo — determina sección cuando no hay vehículos publicados.
 // Honda aparece en ambas listas porque fabrica coches y motos.

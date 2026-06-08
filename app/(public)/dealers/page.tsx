@@ -1,6 +1,13 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import DealerCard from '@/components/marketplace/DealerCard'
 import { MapPin, Car, Bike, CheckCircle } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Concesionarios y especialistas verificados',
+  description: 'Concesionarios, compraventas y especialistas premium verificados en Black Label Market.',
+  alternates: { canonical: '/dealers' },
+}
 
 interface PageProps {
   searchParams: Promise<{ tipo?: string; zona?: string }>

@@ -20,11 +20,20 @@ async function approveVehicle(formData: FormData) {
   'use server'
   const id = formData.get('vehicleId') as string
   const { createAdminClient } = await import('@/lib/supabase/server')
+  const { notifyN8n } = await import('@/lib/integrations/n8n')
   const supabase = await createAdminClient()
-  await supabase.from('vehicles').update({
+  const { data: updated } = await supabase.from('vehicles').update({
     status: 'active',
     published_at: new Date().toISOString(),
-  }).eq('id', id)
+  }).eq('id', id).select('id, brand_name, model_name, year, dealer_id').single()
+
+  await notifyN8n('vehicle.approved', {
+    entityType: 'vehicle',
+    entityId: id,
+    dealerId: updated?.dealer_id ?? null,
+    vehicleId: id,
+    payload: { brand: updated?.brand_name, model: updated?.model_name, year: updated?.year },
+  })
   redirect(`/admin/vehiculos/${id}`)
 }
 
@@ -34,12 +43,21 @@ async function rejectVehicle(formData: FormData) {
   const reason = formData.get('rejection_reason') as string
   const notes  = formData.get('admin_notes') as string
   const { createAdminClient } = await import('@/lib/supabase/server')
+  const { notifyN8n } = await import('@/lib/integrations/n8n')
   const supabase = await createAdminClient()
-  await supabase.from('vehicles').update({
+  const { data: updated } = await supabase.from('vehicles').update({
     status:           'draft',
     rejection_reason: reason || null,
     admin_notes:      notes  || null,
-  }).eq('id', id)
+  }).eq('id', id).select('id, brand_name, model_name, year, dealer_id').single()
+
+  await notifyN8n('vehicle.rejected', {
+    entityType: 'vehicle',
+    entityId: id,
+    dealerId: updated?.dealer_id ?? null,
+    vehicleId: id,
+    payload: { brand: updated?.brand_name, model: updated?.model_name, year: updated?.year, reason: reason || null },
+  })
   redirect(`/admin/vehiculos/${id}`)
 }
 

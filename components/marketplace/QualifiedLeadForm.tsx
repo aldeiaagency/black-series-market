@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/client'
 import { CheckCircle, ChevronDown, ChevronUp, Info } from 'lucide-react'
 
 const schema = z.object({
@@ -57,7 +56,6 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
 
   async function onSubmit(data: FormData) {
     setError(null)
-    const supabase = createClient()
 
     const timelineLabels: Record<string, string> = {
       immediate: 'Inmediata', '1_3_months': '1-3 meses',
@@ -73,23 +71,31 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
     if (data.trade_in) parts.push(`Entrega vehículo: ${data.trade_in === 'yes' ? 'Sí' : 'No'}`)
     if (data.contact_preference) parts.push(`Contacto preferido: ${contactLabels[data.contact_preference]}`)
 
-    const { error: err } = await supabase.from('leads').insert({
-      vehicle_id:  vehicleId,
-      dealer_id:   dealerId,
-      buyer_name:  data.buyer_name,
-      buyer_email: data.buyer_email,
-      buyer_phone: data.buyer_phone || null,
-      message:     parts.join(' · ') || 'Solicitud de información',
-    })
-
-    if (err) { setError('Error al enviar. Inténtalo de nuevo.'); return }
+    // Single server-side insert + n8n event (lead.created), via /api/leads.
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vehicle_id:  vehicleId,
+          dealer_id:   dealerId,
+          buyer_name:  data.buyer_name,
+          buyer_email: data.buyer_email,
+          buyer_phone: data.buyer_phone || null,
+          message:     parts.join(' · ') || 'Solicitud de información',
+        }),
+      })
+      if (!res.ok) { setError('Error al enviar. Inténtalo de nuevo.'); return }
+    } catch {
+      setError('Error al enviar. Revisa tu conexión e inténtalo de nuevo.')
+      return
+    }
 
     fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event_type: 'vehicle_contact_submit', vehicle_id: vehicleId, dealer_id: dealerId }),
     }).catch(() => {})
-
 
     setSubmitted(true)
   }

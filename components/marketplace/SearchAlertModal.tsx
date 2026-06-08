@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Bell, CheckCircle } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
 const schema = z.object({
   vehicle_type: z.enum(['car', 'motorcycle', 'any']),
@@ -30,6 +29,7 @@ interface Props {
 
 export default function SearchAlertModal({ open, onClose, defaultVehicleType }: Props) {
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -40,32 +40,24 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
   })
 
   async function onSubmit(data: FormData) {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    setError(null)
 
-    if (user) {
-      // Logged-in: save to Supabase
-      await supabase.from('search_alerts').insert({
-        user_id:      user.id,
-        email:        data.email,
-        phone:        data.phone || null,
-        vehicle_type: data.vehicle_type,
-        brand:        data.brand || null,
-        model:        data.model || null,
-        budget_max:   data.budget_max || null,
-        year_min:     data.year_min ? parseInt(data.year_min) : null,
-        km_max:       data.km_max || null,
-        location:     data.location || null,
-        timeline:     data.timeline,
+    // Persist server-side for everyone — anonymous and logged-in alike. The server
+    // route attaches the user when a session exists; anonymous alerts no longer get
+    // lost in localStorage.
+    try {
+      const res = await fetch('/api/search-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       })
-    } else {
-      // Guest: store locally
-      try {
-        const stored = JSON.parse(localStorage.getItem('blacklabel_alerts') || '[]')
-        stored.push({ ...data, created_at: new Date().toISOString() })
-        localStorage.setItem('blacklabel_alerts', JSON.stringify(stored))
-      } catch {}
-      await new Promise((r) => setTimeout(r, 600))
+      if (!res.ok) {
+        setError('No se pudo registrar la alerta. Inténtalo de nuevo.')
+        return
+      }
+    } catch {
+      setError('No se pudo registrar la alerta. Revisa tu conexión.')
+      return
     }
 
     // Track alert creation (non-blocking)
@@ -209,6 +201,10 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
                 <input {...register('phone')} type="tel" placeholder="Opcional" className="input-base" />
               </div>
             </div>
+
+            {error && (
+              <p className="text-xs text-red-400 text-center" role="alert">{error}</p>
+            )}
 
             <button
               type="submit"
