@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import SearchBar from '@/components/marketplace/SearchBar'
+import CloseSearchButton from '@/components/marketplace/CloseSearchButton'
 import Link from 'next/link'
 
 interface PageProps {
@@ -64,9 +65,12 @@ export default async function BuscarPage({ searchParams }: PageProps) {
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       <div className="mb-10">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px w-8 bg-gold" />
-          <span className="text-xs text-gold tracking-widest uppercase">Búsqueda</span>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="h-px w-8 bg-gold" />
+            <span className="text-xs text-gold tracking-widest uppercase">Búsqueda</span>
+          </div>
+          <CloseSearchButton />
         </div>
         <h1 className="section-title mb-8">Buscar vehículos</h1>
 

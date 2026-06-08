@@ -1048,10 +1048,10 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   return (
     <>
-      {/* ── FILTER BAR (todas las resoluciones) ── */}
-      <div className="flex flex-wrap items-center gap-2.5">
-        {/* Search */}
-        <form onSubmit={submitSearch} className="relative flex-1 min-w-[160px] max-w-xs hidden sm:block">
+      {/* ── FILTER BAR ── */}
+      <div className="space-y-3">
+        {/* Search — su propia fila, centrada */}
+        <form onSubmit={submitSearch} className="relative w-full max-w-md mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-bsm-text-muted pointer-events-none" />
           <input
             type="text"
@@ -1063,137 +1063,140 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           />
         </form>
 
-        {/* Quick: Marca */}
-        <select
-          className={`${quickSelectCls} hidden sm:block`}
-          value={currentBrand}
-          onChange={(e) => updateBrand(e.target.value)}
-          aria-label="Marca"
-        >
-          <option value="">Marca</option>
-          {allBrands.map((brand) => (
-            <option key={brand} value={brandSlug(brand)}>{brand}</option>
-          ))}
-        </select>
-
-        {/* Quick: Modelo (aparece al elegir marca) */}
-        {currentBrand && (
+        {/* Filtros rápidos — fila centrada */}
+        <div className="flex flex-wrap items-center justify-center gap-2.5">
+          {/* Quick: Marca */}
           <select
             className={`${quickSelectCls} hidden sm:block`}
-            value={view.get('modelo') || ''}
-            onChange={(e) => updateParam('modelo', e.target.value || null)}
-            disabled={loadingModels}
-            aria-label="Modelo"
+            value={currentBrand}
+            onChange={(e) => updateBrand(e.target.value)}
+            aria-label="Marca"
           >
-            <option value="">{loadingModels ? 'Cargando…' : 'Modelo'}</option>
-            {models.map((m) => (
-              <option key={m} value={m}>{m}</option>
+            <option value="">Marca</option>
+            {allBrands.map((brand) => (
+              <option key={brand} value={brandSlug(brand)}>{brand}</option>
             ))}
           </select>
-        )}
 
-        {/* Quick: Categoría */}
-        <select
-          className={`${quickSelectCls} hidden md:block`}
-          value={view.get('categoria') || ''}
-          onChange={(e) => updateParam('categoria', e.target.value || null)}
-          aria-label="Categoría"
-        >
-          <option value="">Categoría</option>
-          {categories.map((c) => (
-            <option key={c.value} value={c.value}>{c.label}</option>
-          ))}
-        </select>
+          {/* Quick: Modelo (aparece al elegir marca) */}
+          {currentBrand && (
+            <select
+              className={`${quickSelectCls} hidden sm:block`}
+              value={view.get('modelo') || ''}
+              onChange={(e) => updateParam('modelo', e.target.value || null)}
+              disabled={loadingModels}
+              aria-label="Modelo"
+            >
+              <option value="">{loadingModels ? 'Cargando…' : 'Modelo'}</option>
+              {models.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          )}
 
-        {/* Quick: Precio */}
-        <div className="relative hidden sm:block">
-          <button type="button" onClick={() => setOpenQuick(openQuick === 'precio' ? null : 'precio')} className={quickBtnCls}>
-            {priceLabel}
-            <ChevronDown className="w-3.5 h-3.5" />
+          {/* Quick: Versión (texto) — consecutivo a Marca/Modelo, mismo ancho */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); updateParam('version', versionDraft.trim() || null) }}
+            className="hidden sm:block"
+          >
+            <input
+              type="text"
+              placeholder="Versión"
+              className="input-base text-sm py-2 w-36"
+              value={versionDraft}
+              onChange={(e) => setVersionDraft(e.target.value)}
+              onBlur={() => { if ((view.get('version') || '') !== versionDraft.trim()) updateParam('version', versionDraft.trim() || null) }}
+              aria-label="Versión"
+            />
+          </form>
+
+          {/* Quick: Categoría */}
+          <select
+            className={`${quickSelectCls} hidden md:block`}
+            value={view.get('categoria') || ''}
+            onChange={(e) => updateParam('categoria', e.target.value || null)}
+            aria-label="Categoría"
+          >
+            <option value="">Categoría</option>
+            {categories.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+
+          {/* Quick: Precio */}
+          <div className="relative hidden md:block">
+            <button type="button" onClick={() => setOpenQuick(openQuick === 'precio' ? null : 'precio')} className={quickBtnCls}>
+              {priceLabel}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+            {openQuick === 'precio' && (
+              <>
+                <button className="fixed inset-0 z-30" aria-hidden onClick={() => setOpenQuick(null)} />
+                <form
+                  onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); updateRange('precioMin', String(fd.get('min') || ''), 'precioMax', String(fd.get('max') || '')); setOpenQuick(null) }}
+                  className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-40 w-64 bg-[#0D0D0D] border border-bsm-border p-4 shadow-xl"
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    <input name="min" type="number" defaultValue={searchParams.get('precioMin') || ''} placeholder="Desde €" className="input-base text-sm" />
+                    <input name="max" type="number" defaultValue={searchParams.get('precioMax') || ''} placeholder="Hasta €" className="input-base text-sm" />
+                  </div>
+                  <button type="submit" className="btn-gold w-full justify-center text-xs mt-3 py-2">Aplicar</button>
+                </form>
+              </>
+            )}
+          </div>
+
+          {/* Quick: Año */}
+          <div className="relative hidden lg:block">
+            <button type="button" onClick={() => setOpenQuick(openQuick === 'anio' ? null : 'anio')} className={quickBtnCls}>
+              {yearLabel}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+            {openQuick === 'anio' && (
+              <>
+                <button className="fixed inset-0 z-30" aria-hidden onClick={() => setOpenQuick(null)} />
+                <form
+                  onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); updateRange('anioMin', String(fd.get('min') || ''), 'anioMax', String(fd.get('max') || '')); setOpenQuick(null) }}
+                  className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-40 w-56 bg-[#0D0D0D] border border-bsm-border p-4 shadow-xl"
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    <input name="min" type="number" min="1950" defaultValue={searchParams.get('anioMin') || ''} placeholder="Desde" className="input-base text-sm" />
+                    <input name="max" type="number" min="1950" defaultValue={searchParams.get('anioMax') || ''} placeholder="Hasta" className="input-base text-sm" />
+                  </div>
+                  <button type="submit" className="btn-gold w-full justify-center text-xs mt-3 py-2">Aplicar</button>
+                </form>
+              </>
+            )}
+          </div>
+
+          {/* Quick: Combustible */}
+          <select
+            className={`${quickSelectCls} hidden lg:block`}
+            value={searchParams.get('combustible') || ''}
+            onChange={(e) => updateParam('combustible', e.target.value || null)}
+            aria-label="Combustible"
+          >
+            <option value="">Combustible</option>
+            {FUEL_QUICK.map((f) => (
+              <option key={f.value} value={f.value}>{f.label}</option>
+            ))}
+          </select>
+
+          {/* All filters → drawer */}
+          <button
+            onClick={openDrawer}
+            className="flex items-center gap-2 px-4 py-2 text-sm border border-gold/40 text-gold
+              hover:bg-gold/10 transition-colors whitespace-nowrap"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Todos los filtros
+            {activeFilterCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-gold text-obsidian text-[10px] font-medium flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
           </button>
-          {openQuick === 'precio' && (
-            <>
-              <button className="fixed inset-0 z-30" aria-hidden onClick={() => setOpenQuick(null)} />
-              <form
-                onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); updateRange('precioMin', String(fd.get('min') || ''), 'precioMax', String(fd.get('max') || '')); setOpenQuick(null) }}
-                className="absolute left-0 top-full mt-2 z-40 w-64 bg-[#0D0D0D] border border-bsm-border p-4 shadow-xl"
-              >
-                <div className="grid grid-cols-2 gap-2">
-                  <input name="min" type="number" defaultValue={searchParams.get('precioMin') || ''} placeholder="Desde €" className="input-base text-sm" />
-                  <input name="max" type="number" defaultValue={searchParams.get('precioMax') || ''} placeholder="Hasta €" className="input-base text-sm" />
-                </div>
-                <button type="submit" className="btn-gold w-full justify-center text-xs mt-3 py-2">Aplicar</button>
-              </form>
-            </>
-          )}
         </div>
-
-        {/* Quick: Año */}
-        <div className="relative hidden md:block">
-          <button type="button" onClick={() => setOpenQuick(openQuick === 'anio' ? null : 'anio')} className={quickBtnCls}>
-            {yearLabel}
-            <ChevronDown className="w-3.5 h-3.5" />
-          </button>
-          {openQuick === 'anio' && (
-            <>
-              <button className="fixed inset-0 z-30" aria-hidden onClick={() => setOpenQuick(null)} />
-              <form
-                onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); updateRange('anioMin', String(fd.get('min') || ''), 'anioMax', String(fd.get('max') || '')); setOpenQuick(null) }}
-                className="absolute left-0 top-full mt-2 z-40 w-56 bg-[#0D0D0D] border border-bsm-border p-4 shadow-xl"
-              >
-                <div className="grid grid-cols-2 gap-2">
-                  <input name="min" type="number" min="1950" defaultValue={searchParams.get('anioMin') || ''} placeholder="Desde" className="input-base text-sm" />
-                  <input name="max" type="number" min="1950" defaultValue={searchParams.get('anioMax') || ''} placeholder="Hasta" className="input-base text-sm" />
-                </div>
-                <button type="submit" className="btn-gold w-full justify-center text-xs mt-3 py-2">Aplicar</button>
-              </form>
-            </>
-          )}
-        </div>
-
-        {/* Quick: Combustible */}
-        <select
-          className={`${quickSelectCls} hidden md:block`}
-          value={searchParams.get('combustible') || ''}
-          onChange={(e) => updateParam('combustible', e.target.value || null)}
-          aria-label="Combustible"
-        >
-          <option value="">Combustible</option>
-          {FUEL_QUICK.map((f) => (
-            <option key={f.value} value={f.value}>{f.label}</option>
-          ))}
-        </select>
-
-        {/* Quick: Versión (texto) */}
-        <form
-          onSubmit={(e) => { e.preventDefault(); updateParam('version', versionDraft.trim() || null) }}
-          className="relative hidden lg:block"
-        >
-          <input
-            type="text"
-            placeholder="Versión"
-            className="input-base text-sm w-32"
-            value={versionDraft}
-            onChange={(e) => setVersionDraft(e.target.value)}
-            onBlur={() => { if ((view.get('version') || '') !== versionDraft.trim()) updateParam('version', versionDraft.trim() || null) }}
-            aria-label="Versión"
-          />
-        </form>
-
-        {/* All filters → drawer */}
-        <button
-          onClick={openDrawer}
-          className="flex items-center gap-2 px-4 py-2 text-sm border border-gold/40 text-gold
-            hover:bg-gold/10 transition-colors ml-auto whitespace-nowrap"
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          Todos los filtros
-          {activeFilterCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-gold text-obsidian text-[10px] font-medium flex items-center justify-center">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
       </div>
 
       {/* ── FILTER DRAWER (derecha en escritorio, pantalla completa en móvil) ── */}
