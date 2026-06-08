@@ -125,13 +125,13 @@ async function MotoList({ params }: { params: Record<string, string> }) {
   }
 
   return (
-    <div className="flex-1 space-y-8">
+    <div className="space-y-8">
       {(count ?? 0) <= limit && (
         <p className="text-sm text-bsm-text-muted">
           {count} moto{count !== 1 ? 's' : ''} encontrada{count !== 1 ? 's' : ''}
         </p>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
       </div>
       <Pagination
@@ -167,19 +167,18 @@ export default async function MotosPage({ searchParams }: PageProps) {
           <h1 className="section-title">Motos premium</h1>
           <Suspense fallback={null}><SortSelector /></Suspense>
         </div>
-        <Suspense fallback={null}>
-          <ActiveFiltersBar />
-        </Suspense>
-      </div>
-
-      <div className="flex gap-12">
+        {/* Filter bar — quick filters + 'Todos los filtros' drawer */}
         <Suspense fallback={null}>
           <VehicleFilters vehicleType="motorcycle" totalCount={count || 0} />
         </Suspense>
-        <Suspense fallback={<div className="flex-1" />}>
-          <MotoList params={params} />
+        <Suspense fallback={null}>
+          <ActiveFiltersBar className="mt-4" />
         </Suspense>
       </div>
+
+      <Suspense fallback={<div />}>
+        <MotoList params={params} />
+      </Suspense>
     </div>
   )
 }

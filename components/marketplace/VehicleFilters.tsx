@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { cn, SPAIN_LOCATIONS, getProvinciasByComunidad } from '@/lib/utils'
@@ -378,44 +378,29 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     return () => { document.body.style.overflow = '' }
   }, [mobileOpen])
 
-  // ── Scroll affordance for the desktop filter rail ──────────────────────────
-  // Tracks whether there is hidden content above/below the visible window so we can
-  // fade the corresponding edge (signals "there is more to scroll"). A ResizeObserver
-  // keeps it correct when groups expand/collapse and the content height changes.
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [scrollEdges, setScrollEdges] = useState<{ up: boolean; down: boolean }>({ up: false, down: false })
+  // ── Quick filters (top bar) ────────────────────────────────────────────────
+  // Which range popover (price / year) is currently open in the quick bar.
+  const [openQuick, setOpenQuick] = useState<string | null>(null)
 
-  const recomputeScrollEdges = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-    const up = el.scrollTop > 4
-    const down = el.scrollTop + el.clientHeight < el.scrollHeight - 4
-    setScrollEdges((prev) => (prev.up === up && prev.down === down ? prev : { up, down }))
-  }, [])
+  // Fuel options surfaced as a quick filter in the bar.
+  const FUEL_QUICK = [
+    { value: 'gasoline', label: 'Gasolina' },
+    { value: 'diesel', label: 'Diésel' },
+    { value: 'electric', label: 'Eléctrico' },
+    { value: 'hybrid', label: 'Híbrido' },
+    { value: 'plugin_hybrid', label: 'Híbrido enchufable' },
+  ]
 
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    recomputeScrollEdges()
-    const ro = new ResizeObserver(() => recomputeScrollEdges())
-    ro.observe(el)
-    if (el.firstElementChild) ro.observe(el.firstElementChild)
-    window.addEventListener('resize', recomputeScrollEdges)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', recomputeScrollEdges)
-    }
-  }, [recomputeScrollEdges])
+  const brandSlug = (name: string) => name.toLowerCase().replace(/ /g, '-')
 
-  // Edge-fade mask: fades the top once scrolled, the bottom while content remains.
-  const FADE = '1.75rem'
-  const filterMask = (() => {
-    const { up, down } = scrollEdges
-    if (!up && !down) return undefined
-    const top = up ? `transparent 0, #000 ${FADE}` : `#000 0`
-    const bottom = down ? `#000 calc(100% - ${FADE}), transparent 100%` : `#000 100%`
-    return `linear-gradient(to bottom, ${top}, ${bottom})`
-  })()
+  // Apply a min/max range in a single navigation (avoids two pushes).
+  function updateRange(minKey: string, minVal: string, maxKey: string, maxVal: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    minVal ? params.set(minKey, minVal) : params.delete(minKey)
+    maxVal ? params.set(maxKey, maxVal) : params.delete(maxKey)
+    params.delete('page')
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
 
   useEffect(() => {
     if (!currentBrand) { setModels([]); return }
@@ -964,16 +949,124 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     )
   }
 
+  const priceLabel = (() => {
+    const min = searchParams.get('precioMin'), max = searchParams.get('precioMax')
+    if (min && max) return `${(+min / 1000).toFixed(0)}k–${(+max / 1000).toFixed(0)}k €`
+    if (min) return `Desde ${(+min / 1000).toFixed(0)}k €`
+    if (max) return `Hasta ${(+max / 1000).toFixed(0)}k €`
+    return 'Precio'
+  })()
+  const yearLabel = (() => {
+    const min = searchParams.get('anioMin'), max = searchParams.get('anioMax')
+    if (min && max) return `${min}–${max}`
+    if (min) return `${min}+`
+    if (max) return `Hasta ${max}`
+    return 'Año'
+  })()
+
+  const quickSelectCls =
+    'select-base w-auto min-w-[7rem] text-sm py-2'
+  const quickBtnCls =
+    'flex items-center gap-1.5 px-3 py-2 text-sm border border-bsm-border text-bsm-text-secondary ' +
+    'hover:border-gold/40 hover:text-bsm-text-primary transition-colors whitespace-nowrap'
+
   return (
     <>
-      {/* ── MOBILE trigger ── */}
-      <div className="lg:hidden mb-6">
+      {/* ── FILTER BAR (todas las resoluciones) ── */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        {/* Search */}
+        <form onSubmit={submitSearch} className="relative flex-1 min-w-[160px] max-w-xs hidden sm:block">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-bsm-text-muted pointer-events-none" />
+          <input
+            type="text"
+            placeholder={`Marca, modelo${isMoto ? ', estilo' : ', versión'}…`}
+            className="input-base pl-9 text-sm"
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
+            aria-label="Buscar"
+          />
+        </form>
+
+        {/* Quick: Marca */}
+        <select
+          className={`${quickSelectCls} hidden sm:block`}
+          value={currentBrand}
+          onChange={(e) => updateBrand(e.target.value)}
+          aria-label="Marca"
+        >
+          <option value="">Marca</option>
+          {allBrands.map((brand) => (
+            <option key={brand} value={brandSlug(brand)}>{brand}</option>
+          ))}
+        </select>
+
+        {/* Quick: Precio */}
+        <div className="relative hidden sm:block">
+          <button type="button" onClick={() => setOpenQuick(openQuick === 'precio' ? null : 'precio')} className={quickBtnCls}>
+            {priceLabel}
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+          {openQuick === 'precio' && (
+            <>
+              <button className="fixed inset-0 z-30" aria-hidden onClick={() => setOpenQuick(null)} />
+              <form
+                onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); updateRange('precioMin', String(fd.get('min') || ''), 'precioMax', String(fd.get('max') || '')); setOpenQuick(null) }}
+                className="absolute left-0 top-full mt-2 z-40 w-64 bg-[#0D0D0D] border border-bsm-border p-4 shadow-xl"
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  <input name="min" type="number" defaultValue={searchParams.get('precioMin') || ''} placeholder="Desde €" className="input-base text-sm" />
+                  <input name="max" type="number" defaultValue={searchParams.get('precioMax') || ''} placeholder="Hasta €" className="input-base text-sm" />
+                </div>
+                <button type="submit" className="btn-gold w-full justify-center text-xs mt-3 py-2">Aplicar</button>
+              </form>
+            </>
+          )}
+        </div>
+
+        {/* Quick: Año */}
+        <div className="relative hidden md:block">
+          <button type="button" onClick={() => setOpenQuick(openQuick === 'anio' ? null : 'anio')} className={quickBtnCls}>
+            {yearLabel}
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+          {openQuick === 'anio' && (
+            <>
+              <button className="fixed inset-0 z-30" aria-hidden onClick={() => setOpenQuick(null)} />
+              <form
+                onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); updateRange('anioMin', String(fd.get('min') || ''), 'anioMax', String(fd.get('max') || '')); setOpenQuick(null) }}
+                className="absolute left-0 top-full mt-2 z-40 w-56 bg-[#0D0D0D] border border-bsm-border p-4 shadow-xl"
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  <input name="min" type="number" min="1950" defaultValue={searchParams.get('anioMin') || ''} placeholder="Desde" className="input-base text-sm" />
+                  <input name="max" type="number" min="1950" defaultValue={searchParams.get('anioMax') || ''} placeholder="Hasta" className="input-base text-sm" />
+                </div>
+                <button type="submit" className="btn-gold w-full justify-center text-xs mt-3 py-2">Aplicar</button>
+              </form>
+            </>
+          )}
+        </div>
+
+        {/* Quick: Combustible */}
+        <select
+          className={`${quickSelectCls} hidden md:block`}
+          value={searchParams.get('combustible') || ''}
+          onChange={(e) => updateParam('combustible', e.target.value || null)}
+          aria-label="Combustible"
+        >
+          <option value="">Combustible</option>
+          {FUEL_QUICK.map((f) => (
+            <option key={f.value} value={f.value}>{f.label}</option>
+          ))}
+        </select>
+
+        {/* All filters → drawer */}
         <button
           onClick={() => setMobileOpen(true)}
-          className="flex items-center gap-2 btn-outline w-full justify-center"
+          className="flex items-center gap-2 px-4 py-2 text-sm border border-gold/40 text-gold
+            hover:bg-gold/10 transition-colors ml-auto whitespace-nowrap"
         >
           <SlidersHorizontal className="w-4 h-4" />
-          Filtros
+          Todos los filtros
           {activeFilterCount > 0 && (
             <span className="w-5 h-5 rounded-full bg-gold text-obsidian text-[10px] font-medium flex items-center justify-center">
               {activeFilterCount}
@@ -982,19 +1075,22 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </button>
       </div>
 
-      {/* ── MOBILE drawer ── */}
+      {/* ── FILTER DRAWER (derecha en escritorio, pantalla completa en móvil) ── */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
+        <div className="fixed inset-0 z-50 flex justify-end">
           <button
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
             aria-label="Cerrar filtros"
           />
-          <div className="relative z-10 w-[min(85vw,340px)] h-full bg-[#080808] border-r border-bsm-border flex flex-col">
+          <div className="relative z-10 h-full w-full sm:w-[420px] bg-[#080808] border-l border-bsm-border flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.8)] animate-slide-in-right">
             <div className="flex items-center justify-between px-5 py-4 border-b border-bsm-border flex-shrink-0">
-              <span className="text-sm font-medium text-bsm-text-primary">
-                Filtros {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
-              </span>
+              <div>
+                <span className="text-sm font-medium text-bsm-text-primary">
+                  Filtros {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+                </span>
+                <p className="text-[11px] text-bsm-text-muted mt-0.5">{totalCount} vehículos en total</p>
+              </div>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-1 text-bsm-text-muted hover:text-bsm-text-primary transition-colors"
@@ -1003,13 +1099,21 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-5 py-5">
+            <div className="flex-1 overflow-y-auto overscroll-contain filter-scroll px-5 py-5">
               {renderFilters()}
             </div>
-            <div className="flex-shrink-0 px-5 py-4 border-t border-bsm-border">
+            <div className="flex-shrink-0 px-5 py-4 border-t border-bsm-border flex items-center gap-3">
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearAll}
+                  className="text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors whitespace-nowrap"
+                >
+                  Borrar todo
+                </button>
+              )}
               <button
                 onClick={() => setMobileOpen(false)}
-                className="btn-gold w-full justify-center text-sm"
+                className="btn-gold flex-1 justify-center text-sm"
               >
                 Ver resultados
               </button>
@@ -1017,42 +1121,6 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           </div>
         </div>
       )}
-
-      {/* ── DESKTOP sidebar — 3 zonas: cabecera fija + cuerpo scrollable ── */}
-      <aside
-        className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 self-start sticky top-24 overflow-hidden"
-        style={{ height: 'calc(100vh - 6rem)' }}
-      >
-        {/* Pinned header — el contador y "borrar" no se van con el scroll */}
-        <div className="flex items-center justify-between pb-4 mb-2 flex-shrink-0 border-b border-bsm-border pr-1">
-          <span className="text-xs text-bsm-text-muted uppercase tracking-widest">
-            {totalCount} vehículos
-          </span>
-          {activeFilterCount > 0 && (
-            <button
-              onClick={clearAll}
-              className="text-xs text-gold hover:text-gold-light transition-colors flex items-center gap-1"
-            >
-              <X className="w-3 h-3" />
-              Borrar {activeFilterCount > 1 ? `${activeFilterCount} filtros` : 'filtro'}
-            </button>
-          )}
-        </div>
-        {/* Scrollable body — fade en los bordes + scrollbar dorada + sin scroll chaining */}
-        <div
-          ref={scrollRef}
-          onScroll={recomputeScrollEdges}
-          tabIndex={0}
-          role="region"
-          aria-label="Filtros de búsqueda"
-          className="flex-1 overflow-y-auto overscroll-contain filter-scroll pr-2 pt-4"
-          style={{ maskImage: filterMask, WebkitMaskImage: filterMask }}
-        >
-          <div className="pb-8">
-            {renderFilters()}
-          </div>
-        </div>
-      </aside>
     </>
   )
 }
