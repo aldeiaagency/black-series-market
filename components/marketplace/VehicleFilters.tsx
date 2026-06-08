@@ -354,6 +354,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const [models, setModels]                     = useState<string[]>([])
   const [loadingModels, setLoadingModels]       = useState(false)
   const [searchDraft, setSearchDraft]           = useState(searchParams.get('search') || '')
+  const [versionDraft, setVersionDraft]         = useState(searchParams.get('version') || '')
   const [showAdvanced, setShowAdvanced]         = useState(false)
   const [allDealers, setAllDealers]             = useState<{ id: string; name: string; location_city: string | null; isFeatured: boolean }[]>([])
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
@@ -442,6 +443,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   useEffect(() => {
     setSearchDraft(searchParams.get('search') || '')
+    setVersionDraft(searchParams.get('version') || '')
   }, [searchParams])
 
   // Fetch all dealers with active stock, filtered by current location
@@ -1074,6 +1076,35 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           ))}
         </select>
 
+        {/* Quick: Modelo (aparece al elegir marca) */}
+        {currentBrand && (
+          <select
+            className={`${quickSelectCls} hidden sm:block`}
+            value={view.get('modelo') || ''}
+            onChange={(e) => updateParam('modelo', e.target.value || null)}
+            disabled={loadingModels}
+            aria-label="Modelo"
+          >
+            <option value="">{loadingModels ? 'Cargando…' : 'Modelo'}</option>
+            {models.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Quick: Categoría */}
+        <select
+          className={`${quickSelectCls} hidden md:block`}
+          value={view.get('categoria') || ''}
+          onChange={(e) => updateParam('categoria', e.target.value || null)}
+          aria-label="Categoría"
+        >
+          <option value="">Categoría</option>
+          {categories.map((c) => (
+            <option key={c.value} value={c.value}>{c.label}</option>
+          ))}
+        </select>
+
         {/* Quick: Precio */}
         <div className="relative hidden sm:block">
           <button type="button" onClick={() => setOpenQuick(openQuick === 'precio' ? null : 'precio')} className={quickBtnCls}>
@@ -1132,6 +1163,22 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             <option key={f.value} value={f.value}>{f.label}</option>
           ))}
         </select>
+
+        {/* Quick: Versión (texto) */}
+        <form
+          onSubmit={(e) => { e.preventDefault(); updateParam('version', versionDraft.trim() || null) }}
+          className="relative hidden lg:block"
+        >
+          <input
+            type="text"
+            placeholder="Versión"
+            className="input-base text-sm w-32"
+            value={versionDraft}
+            onChange={(e) => setVersionDraft(e.target.value)}
+            onBlur={() => { if ((view.get('version') || '') !== versionDraft.trim()) updateParam('version', versionDraft.trim() || null) }}
+            aria-label="Versión"
+          />
+        </form>
 
         {/* All filters → drawer */}
         <button
