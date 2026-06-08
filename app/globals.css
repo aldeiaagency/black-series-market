@@ -53,6 +53,26 @@
   input[type='number']::-webkit-outer-spin-button {
     -webkit-appearance: none;
   }
+
+  /* Filter rail — persistent, gold-tinted scrollbar so overflow is always evident */
+  .filter-scroll {
+    scrollbar-width: thin;                                  /* Firefox */
+    scrollbar-color: rgba(201, 168, 76, 0.35) transparent;  /* thumb / track */
+    scrollbar-gutter: stable;
+  }
+  .filter-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  .filter-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .filter-scroll::-webkit-scrollbar-thumb {
+    background: rgba(201, 168, 76, 0.30);
+    border-radius: 4px;
+  }
+  .filter-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(201, 168, 76, 0.55);
+  }
 }
 
 @layer components {

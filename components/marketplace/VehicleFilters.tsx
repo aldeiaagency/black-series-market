@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { cn, SPAIN_LOCATIONS, getProvinciasByComunidad } from '@/lib/utils'
@@ -377,6 +377,45 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     }
     return () => { document.body.style.overflow = '' }
   }, [mobileOpen])
+
+  // ── Scroll affordance for the desktop filter rail ──────────────────────────
+  // Tracks whether there is hidden content above/below the visible window so we can
+  // fade the corresponding edge (signals "there is more to scroll"). A ResizeObserver
+  // keeps it correct when groups expand/collapse and the content height changes.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [scrollEdges, setScrollEdges] = useState<{ up: boolean; down: boolean }>({ up: false, down: false })
+
+  const recomputeScrollEdges = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const up = el.scrollTop > 4
+    const down = el.scrollTop + el.clientHeight < el.scrollHeight - 4
+    setScrollEdges((prev) => (prev.up === up && prev.down === down ? prev : { up, down }))
+  }, [])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    recomputeScrollEdges()
+    const ro = new ResizeObserver(() => recomputeScrollEdges())
+    ro.observe(el)
+    if (el.firstElementChild) ro.observe(el.firstElementChild)
+    window.addEventListener('resize', recomputeScrollEdges)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', recomputeScrollEdges)
+    }
+  }, [recomputeScrollEdges])
+
+  // Edge-fade mask: fades the top once scrolled, the bottom while content remains.
+  const FADE = '1.75rem'
+  const filterMask = (() => {
+    const { up, down } = scrollEdges
+    if (!up && !down) return undefined
+    const top = up ? `transparent 0, #000 ${FADE}` : `#000 0`
+    const bottom = down ? `#000 calc(100% - ${FADE}), transparent 100%` : `#000 100%`
+    return `linear-gradient(to bottom, ${top}, ${bottom})`
+  })()
 
   useEffect(() => {
     if (!currentBrand) { setModels([]); return }
@@ -979,12 +1018,13 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         </div>
       )}
 
-      {/* ── DESKTOP sidebar ── */}
+      {/* ── DESKTOP sidebar — 3 zonas: cabecera fija + cuerpo scrollable ── */}
       <aside
-        className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 self-start sticky top-24 overflow-y-auto"
+        className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 self-start sticky top-24 overflow-hidden"
         style={{ height: 'calc(100vh - 6rem)' }}
       >
-        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+        {/* Pinned header — el contador y "borrar" no se van con el scroll */}
+        <div className="flex items-center justify-between pb-4 mb-2 flex-shrink-0 border-b border-bsm-border pr-1">
           <span className="text-xs text-bsm-text-muted uppercase tracking-widest">
             {totalCount} vehículos
           </span>
@@ -998,8 +1038,19 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             </button>
           )}
         </div>
-        <div className="flex-1 pb-8 pr-3">
-          {renderFilters()}
+        {/* Scrollable body — fade en los bordes + scrollbar dorada + sin scroll chaining */}
+        <div
+          ref={scrollRef}
+          onScroll={recomputeScrollEdges}
+          tabIndex={0}
+          role="region"
+          aria-label="Filtros de búsqueda"
+          className="flex-1 overflow-y-auto overscroll-contain filter-scroll pr-2 pt-4"
+          style={{ maskImage: filterMask, WebkitMaskImage: filterMask }}
+        >
+          <div className="pb-8">
+            {renderFilters()}
+          </div>
         </div>
       </aside>
     </>
