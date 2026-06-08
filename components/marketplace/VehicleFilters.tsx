@@ -358,14 +358,28 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const [allDealers, setAllDealers]             = useState<{ id: string; name: string; location_city: string | null; isFeatured: boolean }[]>([])
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
+  // ── Staging (filter drawer) ────────────────────────────────────────────────
+  // While the drawer is open we edit a local `draft` instead of navigating; the URL
+  // is only updated when the user taps "Ver N". This avoids a reload per toggle.
+  // `view` is what reads resolve against: the draft while staging, the live URL
+  // otherwise. The quick bar (drawer closed → draft null) keeps applying instantly.
+  const [draft, setDraft] = useState<URLSearchParams | null>(null)
+  const [draftCount, setDraftCount] = useState<number | null>(null)
+  const [countLoading, setCountLoading] = useState(false)
+  const view = draft ?? searchParams
+
   const isMoto      = vehicleType === 'motorcycle'
   const categories  = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
   const allBrands   = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
 
-  const currentBrand = searchParams.get('marca') || ''
-  const currentModel = searchParams.get('modelo') || ''
+  const currentBrand = view.get('marca') || ''
+  const currentModel = view.get('modelo') || ''
 
   const activeFilterCount = Array.from(searchParams.entries()).filter(
+    ([k]) => !['page', 'sort'].includes(k)
+  ).length
+  // Count reflecting the draft while the drawer is open (else the applied URL).
+  const drawerFilterCount = Array.from(view.entries()).filter(
     ([k]) => !['page', 'sort'].includes(k)
   ).length
 
@@ -393,13 +407,27 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
   const brandSlug = (name: string) => name.toLowerCase().replace(/ /g, '-')
 
-  // Apply a min/max range in a single navigation (avoids two pushes).
+  // Commit a set of params either to the local draft (staging) or to the URL (live).
+  function commit(mutate: (p: URLSearchParams) => void) {
+    if (draft) {
+      const next = new URLSearchParams(draft.toString())
+      mutate(next)
+      next.delete('page')
+      setDraft(next)
+    } else {
+      const params = new URLSearchParams(searchParams.toString())
+      mutate(params)
+      params.delete('page')
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    }
+  }
+
+  // Apply a min/max range in a single operation.
   function updateRange(minKey: string, minVal: string, maxKey: string, maxVal: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    minVal ? params.set(minKey, minVal) : params.delete(minKey)
-    maxVal ? params.set(maxKey, maxVal) : params.delete(maxKey)
-    params.delete('page')
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    commit((p) => {
+      minVal ? p.set(minKey, minVal) : p.delete(minKey)
+      maxVal ? p.set(maxKey, maxVal) : p.delete(maxKey)
+    })
   }
 
   useEffect(() => {
@@ -443,41 +471,83 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     }
   }, [searchParams])
 
+  // Live result count for the staging drawer — debounced; mirrors the grid's filters.
+  useEffect(() => {
+    if (!mobileOpen || !draft) return
+    setCountLoading(true)
+    const t = setTimeout(() => {
+      const qs = new URLSearchParams(draft.toString())
+      qs.delete('page'); qs.delete('sort')
+      qs.set('type', isMoto ? 'motorcycle' : 'car')
+      fetch(`/api/vehicles/count?${qs.toString()}`)
+        .then((r) => r.json())
+        .then((d) => setDraftCount(typeof d.count === 'number' ? d.count : null))
+        .catch(() => setDraftCount(null))
+        .finally(() => setCountLoading(false))
+    }, 300)
+    return () => clearTimeout(t)
+  }, [draft, mobileOpen, isMoto])
+
   function updateParam(key: string, value: string | null) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (value === null || value === '') params.delete(key)
-    else params.set(key, value)
-    params.delete('page')
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    commit((p) => {
+      if (value === null || value === '') p.delete(key)
+      else p.set(key, value)
+    })
   }
 
   function updateBrand(brand: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (!brand) { params.delete('marca'); params.delete('modelo') }
-    else { params.set('marca', brand); params.delete('modelo') }
-    params.delete('page')
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    commit((p) => {
+      if (!brand) { p.delete('marca'); p.delete('modelo') }
+      else { p.set('marca', brand); p.delete('modelo') }
+    })
   }
 
   function updateComunidad(comunidad: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (!comunidad) { params.delete('comunidad'); params.delete('provincia') }
-    else { params.set('comunidad', comunidad); params.delete('provincia') }
-    params.delete('showroom')
-    params.delete('page')
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    commit((p) => {
+      if (!comunidad) { p.delete('comunidad'); p.delete('provincia') }
+      else { p.set('comunidad', comunidad); p.delete('provincia') }
+      p.delete('showroom')
+    })
   }
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault()
     updateParam('search', searchDraft.trim() || null)
-    setMobileOpen(false)
+    if (!draft) setMobileOpen(false)  // live (quick bar): close mobile; staging: keep open
   }
 
   function clearAll() {
+    setSearchDraft('')
+    if (draft) {
+      const sort = draft.get('sort')
+      const next = new URLSearchParams()
+      if (sort) next.set('sort', sort)
+      setDraft(next)
+      return
+    }
     const sort = searchParams.get('sort')
     router.push(sort ? `${pathname}?sort=${sort}` : pathname, { scroll: false })
-    setSearchDraft('')
+  }
+
+  // Drawer lifecycle: open initialises the draft from the live URL; apply pushes the
+  // draft to the URL; close/cancel discards it.
+  function openDrawer() {
+    setDraft(new URLSearchParams(searchParams.toString()))
+    setDraftCount(null)
+    setCountLoading(true)
+    setMobileOpen(true)
+  }
+  function closeDrawer() {
+    setMobileOpen(false)
+    setDraft(null)
+  }
+  function applyDraft() {
+    if (draft) {
+      const next = new URLSearchParams(draft.toString())
+      next.delete('page')
+      router.push(`${pathname}?${next.toString()}`, { scroll: false })
+    }
+    closeDrawer()
   }
 
   const CheckOption = ({ param, value, label }: { param: string; value: string; label: string }) => (
@@ -485,7 +555,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
       <input
         type="checkbox"
         className="accent-gold w-3.5 h-3.5"
-        checked={searchParams.get(param) === value}
+        checked={view.get(param) === value}
         onChange={(e) => updateParam(param, e.target.checked ? value : null)}
       />
       <span className="text-sm text-bsm-text-secondary group-hover:text-bsm-text-primary transition-colors">
@@ -495,6 +565,10 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   )
 
   function renderFilters() {
+    // Inside the drawer every read resolves against the draft (staging). Shadowing
+    // `searchParams` here keeps the large JSX below untouched while making each
+    // `searchParams.get(...)` draft-aware automatically.
+    const searchParams = view
     return (
       <div>
         {/* Mobile-only sort */}
@@ -1061,7 +1135,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
 
         {/* All filters → drawer */}
         <button
-          onClick={() => setMobileOpen(true)}
+          onClick={openDrawer}
           className="flex items-center gap-2 px-4 py-2 text-sm border border-gold/40 text-gold
             hover:bg-gold/10 transition-colors ml-auto whitespace-nowrap"
         >
@@ -1080,19 +1154,19 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         <div className="fixed inset-0 z-50 flex justify-end">
           <button
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeDrawer}
             aria-label="Cerrar filtros"
           />
           <div className="relative z-10 h-full w-full sm:w-[420px] bg-[#080808] border-l border-bsm-border flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.8)] animate-slide-in-right">
             <div className="flex items-center justify-between px-5 py-4 border-b border-bsm-border flex-shrink-0">
               <div>
                 <span className="text-sm font-medium text-bsm-text-primary">
-                  Filtros {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+                  Filtros {drawerFilterCount > 0 ? `(${drawerFilterCount})` : ''}
                 </span>
                 <p className="text-[11px] text-bsm-text-muted mt-0.5">{totalCount} vehículos en total</p>
               </div>
               <button
-                onClick={() => setMobileOpen(false)}
+                onClick={closeDrawer}
                 className="p-1 text-bsm-text-muted hover:text-bsm-text-primary transition-colors"
                 aria-label="Cerrar"
               >
@@ -1103,7 +1177,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
               {renderFilters()}
             </div>
             <div className="flex-shrink-0 px-5 py-4 border-t border-bsm-border flex items-center gap-3">
-              {activeFilterCount > 0 && (
+              {drawerFilterCount > 0 && (
                 <button
                   onClick={clearAll}
                   className="text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors whitespace-nowrap"
@@ -1112,10 +1186,15 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                 </button>
               )}
               <button
-                onClick={() => setMobileOpen(false)}
-                className="btn-gold flex-1 justify-center text-sm"
+                onClick={applyDraft}
+                disabled={countLoading}
+                className="btn-gold flex-1 justify-center text-sm disabled:opacity-70"
               >
-                Ver resultados
+                {countLoading
+                  ? 'Calculando…'
+                  : draftCount != null
+                    ? `Ver ${draftCount} ${isMoto ? (draftCount === 1 ? 'moto' : 'motos') : (draftCount === 1 ? 'coche' : 'coches')}`
+                    : 'Ver resultados'}
               </button>
             </div>
           </div>
