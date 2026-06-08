@@ -8,8 +8,7 @@ import SortSelector from '@/components/marketplace/SortSelector'
 import ActiveFiltersBar from '@/components/marketplace/ActiveFiltersBar'
 import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
-import { getProvinciasByComunidad } from '@/lib/utils'
-import { resolveBrandNameFromSlug } from '@/lib/brands'
+import { applyVehicleFilters } from '@/lib/vehicle-query'
 import Pagination from '@/components/marketplace/Pagination'
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
@@ -42,47 +41,7 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
     .eq('status', 'active')
     .eq('vehicle_type', 'car')
 
-  if (params.categoria)          query = query.eq('category', params.categoria)
-  if (params.marca) {
-    // Resolve slug → canonical brand name (handles hyphenated brands like Mercedes-Benz).
-    const brandName = await resolveBrandNameFromSlug(supabase, params.marca)
-    query = brandName
-      ? query.ilike('brand_name', brandName)
-      : query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
-  }
-  if (params.modelo)             query = query.ilike('model_name', `%${params.modelo}%`)
-  if (params.version)            query = query.ilike('version', `%${params.version}%`)
-  if (params.anioMin)            query = query.gte('year', parseInt(params.anioMin))
-  if (params.anioMax)            query = query.lte('year', parseInt(params.anioMax))
-  if (params.precioMin)          query = query.gte('price', parseInt(params.precioMin))
-  if (params.precioMax)          query = query.lte('price', parseInt(params.precioMax))
-  if (params.cvMin)              query = query.gte('power_hp', parseInt(params.cvMin))
-  if (params.cvMax)              query = query.lte('power_hp', parseInt(params.cvMax))
-  if (params.kmMin)              query = query.gte('mileage_km', parseInt(params.kmMin))
-  if (params.kmMax)              query = query.lte('mileage_km', parseInt(params.kmMax))
-  if (params.tipo)               query = query.eq('body_type', params.tipo)
-  if (params.combustible)        query = query.eq('fuel_type', params.combustible)
-  if (params.cambio)             query = query.eq('transmission', params.cambio)
-  if (params.colorExterior)      query = query.ilike('color_exterior', `%${params.colorExterior}%`)
-  if (params.provincia) {
-    query = query.eq('location_province', params.provincia)
-  } else if (params.comunidad) {
-    const ps = getProvinciasByComunidad(params.comunidad)
-    if (ps.length) query = query.in('location_province', ps)
-  }
-  if (params.showroom)           query = query.eq('dealer_id', params.showroom)
-  if (params.condicion)          query = query.eq('condition_type', params.condicion)
-  if (params.traccion)           query = query.eq('drive_type', params.traccion)
-  if (params.etiquetaDgt)        query = query.eq('dgt_label', params.etiquetaDgt)
-  if (params.equipamiento)       query = query.contains('equipment', [params.equipamiento])
-  if (params.historial === 'si') query = query.eq('has_service_history', true)
-  if (params.ivaDeducible === 'si') query = query.eq('iva_deducible', true)
-  if (params.destacados === 'true') query = query.eq('is_featured', true)
-  if (params.garantia === 'si')     query = query.eq('has_warranty', true)
-  if (params.financiacion === 'si') query = query.eq('financing_available', true)
-  if (params.search)             query = query.or(
-    `brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`
-  )
+  query = (await applyVehicleFilters(supabase, query, params, 'car')).query
 
   const sorts = SORT_MAP[params.sort || 'featured'] || SORT_MAP.featured
   for (const s of sorts) query = query.order(s.col, { ascending: s.asc })
