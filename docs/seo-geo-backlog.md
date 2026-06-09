@@ -34,9 +34,10 @@
 | 9-jun | **Ola 1 — Schema + metadatos core** | 7/7 ✅ | `Car`/`Motorcycle` schema · `Offer` completo · `AutoDealer` completo · canonical+twitter en fichas · descripciones con specs · quitar `keywords` · OG image+twitter globales | `b7b090c` |
 | 9-jun | **Ola 2 — Rich results + GEO/AEO** | 9/10 ✅ | `WebSite`+`SearchAction` · `BreadcrumbList` fichas/dealers/marcas · `FAQPage` precios+como-funciona · `ItemList` coches+motos · canonical paginación · `llms.txt` · sitemap completo · noindex thin pages · `img`→`next/image` | `aed40f2` |
 | 9-jun | **Ola 3 — Contenido + arquitectura** | 7/8 ✅ | 5 category landings (`/coches/clasicos`, `/coches/deportivos`, `/coches/lujo`, `/motos/deportivas`, `/motos/clasicas`) · `/para-profesionales` B2B · `/glosario` 18 términos (DefinedTermSet) · intro text `/coches`+`/motos` · alt text `VehicleCard` · editorial de marcas top · sitemap +9 rutas | `cc40ccc` |
+| 9-jun | **Ola 4 — Activos de contenido + autoridad** | 4/4 ✅ | Guía compradores `/guias/como-comprar-supercar-segunda-mano` (Article) · Guía vendedores B2B `/guias/como-vender-coche-premium-profesionales` (Article) · Landings programáticas `/marcas/[brand]/coches` + `/marcas/[brand]/motos` (ItemList, noindex si vacío) · GA4+GTM wiring en layout desde `platform_config` | `d4a24a9` |
 
-**Acciones acumuladas: 25.** · Pendiente: O2-07 `sameAs` (bloqueado URLs redes) · O3-01 `/sobre-nosotros` (bloqueado input de marca) · G01 gate noindex. R01: OG 1200×630 dedicada.
-Próxima: **Ola 4** (activos de contenido + autoridad) cuando se desbloqueen los inputs pendientes.
+**Acciones acumuladas: 32.** · Pendiente: O2-07 `sameAs` (bloqueado URLs redes) · O3-01 `/sobre-nosotros` (bloqueado input de marca) · G01 gate noindex. R01: OG 1200×630 dedicada.
+Acciones de usuario pendientes: M01 GSC + Bing · M03 schema validation · T29 PR digital · T33 Google Business Profile · introducir GA4/GTM IDs en el panel admin.
 
 ---
 
@@ -137,13 +138,15 @@ Próxima: **Ola 4** (activos de contenido + autoridad) cuando se desbloqueen los
 
 ---
 
-## OLA 4 — Activos de contenido + autoridad (P2 · 60-90 días)
+## OLA 4 — Activos de contenido + autoridad · ✅ COMPLETADA (4/4 código)
 
-- ⬜ **T27 · ✍️ — Guía: "Cómo comprar un supercar de segunda mano en España"** (activo linkable).
-- ⬜ **T28 · ✍️ — Guía B2B: "Cómo vender tu coche premium con compradores cualificados".**
-- ⬜ **T29 · 📈 — PR digital** (Motor1, CarAndDriver, TopGear España) → backlinks editoriales.
-- ⬜ **T33 · 📈 — Google Business Profile** (si hay dirección registrable).
-- ⬜ **T46(nuevo) · 💻+✍️ — Programático marca+categoría / marca+provincia / modelo** (T35). Solo donde haya stock; `noindex` si vacío.
+> **Ejecutada en sesión 9-jun (commit `d4a24a9`).** 4 ítems de código completados. Resto son acciones de usuario.
+
+- ✅ **T27 · ✍️ — Guía compradores:** `/guias/como-comprar-supercar-segunda-mano` — ~1.500 palabras, 7 secciones, Article schema, breadcrumb, CTAs a `/coches/deportivos` y `/vehiculos-a-la-carta`.
+- ✅ **T28 · ✍️ — Guía vendedores B2B:** `/guias/como-vender-coche-premium-profesionales` — ~1.200 palabras, 7 secciones, Article schema, CTAs a `/para-profesionales` y `/precios`.
+- ⬜ **T29 · 📈 — PR digital** (Motor1, CarAndDriver, TopGear España) → backlinks editoriales. *(Acción de usuario)*
+- ⬜ **T33 · 📈 — Google Business Profile** (si hay dirección registrable). *(Acción de usuario)*
+- ✅ **T46(nuevo) · 💻 — Programático marca×tipo:** `/marcas/[brand]/coches` + `/marcas/[brand]/motos`. ItemList JSON-LD, noindex si vacío, breadcrumb 4 niveles, tab-nav entre tipos.
 
 ---
 
