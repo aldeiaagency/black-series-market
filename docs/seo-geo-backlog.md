@@ -32,9 +32,10 @@
 | Fecha | Ola | Ítems | Acciones | Commit |
 |---|---|---|---|---|
 | 9-jun | **Ola 1 — Schema + metadatos core** | 7/7 ✅ | `Car`/`Motorcycle` schema · `Offer` completo · `AutoDealer` completo · canonical+twitter en fichas · descripciones con specs · quitar `keywords` · OG image+twitter globales | `b7b090c` |
+| 9-jun | **Ola 2 — Rich results + GEO/AEO** | 9/10 ✅ | `WebSite`+`SearchAction` · `BreadcrumbList` fichas/dealers/marcas · `FAQPage` precios+como-funciona · `ItemList` coches+motos · canonical paginación · `llms.txt` · sitemap completo · noindex thin pages · `img`→`next/image` | `aed40f2` |
 
-**Acciones acumuladas: 7.** · Pendiente de refinamiento: R01 (OG 1200×630 dedicada).
-Próxima: **Ola 2** (WebSite/SearchAction, BreadcrumbList, ItemList, FAQPage, llms.txt, noindex en thin pages, `<img>`→`next/image`, completar sitemap). Bloqueos de input: `sameAs` (URLs redes) y "Sobre nosotros".
+**Acciones acumuladas: 16.** · Pendiente: O2-07 `sameAs` (bloqueado por URLs redes). R01: OG 1200×630 dedicada.
+Próxima: **Ola 3** (contenido + arquitectura). Bloqueos de input: `sameAs` (URLs redes BLM), "Sobre nosotros" (contenido de marca).
 
 ---
 
@@ -70,37 +71,39 @@ Próxima: **Ola 2** (WebSite/SearchAction, BreadcrumbList, ItemList, FAQPage, ll
 
 ---
 
-## OLA 2 — Rich results + GEO/AEO (P1)
+## OLA 2 — Rich results + GEO/AEO (P1) · ✅ COMPLETADA
 
-- ⬜ **O2-01 · T02b · 💻 — `WebSite` + `SearchAction` (Sitelinks Searchbox).**
-  Archivo: `app/layout.tsx`. JSON-LD `WebSite` con `potentialAction: SearchAction` apuntando a `/buscar?q={search_term_string}`.
+> **Ejecutada en sesión 9-jun (commit `aed40f2`).** 9/10 ítems (O2-07 bloqueado por input). Build ✓. Archivos: `layout.tsx`, `sitemap.ts`, `coches/`, `motos/`, `coches/[slug]`, `motos/[slug]`, `dealers/[slug]`, `marcas/[brand]`, `como-funciona`, `precios`, `buscar`, `comparar`, `mis-favoritos`, `DealerInlineCard`, `home page`, `public/llms.txt`.
 
-- ⬜ **O2-02 · T06 + T19 · 💻 — `BreadcrumbList` (schema + migas visibles).**
-  En fichas (Home > Coches > {Marca} > {Título}), dealers (Home > Showrooms > {Nombre}) y marca (Home > Marcas > {Marca}). Añadir nav HTML visible además del JSON-LD.
+- ✅ **O2-01 · T02b · 💻 — `WebSite` + `SearchAction` (Sitelinks Searchbox).**
+  `app/layout.tsx`: `WebSite` JSON-LD con `potentialAction: SearchAction` apuntando a `/buscar?q={search_term_string}`. Renderizado junto al `Organization` ya existente.
 
-- ⬜ **O2-03 · T07 + T36 · 💻+✍️ — `FAQPage` schema.**
-  En `/precios` (ya tiene 5 FAQ → marcar) y en `/como-funciona` ("Qué no es Black Label"). Crear además una FAQ explícita (10-15 Q&A sobre BLM) — **formato top para citación LLM**.
+- ✅ **O2-02 · T06 + T19 · 💻 — `BreadcrumbList` (schema + migas visibles).**
+  JSON-LD en `coches/[slug]`, `motos/[slug]`, `dealers/[slug]`, `marcas/[brand]`. `<nav aria-label="breadcrumb">` visible en dealers y marcas. VehicleDetailContent ya tenía nav visible (añadido JSON-LD).
 
-- ⬜ **O2-04 · T17 · 💻 — `ItemList` en `/coches` y `/motos`.**
-  Listar los primeros N vehículos del grid como `ItemList` → elegibilidad de carrusel.
+- ✅ **O2-03 · T07 + T36 · 💻+✍️ — `FAQPage` schema.**
+  `/precios`: FAQPage JSON-LD con las 5 FAQ existentes + metadata+canonical. `/como-funciona`: FAQPage JSON-LD (6 Q&A) + sección visible "Preguntas frecuentes" + metadata canonical mejorado.
 
-- ⬜ **O2-05 · T05b · 💻 — Canonical consciente de paginación.**
-  En `/coches` y `/motos`: canonical self-referencial incluyendo `?page=N` (o `prev/next`).
+- ✅ **O2-04 · T17 · 💻 — `ItemList` en `/coches` y `/motos`.**
+  Los 10 vehículos más recientes/destacados → `ItemList` JSON-LD en cada página.
 
-- ⬜ **O2-06 · T41(nuevo) · 💻 — `llms.txt` en la raíz.**
-  `app/llms.txt/route.ts` o `/public/llms.txt`: índice markdown (qué es BLM, propuesta, categorías, enlaces clave, contacto). El "robots.txt para IA".
+- ✅ **O2-05 · T05b · 💻 — Canonical consciente de paginación.**
+  `/coches` y `/motos`: convertido de `metadata` estático a `generateMetadata` → canonical self-referencial `/coches?page=N` a partir de página 2.
 
-- ⬜ **O2-07 · T37 · 💻 — `sameAs` en Organization (entidad).**
-  ⚠️ **Bloqueado hasta tener las URLs reales de redes** de Black Label Market (Instagram/YouTube/TikTok/LinkedIn/Facebook). Añadir a `Organization` + footer + dealer. *(Pide las URLs.)*
+- ✅ **O2-06 · T41(nuevo) · 💻 — `llms.txt` en la raíz.**
+  `public/llms.txt`: índice markdown completo (qué es BLM, propuesta, categorías, URLs, modelo de negocio, criterios).
 
-- ⬜ **O2-08 · T10 + T22 · 💻 — Completar sitemap.**
-  Añadir `/vehiculos-a-la-carta`, `/como-funciona`, `/sobre-nosotros`, `/legal/criterios-publicacion`, `/legal/condiciones-profesionales` a `staticRoutes` en `app/sitemap.ts`.
+- ⬜ **O2-07 · T37 · 💻 — `sameAs` en Organization.**
+  ⚠️ **Bloqueado** — necesito las URLs reales de redes de Black Label Market (Instagram, TikTok, YouTube, LinkedIn…).
 
-- ⬜ **O2-09 · T11 · 💻 — `noindex` en páginas sin valor SEO.**
-  `metadata.robots = { index: false }` en `/buscar`, `/comparar`, `/mis-favoritos` (thin/dinámico/privado).
+- ✅ **O2-08 · T10 + T22 · 💻 — Completar sitemap.**
+  Añadidas: `/vehiculos-a-la-carta`, `/como-funciona`, `/sobre-nosotros`, `/legal/criterios-publicacion`, `/legal/condiciones-profesionales`.
 
-- ⬜ **O2-10 · T44(nuevo) · 💻 — `<img>` crudas → `next/image` (Core Web Vitals).**
-  Home (bloques a-la-carta y profesional), logos de dealer. CWV es factor de ranking.
+- ✅ **O2-09 · T11 · 💻 — `noindex` en páginas sin valor SEO.**
+  `/buscar`: metadata + noindex. `/comparar`: noindex añadido. `/mis-favoritos`: `layout.tsx` creado con noindex (client component sin metadata propio).
+
+- ✅ **O2-10 · T44(nuevo) · 💻 — `<img>` crudas → `next/image` (Core Web Vitals).**
+  Home (bloques a-la-carta y profesional → `fill` + `sizes`), `DealerInlineCard` (card logo 28×28, sidebar cover `fill`, sidebar logo 40×40), `marcas/[brand]` (logo 96×96).
 
 ---
 
