@@ -59,7 +59,14 @@ export default function ContactoPage() {
 
           <div className="pt-6 border-t border-bsm-border">
             <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-3">Operado por</p>
-            <p className="text-bsm-text-primary font-medium">Black Series Agency</p>
+            <a
+              href="https://blackseriesagency.es"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-bsm-text-primary font-medium hover:text-gold transition-colors"
+            >
+              Black Series Agency
+            </a>
             <p className="text-sm text-bsm-text-muted">Agencia de IA y Revenue Ops para automoción premium</p>
           </div>
         </div>

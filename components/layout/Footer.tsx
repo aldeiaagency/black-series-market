@@ -52,11 +52,28 @@ export default function Footer() {
             <div className="mb-6 inline-block">
               <Logo width={152} variant="footer" />
               <p className="mt-1 text-[10px] text-[#808080] tracking-[0.15em] uppercase text-center">
-                by Black Series
+                by{' '}
+                <a
+                  href="https://blackseriesagency.es"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gold transition-colors"
+                >
+                  Black Series
+                </a>
               </p>
             </div>
             <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xs mb-4">
-              Black Label Market es un producto de Black Series, agencia especializada en el mundo del motor de alto rendimiento.
+              Black Label Market es un producto de{' '}
+              <a
+                href="https://blackseriesagency.es"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#C9C9C9] hover:text-gold underline underline-offset-2 decoration-[#2A2A2A] transition-colors"
+              >
+                Black Series
+              </a>
+              , agencia especializada en el mundo del motor de alto rendimiento.
             </p>
             <MarketSocialLinks className="-ml-1.5" />
           </div>

@@ -53,7 +53,7 @@ const organizationJsonLd = {
   description:
     'Marketplace de coches y motos premium, deportivos, clásicos y unidades especiales en España, con concesionarios y especialistas verificados.',
   brand: { '@type': 'Brand', name: 'Black Label Market' },
-  creator: { '@type': 'Organization', name: 'Black Series' },
+  creator: { '@type': 'Organization', name: 'Black Series', url: 'https://blackseriesagency.es' },
   areaServed: 'ES',
   email: 'hola@blacklabelmarket.es',
 }
