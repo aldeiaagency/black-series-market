@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: 'Publica tu vehículo premium — Para profesionales | Black Label Market',
   description: 'Anuncia coches y motos de lujo en el marketplace más selectivo de España. Sin comisiones por venta, compradores cualificados, perfil de showroom completo y analítica de rendimiento.',
   alternates: { canonical: '/para-profesionales' },
+  openGraph: {
+    title: 'Publica en Black Label Market — Para profesionales',
+    description: 'Sin comisiones por venta. Compradores cualificados. El marketplace más selectivo de coches y motos premium en España.',
+    url: 'https://blacklabelmarket.es/para-profesionales',
+    siteName: 'Black Label Market',
+    type: 'website',
+  },
 }
 
 const BENEFITS = [

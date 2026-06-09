@@ -8,6 +8,13 @@ export const metadata: Metadata = {
   title: 'Cómo funciona — Black Label Market',
   description: 'Cómo funciona Black Label Market: marketplace de coches y motos premium con profesionales verificados. Para compradores y para concesionarios.',
   alternates: { canonical: '/como-funciona' },
+  openGraph: {
+    title: 'Cómo funciona — Black Label Market',
+    description: 'Marketplace de coches y motos premium con profesionales verificados en España. Compradores: encuentra y contacta. Profesionales: publica y vende.',
+    url: 'https://blacklabelmarket.es/como-funciona',
+    siteName: 'Black Label Market',
+    type: 'website',
+  },
 }
 
 const FAQ_ITEMS = [
