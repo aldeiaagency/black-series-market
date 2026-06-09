@@ -36,8 +36,9 @@
 | 9-jun | **Ola 3 — Contenido + arquitectura** | 7/8 ✅ | 5 category landings (`/coches/clasicos`, `/coches/deportivos`, `/coches/lujo`, `/motos/deportivas`, `/motos/clasicas`) · `/para-profesionales` B2B · `/glosario` 18 términos (DefinedTermSet) · intro text `/coches`+`/motos` · alt text `VehicleCard` · editorial de marcas top · sitemap +9 rutas | `cc40ccc` |
 | 9-jun | **Ola 4 — Activos de contenido + autoridad** | 4/4 ✅ | Guía compradores `/guias/como-comprar-supercar-segunda-mano` (Article) · Guía vendedores B2B `/guias/como-vender-coche-premium-profesionales` (Article) · Landings programáticas `/marcas/[brand]/coches` + `/marcas/[brand]/motos` (ItemList, noindex si vacío) · GA4+GTM wiring en layout desde `platform_config` | `d4a24a9` |
 | 9-jun | **Ola 5 — Autoridad + arquitectura de enlazado** | 6/6 ✅ | 4 category landings (`/coches/suv`, `/motos/naked`, `/motos/touring`, `/motos/trail`) · `contacto/layout.tsx` con metadata/canonical · `llms.txt` reescrito completo · `robots.ts` con reglas post-G01 comentadas · sitemap +4 categories +17 brand×tipo · enlazado interno guías↔category pages | `4be8781` |
+| 9-jun | **Ola 6 — Cobertura completa + autoridad editorial** | 5/5 ✅ | 3 category landings restantes (`/coches/especiales`, `/motos/custom`, `/motos/scooter`) · `HowTo` schema en `/como-funciona` (2 tipos: comprador + profesional) · 6 brand editorials (mercedes-benz, audi, bugatti, triumph, harley-davidson, mv-agusta) · 2 guías nuevas (`/guias/motos-premium-segunda-mano`, `/guias/coches-clasicos-youngtimers-como-invertir`) · `/marcas` index CollectionPage schema + metadata + breadcrumb | `71e2b0f` |
 
-**Acciones acumuladas: 42.** · Pendiente: O2-07 `sameAs` · O3-01 `/sobre-nosotros` · G01 gate noindex. R01: OG 1200×630.
+**Acciones acumuladas: 51.** · Pendiente: O2-07 `sameAs` · O3-01 `/sobre-nosotros` · G01 gate noindex. R01: OG 1200×630.
 Acciones de usuario: M01 GSC + Bing · M03 schema validation · T29 PR digital · T33 Google Business Profile · GA4/GTM IDs en admin.
 
 ---
@@ -162,7 +163,7 @@ Acciones de usuario: M01 GSC + Bing · M03 schema validation · T29 PR digital �
 
 - ⬜ **M01 · ⚙️+💻 — Google Search Console + Bing Webmaster Tools.**
   Verificar dominio, enviar sitemap (tras quitar noindex). Sin GSC no hay datos de keywords ni indexación.
-- ⬜ **M02 · 💻 — Inyectar GA4 / GTM.** La UI de config existe en admin pero **no está cableado**. Conectar el ID y renderizar el tag.
+- ✅ **M02 · 💻 — Inyectar GA4 / GTM.** Cableado en Ola 4: `app/layout.tsx` lee `platform_config.seo` via `createAdminClient()` e inyecta `next/script` condicionalmente para GA4 y GTM. Activar introduciendo los IDs en `/admin/configuracion` → SEO y analíticas.
 - ⬜ **M03 · ⚙️ — Validar schema** (Rich Results Test / Schema.org validator) tras cada ola.
 
 ---
