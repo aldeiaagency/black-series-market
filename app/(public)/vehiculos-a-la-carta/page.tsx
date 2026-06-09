@@ -3,9 +3,23 @@ import PrivateSearchForm from '@/components/marketplace/PrivateSearchForm'
 import { AlertCircle, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
 export const metadata: Metadata = {
-  title: 'Vehículos a la carta',
-  description: 'No encuentras lo que buscas en el catálogo. Registra tu demanda y conectamos con los profesionales adecuados cuando aparezca una unidad compatible.',
+  title: 'Vehículos a la carta — Encuentra el coche o moto premium que buscas',
+  description: 'Describe el vehículo premium que buscas y conectamos con especialistas verificados cuando aparezca una unidad compatible. Porsche, Ferrari, Ducati, McLaren y más.',
+  alternates: { canonical: '/vehiculos-a-la-carta' },
+}
+
+const webPageJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${SITE_URL}/vehiculos-a-la-carta#webpage`,
+  url: `${SITE_URL}/vehiculos-a-la-carta`,
+  name: 'Vehículos a la carta — Black Label Market',
+  description: 'Describe el vehículo premium que buscas y conectamos con especialistas verificados cuando aparezca una unidad compatible.',
+  inLanguage: 'es-ES',
+  isPartOf: { '@id': `${SITE_URL}/#website` },
 }
 
 const EXAMPLES = [
@@ -18,6 +32,7 @@ const EXAMPLES = [
 export default function VehiculosALaCartaPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
 
       {/* Header */}
       <div className="mb-14 max-w-2xl">

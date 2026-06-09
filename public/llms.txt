@@ -24,6 +24,7 @@ Creado y operado por **Black Series** (https://blackseriesagency.es), agencia es
 - **Clásicos y youngtimers**: Porsche 911 air-cooled, Ferrari 308, BMW E30 M3, Jaguar E-Type — https://blacklabelmarket.es/coches/clasicos
 - **Lujo y alta gama**: Rolls-Royce, Bentley, Mercedes Clase S, BMW Serie 7, Maserati — https://blacklabelmarket.es/coches/lujo
 - **SUV premium**: Porsche Cayenne, Lamborghini Urus, Bentley Bentayga, Range Rover — https://blacklabelmarket.es/coches/suv
+- **Unidades especiales**: Ferrari LaFerrari, Porsche GT2 RS Weissach, McLaren Senna, Bugatti Chiron — https://blacklabelmarket.es/coches/especiales
 - **Catálogo completo de coches**: https://blacklabelmarket.es/coches
 
 ### Motos premium por categoría
@@ -33,6 +34,10 @@ Creado y operado por **Black Series** (https://blackseriesagency.es), agencia es
 - **Touring y adventure**: BMW R1250 GS, Ducati Multistrada V4, KTM 1290 Super Adventure — https://blacklabelmarket.es/motos/touring
 - **Trail premium**: Honda Africa Twin, Ducati DesertX, Husqvarna Norden — https://blacklabelmarket.es/motos/trail
 - **Clásicas y youngtimers**: Honda CB750, Ducati 900 SS, Triumph T120, BMW R90S — https://blacklabelmarket.es/motos/clasicas
+- **Custom y cruiser**: Harley-Davidson Heritage, Indian Chief, Triumph Bobber, BMW R18 — https://blacklabelmarket.es/motos/custom
+- **Scooter premium**: Vespa GTS 300, BMW C 400 GT, Aprilia SRV 850 — https://blacklabelmarket.es/motos/scooter
+- **Ediciones especiales**: Ducati Superleggera V4, BMW HP4 Race, Honda RC213V-S — https://blacklabelmarket.es/motos/ediciones-especiales
+- **Entusiastas**: Honda CB1000R, Triumph Street Triple, Kawasaki Z900RS — https://blacklabelmarket.es/motos/entusiastas
 - **Catálogo completo de motos**: https://blacklabelmarket.es/motos
 
 ### Por marca (coches y motos)
@@ -45,6 +50,12 @@ Creado y operado por **Black Series** (https://blackseriesagency.es), agencia es
 - Ducati: https://blacklabelmarket.es/marcas/ducati | Solo motos: https://blacklabelmarket.es/marcas/ducati/motos
 - Rolls-Royce: https://blacklabelmarket.es/marcas/rolls-royce
 - Bentley: https://blacklabelmarket.es/marcas/bentley
+- Mercedes-Benz: https://blacklabelmarket.es/marcas/mercedes-benz | Solo coches: https://blacklabelmarket.es/marcas/mercedes-benz/coches
+- Audi: https://blacklabelmarket.es/marcas/audi | Solo coches: https://blacklabelmarket.es/marcas/audi/coches
+- Bugatti: https://blacklabelmarket.es/marcas/bugatti
+- Triumph: https://blacklabelmarket.es/marcas/triumph | Solo motos: https://blacklabelmarket.es/marcas/triumph/motos
+- Harley-Davidson: https://blacklabelmarket.es/marcas/harley-davidson | Solo motos: https://blacklabelmarket.es/marcas/harley-davidson/motos
+- MV Agusta: https://blacklabelmarket.es/marcas/mv-agusta | Solo motos: https://blacklabelmarket.es/marcas/mv-agusta/motos
 - Todas las marcas: https://blacklabelmarket.es/marcas
 
 ## URLs principales
@@ -59,7 +70,10 @@ Creado y operado por **Black Series** (https://blackseriesagency.es), agencia es
 ## Recursos de referencia
 
 - Glosario del mercado premium (youngtimer, GT, VIN, matching numbers...): https://blacklabelmarket.es/glosario
-- Guía de compra: Cómo comprar un supercar de segunda mano en España: https://blacklabelmarket.es/guias/como-comprar-supercar-segunda-mano
+- Guías del mercado premium (índice de todas las guías): https://blacklabelmarket.es/guias
+- Guía de compra supercars: Cómo comprar un supercar de segunda mano en España: https://blacklabelmarket.es/guias/como-comprar-supercar-segunda-mano
+- Guía de compra motos: Cómo comprar una moto premium de segunda mano: https://blacklabelmarket.es/guias/motos-premium-segunda-mano
+- Guía de inversión: Coches clásicos y youngtimers como inversión: https://blacklabelmarket.es/guias/coches-clasicos-youngtimers-como-invertir
 - Guía de venta (profesionales): Cómo vender un coche premium con los compradores correctos: https://blacklabelmarket.es/guias/como-vender-coche-premium-profesionales
 
 ## Modelo de negocio
@@ -93,6 +107,9 @@ El sitio implementa schema.org extensivamente:
 - `ItemList` — listas de vehículos en páginas de categoría y marca
 - `Article` — guías editoriales en `/guias/`
 - `DefinedTermSet` + `DefinedTerm` — glosario del sector en `/glosario`
+- `HowTo` — pasos de compra y venta en `/como-funciona` (compradores y profesionales)
+- `CollectionPage` — índice de marcas (`/marcas`) y guías (`/guias`)
+- `WebPage` — páginas transaccionales (`/vehiculos-a-la-carta`, `/para-profesionales`)
 
 Sitemap: https://blacklabelmarket.es/sitemap.xml
 Robots: https://blacklabelmarket.es/robots.txt

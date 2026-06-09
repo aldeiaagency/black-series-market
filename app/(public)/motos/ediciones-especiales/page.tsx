@@ -12,23 +12,23 @@ export async function generateMetadata(): Promise<Metadata> {
     .select('*', { count: 'exact', head: true })
     .eq('status', 'active')
     .eq('vehicle_type', 'motorcycle')
-    .eq('category', 'clasicas_youngtimers')
+    .eq('category', 'ediciones_especiales')
   return {
-    title: 'Motos clásicas y youngtimers en venta en España',
-    description: 'Honda CB750, Ducati 900 SS, Triumph T120, BMW R90S, café racers y neo-retro... Motos clásicas, youngtimers y piezas de colección de especialistas verificados en España.',
-    alternates: { canonical: '/motos/clasicas' },
+    title: 'Motos de edición especial y colección en venta en España',
+    description: 'Ducati Superleggera, BMW HP4 Race, Honda RC213V-S, MV Agusta F4 RC... Motos de producción limitada, ediciones especiales y piezas de colección de especialistas verificados en España.',
+    alternates: { canonical: '/motos/ediciones-especiales' },
     ...(count === 0 ? { robots: { index: false } } : {}),
   }
 }
 
-export default async function MotosClasicasPage() {
+export default async function MotosEdicionesEspecialesPage() {
   const supabase = await createClient()
   const { data: vehicles, count } = await supabase
     .from('vehicles')
     .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
     .eq('status', 'active')
     .eq('vehicle_type', 'motorcycle')
-    .eq('category', 'clasicas_youngtimers')
+    .eq('category', 'ediciones_especiales')
     .order('is_featured', { ascending: false })
     .order('published_at', { ascending: false })
     .limit(48)
@@ -36,8 +36,8 @@ export default async function MotosClasicasPage() {
   const itemListJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Motos clásicas y youngtimers en venta en España',
-    url: `${SITE_URL}/motos/clasicas`,
+    name: 'Motos de edición especial en venta en España',
+    url: `${SITE_URL}/motos/ediciones-especiales`,
     itemListElement: (vehicles || []).map((v, i) => ({
       '@type': 'ListItem',
       position: i + 1,
@@ -52,7 +52,7 @@ export default async function MotosClasicasPage() {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Motos', item: `${SITE_URL}/motos` },
-      { '@type': 'ListItem', position: 3, name: 'Clásicas y youngtimers' },
+      { '@type': 'ListItem', position: 3, name: 'Ediciones especiales' },
     ],
   }
 
@@ -68,7 +68,7 @@ export default async function MotosClasicasPage() {
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
             <li><Link href="/motos" className="hover:text-gold transition-colors">Motos</Link></li>
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-            <li className="text-bsm-text-secondary" aria-current="page">Clásicas y youngtimers</li>
+            <li className="text-bsm-text-secondary" aria-current="page">Ediciones especiales</li>
           </ol>
         </nav>
 
@@ -76,9 +76,9 @@ export default async function MotosClasicasPage() {
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Marketplace</span>
         </div>
-        <h1 className="section-title mb-3">Motos clásicas y youngtimers</h1>
+        <h1 className="section-title mb-3">Motos de edición especial y colección</h1>
         <p className="text-sm text-bsm-text-muted max-w-2xl">
-          Honda CB750, Ducati 900 SS, Triumph T120, BMW R90S, café racers y piezas neo-retro... Motos con historia real, en manos de especialistas que conocen el mercado clásico y cuidan cada detalle.
+          Ducati Superleggera V4, BMW HP4 Race, Honda RC213V-S... Motos de producción limitada, ediciones conmemorativas y piezas pensadas para coleccionistas. Unidades que no vuelven, con la trazabilidad que exige su valor.
         </p>
       </div>
 
@@ -89,8 +89,8 @@ export default async function MotosClasicasPage() {
             {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
           </div>
           <div className="pt-8 border-t border-bsm-border flex flex-wrap items-center justify-between gap-4">
-            <Link href="/motos?categoria=clasicas_youngtimers" className="text-sm text-gold hover:text-gold-light transition-colors">
-              Ver todas las motos clásicas con filtros →
+            <Link href="/motos?categoria=ediciones_especiales" className="text-sm text-gold hover:text-gold-light transition-colors">
+              Ver todas las ediciones especiales con filtros →
             </Link>
             <Link href="/guias/motos-premium-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
               Guía de compra →
@@ -101,7 +101,7 @@ export default async function MotosClasicasPage() {
         <div className="flex flex-col items-center justify-center py-20 text-center border border-bsm-border bg-surface">
           <h2 className="font-display text-xl mb-2 text-bsm-text-primary">Sin unidades disponibles en este momento</h2>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
-            Aún no hay motos clásicas publicadas. Explora el catálogo general o solicita una búsqueda a la carta.
+            Las ediciones especiales son escasas por definición. Deja tu solicitud y te avisamos cuando aparezca una.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/motos" className="btn-outline text-sm px-4">Explorar todas las motos</Link>

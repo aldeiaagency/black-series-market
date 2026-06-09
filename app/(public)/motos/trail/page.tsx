@@ -88,9 +88,12 @@ export default async function MotosTrailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
             {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
           </div>
-          <div className="pt-8 border-t border-bsm-border">
+          <div className="pt-8 border-t border-bsm-border flex flex-wrap items-center justify-between gap-4">
             <Link href="/motos?categoria=trail_premium" className="text-sm text-gold hover:text-gold-light transition-colors">
               Ver todas las motos trail con filtros →
+            </Link>
+            <Link href="/guias/motos-premium-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Guía de compra →
             </Link>
           </div>
         </>
