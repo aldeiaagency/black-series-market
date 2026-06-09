@@ -54,7 +54,7 @@ const DEALER_STEPS = [
   {
     icon: BarChart2,
     title: 'Controla el rendimiento de tus publicaciones',
-    desc: 'Consulta visitas, contactos recibidos, estado de cada solicitud y señales básicas para entender qué vehículos están generando más interés',
+    desc: 'Consulta visitas, contactos recibidos, estado de cada solicitud y señales básicas para entender qué vehículos están generando más interés.',
   },
 ]
 
@@ -80,7 +80,7 @@ export default function ComoFuncionaPage() {
           Cómo funciona Black Label Market
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
-          Black Label Market reúne coches y motos premium, deportivos, clásicos y unidades especiales en un entorno más selectivo y especializado que un portal generalista. Sólo pueden publicar profesionales revisados y verificados por nosotros y cada unidad debe encajar con nuestro estándar de presentación, información y calidad.
+          Black Label Market reúne coches y motos premium, deportivos, clásicos y unidades especiales en un entorno más selectivo y especializado que un portal generalista. Solo pueden publicar profesionales revisados y verificados por nosotros y cada unidad debe encajar con nuestro estándar de presentación, información y calidad.
         </p>
       </div>
 

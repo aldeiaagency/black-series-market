@@ -29,7 +29,7 @@ const PLANS = [
       'Perfil destacado en resultados de búsqueda',
       'Badge verificado en el marketplace',
       'Analíticas avanzadas',
-      'Acceso a featured spots de homepage',
+      'Espacios destacados en portada',
       'Soporte prioritario',
     ],
     cta: 'Empezar con Professional',
@@ -42,12 +42,11 @@ const PLANS = [
     description: 'Para los referentes del mercado premium',
     features: [
       'Vehículos ilimitados',
-      'Aparición permanente en homepage',
+      'Aparición permanente en portada',
       'Showroom Destacado en el marketplace',
       'Analíticas premium con benchmarks de mercado',
       'Account manager dedicado',
       'Acceso a eventos exclusivos Black Series',
-      'Listing destacado permanente',
     ],
     cta: 'Empezar con Elite',
   },
@@ -122,7 +121,7 @@ export default function PreciosPage() {
         <h3 className="font-display text-2xl font-light mb-2">Destacado puntual</h3>
         <p className="text-bsm-text-muted mb-4 max-w-lg mx-auto">
           ¿Quieres impulsar un vehículo específico sin cambiar de plan?
-          El boost puntual posiciona tu listing en primer lugar durante 7 días.
+          El destacado puntual posiciona tu vehículo en primer lugar durante 7 días.
         </p>
         <div className="font-display text-3xl font-light text-gold mb-4">49€ / 7 días</div>
         <p className="text-xs text-bsm-text-muted">Disponible desde el panel de tu concesionario.</p>

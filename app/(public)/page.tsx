@@ -111,11 +111,11 @@ export default async function HomePage() {
 
             <div className="flex flex-wrap gap-3">
               <Link href="/coches" className="btn-gold">
-                Ver coches
+                Explorar coches
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link href="/motos" className="btn-gold">
-                Ver motos
+                Explorar motos
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
@@ -316,7 +316,7 @@ export default async function HomePage() {
         </span>
       </div>
       <h2 className="font-display text-3xl md:text-4xl font-light text-[#F4F1EA]">
-        Una forma más fácil de encontrar el vehículo de tus sueños
+        Una forma más fácil de encontrar exactamente lo que buscas
       </h2>
     </div>
 
@@ -324,7 +324,7 @@ export default async function HomePage() {
       {[
         {
           n: '01',
-          title: 'Menos ruido. Sólo vehículos premium',
+          title: 'Menos ruido. Solo vehículos premium',
           desc: 'No queremos que pierdas tiempo entre miles de resultados. Black Label reúne los coches y motos que estás buscando.',
         },
         {
