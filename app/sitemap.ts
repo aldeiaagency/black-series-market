@@ -49,6 +49,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/coches/lujo`,                          lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
     { url: `${BASE_URL}/motos/deportivas`,                     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
     { url: `${BASE_URL}/motos/clasicas`,                       lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/guias/como-comprar-supercar-segunda-mano`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/guias/como-vender-coche-premium-profesionales`,     lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const vehicleRoutes: MetadataRoute.Sitemap = (vehicles || []).map((v) => ({

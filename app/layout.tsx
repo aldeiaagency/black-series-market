@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import { ComparatorProvider } from '@/lib/comparator-context'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner'
+import { createAdminClient } from '@/lib/supabase/server'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -77,14 +79,37 @@ const webSiteJsonLd = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  let gaId: string | null = null
+  let gtmId: string | null = null
+  try {
+    const admin = await createAdminClient()
+    const { data } = await admin
+      .from('platform_config')
+      .select('value')
+      .eq('key', 'seo')
+      .single()
+    gaId = data?.value?.ga_id || null
+    gtmId = data?.value?.gtm_id || null
+  } catch {}
+
   return (
     <html lang="es" className={`${inter.variable} ${cormorant.variable}`}>
       <body className="bg-obsidian text-bsm-text-primary antialiased">
+        {gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
@@ -97,6 +122,29 @@ export default function RootLayout({
           {children}
         </ComparatorProvider>
         <CookieConsentBanner />
+        {gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">{`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gaId}');
+            `}</Script>
+          </>
+        )}
+        {gtmId && (
+          <Script id="gtm-init" strategy="afterInteractive">{`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','${gtmId}');
+          `}</Script>
+        )}
       </body>
     </html>
   )
