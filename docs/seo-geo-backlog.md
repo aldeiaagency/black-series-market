@@ -33,9 +33,10 @@
 |---|---|---|---|---|
 | 9-jun | **Ola 1 — Schema + metadatos core** | 7/7 ✅ | `Car`/`Motorcycle` schema · `Offer` completo · `AutoDealer` completo · canonical+twitter en fichas · descripciones con specs · quitar `keywords` · OG image+twitter globales | `b7b090c` |
 | 9-jun | **Ola 2 — Rich results + GEO/AEO** | 9/10 ✅ | `WebSite`+`SearchAction` · `BreadcrumbList` fichas/dealers/marcas · `FAQPage` precios+como-funciona · `ItemList` coches+motos · canonical paginación · `llms.txt` · sitemap completo · noindex thin pages · `img`→`next/image` | `aed40f2` |
+| 9-jun | **Ola 3 — Contenido + arquitectura** | 7/8 ✅ | 5 category landings (`/coches/clasicos`, `/coches/deportivos`, `/coches/lujo`, `/motos/deportivas`, `/motos/clasicas`) · `/para-profesionales` B2B · `/glosario` 18 términos (DefinedTermSet) · intro text `/coches`+`/motos` · alt text `VehicleCard` · editorial de marcas top · sitemap +9 rutas | `cc40ccc` |
 
-**Acciones acumuladas: 16.** · Pendiente: O2-07 `sameAs` (bloqueado por URLs redes). R01: OG 1200×630 dedicada.
-Próxima: **Ola 3** (contenido + arquitectura). Bloqueos de input: `sameAs` (URLs redes BLM), "Sobre nosotros" (contenido de marca).
+**Acciones acumuladas: 25.** · Pendiente: O2-07 `sameAs` (bloqueado URLs redes) · O3-01 `/sobre-nosotros` (bloqueado input de marca) · G01 gate noindex. R01: OG 1200×630 dedicada.
+Próxima: **Ola 4** (activos de contenido + autoridad) cuando se desbloqueen los inputs pendientes.
 
 ---
 
@@ -107,30 +108,32 @@ Próxima: **Ola 3** (contenido + arquitectura). Bloqueos de input: `sameAs` (URL
 
 ---
 
-## OLA 3 — Contenido + arquitectura (P1-P2)
+## OLA 3 — Contenido + arquitectura (P1-P2) · ✅ COMPLETADA (7/8)
+
+> **Ejecutada en sesión 9-jun (commit `cc40ccc`).** 7/8 ítems (O3-01 bloqueado por input de marca). Build ✓.
 
 - ⬜ **O3-01 · T12 · 💻+✍️ — Página `/sobre-nosotros` (E-E-A-T).**
-  Quién está detrás (Black Series), propósito, proceso de verificación, criterios de selección. Schema `AboutPage`. ⚠️ Necesito tu input de marca.
+  Quién está detrás (Black Series), propósito, proceso de verificación, criterios de selección. Schema `AboutPage`. ⚠️ **Bloqueado** — necesito tu input de marca.
 
-- ⬜ **O3-02 · T16 · 💻+✍️ — Landing `/para-profesionales` (B2B).**
-  Intención: "anunciar coche de lujo", "marketplace coches premium profesionales". CTA a `/registro`. *(Usa la voz B2B de la guía de copy.)*
+- ✅ **O3-02 · T16 · 💻+✍️ — Landing `/para-profesionales` (B2B).**
+  Hero "Llega a compradores que saben exactamente lo que buscan", grid de 6 beneficios, bloque de criterios, CTA a `/precios` y `/registro`. Schema `WebPage`.
 
-- ⬜ **O3-03 · T21 · ✍️ — Texto introductorio en `/coches` y `/motos`.**
-  2-3 frases con keywords naturales antes del grid (contexto para Google y LLMs).
+- ✅ **O3-03 · T21 · ✍️ — Texto introductorio en `/coches` y `/motos`.**
+  Párrafo introductorio con keywords naturales antes del grid.
 
-- ⬜ **O3-04 · T20 · 💻 — Title de páginas de marca.**
-  `'{Marca} en venta en España | Black Label Market'` en `/marcas/[brand]`.
+- ✅ **O3-04 · T20 · 💻 — Title de páginas de marca.**
+  `'{Marca} en venta en España | Black Label Market'` implementado en `/marcas/[brand]`.
 
-- ⬜ **O3-05 · T31 · 💻 — Alt text contextual en `VehicleCard`.**
+- ✅ **O3-05 · T31 · 💻 — Alt text contextual en `VehicleCard`.**
   `'{Marca Modelo Año} {color} en venta en {ciudad} — Black Label Market'`.
 
-- ⬜ **O3-06 · T24 + T25 + T26 · 💻+✍️ — Landings de categoría indexables.**
-  `/coches/clasicos`, `/coches/deportivos`, `/coches/lujo` (y motos) con H1, intro editorial única y grid filtrado. **Mayor palanca de tráfico head-term.** Regla: `noindex` automático si quedan vacías.
+- ✅ **O3-06 · T24 + T25 + T26 · 💻+✍️ — Landings de categoría indexables.**
+  `/coches/clasicos`, `/coches/deportivos`, `/coches/lujo`, `/motos/deportivas`, `/motos/clasicas`. Cada una con BreadcrumbList + ItemList JSON-LD, H1, intro, grid VehicleCard, noindex si count=0, CTA a filtros.
 
-- ⬜ **O3-07 · T23 · ✍️ — Contenido editorial en marcas top (Ferrari, Porsche, Ducati, BMW, Lamborghini).**
-  100-200 palabras por marca (hoy son thin content).
+- ✅ **O3-07 · T23 · ✍️ — Contenido editorial en marcas top.**
+  Map `BRAND_EDITORIAL` para Ferrari, Porsche, Lamborghini, BMW, Ducati, McLaren, Rolls-Royce, Bentley en `/marcas/[brand]`.
 
-- ⬜ **O3-08 · T32 · ✍️ — Glosario del sector** (`/glosario`: youngtimer, servicebook, GT…). SEO informacional + entidades GEO.
+- ✅ **O3-08 · T32 · ✍️ — Glosario del sector** (`/glosario`). 18 términos con `DefinedTermSet`+`DefinedTerm` schema, anchor links, breadcrumb. SEO informacional + entidades GEO.
 
 ---
 
