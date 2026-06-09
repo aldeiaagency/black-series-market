@@ -2,10 +2,19 @@ import Link from 'next/link'
 import { Check, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
 export const metadata: Metadata = {
   title: 'Precios y planes — Black Label Market',
-  description: 'Planes de publicación para concesionarios y especialistas. Sin comisiones por venta. Essential 149 €/mes, Professional 349 €/mes, Elite 699 €/mes.',
+  description: 'Planes de publicación para concesionarios y especialistas premium. Sin comisiones por venta. Essential 149 €/mes, Professional 349 €/mes, Elite 699 €/mes.',
   alternates: { canonical: '/precios' },
+  openGraph: {
+    title: 'Precios y planes — Black Label Market',
+    description: 'Planes para publicar en el marketplace premium. Essential 149 €, Professional 349 €, Elite 699 €/mes. Sin comisiones por venta.',
+    url: 'https://blacklabelmarket.es/precios',
+    siteName: 'Black Label Market',
+    type: 'website',
+  },
 }
 
 const PLANS = [
@@ -59,6 +68,24 @@ const PLANS = [
   },
 ]
 
+const webPageJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${SITE_URL}/precios`,
+  name: 'Precios y planes — Black Label Market',
+  description: 'Planes de publicación para concesionarios y especialistas premium. Sin comisiones por venta.',
+  url: `${SITE_URL}/precios`,
+  inLanguage: 'es-ES',
+  isPartOf: { '@type': 'WebSite', '@id': `${SITE_URL}/#website` },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Precios y planes' },
+    ],
+  },
+}
+
 const faqJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -94,6 +121,7 @@ const faqJsonLd = {
 export default function PreciosPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-32 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="text-center mb-16">
         <div className="flex items-center justify-center gap-3 mb-4">

@@ -364,6 +364,32 @@ export default async function HomePage() {
   </div>
 </section>
 
+      {/* RECURSOS EDITORIALES */}
+      <section className="border-t border-[#141414] py-16">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-px w-8 bg-[#C6A64B]/40" />
+                <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+                  Guías del mercado
+                </span>
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl font-light text-[#F4F1EA] mb-2">
+                Compra mejor. Con contexto real.
+              </h2>
+              <p className="text-[13px] text-[#8A8A8A] max-w-xl leading-relaxed">
+                Guías prácticas sobre supercars, clásicos y motos premium: qué verificar, cómo valorar el precio y los errores más habituales.
+              </p>
+            </div>
+            <Link href="/guias" className="btn-ghost flex-shrink-0 text-[#8A8A8A] hover:text-[#C9C9C9]">
+              Ver todas las guías
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
     {/* VEHÍCULOS A LA CARTA */}
 <section className="border-t border-[#141414] py-20">
   <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">

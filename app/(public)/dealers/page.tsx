@@ -3,10 +3,19 @@ import { createClient } from '@/lib/supabase/server'
 import DealerCard from '@/components/marketplace/DealerCard'
 import { MapPin, Car, Bike, CheckCircle } from 'lucide-react'
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
 export const metadata: Metadata = {
-  title: 'Concesionarios y especialistas verificados',
-  description: 'Concesionarios, compraventas y especialistas premium verificados en Black Label Market.',
+  title: 'Concesionarios y especialistas premium verificados | Black Label Market',
+  description: 'Concesionarios, compraventas y especialistas premium verificados en España. Coches deportivos, supercars, clásicos y motos premium de profesionales seleccionados por Black Label Market.',
   alternates: { canonical: '/dealers' },
+  openGraph: {
+    title: 'Concesionarios y especialistas verificados | Black Label Market',
+    description: 'Concesionarios, compraventas y especialistas premium verificados en España. Profesionales seleccionados por Black Label Market.',
+    url: 'https://blacklabelmarket.es/dealers',
+    siteName: 'Black Label Market',
+    type: 'website',
+  },
 }
 
 interface PageProps {
@@ -89,6 +98,25 @@ function renderPage(
   params: { tipo?: string; zona?: string },
   zones: string[],
 ) {
+  const webPageJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SearchResultsPage',
+    '@id': `${SITE_URL}/dealers`,
+    name: 'Concesionarios y especialistas premium verificados en España',
+    description: 'Red de profesionales verificados por Black Label Market: concesionarios, compraventas y especialistas en coches y motos premium.',
+    url: `${SITE_URL}/dealers`,
+    inLanguage: 'es-ES',
+    isPartOf: { '@type': 'WebSite', '@id': `${SITE_URL}/#website` },
+  }
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Showrooms verificados' },
+    ],
+  }
+
   const featured    = dealers.filter((d) => d.is_featured)
   const nonFeatured = dealers.filter((d) => !d.is_featured)
 
@@ -97,6 +125,8 @@ function renderPage(
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       {/* Header */}
       <div className="mb-10">

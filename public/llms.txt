@@ -109,7 +109,9 @@ El sitio implementa schema.org extensivamente:
 - `DefinedTermSet` + `DefinedTerm` — glosario del sector en `/glosario`
 - `HowTo` — pasos de compra y venta en `/como-funciona` (compradores y profesionales)
 - `CollectionPage` — índice de marcas (`/marcas`) y guías (`/guias`)
-- `WebPage` — páginas transaccionales (`/vehiculos-a-la-carta`, `/para-profesionales`)
+- `WebPage` — páginas transaccionales (`/vehiculos-a-la-carta`, `/para-profesionales`, `/precios`)
+- `SearchResultsPage` — directorio de showrooms verificados (`/dealers`)
+- `ContactPage` — contacto con el marketplace (`/contacto`)
 
 Sitemap: https://blacklabelmarket.es/sitemap.xml
 Robots: https://blacklabelmarket.es/robots.txt
