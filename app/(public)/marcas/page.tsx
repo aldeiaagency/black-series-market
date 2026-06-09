@@ -2,10 +2,32 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
 export const metadata: Metadata = {
-  title: 'Marcas premium',
-  description: 'Explora las marcas de coches y motos premium disponibles en Black Label Market.',
+  title: 'Marcas de coches y motos premium en España | Black Label Market',
+  description: 'Ferrari, Porsche, Lamborghini, BMW, McLaren, Ducati, Triumph y más de 50 marcas premium. Catálogo completo de coches y motos de lujo, deportivos y de colección en España.',
   alternates: { canonical: '/marcas' },
+}
+
+const collectionPageJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${SITE_URL}/marcas#page`,
+  name: 'Marcas de coches y motos premium | Black Label Market',
+  description: 'Catálogo completo de marcas premium disponibles en Black Label Market: Ferrari, Porsche, Lamborghini, BMW, McLaren, Ducati, Triumph y más de 50 fabricantes.',
+  url: `${SITE_URL}/marcas`,
+  inLanguage: 'es-ES',
+  isPartOf: { '@id': `${SITE_URL}/#website` },
+}
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Marcas' },
+  ],
 }
 
 // Slugs canónicos por tipo — determina sección cuando no hay vehículos publicados.
@@ -103,12 +125,25 @@ export default async function MarcasPage() {
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+
       <div className="mb-12">
+        <nav aria-label="breadcrumb" className="mb-6">
+          <ol className="flex items-center gap-1.5 text-xs text-bsm-text-muted">
+            <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
+            <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+            <li className="text-bsm-text-secondary" aria-current="page">Marcas</li>
+          </ol>
+        </nav>
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Catálogo</span>
         </div>
-        <h1 className="section-title">Marcas del marketplace</h1>
+        <h1 className="section-title mb-3">Marcas del marketplace</h1>
+        <p className="text-sm text-bsm-text-muted max-w-2xl">
+          Ferrari, Porsche, Lamborghini, McLaren, Ducati, Triumph y más de 50 marcas premium. Coches y motos de lujo, deportivos, clásicos y de colección con vendedores verificados en España.
+        </p>
       </div>
 
       {carBrands.length > 0 && (

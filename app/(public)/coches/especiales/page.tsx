@@ -12,23 +12,23 @@ export async function generateMetadata(): Promise<Metadata> {
     .select('*', { count: 'exact', head: true })
     .eq('status', 'active')
     .eq('vehicle_type', 'car')
-    .eq('category', 'clasicos')
+    .eq('category', 'unidades_especiales')
   return {
-    title: 'Coches clásicos y futuros clásicos en venta en España',
-    description: 'Porsche 911 air-cooled, Ferrari 308, BMW E30 M3, Jaguar E-Type... Coches clásicos, youngtimers y futuros clásicos de especialistas verificados en Black Label Market.',
-    alternates: { canonical: '/coches/clasicos' },
+    title: 'Coches de edición especial y unidades únicas en venta en España',
+    description: 'Ferrari LaFerrari, Porsche GT2 RS, McLaren Senna, Bugatti Chiron... Ediciones limitadas, series especiales y unidades de producción exclusiva de especialistas verificados en España.',
+    alternates: { canonical: '/coches/especiales' },
     ...(count === 0 ? { robots: { index: false } } : {}),
   }
 }
 
-export default async function CochesClasicosPage() {
+export default async function CochesEspecialesPage() {
   const supabase = await createClient()
   const { data: vehicles, count } = await supabase
     .from('vehicles')
     .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
     .eq('status', 'active')
     .eq('vehicle_type', 'car')
-    .eq('category', 'clasicos')
+    .eq('category', 'unidades_especiales')
     .order('is_featured', { ascending: false })
     .order('published_at', { ascending: false })
     .limit(48)
@@ -36,8 +36,8 @@ export default async function CochesClasicosPage() {
   const itemListJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Coches clásicos en venta en España',
-    url: `${SITE_URL}/coches/clasicos`,
+    name: 'Coches de edición especial en venta en España',
+    url: `${SITE_URL}/coches/especiales`,
     itemListElement: (vehicles || []).map((v, i) => ({
       '@type': 'ListItem',
       position: i + 1,
@@ -52,7 +52,7 @@ export default async function CochesClasicosPage() {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Coches', item: `${SITE_URL}/coches` },
-      { '@type': 'ListItem', position: 3, name: 'Clásicos' },
+      { '@type': 'ListItem', position: 3, name: 'Unidades especiales' },
     ],
   }
 
@@ -68,7 +68,7 @@ export default async function CochesClasicosPage() {
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
             <li><Link href="/coches" className="hover:text-gold transition-colors">Coches</Link></li>
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-            <li className="text-bsm-text-secondary" aria-current="page">Clásicos</li>
+            <li className="text-bsm-text-secondary" aria-current="page">Unidades especiales</li>
           </ol>
         </nav>
 
@@ -76,9 +76,9 @@ export default async function CochesClasicosPage() {
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Marketplace</span>
         </div>
-        <h1 className="section-title mb-3">Coches clásicos y futuros clásicos</h1>
+        <h1 className="section-title mb-3">Coches de edición especial y unidades únicas</h1>
         <p className="text-sm text-bsm-text-muted max-w-2xl">
-          Porsche 911 air-cooled, Ferrari 308, BMW E30 M3, Jaguar E-Type... Los clásicos no envejecen. Encuentra coches clásicos, youngtimers y futuros clásicos en manos de especialistas verificados.
+          Ferrari LaFerrari, Porsche GT2 RS Weissach, McLaren Senna, Bugatti Chiron... Ediciones limitadas, series especiales y unidades de producción exclusiva. Piezas que no vuelven a aparecer con facilidad, en manos de especialistas que conocen su valor y su historial.
         </p>
       </div>
 
@@ -89,24 +89,19 @@ export default async function CochesClasicosPage() {
             {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
           </div>
           <div className="pt-8 border-t border-bsm-border flex flex-wrap items-center justify-between gap-4">
-            <Link href="/coches?categoria=clasicos" className="text-sm text-gold hover:text-gold-light transition-colors">
-              Ver todos los coches clásicos con filtros →
+            <Link href="/coches?categoria=unidades_especiales" className="text-sm text-gold hover:text-gold-light transition-colors">
+              Ver todas las unidades especiales con filtros →
             </Link>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/guias/como-comprar-supercar-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-                Guía de compra →
-              </Link>
-              <Link href="/guias/coches-clasicos-youngtimers-como-invertir" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-                Clásicos como inversión →
-              </Link>
-            </div>
+            <Link href="/vehiculos-a-la-carta" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Solicitar búsqueda personalizada →
+            </Link>
           </div>
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-bsm-border bg-surface">
           <h2 className="font-display text-xl mb-2 text-bsm-text-primary">Sin unidades disponibles en este momento</h2>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
-            Aún no hay coches clásicos publicados. Prueba la búsqueda general o deja tu solicitud a la carta.
+            Las unidades especiales son escasas por definición. Si tienes una en mente, deja tu solicitud y te avisamos.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/coches" className="btn-outline text-sm px-4">Explorar todos los coches</Link>

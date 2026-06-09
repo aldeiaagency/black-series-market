@@ -174,6 +174,12 @@ export default function GlosarioPage() {
             <Link href="/guias/como-vender-coche-premium-profesionales" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
               Cómo vender un coche premium →
             </Link>
+            <Link href="/guias/motos-premium-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Cómo comprar una moto premium de segunda mano →
+            </Link>
+            <Link href="/guias/coches-clasicos-youngtimers-como-invertir" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Coches clásicos y youngtimers como inversión →
+            </Link>
           </div>
         </div>
       </div>

@@ -55,6 +55,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/motos/naked`,                                       lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
     { url: `${BASE_URL}/motos/touring`,                                     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
     { url: `${BASE_URL}/motos/trail`,                                       lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/coches/especiales`,                                 lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/motos/custom`,                                      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/motos/scooter`,                                     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/guias/motos-premium-segunda-mano`,                  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/guias/coches-clasicos-youngtimers-como-invertir`,   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const TOP_CAR_BRANDS = ['ferrari', 'porsche', 'lamborghini', 'bmw', 'mclaren', 'rolls-royce', 'bentley', 'mercedes-benz', 'audi', 'bugatti']

@@ -25,6 +25,18 @@ const BRAND_EDITORIAL: Record<string, string> = {
     'Rolls-Royce define el lujo sin compromiso. Cada unidad es prácticamente única: materiales de primera calidad, personalización a medida y una presencia en carretera inigualable. Los Rolls-Royce disponibles en Black Label Market son ofrecidos por los pocos especialistas que manejan este tipo de producto con el cuidado que merece.',
   bentley:
     'Bentley combina artesanía british con prestaciones deportivas reales. El Continental GT, el Bentayga o el Flying Spur son elecciones de quienes no quieren elegir entre lujo y dinámicas. Los vendedores especializados en Black Label Market son los únicos en los que merece confiar para este tipo de adquisición.',
+  'mercedes-benz':
+    'Mercedes-Benz define el estándar de lo que significa el lujo alemán en movimiento. Desde el SL clásico hasta el AMG GT, la Clase S o el G63, cada modelo combina ingeniería de vanguardia con un refinamiento que ningún otro fabricante iguala en volumen. Los vehículos Mercedes-Benz publicados en Black Label Market son seleccionados por profesionales con historial documentado, mantenimiento en red oficial y configuraciones de alto equipamiento.',
+  audi:
+    'Audi lleva décadas estableciendo referencias en tecnología, diseño y tracción quattro. La gama RS, el A8 o el e-tron GT son ejemplos de un fabricante que no necesita elevar el tono para ser premium. Los vehículos Audi publicados en Black Label Market son seleccionados por concesionarios especializados con historial verificado y presentación a la altura de la marca.',
+  bugatti:
+    'Bugatti produce los hipercars más exclusivos del mundo. Cada Veyron, Chiron o Divo es una obra de ingeniería sin parangón: más de 1.000 CV, producción medida en decenas de unidades y un proceso de fabricación artesanal en Molsheim. Una operación Bugatti exige el máximo rigor en documentación, trazabilidad y especialización: exactamente lo que ofrecen los vendedores de Black Label Market.',
+  triumph:
+    'Triumph es la esencia de la moto británica de carácter: desde la Speed Triple hasta la Bonneville o la Tiger 900, cada modelo tiene una identidad definida y un legado de décadas. Los Triumph publicados en Black Label Market provienen de especialistas con inventario bien seleccionado, mantenimiento documentado y conocimiento real del producto.',
+  'harley-davidson':
+    'Harley-Davidson no es solo una moto, es una cultura de conducción. Desde el Sportster hasta el Road King o el Fat Bob, cada modelo carga con décadas de historia y una comunidad que valora la autenticidad por encima de todo. Los Harley-Davidson publicados en Black Label Market son ofrecidos por especialistas que entienden el valor de una moto bien mantenida, documentada y en su configuración original.',
+  'mv-agusta':
+    'MV Agusta produce algunas de las motos más hermosas del mundo. La Brutale, la F4, la Superveloce... piezas de orfebrería sobre dos ruedas que combinan rendimiento superlativo con un diseño inimitable. Encontrar una MV Agusta con historial claro y en manos de un especialista de confianza es el tipo de operación que hace Black Label Market.',
 }
 
 interface PageProps {

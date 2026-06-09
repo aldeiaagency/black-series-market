@@ -2,6 +2,8 @@
 import { Search, Heart, Bell, GitCompareArrows, MessageSquare, ShieldCheck, Package, BarChart2, X, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
 export const metadata: Metadata = {
   title: 'Cómo funciona — Black Label Market',
   description: 'Cómo funciona Black Label Market: marketplace de coches y motos premium con profesionales verificados. Para compradores y para concesionarios.',
@@ -104,10 +106,42 @@ const NOT_BL = [
   'No sustituimos las comprobaciones técnicas y documentales del comprador',
 ]
 
+const howToBuyerJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  '@id': `${SITE_URL}/como-funciona#howto-comprador`,
+  name: 'Cómo comprar un coche o moto premium en Black Label Market',
+  description: 'Pasos para encontrar, comparar y contactar con vendedores verificados de vehículos premium en España.',
+  inLanguage: 'es-ES',
+  step: BUYER_STEPS.map((s, i) => ({
+    '@type': 'HowToStep',
+    position: i + 1,
+    name: s.title,
+    text: s.desc,
+  })),
+}
+
+const howToDealerJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  '@id': `${SITE_URL}/como-funciona#howto-profesional`,
+  name: 'Cómo publicar vehículos premium como profesional en Black Label Market',
+  description: 'Pasos para solicitar acceso, publicar inventario y recibir leads cualificados como concesionario en España.',
+  inLanguage: 'es-ES',
+  step: DEALER_STEPS.map((s, i) => ({
+    '@type': 'HowToStep',
+    position: i + 1,
+    name: s.title,
+    text: s.desc,
+  })),
+}
+
 export default function ComoFuncionaPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToBuyerJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToDealerJsonLd) }} />
 
       {/* Hero */}
       <div className="mb-16 max-w-2xl">
