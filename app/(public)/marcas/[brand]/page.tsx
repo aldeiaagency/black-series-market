@@ -43,6 +43,21 @@ export default async function BrandPage({ params }: PageProps) {
   const cars   = vehicles?.filter((v: any) => v.vehicle_type === 'car') || []
   const motos  = vehicles?.filter((v: any) => v.vehicle_type === 'motorcycle') || []
 
+  // Type-aware CTA for the empty state: moto-only brands → /motos, car-only → /coches,
+  // mixed/unknown brands → the brands index. Derived from the brand's models so it is
+  // correct even when there is currently no active stock.
+  let emptyCta = { href: '/marcas', label: 'explora otras marcas' }
+  if (!vehicles?.length) {
+    const { data: brandModels } = await supabase
+      .from('models')
+      .select('vehicle_type')
+      .eq('brand_id', brandData.id)
+    const hasCar  = brandModels?.some((m: any) => m.vehicle_type === 'car')
+    const hasMoto = brandModels?.some((m: any) => m.vehicle_type === 'motorcycle')
+    if (hasMoto && !hasCar)      emptyCta = { href: '/motos',  label: 'explora motos disponibles' }
+    else if (hasCar && !hasMoto) emptyCta = { href: '/coches', label: 'explora coches disponibles' }
+  }
+
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       {/* Header */}
@@ -103,8 +118,8 @@ export default async function BrandPage({ params }: PageProps) {
           <p className="text-bsm-text-muted">No hay vehículos {brandData.name} disponibles en este momento.</p>
           <p className="text-sm text-bsm-text-muted mt-2">
             Vuelve pronto o{' '}
-            <Link href="/coches" className="text-gold hover:text-gold-light">
-              explora otras marcas
+            <Link href={emptyCta.href} className="text-gold hover:text-gold-light">
+              {emptyCta.label}
             </Link>.
           </p>
         </div>
