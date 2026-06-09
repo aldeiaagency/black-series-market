@@ -33,10 +33,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/dealers`, lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${BASE_URL}/precios`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/contacto`,lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
-    { url: `${BASE_URL}/legal/aviso-legal`,  lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${BASE_URL}/legal/privacidad`,   lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${BASE_URL}/legal/cookies`,      lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${BASE_URL}/legal/terminos`,     lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${BASE_URL}/vehiculos-a-la-carta`,                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/como-funciona`,                        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/sobre-nosotros`,                       lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE_URL}/legal/aviso-legal`,                    lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
+    { url: `${BASE_URL}/legal/privacidad`,                     lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
+    { url: `${BASE_URL}/legal/cookies`,                        lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
+    { url: `${BASE_URL}/legal/terminos`,                       lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
+    { url: `${BASE_URL}/legal/criterios-publicacion`,          lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
+    { url: `${BASE_URL}/legal/condiciones-profesionales`,      lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
   ]
 
   const vehicleRoutes: MetadataRoute.Sitemap = (vehicles || []).map((v) => ({

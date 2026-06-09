@@ -110,6 +110,17 @@ export default async function MotoDetailPage({ params }: PageProps) {
       }
     : {}
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Motos', item: `${SITE_URL}/motos` },
+      { '@type': 'ListItem', position: 3, name: vehicle.brand_name, item: `${SITE_URL}/motos?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}` },
+      { '@type': 'ListItem', position: 4, name: fullName },
+    ],
+  }
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Motorcycle',
@@ -143,6 +154,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <VehicleDetailContent
         vehicle={vehicle}
         similarVehicles={similarVehicles || []}

@@ -4,7 +4,45 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Cómo funciona — Black Label Market',
-  description: 'Cómo funciona Black Label Market para compradores y profesionales del motor premium.',
+  description: 'Cómo funciona Black Label Market: marketplace de coches y motos premium con profesionales verificados. Para compradores y para concesionarios.',
+  alternates: { canonical: '/como-funciona' },
+}
+
+const FAQ_ITEMS = [
+  {
+    q: '¿Qué diferencia a Black Label Market de otros portales de coches?',
+    a: 'Black Label Market solo admite profesionales verificados (concesionarios, compraventas y especialistas que han pasado revisión previa) y solo publica vehículos con información real, imágenes propias y disponibilidad confirmada. No somos un portal masivo de anuncios; nos centramos en unidades premium, deportivos, clásicos y motos de interés.',
+  },
+  {
+    q: '¿Puedo contactar directamente con el vendedor?',
+    a: 'Sí. Black Label Market facilita el contacto directo entre comprador y vendedor. No intervenimos como intermediarios en la operación de compraventa.',
+  },
+  {
+    q: '¿Qué significa que un profesional esté verificado?',
+    a: 'Antes de publicar, revisamos la reputación online, la especialización y la calidad de presentación de cada profesional. El badge "verificado" indica que ha superado ese proceso de selección.',
+  },
+  {
+    q: '¿Qué garantías tienen los vehículos publicados?',
+    a: 'Cada vehículo indica en su ficha si incluye garantía. Black Label no ofrece garantía propia: la garantía (si existe) la otorga el vendedor. Recomendamos siempre confirmar el estado, historial y documentación directamente con el concesionario antes de formalizar la compra.',
+  },
+  {
+    q: '¿Puedo solicitar un vehículo que no encuentro en el catálogo?',
+    a: 'Sí, a través del servicio "Vehículos a la carta". Descríbenos exactamente qué unidad buscas y, si aparece una oportunidad compatible, podemos avisarte.',
+  },
+  {
+    q: '¿Se puede financiar un vehículo a través de Black Label?',
+    a: 'Cada profesional puede ofrecer opciones de financiación propias o a través de sus colaboradores. Esto se indica en la ficha del vehículo. Black Label no gestiona financiación directamente.',
+  },
+]
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
 }
 
 const BUYER_STEPS = [
@@ -69,6 +107,7 @@ const NOT_BL = [
 export default function ComoFuncionaPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       {/* Hero */}
       <div className="mb-16 max-w-2xl">
@@ -144,6 +183,19 @@ export default function ComoFuncionaPage() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="mb-20">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="font-display text-2xl font-light text-center mb-8">Preguntas frecuentes</h2>
+          {FAQ_ITEMS.map(({ q, a }) => (
+            <div key={q} className="border-b border-bsm-border py-5">
+              <h3 className="font-medium text-bsm-text-primary mb-2">{q}</h3>
+              <p className="text-sm text-bsm-text-secondary leading-relaxed">{a}</p>
+            </div>
+          ))}
         </div>
       </section>
 

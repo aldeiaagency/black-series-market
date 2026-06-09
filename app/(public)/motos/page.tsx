@@ -23,10 +23,16 @@ const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   year_asc:     [{ col: 'year', asc: true }],
 }
 
-export const metadata: Metadata = {
-  title: 'Motos premium en venta',
-  description: 'Motos premium, deportivas, clásicas y unidades especiales en venta en España. Concesionarios y especialistas verificados.',
-  alternates: { canonical: '/motos' },
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string>> }): Promise<Metadata> {
+  const params = await searchParams
+  const page = Math.max(1, parseInt(params.page || '1'))
+  return {
+    title: 'Motos premium en venta',
+    description: 'Motos premium, deportivas, clásicas y unidades especiales en venta en España. Concesionarios y especialistas verificados.',
+    alternates: { canonical: page > 1 ? `/motos?page=${page}` : '/motos' },
+  }
 }
 
 interface PageProps {
@@ -106,14 +112,38 @@ async function MotoList({ params }: { params: Record<string, string> }) {
 export default async function MotosPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = await createClient()
-  const { count } = await supabase
-    .from('vehicles')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'active')
-    .eq('vehicle_type', 'motorcycle')
+  const [{ count }, { data: itemListVehicles }] = await Promise.all([
+    supabase
+      .from('vehicles')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active')
+      .eq('vehicle_type', 'motorcycle'),
+    supabase
+      .from('vehicles')
+      .select('slug, brand_name, model_name, year')
+      .eq('status', 'active')
+      .eq('vehicle_type', 'motorcycle')
+      .order('is_featured', { ascending: false })
+      .order('published_at', { ascending: false })
+      .limit(10),
+  ])
+
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Motos premium en venta en España',
+    url: `${SITE_URL}/motos`,
+    itemListElement: (itemListVehicles || []).map((v, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${SITE_URL}/motos/${v.slug}`,
+      name: `${v.brand_name} ${v.model_name} ${v.year}`,
+    })),
+  }
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />

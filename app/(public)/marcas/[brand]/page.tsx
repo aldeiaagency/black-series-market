@@ -2,8 +2,11 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import Image from 'next/image'
 import type { Metadata } from 'next'
+
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 interface PageProps {
   params: Promise<{ brand: string }>
@@ -15,8 +18,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { data } = await supabase.from('brands').select('name').eq('slug', brand).single()
   if (!data) return {}
   return {
-    title: `${data.name} en venta`,
-    description: `Explora todos los vehículos ${data.name} disponibles en Black Label Market. Selección curada de coches y motos premium.`,
+    title: `${data.name} en venta en España`,
+    description: `Vehículos ${data.name} disponibles en Black Label Market: coches y motos premium con vendedores verificados.`,
+    alternates: { canonical: `/marcas/${brand}` },
   }
 }
 
@@ -58,20 +62,35 @@ export default async function BrandPage({ params }: PageProps) {
     else if (hasCar && !hasMoto) emptyCta = { href: '/coches', label: 'explora coches disponibles' }
   }
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Marcas', item: `${SITE_URL}/marcas` },
+      { '@type': 'ListItem', position: 3, name: brandData.name },
+    ],
+  }
+
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {/* Header */}
       <div className="mb-12">
-        <Link href="/marcas" className="flex items-center gap-1.5 text-sm text-bsm-text-muted hover:text-gold transition-colors mb-8">
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Todas las marcas
-        </Link>
+        <nav aria-label="breadcrumb" className="mb-8">
+          <ol className="flex items-center gap-1.5 text-sm text-bsm-text-muted">
+            <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
+            <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+            <li><Link href="/marcas" className="hover:text-gold transition-colors">Marcas</Link></li>
+            <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+            <li className="text-bsm-text-secondary" aria-current="page">{brandData.name}</li>
+          </ol>
+        </nav>
 
         <div className="flex flex-col md:flex-row md:items-end gap-6">
           {brandData.logo_url && (
             <div className="w-24 h-24 bg-white rounded-sm flex items-center justify-center p-3 flex-shrink-0 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={brandData.logo_url} alt={brandData.name} className="w-full h-full object-contain" />
+              <Image src={brandData.logo_url} alt={brandData.name} width={96} height={96} className="w-full h-full object-contain" />
             </div>
           )}
           <div>

@@ -101,6 +101,17 @@ export default async function CocheDetailPage({ params }: PageProps) {
   ].filter(Boolean)
   const schemaDescription = vehicle.description || `${descParts.join(' · ')} — Vendedor profesional verificado en Black Label Market.`
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Coches', item: `${SITE_URL}/coches` },
+      { '@type': 'ListItem', position: 3, name: vehicle.brand_name, item: `${SITE_URL}/coches?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}` },
+      { '@type': 'ListItem', position: 4, name: fullName },
+    ],
+  }
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Car',
@@ -138,6 +149,7 @@ export default async function CocheDetailPage({ params }: PageProps) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <VehicleDetailContent
         vehicle={vehicle}
         similarVehicles={similarVehicles || []}

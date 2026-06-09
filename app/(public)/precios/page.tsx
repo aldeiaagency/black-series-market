@@ -1,5 +1,12 @@
 import Link from 'next/link'
 import { Check, ArrowRight } from 'lucide-react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Precios y planes — Black Label Market',
+  description: 'Planes de publicación para concesionarios y especialistas. Sin comisiones por venta. Essential 149 €/mes, Professional 349 €/mes, Elite 699 €/mes.',
+  alternates: { canonical: '/precios' },
+}
 
 const PLANS = [
   {
@@ -52,9 +59,42 @@ const PLANS = [
   },
 ]
 
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: '¿Hay comisión por venta?',
+      acceptedAnswer: { '@type': 'Answer', text: 'No. Pagas solo la suscripción mensual. No cobramos comisión cuando vendes un vehículo.' },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Puedo cambiar de plan en cualquier momento?',
+      acceptedAnswer: { '@type': 'Answer', text: 'Sí. Puedes subir o bajar de plan desde tu panel. El cambio se aplica en el siguiente ciclo de facturación.' },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Qué pasa si cancelo?',
+      acceptedAnswer: { '@type': 'Answer', text: 'Tus vehículos se marcarán como inactivos al finalizar el periodo pagado. Sin penalizaciones.' },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Los vehículos se publican automáticamente?',
+      acceptedAnswer: { '@type': 'Answer', text: 'No. Todos los vehículos pasan revisión editorial antes de publicarse (habitualmente en menos de 24 horas laborables).' },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Puedo subir fotos en alta resolución?',
+      acceptedAnswer: { '@type': 'Answer', text: 'Sí. Recomendamos entre 20 y 60 fotografías por vehículo. Hasta 10 MB por imagen, formatos JPG, PNG y WebP.' },
+    },
+  ],
+}
+
 export default function PreciosPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-32 pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div className="text-center mb-16">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />

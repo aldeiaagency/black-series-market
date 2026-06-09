@@ -415,12 +415,13 @@ export default async function HomePage() {
       </div>
 
       <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
-        <img
+        <Image
           src="/images/hero/vehicle-concierge-black-label.webp"
           alt="Búsqueda personalizada de coche o moto premium en Black Label"
-          className="absolute inset-0 h-full w-full object-cover opacity-90"
+          fill
+          className="object-cover opacity-90"
           loading="lazy"
-          decoding="async"
+          sizes="(max-width: 1024px) 100vw, 55vw"
         />
 
         <div className="absolute inset-0 bg-gradient-to-r from-[#080808]/30 via-[#080808]/10 to-transparent" />
@@ -457,12 +458,13 @@ export default async function HomePage() {
 
       {/* Imagen — izquierda en desktop, arriba en mobile */}
       <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden order-first">
-        <img
+        <Image
           src="/images/hero/professional-showroom-black-label.webp"
           alt="Showroom profesional premium con vehículo revisado para Black Label"
-          className="absolute inset-0 h-full w-full object-cover opacity-90"
+          fill
+          className="object-cover opacity-90"
           loading="lazy"
-          decoding="async"
+          sizes="(max-width: 1024px) 100vw, 55vw"
         />
 
         <div className="absolute inset-0 bg-gradient-to-l from-[#080808]/35 via-[#080808]/10 to-transparent" />

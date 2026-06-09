@@ -8,6 +8,7 @@ import CompareExpandToggle from '@/components/marketplace/CompareExpandToggle'
 
 export const metadata: Metadata = {
   title: 'Comparar vehículos — Black Label Market',
+  robots: { index: false, follow: false },
 }
 
 interface PageProps {

@@ -4,6 +4,12 @@ import VehicleCard from '@/components/marketplace/VehicleCard'
 import SearchBar from '@/components/marketplace/SearchBar'
 import CloseSearchButton from '@/components/marketplace/CloseSearchButton'
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Buscar vehículos — Black Label Market',
+  robots: { index: false, follow: false },
+}
 
 interface PageProps {
   searchParams: Promise<{ q?: string; tipo?: string }>

@@ -1,4 +1,5 @@
 ﻿import Link from 'next/link'
+import Image from 'next/image'
 import { MapPin, CheckCircle, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -42,11 +43,12 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
         {/* Logo or initial */}
         <div className="w-7 h-7 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
           {dealer.logo_url ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
+            <Image
               src={dealer.logo_url}
               alt={dealer.name}
-              className="w-full h-full object-contain"
+              width={28}
+              height={28}
+              className="object-contain"
             />
           ) : (
             <span className="text-[10px] font-medium text-[#C6A64B]/60 leading-none select-none">
@@ -79,11 +81,12 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
     <div className={cn('relative min-h-[190px] overflow-hidden', className)}>
       {/* Background: cover image or solid dark */}
       {dealer.cover_url ? (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
+        <Image
           src={dealer.cover_url}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover"
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, 400px"
         />
       ) : (
         <div className="absolute inset-0 bg-[#0D0D0D]" />
@@ -101,11 +104,12 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
         {/* Logo */}
         <div className="w-10 h-10 mb-3 flex-shrink-0 bg-black/60 border border-white/15 flex items-center justify-center overflow-hidden">
           {dealer.logo_url ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
+            <Image
               src={dealer.logo_url}
               alt={dealer.name}
-              className="w-full h-full object-contain p-0.5"
+              width={40}
+              height={40}
+              className="object-contain p-0.5"
             />
           ) : (
             <span className="font-display text-sm font-light text-[#C6A64B]/70 select-none">

@@ -136,6 +136,16 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
     ? `${Math.min(...dealerPrices).toLocaleString('es-ES')} € - ${Math.max(...dealerPrices).toLocaleString('es-ES')} €`
     : '€€€€'
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Showrooms', item: `${SITE_URL}/dealers` },
+      { '@type': 'ListItem', position: 3, name: dealer.name },
+    ],
+  }
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'AutoDealer',
@@ -163,6 +173,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <div className="pt-20">
 
         {/* Cover */}
@@ -176,11 +187,15 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/20 to-transparent" />
-          <div className="absolute top-6 left-6 lg:left-12">
-            <Link href="/dealers" className="flex items-center gap-1.5 text-xs text-[#808080] hover:text-[#C9C9C9] transition-colors">
-              ← Concesionarios
-            </Link>
-          </div>
+          <nav aria-label="breadcrumb" className="absolute top-6 left-6 lg:left-12">
+            <ol className="flex items-center gap-1.5 text-xs text-[#808080]">
+              <li><Link href="/" className="hover:text-[#C9C9C9] transition-colors">Inicio</Link></li>
+              <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+              <li><Link href="/dealers" className="hover:text-[#C9C9C9] transition-colors">Showrooms</Link></li>
+              <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+              <li className="text-[#C9C9C9] truncate max-w-[120px]" aria-current="page">{dealer.name}</li>
+            </ol>
+          </nav>
         </div>
 
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">

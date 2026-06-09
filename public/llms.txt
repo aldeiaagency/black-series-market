@@ -1,0 +1,59 @@
+# Black Label Market
+
+> Marketplace premium de coches y motos en España. Solo profesionales verificados, solo unidades con valor real.
+
+## Qué es Black Label Market
+
+Black Label Market es un marketplace especializado en vehículos premium: coches deportivos, supercars, clásicos, youngtimers, motos premium y unidades especiales. Solo publican profesionales verificados (concesionarios, compraventas y especialistas) que han pasado revisión editorial previa.
+
+No es un portal de anuncios masivo ni aceptamos stock sin criterio. Cada unidad publicada ha pasado revisión editorial.
+
+## Quién está detrás
+
+Creado y operado por **Black Series** (https://blackseriesagency.es), agencia española de marketing y tecnología para el sector premium y exclusivo.
+
+- Entidad legal: KAZAWEB, S.L.U.
+- Contacto: hola@blacklabelmarket.es
+- Web: https://blacklabelmarket.es
+
+## Qué se puede encontrar
+
+- **Coches premium**: superdeportivos, GT, clásicos, muscle cars, luxury, SUVs exclusivos
+- **Motos premium**: deportivas, custom, clásicas, adventure premium — Ducati, MV Agusta, BMW Motorrad, Harley-Davidson, Triumph, KTM
+- **Vehículos a la carta**: búsqueda personalizada para unidades difíciles de encontrar
+- **Showrooms verificados**: directorio de concesionarios y especialistas seleccionados en España
+
+## URLs principales
+
+- Inicio: https://blacklabelmarket.es
+- Coches en venta: https://blacklabelmarket.es/coches
+- Motos en venta: https://blacklabelmarket.es/motos
+- Marcas disponibles: https://blacklabelmarket.es/marcas
+- Showrooms: https://blacklabelmarket.es/dealers
+- Vehículos a la carta: https://blacklabelmarket.es/vehiculos-a-la-carta
+- Cómo funciona: https://blacklabelmarket.es/como-funciona
+- Planes para profesionales: https://blacklabelmarket.es/precios
+
+## Modelo de negocio
+
+- Marketplace B2B2C: los profesionales pagan suscripción mensual; los compradores acceden gratis
+- Planes: Essential (149 €/mes, 10 vehículos), Professional (349 €/mes, 30 vehículos), Elite (699 €/mes, ilimitados)
+- Sin comisiones por venta
+- Revisión editorial previa a cada publicación (habitualmente menos de 24 h laborables)
+
+## Criterios de selección
+
+- Solo profesionales con buena reputación, stock actualizado y presentación cuidada
+- Solo vehículos con información real, imágenes propias y disponibilidad confirmada
+- No se aceptan anuncios de particulares ni stock masivo sin calidad editorial
+- El vendedor es siempre el profesional; Black Label no interviene como parte en la compraventa
+
+## Cobertura geográfica
+
+España (mercado principal). Algunos concesionarios ofrecen transporte nacional.
+
+## Para integraciones y datos estructurados
+
+El sitio implementa schema.org para Car, Motorcycle, AutoDealer, Organization y BreadcrumbList.
+Sitemap: https://blacklabelmarket.es/sitemap.xml
+Robots: https://blacklabelmarket.es/robots.txt
