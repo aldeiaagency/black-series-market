@@ -149,12 +149,15 @@ export default async function CochesPage({ searchParams }: PageProps) {
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Marketplace</span>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-5">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-3">
           <h1 className="section-title">Coches premium</h1>
           <Suspense fallback={null}>
             <SortSelector />
           </Suspense>
         </div>
+        <p className="text-sm text-bsm-text-muted mb-5 max-w-2xl">
+          Coches deportivos, GT, clásicos, superdeportivos y unidades especiales en venta en España. Solo concesionarios y especialistas verificados, con stock real y ficha completa.
+        </p>
         {/* Filter bar — quick filters + 'Todos los filtros' drawer */}
         <Suspense fallback={null}>
           <VehicleFilters vehicleType="car" totalCount={count || 0} />

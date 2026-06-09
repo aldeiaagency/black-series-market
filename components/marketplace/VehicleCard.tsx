@@ -49,6 +49,14 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
   // Location: prefer vehicle's own province, fallback to dealer city
   const location = vehicle.location_province || vehicle.dealer?.location_city || null
 
+  const imgAlt = [
+    `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year}`,
+    (vehicle as any).color_exterior || null,
+    'en venta',
+    location ? `en ${location}` : null,
+    '— Black Label Market',
+  ].filter(Boolean).join(' ')
+
   return (
     <article className={cn(
       'group relative bg-[#0D0D0D] border border-[#1A1A1A] overflow-hidden',
@@ -62,7 +70,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
         {primaryImage && !imgError ? (
           <Image
             src={primaryImage}
-            alt={title}
+            alt={imgAlt}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

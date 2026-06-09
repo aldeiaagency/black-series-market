@@ -8,6 +8,25 @@ import type { Metadata } from 'next'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
+const BRAND_EDITORIAL: Record<string, string> = {
+  ferrari:
+    'Ferrari representa el punto más alto de la ingeniería deportiva italiana. Cada Ferrari en el mercado de segunda mano es una pieza de historia del motor: rendimiento sin concesiones, líneas que no pasan de moda y un valor que el tiempo tiende a respetar. Los Ferrari publicados en Black Label Market provienen de especialistas que conocen cada modelo a fondo, con historial verificado y documentación en orden.',
+  porsche:
+    'Pocos fabricantes logran combinar usabilidad diaria con prestaciones puras como Porsche. El 911, el Cayman, el Taycan o el Panamera son referencias absolutas en sus segmentos. Los Porsche publicados aquí provienen de profesionales especializados: kilometraje verificado, mantenimientos al día y configuraciones originales documentadas.',
+  lamborghini:
+    'Lamborghini es emoción en estado puro: diseño extremo, sonido inconfundible y una exclusividad que se cotiza. Un Lamborghini bien documentado y con historial trazable es uno de los activos más demandados del mercado premium. Los vendedores especializados en Black Label Market aportan la confianza necesaria para este tipo de operación.',
+  bmw:
+    'La gama M de BMW y los modelos más exclusivos de BMW Motorrad son referentes para quienes buscan prestaciones reales con refinamiento diario. Los vehículos BMW publicados en Black Label Market son seleccionados por profesionales con inventario especializado, historial documentado y exigencia en la presentación.',
+  ducati:
+    'Ducati es sinónimo de pasión, precisión y carácter italiano. Desde la Panigale V4 hasta la Scrambler, cada modelo tiene una personalidad definida y un seguimiento de culto. En Black Label Market encontrarás Ducati de especialistas que entienden el producto: motos con historial claro, mantenimiento oficial y presentación a la altura.',
+  mclaren:
+    'McLaren lleva la tecnología de la Fórmula 1 a la carretera. Sus modelos —720S, Artura, Senna, P1— son máquinas de referencia absoluta en el segmento superdeportivo. Encontrar un McLaren con historial documentado y en manos de un especialista de confianza es exactamente lo que hace Black Label Market.',
+  'rolls-royce':
+    'Rolls-Royce define el lujo sin compromiso. Cada unidad es prácticamente única: materiales de primera calidad, personalización a medida y una presencia en carretera inigualable. Los Rolls-Royce disponibles en Black Label Market son ofrecidos por los pocos especialistas que manejan este tipo de producto con el cuidado que merece.',
+  bentley:
+    'Bentley combina artesanía british con prestaciones deportivas reales. El Continental GT, el Bentayga o el Flying Spur son elecciones de quienes no quieren elegir entre lujo y dinámicas. Los vendedores especializados en Black Label Market son los únicos en los que merece confiar para este tipo de adquisición.',
+}
+
 interface PageProps {
   params: Promise<{ brand: string }>
 }
@@ -107,6 +126,16 @@ export default async function BrandPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Editorial — solo para marcas top con contenido definido */}
+      {(() => {
+        const editorial = BRAND_EDITORIAL[brandData.slug] || (brandData as any).description
+        return editorial ? (
+          <div className="mb-12 max-w-2xl">
+            <p className="text-sm text-bsm-text-secondary leading-relaxed">{editorial}</p>
+          </div>
+        ) : null
+      })()}
 
       {/* Cars */}
       {cars.length > 0 && (

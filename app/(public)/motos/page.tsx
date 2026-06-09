@@ -149,10 +149,13 @@ export default async function MotosPage({ searchParams }: PageProps) {
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Marketplace</span>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-5">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-3">
           <h1 className="section-title">Motos premium</h1>
           <Suspense fallback={null}><SortSelector /></Suspense>
         </div>
+        <p className="text-sm text-bsm-text-muted mb-5 max-w-2xl">
+          Motos deportivas, clásicas, custom y premium en venta en España. Ducati, BMW Motorrad, MV Agusta, Harley-Davidson y mucho más, de especialistas verificados con stock actualizado.
+        </p>
         {/* Filter bar — quick filters + 'Todos los filtros' drawer */}
         <Suspense fallback={null}>
           <VehicleFilters vehicleType="motorcycle" totalCount={count || 0} />
