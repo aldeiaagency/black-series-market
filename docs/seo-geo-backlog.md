@@ -27,33 +27,46 @@
 
 ---
 
-## OLA 1 — Schema + metadatos core (P0) · máximo ROI, bajo riesgo
+## 📋 Registro de ejecución
+
+| Fecha | Ola | Ítems | Acciones | Commit |
+|---|---|---|---|---|
+| 9-jun | **Ola 1 — Schema + metadatos core** | 7/7 ✅ | `Car`/`Motorcycle` schema · `Offer` completo · `AutoDealer` completo · canonical+twitter en fichas · descripciones con specs · quitar `keywords` · OG image+twitter globales | `b7b090c` |
+
+**Acciones acumuladas: 7.** · Pendiente de refinamiento: R01 (OG 1200×630 dedicada).
+Próxima: **Ola 2** (WebSite/SearchAction, BreadcrumbList, ItemList, FAQPage, llms.txt, noindex en thin pages, `<img>`→`next/image`, completar sitemap). Bloqueos de input: `sameAs` (URLs redes) y "Sobre nosotros".
+
+---
+
+## OLA 1 — Schema + metadatos core (P0) · ✅ COMPLETADA
 
 > Objetivo: que cada ficha sea un *hecho estructurado* perfecto para Google y para que los LLMs la citen.
+> **Ejecutada en sesión 9-jun (commit `b7b090c`).** 7/7 ítems. Archivos: `coches/[slug]`, `motos/[slug]`, `dealers/[slug]`, `app/layout.tsx`. Build ✓ + lint ✓.
 
-- ⬜ **O1-01 · T04 · 💻 — `Product` → `Car`/`MotorVehicle` en fichas.**
+- ✅ **O1-01 · T04 · 💻 — `Product` → `Car`/`MotorVehicle` en fichas.**
   Archivos: `app/(public)/coches/[slug]/page.tsx` y `motos/[slug]/page.tsx` (bloque `jsonLd`).
   Cómo: `@type: 'Car'` (coches) / `'Motorcycle'` (motos). Añadir `fuelType`, `bodyType`, `vehicleTransmission`, `driveWheelConfiguration`, `color`, `numberOfDoors`, `vehicleSeatingCapacity`, `itemCondition` (mapear `condition_type`→`schema.org/UsedCondition|NewCondition`), `vehicleModelDate`, `vehicleEngine` (ya parcial), `vehicleIdentificationNumber` (VIN si existe).
 
-- ⬜ **O1-02 · T38 · 💻 — Completar `Offer` en fichas.**
+- ✅ **O1-02 · T38 · 💻 — Completar `Offer` en fichas.**
   Cómo: añadir a `offers`: `url` (canónica de la ficha), `itemCondition`, `priceValidUntil`, `seller.url` (URL del dealer), `availability` (ya está), `priceCurrency` (ya está). Si `price_on_request` → omitir `price` y usar `availability: InStock`.
 
-- ⬜ **O1-03 · T43(nuevo) · 💻 — Canonical + Twitter card en fichas de vehículo.**
+- ✅ **O1-03 · T43(nuevo) · 💻 — Canonical + Twitter card en fichas de vehículo.**
   Archivos: `generateMetadata` de coches/motos `[slug]`.
   Cómo: `alternates: { canonical: '/coches/' + slug }`, `openGraph.type` + dimensiones, y bloque `twitter: { card: 'summary_large_image', title, description, images }`. Idéntico en dealer `[slug]`.
 
-- ⬜ **O1-04 · T15 + T30 · 💻 — Meta description de fichas enriquecida con specs.**
+- ✅ **O1-04 · T15 + T30 · 💻 — Meta description de fichas enriquecida con specs.**
   Cómo: en `generateMetadata`, construir desc con datos reales: `"{Marca Modelo Año} · {km} km · {combustible} · {CV} CV · {provincia} · {precio} € — Vendedor profesional verificado."`. Replicar en `description` del JSON-LD y `og:description` explícita.
 
-- ⬜ **O1-05 · T42(nuevo) · 💻 — Schema base `AutoDealer`/`LocalBusiness` en fichas de dealer.**
+- ✅ **O1-05 · T42(nuevo) · 💻 — Schema base `AutoDealer`/`LocalBusiness` en fichas de dealer.**
   Archivo: `app/(public)/dealers/[slug]/page.tsx` (hoy **sin** JSON-LD).
   Cómo: `@type: 'AutoDealer'` con `name`, `address` (PostalAddress: ciudad/región/CP/país), `geo` si hay, `telephone`, `email`, `url`, `image` (cover/logo), `priceRange`, `sameAs` (redes del dealer). *(Completar con T18; `aggregateRating` va aparte en T34.)*
 
-- ⬜ **O1-06 · T13 · 💻 — Eliminar `keywords` del metadata global.**
+- ✅ **O1-06 · T13 · 💻 — Eliminar `keywords` del metadata global.**
   Archivo: `app/layout.tsx`. Quitar el array `keywords` (Google lo ignora; ruido).
 
-- ⬜ **O1-07 · T08 + T09 + T39 · 💻+🎨 — OG image global + Twitter cards globales + fallback dealer.**
-  Cómo: crear `/public` OG 1200×630 de marca; en `app/layout.tsx` `openGraph.images` + `twitter` por defecto. Fallback OG para dealers sin `cover_url`.
+- ✅ **O1-07 · T08 + T09 + T39 · 💻+🎨 — OG image global + Twitter cards globales + fallback dealer.**
+  Hecho: `openGraph.images` + `twitter` (summary_large_image) por defecto en `app/layout.tsx`; dealers sin imagen heredan el OG global. **Interino:** se usa la hero `black-label-hero-gt3rs-ducati.webp` (ratio ~1.9:1) como OG por defecto.
+  ⬜ **Refinamiento pendiente (R01 · 🎨):** crear una **OG 1200×630 de marca dedicada** (JPG/PNG, máxima compatibilidad LinkedIn) y sustituir la hero webp.
 
 ---
 
