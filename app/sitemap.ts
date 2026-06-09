@@ -51,6 +51,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/motos/clasicas`,                       lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
     { url: `${BASE_URL}/guias/como-comprar-supercar-segunda-mano`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/guias/como-vender-coche-premium-profesionales`,     lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/coches/suv`,                                        lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/motos/naked`,                                       lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/motos/touring`,                                     lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+    { url: `${BASE_URL}/motos/trail`,                                       lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
+  ]
+
+  const TOP_CAR_BRANDS = ['ferrari', 'porsche', 'lamborghini', 'bmw', 'mclaren', 'rolls-royce', 'bentley', 'mercedes-benz', 'audi', 'bugatti']
+  const TOP_MOTO_BRANDS = ['ducati', 'bmw', 'mv-agusta', 'triumph', 'harley-davidson', 'ktm', 'aprilia']
+
+  const brandTypeRoutes: MetadataRoute.Sitemap = [
+    ...TOP_CAR_BRANDS.map((b) => ({
+      url: `${BASE_URL}/marcas/${b}/coches`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })),
+    ...TOP_MOTO_BRANDS.map((b) => ({
+      url: `${BASE_URL}/marcas/${b}/motos`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })),
   ]
 
   const vehicleRoutes: MetadataRoute.Sitemap = (vehicles || []).map((v) => ({
@@ -74,5 +96,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }))
 
-  return [...staticRoutes, ...vehicleRoutes, ...dealerRoutes, ...brandRoutes]
+  return [...staticRoutes, ...vehicleRoutes, ...dealerRoutes, ...brandRoutes, ...brandTypeRoutes]
 }

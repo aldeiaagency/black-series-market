@@ -110,6 +110,18 @@ export default function ParaProfesionalesPage() {
         </Link>
       </div>
 
+      {/* Guía relacionada */}
+      <div className="mb-16 p-6 border border-bsm-border bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p className="text-xs text-gold tracking-widest uppercase mb-1">Lectura recomendada</p>
+          <p className="text-sm text-bsm-text-primary font-medium">Cómo vender un coche premium con los compradores correctos</p>
+          <p className="text-xs text-bsm-text-muted mt-1">Estrategia, documentación, precio y canales para vendedores de alta gama.</p>
+        </div>
+        <Link href="/guias/como-vender-coche-premium-profesionales" className="text-sm text-gold hover:text-gold-light transition-colors whitespace-nowrap flex-shrink-0">
+          Leer la guía →
+        </Link>
+      </div>
+
       {/* CTA final */}
       <div className="border-t border-bsm-border pt-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div>

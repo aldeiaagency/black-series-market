@@ -148,20 +148,33 @@ export default function GlosarioPage() {
         ))}
       </div>
 
-      <div className="mt-16 pt-10 border-t border-bsm-border">
-        <p className="text-sm text-bsm-text-muted mb-4">
-          ¿Buscas un vehículo con estas características? Explorar el catálogo es el siguiente paso.
-        </p>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/coches/clasicos" className="text-sm text-gold hover:text-gold-light transition-colors">
-            Coches clásicos y youngtimers →
-          </Link>
-          <Link href="/coches/deportivos" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-            Deportivos y superdeportivos →
-          </Link>
-          <Link href="/vehiculos-a-la-carta" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-            Solicitar vehículo a la carta →
-          </Link>
+      <div className="mt-16 pt-10 border-t border-bsm-border space-y-8">
+        <div>
+          <p className="text-sm text-bsm-text-muted mb-4">
+            ¿Buscas un vehículo con estas características? Explorar el catálogo es el siguiente paso.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/coches/clasicos" className="text-sm text-gold hover:text-gold-light transition-colors">
+              Coches clásicos y youngtimers →
+            </Link>
+            <Link href="/coches/deportivos" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Deportivos y superdeportivos →
+            </Link>
+            <Link href="/vehiculos-a-la-carta" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Solicitar vehículo a la carta →
+            </Link>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-3">Guías relacionadas</p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/guias/como-comprar-supercar-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Cómo comprar un supercar de segunda mano →
+            </Link>
+            <Link href="/guias/como-vender-coche-premium-profesionales" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Cómo vender un coche premium →
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -88,12 +88,17 @@ export default async function CochesDeportivosPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
             {vehicles.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
           </div>
-          <div className="pt-8 border-t border-bsm-border flex gap-6">
-            <Link href="/coches?categoria=deportivos" className="text-sm text-gold hover:text-gold-light transition-colors">
-              Ver todos los deportivos con filtros →
-            </Link>
-            <Link href="/coches?categoria=superdeportivos" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-              Solo superdeportivos →
+          <div className="pt-8 border-t border-bsm-border flex flex-wrap items-center justify-between gap-4">
+            <div className="flex gap-6">
+              <Link href="/coches?categoria=deportivos" className="text-sm text-gold hover:text-gold-light transition-colors">
+                Ver todos los deportivos con filtros →
+              </Link>
+              <Link href="/coches?categoria=superdeportivos" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+                Solo superdeportivos →
+              </Link>
+            </div>
+            <Link href="/guias/como-comprar-supercar-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
+              Guía de compra →
             </Link>
           </div>
         </>

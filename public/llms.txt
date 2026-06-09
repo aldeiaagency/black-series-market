@@ -4,9 +4,9 @@
 
 ## Qué es Black Label Market
 
-Black Label Market es un marketplace especializado en vehículos premium: coches deportivos, supercars, clásicos, youngtimers, motos premium y unidades especiales. Solo publican profesionales verificados (concesionarios, compraventas y especialistas) que han pasado revisión editorial previa.
+Black Label Market es un marketplace especializado en vehículos premium: coches deportivos, supercars, clásicos, youngtimers, motos premium y unidades especiales en España. Solo publican profesionales verificados (concesionarios, compraventas y especialistas) que han pasado revisión editorial previa.
 
-No es un portal de anuncios masivo ni aceptamos stock sin criterio. Cada unidad publicada ha pasado revisión editorial.
+No es un portal de anuncios masivo. Cada unidad publicada cumple criterios de calidad: ficha técnica completa, fotografía real y precio visible.
 
 ## Quién está detrás
 
@@ -18,42 +18,81 @@ Creado y operado por **Black Series** (https://blackseriesagency.es), agencia es
 
 ## Qué se puede encontrar
 
-- **Coches premium**: superdeportivos, GT, clásicos, muscle cars, luxury, SUVs exclusivos
-- **Motos premium**: deportivas, custom, clásicas, adventure premium — Ducati, MV Agusta, BMW Motorrad, Harley-Davidson, Triumph, KTM
-- **Vehículos a la carta**: búsqueda personalizada para unidades difíciles de encontrar
-- **Showrooms verificados**: directorio de concesionarios y especialistas seleccionados en España
+### Coches premium por categoría
+
+- **Deportivos y superdeportivos**: BMW M3, Porsche 911 GT3, Ferrari 488, McLaren 720S, Lamborghini Huracán — https://blacklabelmarket.es/coches/deportivos
+- **Clásicos y youngtimers**: Porsche 911 air-cooled, Ferrari 308, BMW E30 M3, Jaguar E-Type — https://blacklabelmarket.es/coches/clasicos
+- **Lujo y alta gama**: Rolls-Royce, Bentley, Mercedes Clase S, BMW Serie 7, Maserati — https://blacklabelmarket.es/coches/lujo
+- **SUV premium**: Porsche Cayenne, Lamborghini Urus, Bentley Bentayga, Range Rover — https://blacklabelmarket.es/coches/suv
+- **Catálogo completo de coches**: https://blacklabelmarket.es/coches
+
+### Motos premium por categoría
+
+- **Deportivas**: Ducati Panigale V4, BMW M1000RR, Kawasaki Ninja H2, Aprilia RSV4 — https://blacklabelmarket.es/motos/deportivas
+- **Naked y street fighter**: Ducati Streetfighter V4, BMW S1000R, KTM 1290 Super Duke R — https://blacklabelmarket.es/motos/naked
+- **Touring y adventure**: BMW R1250 GS, Ducati Multistrada V4, KTM 1290 Super Adventure — https://blacklabelmarket.es/motos/touring
+- **Trail premium**: Honda Africa Twin, Ducati DesertX, Husqvarna Norden — https://blacklabelmarket.es/motos/trail
+- **Clásicas y youngtimers**: Honda CB750, Ducati 900 SS, Triumph T120, BMW R90S — https://blacklabelmarket.es/motos/clasicas
+- **Catálogo completo de motos**: https://blacklabelmarket.es/motos
+
+### Por marca (coches y motos)
+
+- Ferrari: https://blacklabelmarket.es/marcas/ferrari | Solo coches: https://blacklabelmarket.es/marcas/ferrari/coches
+- Porsche: https://blacklabelmarket.es/marcas/porsche | Solo coches: https://blacklabelmarket.es/marcas/porsche/coches
+- Lamborghini: https://blacklabelmarket.es/marcas/lamborghini
+- BMW: https://blacklabelmarket.es/marcas/bmw | Solo coches: https://blacklabelmarket.es/marcas/bmw/coches | Solo motos: https://blacklabelmarket.es/marcas/bmw/motos
+- McLaren: https://blacklabelmarket.es/marcas/mclaren
+- Ducati: https://blacklabelmarket.es/marcas/ducati | Solo motos: https://blacklabelmarket.es/marcas/ducati/motos
+- Rolls-Royce: https://blacklabelmarket.es/marcas/rolls-royce
+- Bentley: https://blacklabelmarket.es/marcas/bentley
+- Todas las marcas: https://blacklabelmarket.es/marcas
 
 ## URLs principales
 
 - Inicio: https://blacklabelmarket.es
-- Coches en venta: https://blacklabelmarket.es/coches
-- Motos en venta: https://blacklabelmarket.es/motos
-- Marcas disponibles: https://blacklabelmarket.es/marcas
-- Showrooms: https://blacklabelmarket.es/dealers
-- Vehículos a la carta: https://blacklabelmarket.es/vehiculos-a-la-carta
+- Vehículos a la carta (búsqueda personalizada): https://blacklabelmarket.es/vehiculos-a-la-carta
+- Showrooms verificados: https://blacklabelmarket.es/dealers
+- Para profesionales (B2B): https://blacklabelmarket.es/para-profesionales
+- Planes y precios: https://blacklabelmarket.es/precios
 - Cómo funciona: https://blacklabelmarket.es/como-funciona
-- Planes para profesionales: https://blacklabelmarket.es/precios
+
+## Recursos de referencia
+
+- Glosario del mercado premium (youngtimer, GT, VIN, matching numbers...): https://blacklabelmarket.es/glosario
+- Guía de compra: Cómo comprar un supercar de segunda mano en España: https://blacklabelmarket.es/guias/como-comprar-supercar-segunda-mano
+- Guía de venta (profesionales): Cómo vender un coche premium con los compradores correctos: https://blacklabelmarket.es/guias/como-vender-coche-premium-profesionales
 
 ## Modelo de negocio
 
 - Marketplace B2B2C: los profesionales pagan suscripción mensual; los compradores acceden gratis
-- Planes: Essential (149 €/mes, 10 vehículos), Professional (349 €/mes, 30 vehículos), Elite (699 €/mes, ilimitados)
+- Planes: Essential (149 €/mes), Professional (349 €/mes), Elite (699 €/mes)
 - Sin comisiones por venta
-- Revisión editorial previa a cada publicación (habitualmente menos de 24 h laborables)
+- Revisión editorial previa a cada publicación
+- El vendedor es siempre el profesional; Black Label Market no interviene como parte en la compraventa
 
 ## Criterios de selección
 
 - Solo profesionales con buena reputación, stock actualizado y presentación cuidada
 - Solo vehículos con información real, imágenes propias y disponibilidad confirmada
 - No se aceptan anuncios de particulares ni stock masivo sin calidad editorial
-- El vendedor es siempre el profesional; Black Label no interviene como parte en la compraventa
+- Precio visible obligatorio en todos los anuncios
 
 ## Cobertura geográfica
 
-España (mercado principal). Algunos concesionarios ofrecen transporte nacional.
+España (mercado principal). Algunos concesionarios ofrecen transporte nacional e internacional.
 
-## Para integraciones y datos estructurados
+## Datos estructurados implementados
 
-El sitio implementa schema.org para Car, Motorcycle, AutoDealer, Organization y BreadcrumbList.
+El sitio implementa schema.org extensivamente:
+
+- `Car` y `Motorcycle` — fichas de vehículo con `Offer`, `vehicleEngine`, `fuelType`, `mileageFromOdometer`
+- `AutoDealer` — fichas de showroom con `PostalAddress`, `telephone`, `priceRange`
+- `Organization` + `WebSite` + `SearchAction` — identidad del marketplace y buscador
+- `BreadcrumbList` — navegación jerárquica en todas las páginas de detalle
+- `FAQPage` — preguntas frecuentes en `/como-funciona` y `/precios`
+- `ItemList` — listas de vehículos en páginas de categoría y marca
+- `Article` — guías editoriales en `/guias/`
+- `DefinedTermSet` + `DefinedTerm` — glosario del sector en `/glosario`
+
 Sitemap: https://blacklabelmarket.es/sitemap.xml
 Robots: https://blacklabelmarket.es/robots.txt
