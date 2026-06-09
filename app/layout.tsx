@@ -26,16 +26,19 @@ export const metadata: Metadata = {
   },
   description:
     'Coches y motos premium, deportivos, clásicos y unidades especiales en venta en España. Concesionarios, compraventas y especialistas verificados.',
-  keywords: [
-    'coches premium', 'motos premium', 'superdeportivos', 'coches clásicos', 'motos clásicas',
-    'Ferrari', 'Lamborghini', 'Porsche', 'Ducati', 'BMW',
-    'vehículos especiales', 'concesionarios verificados', 'compraventa premium', 'España',
-  ],
   openGraph: {
     title: 'Black Label Market | Coches y motos premium en España',
     description: 'Coches y motos premium, deportivos, clásicos y unidades especiales. Concesionarios y especialistas verificados.',
     type: 'website',
     locale: 'es_ES',
+    siteName: 'Black Label Market',
+    images: [{ url: '/images/hero/black-label-hero-gt3rs-ducati.webp', width: 1365, height: 716, alt: 'Black Label Market — coches y motos premium' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Black Label Market | Coches y motos premium en España',
+    description: 'Coches y motos premium, deportivos, clásicos y unidades especiales. Concesionarios y especialistas verificados.',
+    images: ['/images/hero/black-label-hero-gt3rs-ducati.webp'],
   },
   robots: { index: false, follow: false },
 }

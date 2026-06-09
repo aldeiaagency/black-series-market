@@ -8,6 +8,8 @@ import SocialLinks from '@/components/social/SocialLinks'
 import ShareButton from '@/components/social/ShareButton'
 import type { Metadata } from 'next'
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
 interface PageProps {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ tipo?: string }>
@@ -16,11 +18,22 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('dealers').select('name, description, location_city').eq('slug', slug).single()
+  const { data } = await supabase
+    .from('dealers')
+    .select('name, description, location_city, cover_url, logo_url')
+    .eq('slug', slug)
+    .single()
   if (!data) return {}
+  const title = `${data.name} — Showroom seleccionado`
+  const description = data.description
+    || `Showroom de ${data.name}${data.location_city ? ' en ' + data.location_city : ''} en Black Label Market. Vehículos premium de un profesional verificado.`
+  const image = data.cover_url || data.logo_url
   return {
-    title: `${data.name} — Showroom seleccionado`,
-    description: data.description || `Showroom de ${data.name} en Black Label Market. Vehículos premium seleccionados.`,
+    title,
+    description,
+    alternates: { canonical: `/dealers/${slug}` },
+    openGraph: { title, description, type: 'website', images: image ? [image] : [] },
+    twitter: { card: 'summary_large_image', title, description, images: image ? [image] : [] },
   }
 }
 
@@ -107,17 +120,40 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
   const hasSocial = !!(dealer.website || dealer.instagram || dealer.facebook_url ||
                        dealer.youtube_url || dealer.tiktok_url || dealer.linkedin_url)
 
+  const dealerSameAs = [
+    dealer.website,
+    dealer.facebook_url,
+    dealer.youtube_url,
+    dealer.tiktok_url,
+    dealer.linkedin_url,
+    dealer.instagram && /^https?:\/\//.test(dealer.instagram) ? dealer.instagram : null,
+  ].filter(Boolean)
+
+  const dealerPrices = activeVehicles
+    .map((v: any) => v.price)
+    .filter((p: any): p is number => typeof p === 'number' && p > 0)
+  const priceRange = dealerPrices.length
+    ? `${Math.min(...dealerPrices).toLocaleString('es-ES')} € - ${Math.max(...dealerPrices).toLocaleString('es-ES')} €`
+    : '€€€€'
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'AutoDealer',
+    '@id': `${SITE_URL}/dealers/${dealer.slug}`,
     name: dealer.name,
     description: dealer.description || `Showroom seleccionado por Black Label Market en ${dealer.location_city || 'España'}.`,
-    image: dealer.logo_url || undefined,
-    url: dealer.website || undefined,
+    image: dealer.cover_url || dealer.logo_url || undefined,
+    logo: dealer.logo_url || undefined,
+    url: `${SITE_URL}/dealers/${dealer.slug}`,
     telephone: dealer.phone || undefined,
+    email: dealer.email || undefined,
+    priceRange,
+    areaServed: 'ES',
+    ...(dealerSameAs.length > 0 && { sameAs: dealerSameAs }),
     address: dealer.address ? {
       '@type': 'PostalAddress',
       streetAddress: dealer.address,
+      postalCode: postalCode || undefined,
       addressLocality: dealer.location_city || '',
       addressRegion: dealer.location_region || '',
       addressCountry: 'ES',
