@@ -97,6 +97,16 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
       body: JSON.stringify({ event_type: 'vehicle_contact_submit', vehicle_id: vehicleId, dealer_id: dealerId }),
     }).catch(() => {})
 
+    if (typeof window !== 'undefined') {
+      const dl = ((window as any).dataLayer = (window as any).dataLayer || [])
+      dl.push({
+        event:          'dealer_contact_click',
+        contact_method: 'form',
+        vehicle_id:     vehicleId || undefined,
+        dealer_id:      dealerId  || undefined,
+      })
+    }
+
     setSubmitted(true)
   }
 

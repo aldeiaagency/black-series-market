@@ -64,12 +64,20 @@ export default function PrivateSearchForm() {
       localStorage.setItem('blm_private_searches', JSON.stringify(stored))
     } catch {}
 
-    // Track request event (non-blocking)
     fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event_type: 'vehicle_request_submit' }),
     }).catch(() => {})
+
+    if (typeof window !== 'undefined') {
+      const dl = ((window as any).dataLayer = (window as any).dataLayer || [])
+      dl.push({
+        event:        'vehiculo_carta_submit',
+        vehicle_type: data.vehicle_type,
+        timeline:     data.timeline,
+      })
+    }
 
     setSubmitted(true)
   }

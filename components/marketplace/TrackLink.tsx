@@ -31,6 +31,16 @@ export default function TrackLink({
         dealer_id:  dealerId  || null,
       }),
     }).catch(() => {})
+
+    if (typeof window !== 'undefined') {
+      const dl = ((window as any).dataLayer = (window as any).dataLayer || [])
+      dl.push({
+        event:          'dealer_contact_click',
+        contact_method: eventType === 'vehicle_whatsapp_click' ? 'whatsapp' : 'phone',
+        vehicle_id:     vehicleId || undefined,
+        dealer_id:      dealerId  || undefined,
+      })
+    }
   }
 
   return (
