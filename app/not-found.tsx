@@ -1,5 +1,11 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { ArrowRight } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Página no encontrada — Black Label Market',
+  robots: { index: false, follow: false },
+}
 
 export default function NotFound() {
   return (
