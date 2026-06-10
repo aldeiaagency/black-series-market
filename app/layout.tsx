@@ -130,6 +130,31 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
+        {/* Consent Mode v2 — defaults denied; restores prior consent from localStorage */}
+        <script dangerouslySetInnerHTML={{ __html: `
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent','default',{
+  analytics_storage:'denied',
+  ad_storage:'denied',
+  ad_personalization:'denied',
+  personalization_storage:'denied',
+  functionality_storage:'granted',
+  security_storage:'granted',
+  wait_for_update:500
+});
+gtag('set','ads_data_redaction',true);
+gtag('set','url_passthrough',true);
+try{
+  var _blm=localStorage.getItem('black_label_cookie_consent');
+  if(_blm){var _c=JSON.parse(_blm);if(_c.version==='1.0'){gtag('consent','update',{
+    analytics_storage:_c.analytics?'granted':'denied',
+    ad_storage:_c.marketing?'granted':'denied',
+    ad_personalization:_c.marketing?'granted':'denied',
+    personalization_storage:_c.marketing?'granted':'denied'
+  });}}
+}catch(e){}
+        `.trim() }} />
         <ComparatorProvider>
           {children}
         </ComparatorProvider>

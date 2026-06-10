@@ -222,7 +222,7 @@ export default function CookieConsentBanner() {
                   Utilizamos cookies técnicas necesarias para que la web funcione. Con tu permiso, también podemos
                   usar cookies de análisis para entender cómo se utiliza Black Label Market y mejorar el servicio.{' '}
                   <Link
-                    href="/politica-de-cookies"
+                    href="/legal/cookies"
                     className="text-[#C6A64B] hover:text-[#D4B560] transition-colors underline-offset-2 hover:underline"
                   >
                     Política de cookies

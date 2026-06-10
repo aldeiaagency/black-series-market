@@ -34,6 +34,15 @@ export function saveConsent(analytics: boolean, marketing: boolean): CookieConse
     version:   CONSENT_VERSION,
   }
   localStorage.setItem(CONSENT_KEY, JSON.stringify(consent))
+  // Notify GTM Consent Mode v2 in real time
+  if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+    ;(window as any).gtag('consent', 'update', {
+      analytics_storage:       analytics ? 'granted' : 'denied',
+      ad_storage:              marketing ? 'granted' : 'denied',
+      ad_personalization:      marketing ? 'granted' : 'denied',
+      personalization_storage: marketing ? 'granted' : 'denied',
+    })
+  }
   return consent
 }
 
