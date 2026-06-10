@@ -96,7 +96,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  let gaId: string | null = null
   let gtmId: string | null = null
   try {
     const admin = await createAdminClient()
@@ -105,7 +104,6 @@ export default async function RootLayout({
       .select('value')
       .eq('key', 'seo')
       .single()
-    gaId = data?.value?.ga_id || null
     gtmId = data?.value?.gtm_id || null
   } catch {}
 
@@ -159,20 +157,6 @@ try{
           {children}
         </ComparatorProvider>
         <CookieConsentBanner />
-        {gaId && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4-init" strategy="afterInteractive">{`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${gaId}');
-            `}</Script>
-          </>
-        )}
         {gtmId && (
           <Script id="gtm-init" strategy="afterInteractive">{`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
