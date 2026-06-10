@@ -313,6 +313,30 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 
 ---
 
+### BLOQUE 5 — Eventos post-lanzamiento (después de G01, por prioridad)
+
+> Implementar cuando haya tráfico real. Cada uno requiere modificar un componente + añadir tag en GTM.
+
+- ⬜ **AN13b · 💻⚙️ — `seller_signup_submit`** ← key event B2B crítico.
+  Dispara al completar el formulario de registro profesional (`/registro`). Parámetros: `plan_selected`, `dealer_type`.
+
+- ⬜ **AN14b · 💻⚙️ — `no_results_search`** ← no es key event pero muy importante.
+  Dispara cuando una búsqueda devuelve 0 resultados. Parámetros: `query`, `filters_applied`, `vehicle_type`. Indica gaps de inventario.
+
+- ⬜ **AN15b · 💻⚙️ — `search_alert_created`** ← key event (intención alta).
+  Dispara cuando el usuario crea una alerta de búsqueda. Parámetros: `vehicle_type`, `brand`, `price_max`.
+
+- ⬜ **AN16b · 💻⚙️ — `favorite_vehicle` + `compare_vehicle` + `share_vehicle`** ← engagement signals.
+  `TrackLink` o handlers en los botones correspondientes. No key events, útiles para audiencias de remarketing.
+
+- ⬜ **AN17b · 💻⚙️ — `search_performed` con parámetros ricos.**
+  Pushear desde el componente de búsqueda: `vehicle_type`, `brand`, `model`, `province`, `price_min`, `price_max`, `result_count`. Complementa el Site Search automático de GA4.
+
+- ⬜ **AN18b · ⚙️ — Google Signals.**
+  Activar en GA4 → Admin → Data collection → Google Signals. Solo cuando Google Ads esté activo (AN16).
+
+---
+
 ### Monitorización post-lanzamiento (automático con el tiempo)
 
 - ⬜ **AN17 · ⚙️ — Primera revisión cobertura GSC** (7-14 días tras G01).
