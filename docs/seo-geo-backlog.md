@@ -40,8 +40,8 @@
 | 10-jun | **Ola 7 — Cierre de arquitectura + distribución de autoridad** | 5/5 ✅ | `/guias` hub CollectionPage · 2 últimas motos (`/motos/ediciones-especiales`, `/motos/entusiastas`) — 100% cobertura DB · `llms.txt` actualizado (+4 cats motos, +1 cat coches, +6 marcas, +3 guías, +3 schemas) · `/vehiculos-a-la-carta` canonical + WebPage schema · 6 motos category pages → link guía motos | `cfd4ab1` |
 | 10-jun | **Ola 8 — Schema transaccional + enlazado guías + openGraph** | 4/4 ✅ | `SearchResultsPage`+`BreadcrumbList`+`openGraph` en `/dealers` · `WebPage`+`openGraph` en `/precios` · `ContactPage`+`openGraph` en `/contacto` · sección "Guías del mercado" en home → `/guias` · `llms.txt` +2 schema types | `bab4999` |
 
-**Acciones acumuladas: 73.** · Pendiente: O2-07 `sameAs` · O3-01 `/sobre-nosotros` · G01 gate noindex. R01: OG 1200×630.
-Acciones de usuario: M01 GSC + Bing · M03 schema validation · T29 PR digital · T33 Google Business Profile · GA4/GTM IDs en admin.
+**Acciones acumuladas de código: 73.** · Pre-lanzamiento pendiente: P01-P09 · Analítica: AN01-AN19 · Gate: G01.
+Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist completo al 100%.
 
 ---
 
@@ -157,29 +157,174 @@ Acciones de usuario: M01 GSC + Bing · M03 schema validation · T29 PR digital �
 ## Fase 3+ (cuando haya tracción/datos)
 
 - ⬜ **T34 · 💻 — Reseñas verificadas + `AggregateRating`.** ⚠️ Solo con reviews reales, nunca antes.
-- ⬜ **T35 · 💻+✍️ — Landings por modelo** (Porsche 911, Ferrari 488, Ducati Panigale). Cuando haya inventario suficiente.
+- ⬜ **T35 · 💻+✍️ — Landings por modelo** (Porsche 911, Ferrari 488, Ducati Panigale). Cuando haya inventario suficiente por modelo.
+- ⬜ **T36 · ✍️ — Guía "cómo vender moto premium".** Cluster informacional incompleto: existe guía de venta de coches y 2 de compra de motos, falta la simétrica de venta. URL: `/guias/como-vender-moto-premium-profesionales`. Article schema, ~1.200 palabras.
+- ⬜ **T37 · 💻+✍️ — Landings geográficas** ("Coches premium en Madrid / Barcelona"). Solo cuando haya masa crítica de dealers por ciudad.
 
 ---
 
-## Medición (transversal — montar pronto)
+## 🚀 PRE-LANZAMIENTO — Checklist completo (antes de G01)
 
-- ⬜ **M01 · ⚙️+💻 — Google Search Console + Bing Webmaster Tools.**
-  Verificar dominio, enviar sitemap (tras quitar noindex). Sin GSC no hay datos de keywords ni indexación.
-- ✅ **M02 · 💻 — Inyectar GA4 / GTM.** Cableado en Ola 4: `app/layout.tsx` lee `platform_config.seo` via `createAdminClient()` e inyecta `next/script` condicionalmente para GA4 y GTM. Activar introduciendo los IDs en `/admin/configuracion` → SEO y analíticas.
-- ⬜ **M03 · ⚙️ — Validar schema** (Rich Results Test / Schema.org validator) tras cada ola.
+> Todo lo que debe estar listo antes de quitar el noindex. Ejecutar en este orden.
+> **Leyenda:** 💻 código · ✍️ copy (input tuyo) · 🎨 asset (diseño) · ⚙️ dashboard (acción tuya)
+
+### Código — ejecutable sin input
+
+- ⬜ **P01 · 💻 — `@id` + `logo` en Organization schema.**
+  `app/layout.tsx` → `organizationJsonLd`: añadir `'@id': \`${SITE_URL}/#organization\`` y `logo: { '@type': 'ImageObject', url: \`${SITE_URL}/images/logo/black-label-market-logo.png\` }`. Permite que Google y los LLMs construyan un grafo de conocimiento inequívoco de la marca.
+
+- ⬜ **P02 · 💻 — `author` en las 4 guías Article.**
+  Archivos: `guias/como-comprar-supercar-segunda-mano`, `motos-premium-segunda-mano`, `coches-clasicos-youngtimers-como-invertir`, `como-vender-coche-premium-profesionales`.
+  Añadir en cada `articleJsonLd`: `author: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL }`. Señal E-E-A-T imprescindible en contenido YMYL (vehículos de alto valor).
+
+- ⬜ **P03 · 💻 — Verificar/crear `app/not-found.tsx`.**
+  Página 404 personalizada con H1 descriptivo, enlaces a home/coches/motos/dealers y CTA a vehículos a la carta. Sin 404 útil los errores de rastreo no tienen salida.
+
+- ⬜ **P04 · 💻 — Verificar footer con enlaces completos.**
+  Footer debe enlazar: Inicio · Coches · Motos · Marcas · Dealers · Guías · Glosario · Para profesionales · Precios · Sobre nosotros · Contacto · Aviso legal · Privacidad · Cookies. Evita páginas huérfanas y da señales de sitio completo a Googlebot.
+
+### Requiere input o asset tuyo
+
+- ⬜ **P05 · 🎨 — OG image JPG 1200×630 dedicada (R01).**
+  La imagen actual (`black-label-hero-gt3rs-ducati.webp`, 1365×716) no es JPG/PNG ni el ratio correcto. LinkedIn, Telegram, WhatsApp no procesan WebP de forma fiable.
+  **Lo que necesito:** imagen JPG o PNG 1200×630 con marca. Yo actualizo 1 línea en `layout.tsx`.
+
+- ⬜ **P06 · ✍️ — Página `/sobre-nosotros` con `AboutPage` schema (O3-01).**
+  ⚠️ **CRÍTICO:** la URL está en el sitemap pero la página no existe → Google encontrará una 404 nada más rastrear el sitemap.
+  **Lo que necesito:** quién hay detrás (Black Series / KAZAWEB S.L.U.), año de fundación, misión, proceso de verificación de dealers, criterios de selección de vehículos, figura editorial.
+  Schema: `AboutPage` + `Organization` con `@id`.
+
+- ⬜ **P07 · ⚙️ — `sameAs` en Organization (O2-07).**
+  **Lo que necesito:** URLs de redes sociales reales de Black Label Market (Instagram, TikTok, LinkedIn, Facebook, YouTube — las que existan). Son 5 min de código.
+
+### Validación (acción tuya)
+
+- ⬜ **P08 · ⚙️ — Confirmar que páginas legales existen en producción.**
+  Verificar en el navegador que devuelven 200: `/legal/aviso-legal`, `/legal/privacidad`, `/legal/cookies`, `/legal/terminos`, `/legal/criterios-publicacion`, `/legal/condiciones-profesionales`.
+
+- ⬜ **P09 · ⚙️ — Validar schema con Rich Results Test (M03).**
+  Probar: `/coches/[slug]`, `/motos/[slug]`, `/dealers/[slug]`, `/como-funciona`, `/precios`, `/guias/como-comprar-supercar-segunda-mano`.
+
+---
+
+## 📊 ANALÍTICA Y TRACKING
+
+> Stack completo de medición: analytics, heatmaps, paid media pixels, eventos clave y consent.
+
+### Analytics base — ya cableado en código, solo necesita IDs
+
+- ⬜ **AN01 · ⚙️ — GA4 Measurement ID.**
+  `/admin/configuracion` → SEO y analíticas → campo GA4. Formato: `G-XXXXXXXXXX`.
+  Activa automáticamente: pageviews, sesiones, engagement rate, scroll depth, clics salientes.
+
+- ⬜ **AN02 · ⚙️ — GTM Container ID.**
+  Mismo panel. Formato: `GTM-XXXXXXX`.
+  ✅ Recomendado: instalar todos los demás tags (AN05-AN10) vía GTM para control centralizado y Consent Mode correcto.
+
+### Search analytics
+
+- ⬜ **AN03 · ⚙️ — Google Search Console.**
+  Verificar dominio `blacklabelmarket.es` (método DNS preferido — añadir registro TXT en Vercel Domains).
+  Enviar sitemap: `https://blacklabelmarket.es/sitemap.xml`.
+  Activa: queries, posiciones, CTR, cobertura de índice, CWV field data, URL Inspection Tool.
+
+- ⬜ **AN04 · ⚙️ — Bing Webmaster Tools.**
+  Verificar dominio. Enviar sitemap.
+  Importante para GEO: Bing alimenta ChatGPT (Copilot) y Perplexity. Sin indexación en Bing, no hay citas en esas IAs.
+
+### Heatmaps y CRO
+
+- ⬜ **AN05 · 💻 — Microsoft Clarity** (gratuito, GDPR-ready, recomendado para fase piloto).
+  Instalar vía GTM → tag Custom HTML con snippet de Clarity. Requiere: Project ID de clarity.microsoft.com.
+  Activa: session recordings, heatmaps de clics y scroll, rage clicks, dead clicks, filtros por página.
+  Funnels a revisar: `/vehiculos-a-la-carta`, ficha vehículo → botón "Contactar", `/precios` → botón CTA plan.
+
+- ⬜ **AN06 · 💻 — Hotjar** (alternativa de pago con más features: encuestas, NPS, funnels).
+  Instalar vía GTM o script directo. No necesario en fase piloto — evaluar si Clarity no es suficiente.
+
+### Paid media pixels (instalar antes de activar cada canal de pago)
+
+- ⬜ **AN07 · 💻 — Meta Pixel (Facebook/Instagram Ads).**
+  Instalar vía GTM → template "Facebook Pixel". Requiere: Pixel ID (Meta Events Manager).
+  Eventos a configurar:
+  - `PageView` — automático en cada página
+  - `ViewContent` — en fichas de vehículo (`/coches/[slug]`, `/motos/[slug]`) con parámetros: content_type, content_ids, value, currency
+  - `Lead` — en envío de formulario a-la-carta + clic en "Contactar" dealer
+  - `InitiateCheckout` — en clic en botones de plan en `/precios`
+  Audiencias: visitantes de `/coches/deportivos`, `/coches/clasicos`, `/motos/deportivas`; retargeting de fichas vistas.
+
+- ⬜ **AN08 · 💻 — TikTok Pixel.**
+  Instalar vía GTM → Custom HTML. Requiere: Pixel ID (TikTok Ads Manager).
+  Eventos: `ViewContent` (fichas), `SubmitForm` (formulario a-la-carta).
+
+- ⬜ **AN09 · 💻 — LinkedIn Insight Tag (B2B — captación de dealers).**
+  Instalar vía GTM → Custom HTML. Requiere: Partner ID (LinkedIn Campaign Manager).
+  Audiencias clave: visitantes de `/para-profesionales`, `/precios`, `/dealers`.
+  ⚠️ El Insight Tag identifica el perfil profesional de visitantes → muy útil para saber qué tipo de empresa visita la web.
+
+- ⬜ **AN10 · 💻 — Google Ads Conversion Tag.**
+  Instalar vía GTM → template "Google Ads Conversion Tracking". Requiere: Conversion ID + Label (Google Ads).
+  Conversiones a registrar: formulario a-la-carta enviado, clic en "Contactar" dealer, registro completado.
+
+### Eventos y conversiones clave en GTM
+
+- ⬜ **AN11 · 💻 — Evento: `vehicle_detail_view`.**
+  Trigger: pageview en `/coches/[slug]` y `/motos/[slug]`.
+  Variables recomendadas: marca, modelo, año, categoría, precio, dealer_id.
+
+- ⬜ **AN12 · 💻 — Evento: `dealer_contact_click`** ← macro-conversión B2C.
+  Trigger: clic en botón "Contactar", "WhatsApp" o "Email" en ficha vehículo o perfil dealer.
+
+- ⬜ **AN13 · 💻 — Evento: `vehiculo_carta_submit`** ← macro-conversión B2C.
+  Trigger: envío exitoso del formulario `/vehiculos-a-la-carta`.
+
+- ⬜ **AN14 · 💻 — Evento: `dealer_profile_view`.**
+  Trigger: pageview en `/dealers/[slug]`.
+
+- ⬜ **AN15 · ⚙️ — GA4: marcar macro-conversiones.**
+  GA4 Admin → Events → marcar `dealer_contact_click` y `vehiculo_carta_submit` como conversiones.
+
+- ⬜ **AN16 · 💻 — Consent Mode v2 (GDPR/LOPD) — verificar y configurar.**
+  Verificar que `CookieConsentBanner` bloquea los tags AN05-AN10 antes del consentimiento.
+  En GTM: configurar variables de consentimiento `ad_storage`, `analytics_storage`, `ad_personalization`, `analytics_storage`.
+  ⚠️ Sin Consent Mode correcto: riesgo de sanción AEPD (hasta 20M€) + datos inválidos por ITP/bloqueo de navegadores.
+
+### Monitorización post-lanzamiento
+
+- ⬜ **AN17 · ⚙️ — Primera revisión de cobertura GSC** (7-14 días tras G01).
+  Verificar: URLs indexadas vs. enviadas en sitemap, errores de cobertura, páginas excluidas involuntariamente.
+
+- ⬜ **AN18 · ⚙️ — Core Web Vitals field data** (~28 días tras tráfico real).
+  GSC → Core Web Vitals report. PageSpeed Insights → field data (CrUX). Umbrales: LCP < 2.5s · INP < 200ms · CLS < 0.1.
+
+- ⬜ **AN19 · ⚙️ — Performance report: primeras queries** (30 días tras G01).
+  GSC → Rendimiento → Queries. Identificar: keywords con impresiones reales, CTR por página, posición media.
+  Usar para optimizar titles/descriptions de páginas con muchas impresiones y CTR bajo.
 
 ---
 
 ## 🚦 EL GATE — abrir a indexación
 
 - 🔒 **G01 · 💻 — Quitar `noindex` y abrir el sitio.**
-  Cuando Ola 1 + Ola 2 estén ✅: en `app/layout.tsx` `robots: { index: true, follow: true }` y en `app/robots.ts` `allow: '/'` (con los `disallow` de `/admin`, `/dashboard`, `/api`, y las páginas `noindex`). Luego **enviar sitemap en GSC** (M01).
-  *Esto activa todo lo anterior. Son ~2 líneas; me lo pides cuando estés listo.*
+  Prerrequisitos: P01-P06 completados (especialmente `/sobre-nosotros` y OG image).
+  Cambios: en `app/layout.tsx` → `robots: { index: true, follow: true }` y en `app/robots.ts` → sustituir el bloque de disallow por el bloque post-lanzamiento ya documentado en el archivo.
+  Después: enviar sitemap en GSC (AN03) inmediatamente.
+  *Son ~2 líneas de código. Me lo dices cuando estés listo.*
 
 ---
 
-### Cómo lo ejecuto
-Voy ola por ola, valido `next build` en cada una, commit + push, y voy marcando el `Estado` aquí. Empiezo por la **Ola 1** salvo que prefieras otro orden. Lo único que me bloquea hoy: las **URLs de redes** (O2-07) y tu **input para "Sobre nosotros"** (O3-01).
+### Orden de ejecución recomendado
+1. P01 + P02 + P03 + P04 (código, sin input) → commit
+2. P05 (OG image — asset tuyo) → commit
+3. P06 (sobre-nosotros — copy tuyo) → commit
+4. P07 (sameAs — URLs tuyas) → commit
+5. P08 + P09 (validación — acción tuya)
+6. AN01 + AN02 (GA4 + GTM IDs en admin)
+7. **G01 — abrir indexación** → enviar sitemap en GSC (AN03 + AN04)
+8. AN05 (Clarity — instalar vía GTM)
+9. AN11-AN16 (eventos GTM + Consent Mode)
+10. AN07-AN10 (pixels — cuando actives cada canal de pago)
+11. AN17-AN19 (monitorización — automático con el tiempo)
 
 ---
 
