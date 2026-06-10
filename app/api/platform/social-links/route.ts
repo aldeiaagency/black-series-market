@@ -5,10 +5,9 @@ export const revalidate = 300 // 5 minutes
 
 const OFFICIAL_LINKS: Record<string, string> = {
   instagram: 'https://www.instagram.com/blacklabel_premiumcars/',
+  tiktok:    'https://www.tiktok.com/@blacklabelmarket.es',
   facebook:  'https://www.facebook.com/blacklabel.es',
   youtube:   'https://www.youtube.com/@BlackLabelPremium',
-  tiktok:    'https://www.tiktok.com/@blacklabelmarket.es',
-  linkedin:  'https://www.linkedin.com/company/black-label-market-premiumcars/',
 }
 
 export async function GET() {
