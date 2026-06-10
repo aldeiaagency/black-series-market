@@ -3,6 +3,14 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export const revalidate = 300 // 5 minutes
 
+const OFFICIAL_LINKS: Record<string, string> = {
+  instagram: 'https://www.instagram.com/blacklabel_premiumcars/',
+  facebook:  'https://www.facebook.com/blacklabel.es',
+  youtube:   'https://www.youtube.com/@BlackLabelPremium',
+  tiktok:    'https://www.tiktok.com/@blacklabelmarket.es',
+  linkedin:  'https://www.linkedin.com/company/black-label-market-premiumcars/',
+}
+
 export async function GET() {
   try {
     const admin = await createAdminClient()
@@ -12,9 +20,9 @@ export async function GET() {
       .eq('key', 'social_links')
       .single()
 
-    const links = data?.value as Record<string, string> | null
-    return NextResponse.json(links || {})
+    const overrides = data?.value as Record<string, string> | null
+    return NextResponse.json({ ...OFFICIAL_LINKS, ...overrides })
   } catch {
-    return NextResponse.json({})
+    return NextResponse.json(OFFICIAL_LINKS)
   }
 }
