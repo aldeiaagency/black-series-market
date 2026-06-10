@@ -66,7 +66,8 @@ const organizationJsonLd = {
   email: 'hola@blacklabelmarket.es',
   sameAs: [
     'https://www.instagram.com/blacklabel_premiumcars/',
-    // TikTok, LinkedIn, YouTube — se añadirán al crear cada perfil
+    'https://www.tiktok.com/@blacklabelmarket.es',
+    // LinkedIn, YouTube — se añadirán al crear cada perfil
   ],
 }
 
