@@ -256,23 +256,17 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 - ⬜ **AN05 · ⚙️ — Google Search Console: enviar sitemap.**
   🔒 Bloqueado hasta G01 (noindex quitado).
   GSC → Sitemaps → `https://blacklabelmarket.es/sitemap.xml`.
-  ✅ Ya creado y verificado.
+  ✅ Ya creado y verificado. GSC enlazado a GA4.
 
-- ⬜ **AN06 · ⚙️ — Bing Webmaster Tools.**
-  Verificar dominio `blacklabelmarket.es` + enviar sitemap.
-  Crítico para GEO: Bing alimenta ChatGPT (Copilot) y Perplexity. Sin indexación en Bing no hay citas en esas IAs.
-  Hacer inmediatamente después de G01.
+- ✅ **AN06 · ⚙️ — Bing Webmaster Tools.**
+  `BingSiteAuth.xml` subido a `/public` `commit 9beb4e1`. Dominio verificado, sitemap enviado, GSC conectado.
 
 ---
 
 ### BLOQUE 2 — Behavioral analytics (primera semana)
 
-- ⬜ **AN07 · ⚙️💻 — Microsoft Clarity.**
-  🔒 Bloqueado hasta completar AN03.
-  - Crear proyecto en clarity.microsoft.com → obtener Project ID.
-  - Instalar vía GTM: tag Custom HTML con snippet de Clarity, condicionado al consentimiento (`analytics_storage`).
-  - Funnels prioritarios a revisar: ficha vehículo → "Contactar dealer", `/vehiculos-a-la-carta` → envío, `/precios` → CTA plan.
-  Coste: gratuito. Sin límite de sesiones.
+- ✅ **AN07 · ⚙️💻 — Microsoft Clarity.**
+  Project ID `x4syjlgbx7` guardado en `platform_config`. Tag oficial en GTM condicionado a `analytics_storage`. Retención GA4 extendida a 14 meses. GSC enlazado a GA4. Audiencias creadas: fichas vehículo, interés profesional, alta intención compra, visitantes dealers.
 
 ---
 
