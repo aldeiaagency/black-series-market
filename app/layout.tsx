@@ -68,7 +68,7 @@ const organizationJsonLd = {
     'https://www.instagram.com/blacklabel_premiumcars/',
     'https://www.tiktok.com/@blacklabelmarket.es',
     'https://www.youtube.com/@BlackLabelPremium',
-    // LinkedIn — se añadirá al crear el perfil
+    'https://www.linkedin.com/company/black-label-market-premiumcars/',
   ],
 }
 
