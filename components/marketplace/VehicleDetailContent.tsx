@@ -78,20 +78,6 @@ function HistoryRow({
   )
 }
 
-function youtubeEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url)
-    let id: string | null = null
-    if (u.hostname.includes('youtu.be')) {
-      id = u.pathname.slice(1)
-    } else if (u.hostname.includes('youtube.com')) {
-      id = u.searchParams.get('v')
-      if (!id && u.pathname.startsWith('/embed/')) id = u.pathname.split('/embed/')[1]
-      if (!id && u.pathname.startsWith('/shorts/')) id = u.pathname.split('/shorts/')[1]
-    }
-    return id ? `https://www.youtube.com/embed/${id}` : null
-  } catch { return null }
-}
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   active: { label: 'Disponible', cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5' },
@@ -317,31 +303,6 @@ export default function VehicleDetailContent({
             )}
           </div>
 
-          {/* Vídeo del vehículo */}
-          {vehicle.video_url && (() => {
-            const embedUrl = youtubeEmbedUrl(vehicle.video_url)
-            return (
-              <div>
-                <SectionTitle>Vídeo</SectionTitle>
-                {embedUrl ? (
-                  <div className="w-full aspect-video border border-bsm-border overflow-hidden">
-                    <iframe
-                      src={embedUrl}
-                      title="Vídeo del vehículo"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  </div>
-                ) : (
-                  <a href={vehicle.video_url} target="_blank" rel="noopener noreferrer"
-                    className="text-sm text-gold hover:text-gold-light break-all">
-                    {vehicle.video_url}
-                  </a>
-                )}
-              </div>
-            )
-          })()}
 
           {/* Datos técnicos */}
           {technicalSpecs.length > 0 && (

@@ -43,8 +43,8 @@ function buildMediaItems(images: VehicleImage[], videoId: string | null): MediaI
   const videoItem: VideoItem = {
     kind: 'video',
     videoId,
-    // maxresdefault (1280×720, 16:9) — fallback to dark+play icon if not available
-    thumbUrl: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+    // hqdefault (480×360) always exists; maxresdefault only for HD uploads
+    thumbUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
   }
 
   // Insert video after first image (or at start if no images)
