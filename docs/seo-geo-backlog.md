@@ -229,133 +229,121 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
   - Confirmar si `ga_id` / `gtm_id` están ya en la tabla `platform_config` (si no lo están, no hay riesgo ahora).
   - AN16 (Consent Mode v2) debe completarse **antes** de entrar esos IDs en producción. No entrar los IDs hasta tener el bloqueo de consentimiento activo.
 
-- ⬜ **L01 · 💻 — Añadir punto de contacto DSA al Aviso Legal.**
-  DSA art. 11 obliga a designar un punto de contacto único para autoridades y para notificación de contenidos ilícitos.
-  Añadir en `aviso-legal`, sección "Comunicaciones legales": `"Punto de contacto para autoridades (DSA Reglamento 2022/2065) y notificación de contenidos ilícitos: hola@blacklabelmarket.es"`.
-
-- ⬜ **L02 · 💻 — Añadir enlace ODR (Resolución de Litigios en Línea) al Aviso Legal.**
-  Obligatorio por Ley 7/2017 (RAD) para contratos online con consumidores, incluidas suscripciones de profesionales persona física.
-  Añadir en `aviso-legal`, sección de resolución de controversias: enlace a `https://ec.europa.eu/consumers/odr/` con texto "Plataforma europea de resolución de litigios en línea".
-
-- ⬜ **L03 · 💻 — Añadir plazo de respuesta a derechos RGPD (art. 12) en Política de Privacidad.**
-  El RGPD art. 12 exige informar explícitamente del plazo de 1 mes para responder solicitudes de derechos (prorrogable a 3 meses en casos complejos).
-  Añadir en `privacidad`, sección de derechos: frase con el plazo de respuesta y la mención a la prórroga justificada.
-
-- ⬜ **L04 · 💻 — Añadir tabla de encargados del tratamiento (sub-processors) en Política de Privacidad.**
-  RGPD art. 13/14 obliga a informar sobre las categorías de destinatarios y encargados del tratamiento.
-  Añadir en `privacidad` tabla con: Supabase (base de datos/auth, EE.UU./UE, cláusulas contractuales tipo), Vercel (hosting, EE.UU./UE), Stripe (pagos, EE.UU./UE), Google LLC (analítica GA4/GTM, solo con consentimiento previo).
-
-- ⬜ **L06 · 💻 — Añadir mecanismo de reclamación interno con plazos en Términos y Condiciones (DSA art. 17).**
-  DSA obliga a plataformas a notificar al afectado los motivos de retirada de contenido o suspensión y a ofrecer un mecanismo de impugnación con plazos razonables.
-  Añadir en `terminos`, sección de moderación: párrafo sobre derecho a recibir motivos principales + cómo impugnar vía hola@blacklabelmarket.es + plazo de respuesta razonable.
-
-- ⬜ **L07 · 💻 — Añadir mención a garantías legales en compraventa (RDL 7/2021) en Términos y Condiciones.**
-  Los vehículos vendidos por profesionales a consumidores están sujetos a garantías legales (2 años nuevos, reducible a 1 año segunda mano por acuerdo). BLM debe mencionarlo aunque la responsabilidad sea del vendedor.
-  Añadir en `terminos`, sección de operaciones entre partes: párrafo aclarando que los vendedores profesionales son responsables de las garantías legales aplicables conforme al RDL 7/2021, y que BLM no otorga garantía propia sobre los vehículos.
-
-- ⬜ **L08 · 💻 — Añadir parámetros principales de ranking al Criterios de Publicación (DSA art. 27).**
-  DSA art. 27 obliga a plataformas en línea a informar sobre los parámetros principales que determinan el orden de presentación de resultados.
-  Añadir en `criterios-publicacion` sección breve: criterios de ordenación del catálogo (por ejemplo: fecha de publicación, completitud de la ficha, calidad fotográfica, precio visible).
-
-- ⬜ **L09 · 💻 — Reforzar verificación de vendedores profesionales en Condiciones para Profesionales (DSA art. 30).**
-  DSA art. 30 obliga a plataformas que conectan consumidores con comerciantes a recopilar y verificar datos del vendedor antes de activar su cuenta.
-  Añadir en `condiciones-profesionales`: mención explícita a la obligación legal de verificación (nombre, dirección, NIF/CIF, datos de contacto) y que BLM puede suspender el acceso si los datos son falsos o no se actualizan.
-
 ---
 
 ## 📊 ANALÍTICA Y TRACKING
 
-> Stack completo de medición: analytics, heatmaps, paid media pixels, eventos clave y consent.
+> Stack completo estructurado en 4 bloques. **Regla que manda todo: Consent Mode v2 antes de entrar cualquier ID.** Sin él, GA4/GTM dispara cookies sin consentimiento = infracción AEPD.
+> **Leyenda:** ✅ Hecho · ⬜ Pendiente · 🔒 Bloqueado · ⚙️ acción dashboard · 💻 código
 
-### Analytics base — ya cableado en código, solo necesita IDs
+---
 
-- ⬜ **AN01 · ⚙️ — GA4 Measurement ID.**
-  `/admin/configuracion` → SEO y analíticas → campo GA4. Formato: `G-XXXXXXXXXX`.
-  Activa automáticamente: pageviews, sesiones, engagement rate, scroll depth, clics salientes.
+### BLOQUE 1 — Infraestructura base (obligatorio, día 1)
 
-- ⬜ **AN02 · ⚙️ — GTM Container ID.**
-  Mismo panel. Formato: `GTM-XXXXXXX`.
-  ✅ Recomendado: instalar todos los demás tags (AN05-AN10) vía GTM para control centralizado y Consent Mode correcto.
+- ⬜ **AN01 · ⚙️ — Crear contenedor GTM.**
+  Ir a tagmanager.google.com → Crear cuenta + Contenedor web para `blacklabelmarket.es`.
+  Obtener `GTM-XXXXXXX`. **No entrar el ID en `platform_config` hasta completar AN03.**
 
-### Search analytics
+- ⬜ **AN02 · 💻⚙️ — Consent Mode v2: auditar `CookieConsentBanner` e integrar con GTM.**
+  **Paso previo obligatorio antes de activar cualquier tracking.**
+  - Auditar `components/legal/CookieConsentBanner.tsx`: verificar si ya envía señales `gtag('consent', 'update', {...})` cuando el usuario acepta/rechaza.
+  - Si no las envía: añadir la llamada de actualización de consentimiento.
+  - En GTM: configurar tag "Consent Initialization" con estado por defecto denegado para `analytics_storage`, `ad_storage`, `ad_personalization`, `functionality_storage`.
+  - Verificar en GTM Preview que las señales llegan correctamente antes de publicar.
+  ⚠️ Sin esto: riesgo de sanción AEPD directo.
 
-- ⬜ **AN03 · ⚙️ — Google Search Console.**
-  Verificar dominio `blacklabelmarket.es` (método DNS preferido — añadir registro TXT en Vercel Domains).
-  Enviar sitemap: `https://blacklabelmarket.es/sitemap.xml`.
-  Activa: queries, posiciones, CTR, cobertura de índice, CWV field data, URL Inspection Tool.
+- ⬜ **AN03 · ⚙️ — Entrar GTM Container ID en `platform_config`.**
+  🔒 Bloqueado hasta completar AN02.
+  Panel admin `/admin/configuracion` → campo GTM. Formato: `GTM-XXXXXXX`.
 
-- ⬜ **AN04 · ⚙️ — Bing Webmaster Tools.**
-  Verificar dominio. Enviar sitemap.
-  Importante para GEO: Bing alimenta ChatGPT (Copilot) y Perplexity. Sin indexación en Bing, no hay citas en esas IAs.
+- ⬜ **AN04 · ⚙️ — Configurar GA4 Data Stream y conectar a GTM.**
+  🔒 Bloqueado hasta completar AN03.
+  - Google Analytics → Admin → Data Streams → Web → `blacklabelmarket.es` → obtener `G-XXXXXXXXXX`.
+  - Configurar en GTM: tag "Google Analytics: GA4 Configuration" con el Measurement ID. **No usar el campo GA4 directo del panel** — mejor a través de GTM para respetar Consent Mode.
+  - Activar Enhanced Measurement en GA4: scroll, outbound clicks, site search, video engagement, file downloads.
+  - En GA4 Admin: enlazar con Google Search Console (Property Settings → Search Console).
 
-### Heatmaps y CRO
+- ⬜ **AN05 · ⚙️ — Google Search Console: enviar sitemap.**
+  🔒 Bloqueado hasta G01 (noindex quitado).
+  GSC → Sitemaps → `https://blacklabelmarket.es/sitemap.xml`.
+  ✅ Ya creado y verificado.
 
-- ⬜ **AN05 · 💻 — Microsoft Clarity** (gratuito, GDPR-ready, recomendado para fase piloto).
-  Instalar vía GTM → tag Custom HTML con snippet de Clarity. Requiere: Project ID de clarity.microsoft.com.
-  Activa: session recordings, heatmaps de clics y scroll, rage clicks, dead clicks, filtros por página.
-  Funnels a revisar: `/vehiculos-a-la-carta`, ficha vehículo → botón "Contactar", `/precios` → botón CTA plan.
+- ⬜ **AN06 · ⚙️ — Bing Webmaster Tools.**
+  Verificar dominio `blacklabelmarket.es` + enviar sitemap.
+  Crítico para GEO: Bing alimenta ChatGPT (Copilot) y Perplexity. Sin indexación en Bing no hay citas en esas IAs.
+  Hacer inmediatamente después de G01.
 
-- ⬜ **AN06 · 💻 — Hotjar** (alternativa de pago con más features: encuestas, NPS, funnels).
-  Instalar vía GTM o script directo. No necesario en fase piloto — evaluar si Clarity no es suficiente.
+---
 
-### Paid media pixels (instalar antes de activar cada canal de pago)
+### BLOQUE 2 — Behavioral analytics (primera semana)
 
-- ⬜ **AN07 · 💻 — Meta Pixel (Facebook/Instagram Ads).**
-  Instalar vía GTM → template "Facebook Pixel". Requiere: Pixel ID (Meta Events Manager).
-  Eventos a configurar:
-  - `PageView` — automático en cada página
-  - `ViewContent` — en fichas de vehículo (`/coches/[slug]`, `/motos/[slug]`) con parámetros: content_type, content_ids, value, currency
-  - `Lead` — en envío de formulario a-la-carta + clic en "Contactar" dealer
-  - `InitiateCheckout` — en clic en botones de plan en `/precios`
-  Audiencias: visitantes de `/coches/deportivos`, `/coches/clasicos`, `/motos/deportivas`; retargeting de fichas vistas.
+- ⬜ **AN07 · ⚙️💻 — Microsoft Clarity.**
+  🔒 Bloqueado hasta completar AN03.
+  - Crear proyecto en clarity.microsoft.com → obtener Project ID.
+  - Instalar vía GTM: tag Custom HTML con snippet de Clarity, condicionado al consentimiento (`analytics_storage`).
+  - Funnels prioritarios a revisar: ficha vehículo → "Contactar dealer", `/vehiculos-a-la-carta` → envío, `/precios` → CTA plan.
+  Coste: gratuito. Sin límite de sesiones.
 
-- ⬜ **AN08 · 💻 — TikTok Pixel.**
-  Instalar vía GTM → Custom HTML. Requiere: Pixel ID (TikTok Ads Manager).
+---
+
+### BLOQUE 3 — Eventos y conversiones clave en GTM + GA4
+
+- ⬜ **AN08 · 💻⚙️ — Evento `vehicle_detail_view`.**
+  🔒 Bloqueado hasta completar AN04.
+  GTM: trigger pageview en `/coches/*` y `/motos/*` → GA4 Event con parámetros: `vehicle_brand`, `vehicle_model`, `vehicle_year`, `vehicle_category`, `vehicle_price`, `dealer_id`.
+
+- ⬜ **AN09 · 💻⚙️ — Evento `dealer_contact_click`** ← macro-conversión B2C principal.
+  GTM: trigger clic en botones "Contactar", "WhatsApp", "Email" en fichas de vehículo y perfil dealer.
+  Parámetros: `dealer_id`, `dealer_name`, `vehicle_slug`, `contact_method`.
+
+- ⬜ **AN10 · 💻⚙️ — Evento `vehiculo_carta_submit`** ← macro-conversión B2C secundaria.
+  GTM: trigger en envío exitoso del formulario `/vehiculos-a-la-carta`.
+  Puede requerir ajuste en el componente para emitir un `dataLayer.push` en el submit.
+
+- ⬜ **AN11 · 💻⚙️ — Evento `dealer_profile_view`.**
+  GTM: trigger pageview en `/dealers/*`.
+  Parámetros: `dealer_id`, `dealer_name`, `dealer_city`.
+
+- ⬜ **AN12 · ⚙️ — GA4: marcar macro-conversiones.**
+  GA4 Admin → Events → marcar como conversiones: `dealer_contact_click` y `vehiculo_carta_submit`.
+
+---
+
+### BLOQUE 4 — Pixels de paid media (solo cuando se activa el canal)
+
+> No instalar antes de activar el canal correspondiente. Cada pixel añade riesgo legal sin valor hasta que haya campaña.
+
+- ⬜ **AN13 · 💻⚙️ — Meta Pixel (Facebook + Instagram Ads).**
+  GTM: template oficial "Facebook Pixel". Requiere Pixel ID de Meta Events Manager.
+  Eventos: `PageView` (auto), `ViewContent` en fichas (content_type, value, currency), `Lead` en formulario a-la-carta y clic "Contactar dealer", `InitiateCheckout` en CTA de `/precios`.
+  Audiencias: visitantes `/coches/deportivos`, `/coches/clasicos`, `/motos/deportivas`; retargeting fichas vistas.
+
+- ⬜ **AN14 · 💻⚙️ — LinkedIn Insight Tag (captación B2B dealers).**
+  GTM: Custom HTML. Requiere Partner ID de LinkedIn Campaign Manager.
+  Audiencias clave: visitantes de `/para-profesionales`, `/precios`, `/dealers`.
+  Valor principal: identifica qué empresas visitan la web → imprescindible para campañas B2B de captación de dealers.
+
+- ⬜ **AN15 · 💻⚙️ — TikTok Pixel.**
+  GTM: Custom HTML. Requiere Pixel ID de TikTok Ads Manager.
   Eventos: `ViewContent` (fichas), `SubmitForm` (formulario a-la-carta).
 
-- ⬜ **AN09 · 💻 — LinkedIn Insight Tag (B2B — captación de dealers).**
-  Instalar vía GTM → Custom HTML. Requiere: Partner ID (LinkedIn Campaign Manager).
-  Audiencias clave: visitantes de `/para-profesionales`, `/precios`, `/dealers`.
-  ⚠️ El Insight Tag identifica el perfil profesional de visitantes → muy útil para saber qué tipo de empresa visita la web.
+- ⬜ **AN16 · 💻⚙️ — Google Ads Conversion Tag.**
+  GTM: template "Google Ads Conversion Tracking". Requiere Conversion ID + Label de Google Ads.
+  Conversiones: formulario a-la-carta enviado, clic "Contactar dealer", registro completado.
 
-- ⬜ **AN10 · 💻 — Google Ads Conversion Tag.**
-  Instalar vía GTM → template "Google Ads Conversion Tracking". Requiere: Conversion ID + Label (Google Ads).
-  Conversiones a registrar: formulario a-la-carta enviado, clic en "Contactar" dealer, registro completado.
+---
 
-### Eventos y conversiones clave en GTM
+### Monitorización post-lanzamiento (automático con el tiempo)
 
-- ⬜ **AN11 · 💻 — Evento: `vehicle_detail_view`.**
-  Trigger: pageview en `/coches/[slug]` y `/motos/[slug]`.
-  Variables recomendadas: marca, modelo, año, categoría, precio, dealer_id.
-
-- ⬜ **AN12 · 💻 — Evento: `dealer_contact_click`** ← macro-conversión B2C.
-  Trigger: clic en botón "Contactar", "WhatsApp" o "Email" en ficha vehículo o perfil dealer.
-
-- ⬜ **AN13 · 💻 — Evento: `vehiculo_carta_submit`** ← macro-conversión B2C.
-  Trigger: envío exitoso del formulario `/vehiculos-a-la-carta`.
-
-- ⬜ **AN14 · 💻 — Evento: `dealer_profile_view`.**
-  Trigger: pageview en `/dealers/[slug]`.
-
-- ⬜ **AN15 · ⚙️ — GA4: marcar macro-conversiones.**
-  GA4 Admin → Events → marcar `dealer_contact_click` y `vehiculo_carta_submit` como conversiones.
-
-- ⬜ **AN16 · 💻 — Consent Mode v2 (GDPR/LOPD) — verificar y configurar.**
-  Verificar que `CookieConsentBanner` bloquea los tags AN05-AN10 antes del consentimiento.
-  En GTM: configurar variables de consentimiento `ad_storage`, `analytics_storage`, `ad_personalization`, `analytics_storage`.
-  ⚠️ Sin Consent Mode correcto: riesgo de sanción AEPD (hasta 20M€) + datos inválidos por ITP/bloqueo de navegadores.
-
-### Monitorización post-lanzamiento
-
-- ⬜ **AN17 · ⚙️ — Primera revisión de cobertura GSC** (7-14 días tras G01).
-  Verificar: URLs indexadas vs. enviadas en sitemap, errores de cobertura, páginas excluidas involuntariamente.
+- ⬜ **AN17 · ⚙️ — Primera revisión cobertura GSC** (7-14 días tras G01).
+  Verificar: URLs indexadas vs. enviadas, errores de cobertura, páginas excluidas involuntariamente.
 
 - ⬜ **AN18 · ⚙️ — Core Web Vitals field data** (~28 días tras tráfico real).
-  GSC → Core Web Vitals report. PageSpeed Insights → field data (CrUX). Umbrales: LCP < 2.5s · INP < 200ms · CLS < 0.1.
+  GSC → Core Web Vitals report. Umbrales: LCP < 2.5s · INP < 200ms · CLS < 0.1.
 
 - ⬜ **AN19 · ⚙️ — Performance report: primeras queries** (30 días tras G01).
-  GSC → Rendimiento → Queries. Identificar: keywords con impresiones reales, CTR por página, posición media.
-  Usar para optimizar titles/descriptions de páginas con muchas impresiones y CTR bajo.
+  GSC → Rendimiento → Queries. Identificar keywords reales, CTR por página, posición media.
+  Usar para optimizar titles/descriptions con muchas impresiones y CTR bajo.
 
 ---
 
@@ -370,22 +358,20 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 ---
 
 ### Orden de ejecución recomendado
-1. P01 + P02 + P03 + P04 (código, sin input) → commit
-2. P05 (OG image — asset tuyo) → commit
-3. P06 (sobre-nosotros — copy tuyo) → commit
-4. P07 (sameAs — URLs tuyas) → commit
-5. P08 + P09 (validación — acción tuya)
-6. **L01 + L02 + L03 + L04** (Aviso Legal + Privacidad — código puro) → commit
-7. **L06 + L07** (Términos y Condiciones — código puro) → commit
-8. **L08 + L09** (Criterios + Condiciones Prof. — código puro) → commit
-9. **L05** (verificar GTM/GA4 — ⚠️ confirmar estado DB antes de entrar IDs)
-10. AN16 (Consent Mode v2 — obligatorio ANTES de entrar IDs de GA4/GTM)
-11. AN01 + AN02 (GA4 + GTM IDs en admin — solo tras AN16)
-12. **G01 — abrir indexación** → enviar sitemap en GSC (AN03 + AN04)
-13. AN05 (Clarity — instalar vía GTM)
-14. AN11-AN15 (eventos GTM)
-15. AN07-AN10 (pixels — cuando actives cada canal de pago)
-16. AN17-AN19 (monitorización — automático con el tiempo)
+1. ✅ P01-P09 completados (código + legales)
+2. ✅ L01-L09 completados (compliance RGPD/DSA)
+3. P09 — Rich Results Test (acción tuya)
+4. **AN01** — Crear contenedor GTM (acción tuya, 5 min)
+5. **AN02** — Consent Mode v2: auditar banner + integrar GTM (código + config GTM)
+6. **AN03** — Entrar GTM ID en `platform_config` (acción tuya)
+7. **AN04** — GA4 Data Stream + conectar a GTM (config GA4 + GTM)
+8. **G01** — Quitar noindex → abrir indexación
+9. **AN05** — Search Console: enviar sitemap (acción tuya, inmediato tras G01)
+10. **AN06** — Bing Webmaster Tools (acción tuya)
+11. **AN07** — Microsoft Clarity vía GTM
+12. **AN08-AN12** — Eventos y conversiones GTM + GA4
+13. **AN13-AN16** — Pixels paid media (cuando actives cada canal)
+14. **AN17-AN19** — Monitorización (automático con el tiempo)
 
 ---
 
