@@ -200,12 +200,11 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
               {failedItems.has(activeIndex) ? (
                 <VideoThumbFallback />
               ) : (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={activeItem.thumbUrl}
                   alt={`${title} — vídeo`}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                   onError={() => markFailed(activeIndex)}
                 />
               )}
@@ -294,12 +293,11 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
                     {failedItems.has(i) ? (
                       <VideoThumbFallback compact />
                     ) : (
-                      <Image
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
                         src={item.thumbUrl}
                         alt={`${title} — vídeo`}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
+                        className="absolute inset-0 w-full h-full object-cover"
                         onError={() => markFailed(i)}
                       />
                     )}
