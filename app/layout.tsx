@@ -69,6 +69,7 @@ const organizationJsonLd = {
     'https://www.tiktok.com/@blacklabelmarket.es',
     'https://www.youtube.com/@BlackLabelPremium',
     'https://www.linkedin.com/company/black-label-market-premiumcars/',
+    'https://www.facebook.com/blacklabel.es',
   ],
 }
 
