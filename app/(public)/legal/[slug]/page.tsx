@@ -75,11 +75,25 @@ Este canal también podrá utilizarse para comunicar incidencias legales, anunci
 
 Black Label Market revisará las comunicaciones recibidas y podrá adoptar las medidas que considere oportunas, incluyendo la corrección, suspensión o retirada de contenidos.
 
+**Punto de contacto único — Reglamento de Servicios Digitales (DSA)**
+
+En cumplimiento del Reglamento (UE) 2022/2065, de Servicios Digitales, Black Label Market designa el siguiente punto de contacto único para las comunicaciones de autoridades de los Estados miembros y de la Comisión Europea, y para la notificación de contenidos presuntamente ilícitos:
+
+hola@blacklabelmarket.es
+
+Las notificaciones de contenidos ilícitos deberán identificar el contenido o anuncio afectado y exponer los motivos por los que se considera ilícito.
+
 **Protección de datos y cookies**
 
 El tratamiento de datos personales realizado a través de Black Label Market se regula en la Política de Privacidad.
 
 El uso de cookies y tecnologías similares se regula en la Política de Cookies. El usuario puede configurar sus preferencias de cookies a través del panel habilitado en la web.
+
+**Resolución alternativa de litigios**
+
+De conformidad con el Reglamento (UE) 524/2013 y la Ley 7/2017, de 2 de noviembre, de resolución alternativa de litigios en materia de consumo, los usuarios con la condición de consumidores pueden acceder a la plataforma europea de resolución de litigios en línea para resolver controversias derivadas de servicios contratados en línea:
+
+Plataforma ODR de la UE: https://ec.europa.eu/consumers/odr/
 
 **Legislación aplicable y jurisdicción**
 
@@ -162,6 +176,17 @@ Black Label Market también podrá comunicar datos cuando exista obligación leg
 
 No se venderán datos personales de usuarios a terceros.
 
+**Encargados del tratamiento principales**
+
+Entre los proveedores que pueden acceder a datos personales como encargados del tratamiento para prestar servicios a Black Label Market se encuentran:
+
+- Supabase Inc. (EE.UU./UE): base de datos, autenticación y almacenamiento. Transferencias cubiertas por cláusulas contractuales tipo (SCCs).
+- Vercel Inc. (EE.UU./UE): hosting e infraestructura web. Transferencias cubiertas por cláusulas contractuales tipo (SCCs).
+- Stripe Inc. (EE.UU./UE): procesamiento de pagos y suscripciones profesionales. Transferencias cubiertas por cláusulas contractuales tipo (SCCs).
+- Google LLC (EE.UU.): analítica web mediante Google Analytics 4 y Google Tag Manager, únicamente cuando estén activos y el usuario haya prestado su consentimiento previo. Transferencias cubiertas por el Marco EU-EE.UU. de Privacidad de Datos (DPF).
+
+Esta lista puede actualizarse cuando se incorporen o modifiquen proveedores relevantes.
+
 **Transferencias internacionales**
 
 Algunos proveedores tecnológicos utilizados por Black Label Market pueden estar ubicados fuera del Espacio Económico Europeo o prestar servicios mediante infraestructuras internacionales.
@@ -199,6 +224,8 @@ Para ejercer estos derechos, el usuario puede escribir a:
 privacidad@blacklabelmarket.es
 
 La solicitud deberá indicar el derecho que se desea ejercer y permitir identificar razonablemente al solicitante.
+
+Black Label Market responderá a las solicitudes de ejercicio de derechos en el plazo de un mes desde su recepción. Cuando sea necesario por la complejidad o el número de solicitudes, dicho plazo podrá prorrogarse hasta tres meses adicionales, comunicando al interesado la prórroga y sus motivos dentro del plazo inicial de un mes, conforme al artículo 12 del Reglamento (UE) 2016/679.
 
 El usuario también tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos a través de www.aepd.es si considera que el tratamiento de sus datos no se ajusta a la normativa aplicable.
 
@@ -426,6 +453,10 @@ Cualquier acuerdo, reserva, señal, pago, financiación, garantía, transporte, 
 
 Black Label Market no se responsabiliza de incumplimientos, desacuerdos, daños, pérdidas, reclamaciones, defectos, retrasos, cancelaciones o controversias surgidas entre comprador y vendedor, sin perjuicio de las medidas que pueda adoptar sobre el uso de la plataforma cuando corresponda.
 
+**Garantías legales aplicables**
+
+Los vehículos vendidos por profesionales a consumidores están sujetos a las garantías legales previstas en el Real Decreto Legislativo 7/2021, de 27 de abril, que transpone la Directiva (UE) 2019/771 relativa a los contratos de compraventa de bienes. El vendedor profesional es el único responsable del cumplimiento de las garantías legales aplicables a cada vehículo conforme a dicha normativa. Black Label Market no otorga garantía propia sobre los vehículos publicados ni asume en ningún caso la posición de vendedor.
+
 **Planes de suscripción y pagos profesionales**
 
 Black Label Market puede ofrecer planes de suscripción o servicios de pago dirigidos a profesionales para publicar vehículos, acceder a funcionalidades, destacar stock o gestionar su presencia en la plataforma.
@@ -469,7 +500,9 @@ Las marcas, nombres comerciales, modelos, logotipos o referencias de fabricantes
 
 Black Label Market podrá suspender, limitar o cancelar el acceso de un usuario o profesional cuando detecte incumplimientos de estos Términos, usos fraudulentos, riesgos de seguridad, información falsa, actividad abusiva, contenidos ilícitos, impagos, infracción de derechos de terceros o cualquier conducta contraria a la buena fe o a la normativa aplicable.
 
-Cuando resulte razonable y posible, Black Label Market podrá comunicar los motivos principales de la medida adoptada, sin perjuicio de aquellas situaciones en las que deba proteger la seguridad, confidencialidad, investigación de fraudes o cumplimiento legal.
+Cuando resulte razonable y posible, Black Label Market comunicará al afectado los motivos principales de la medida adoptada, conforme a lo previsto en el Reglamento (UE) 2022/2065, de Servicios Digitales, sin perjuicio de aquellas situaciones en las que deba proteger la seguridad, confidencialidad, investigación de fraudes o cumplimiento legal.
+
+El afectado podrá impugnar la decisión enviando una reclamación motivada a hola@blacklabelmarket.es. Black Label Market tramitará la reclamación y comunicará al interesado el resultado en un plazo razonable, sin perjuicio de los cauces legales o judiciales que correspondan.
 
 **Modificaciones de los Términos**
 
@@ -567,6 +600,17 @@ No todos los vehículos de una marca generalista encajan en Black Label, pero s�
 
 Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o retirar publicaciones conforme a sus criterios de calidad y criterios comerciales, sin necesidad de justificación adicional.
 
+**Criterios de ordenación del catálogo (DSA art. 27)**
+
+En cumplimiento del artículo 27 del Reglamento (UE) 2022/2065, de Servicios Digitales, Black Label Market informa sobre los principales parámetros que determinan el orden de presentación por defecto de los vehículos en el catálogo:
+
+- Fecha de publicación: las unidades publicadas más recientemente tienen preferencia en el orden por defecto.
+- Completitud de la ficha: las unidades con información más completa (fotografías de calidad, descripción detallada, precio visible, especificaciones técnicas y condiciones claras) tienen mejor posicionamiento en la presentación.
+- Disponibilidad: solo se muestran vehículos activos y disponibles en el catálogo.
+- Criterios editoriales: Black Label Market puede destacar unidades de especial relevancia, rareza o interés para los compradores de la plataforma.
+
+El usuario puede modificar el orden de presentación mediante los filtros y opciones de ordenación disponibles en el catálogo.
+
 **¿Quieres publicar en Black Label Market?**
 
 Si eres un profesional del sector y quieres solicitar acceso para publicar vehículos, puedes hacerlo a través del formulario de registro profesional. Tu perfil será revisado antes de habilitar la publicación de vehículos.
@@ -595,6 +639,17 @@ El acceso profesional a Black Label Market no es automático. La plataforma podr
 Black Label Market podrá valorar, entre otros aspectos, la identidad profesional del solicitante, su actividad, reputación, tipo de stock, calidad de presentación, ubicación, especialización y adecuación al posicionamiento de la plataforma.
 
 Black Label Market se reserva el derecho de aceptar, rechazar, suspender o cancelar solicitudes de acceso profesional cuando considere que no encajan con los criterios comerciales, legales o de calidad de la plataforma.
+
+**Verificación de datos del profesional (DSA art. 30)**
+
+En cumplimiento del artículo 30 del Reglamento (UE) 2022/2065, de Servicios Digitales, Black Label Market recopila y verifica, en la medida razonablemente posible, los siguientes datos de cada profesional antes de activar su acceso para publicar vehículos:
+
+- Nombre o razón social.
+- Dirección postal.
+- Número de identificación fiscal (NIF o CIF) o número de registro equivalente.
+- Email y teléfono de contacto.
+
+El profesional deberá mantener estos datos actualizados en todo momento. Si se detecta que los datos proporcionados son falsos, están desactualizados o el profesional se niega a proporcionarlos o a actualizarlos cuando se le requiera, Black Label Market podrá suspender el acceso a la plataforma hasta que la situación sea subsanada.
 
 **Obligaciones del profesional**
 
@@ -740,7 +795,7 @@ export default async function LegalPage({ params }: PageProps) {
         </div>
         <h1 className="section-title">{page.title}</h1>
         <p className="text-xs text-bsm-text-muted mt-3">
-          Última actualización: {new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long' })}
+          Última actualización: 10 de junio de 2026
         </p>
       </div>
 
