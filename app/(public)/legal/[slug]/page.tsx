@@ -324,7 +324,31 @@ Black Label Market utiliza el almacenamiento local del navegador para guardar pr
 
 Análisis
 
-Actualmente Black Label Market no carga cookies de análisis ni herramientas de medición de terceros. Si en el futuro se incorporan herramientas de analítica, se informará en esta política y solo se activarán cuando el usuario haya prestado su consentimiento, cuando este sea exigible.
+Black Label Market utiliza las siguientes herramientas de análisis, condicionadas al consentimiento previo del usuario. Sin dicho consentimiento estas herramientas no se activan y no se depositan cookies de análisis.
+
+**Google Tag Manager (GTM)**
+- Proveedor: Google Ireland Limited / Google LLC (EE. UU.)
+- Finalidad: gestión y carga condicional de etiquetas de seguimiento; no recopila datos propios de forma independiente
+- Base de legitimación: interés legítimo (gestión técnica de scripts de terceros)
+- No genera cookies propias
+
+**Google Analytics 4 (GA4)**
+- Proveedor: Google Ireland Limited / Google LLC (EE. UU.)
+- Finalidad: análisis estadístico del uso de la web (páginas vistas, sesiones, eventos, dispositivo, ubicación aproximada)
+- Base de legitimación: consentimiento del usuario (categoría analítica)
+- Transferencia internacional: servidores de Google en la UE y EE. UU. bajo el marco EU-US Data Privacy Framework
+- Retención: 14 meses
+- Cookies: _ga (2 años), _ga_419RRDTX12 (2 años), _gid (24 horas)
+- Más información: https://policies.google.com/privacy
+
+**Microsoft Clarity**
+- Proveedor: Microsoft Corporation (EE. UU.)
+- Finalidad: grabaciones de sesión anonimizadas, mapas de calor y análisis de comportamiento del usuario para mejorar la experiencia de uso
+- Base de legitimación: consentimiento del usuario (categoría analítica)
+- Transferencia internacional: servidores de Microsoft en la UE y EE. UU. bajo el marco EU-US Data Privacy Framework
+- Retención: datos de sesión 30 días
+- Cookies: _clsk (sesión), _clck (1 año), MUID (13 meses)
+- Más información: https://privacy.microsoft.com
 
 Marketing y publicidad
 
@@ -332,9 +356,14 @@ Actualmente Black Label Market no utiliza cookies de marketing, publicidad compo
 
 **Gestión y configuración de cookies**
 
-Actualmente Black Label Market no carga cookies no técnicas ni herramientas de seguimiento de terceros que requieran consentimiento activo del usuario.
+Black Label Market dispone de un panel de configuración de cookies accesible desde el aviso que aparece al visitar la web por primera vez y desde el enlace habilitado en el pie de página.
 
-Si en el futuro se incorporan cookies o tecnologías similares no técnicas, se habilitará un panel de configuración de cookies donde el usuario podrá aceptar, rechazar o configurar sus preferencias. La retirada del consentimiento no afectará a la licitud del tratamiento realizado antes de su retirada.
+A través de dicho panel el usuario puede:
+- Aceptar todas las cookies
+- Rechazar las cookies no técnicas
+- Configurar sus preferencias por categoría (técnicas necesarias, analítica, marketing)
+
+La elección del usuario se almacena en el navegador y se respeta en sucesivas visitas. Las herramientas de analítica solo se activan cuando el usuario ha prestado su consentimiento para dicha categoría. La retirada del consentimiento no afectará a la licitud del tratamiento realizado con anterioridad.
 
 **Cookies técnicas y almacenamiento funcional**
 
