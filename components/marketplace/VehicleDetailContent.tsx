@@ -287,7 +287,7 @@ export default function VehicleDetailContent({
           )}
 
           {/* Gallery */}
-          <VehicleGallery images={vehicle.images || []} title={title} />
+          <VehicleGallery images={vehicle.images || []} title={title} videoUrl={vehicle.video_url} />
 
           {/* Resumen de la unidad */}
           <div>
