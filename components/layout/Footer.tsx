@@ -22,7 +22,7 @@ const PROFESIONALES = [
   { label: 'Publicar vehículos',      href: '/registro' },
   { label: 'Criterios para publicar', href: '/legal/criterios-publicacion' },
   { label: 'Planes de suscripción',   href: '/precios' },
-  { label: 'Soporte',                 href: '/contacto' },
+  { label: 'Contacto',                 href: '/contacto' },
 ]
 
 // Legal: "Configurar cookies" rendered separately as a client button

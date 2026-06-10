@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, Phone, Clock } from 'lucide-react'
+import { Mail, Phone } from 'lucide-react'
 
 export default function ContactoPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
@@ -40,7 +40,6 @@ export default function ContactoPage() {
         <div className="space-y-8">
           {[
             { icon: Mail, label: 'Email', value: 'hola@blacklabelmarket.es', href: 'mailto:hola@blacklabelmarket.es' },
-            { icon: Clock, label: 'Horario de atención', value: 'Lunes a Viernes\n9:00 – 19:00 h (CET)', href: null },
           ].map(({ icon: Icon, label, value, href }) => (
             <div key={label}>
               <div className="flex items-center gap-3 mb-2">
