@@ -64,6 +64,10 @@ const organizationJsonLd = {
   creator: { '@type': 'Organization', name: 'Black Series', url: 'https://blackseriesagency.es' },
   areaServed: 'ES',
   email: 'hola@blacklabelmarket.es',
+  sameAs: [
+    'https://www.instagram.com/blacklabel_premiumcars/',
+    // TikTok, LinkedIn, YouTube — se añadirán al crear cada perfil
+  ],
 }
 
 const webSiteJsonLd = {
