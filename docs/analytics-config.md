@@ -221,7 +221,7 @@ dataLayer.push({
 - ✅ Bing Webmaster Tools verificado + sitemap
 - ✅ dataLayer pushes en TrackLink, QualifiedLeadForm, PrivateSearchForm
 - ✅ GTM tags: GA4 Config + Clarity + 4 eventos
-- ⬜ GTM v2 publicado (pendiente confirmar)
-- ⬜ GA4 conversiones marcadas (AN12)
+- ✅ GTM v2 publicado (`v2 — GA4 events`)
+- ⬜ GA4 key events marcados (AN12) — `dealer_contact_click` disparado, esperando 24h para aparecer en GA4
 - ⬜ Search Console sitemap enviado (tras G01)
 - ⬜ Pixels paid media (cuando se activen canales)

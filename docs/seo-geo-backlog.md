@@ -272,24 +272,20 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 
 ### BLOQUE 3 — Eventos y conversiones clave en GTM + GA4
 
-- ⬜ **AN08 · 💻⚙️ — Evento `vehicle_detail_view`.**
-  🔒 Bloqueado hasta completar AN04.
-  GTM: trigger pageview en `/coches/*` y `/motos/*` → GA4 Event con parámetros: `vehicle_brand`, `vehicle_model`, `vehicle_year`, `vehicle_category`, `vehicle_price`, `dealer_id`.
+- ✅ **AN08 · 💻⚙️ — Evento `vehicle_detail_view`.**
+  GTM tag: GA4 Event · Pageview trigger → Page Path contiene `/coches/` OR `/motos/`.
 
-- ⬜ **AN09 · 💻⚙️ — Evento `dealer_contact_click`** ← macro-conversión B2C principal.
-  GTM: trigger clic en botones "Contactar", "WhatsApp", "Email" en fichas de vehículo y perfil dealer.
-  Parámetros: `dealer_id`, `dealer_name`, `vehicle_slug`, `contact_method`.
+- ✅ **AN09 · 💻⚙️ — Evento `dealer_contact_click`** ← macro-conversión B2C principal.
+  `TrackLink.tsx` y `QualifiedLeadForm.tsx` pushean a dataLayer. GTM tag activo. Probado y disparando. `commit 4d5fdf4`
 
-- ⬜ **AN10 · 💻⚙️ — Evento `vehiculo_carta_submit`** ← macro-conversión B2C secundaria.
-  GTM: trigger en envío exitoso del formulario `/vehiculos-a-la-carta`.
-  Puede requerir ajuste en el componente para emitir un `dataLayer.push` en el submit.
+- ✅ **AN10 · 💻⚙️ — Evento `vehiculo_carta_submit`** ← macro-conversión B2C secundaria.
+  `PrivateSearchForm.tsx` pushea a dataLayer tras submit exitoso. GTM tag activo. `commit 4d5fdf4`
 
-- ⬜ **AN11 · 💻⚙️ — Evento `dealer_profile_view`.**
-  GTM: trigger pageview en `/dealers/*`.
-  Parámetros: `dealer_id`, `dealer_name`, `dealer_city`.
+- ✅ **AN11 · 💻⚙️ — Evento `dealer_profile_view`.**
+  GTM tag: GA4 Event · Pageview trigger → Page Path contiene `/dealers/`.
 
-- ⬜ **AN12 · ⚙️ — GA4: marcar macro-conversiones.**
-  GA4 Admin → Events → marcar como conversiones: `dealer_contact_click` y `vehiculo_carta_submit`.
+- ⬜ **AN12 · ⚙️ — GA4: marcar key events.**
+  Esperar 24h a que `dealer_contact_click` y `vehiculo_carta_submit` aparezcan en GA4 → Recent events → marcar estrella. GTM v2 publicado, `dealer_contact_click` ya disparado.
 
 ---
 
