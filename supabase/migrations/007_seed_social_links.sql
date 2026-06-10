@@ -3,11 +3,10 @@ INSERT INTO platform_config (key, value)
 VALUES (
   'social_links',
   '{
-    "instagram": "https://www.instagram.com/blacklabelmarket",
-    "facebook":  "https://www.facebook.com/blacklabelmarket",
-    "youtube":   "https://www.youtube.com/@blacklabelmarket",
-    "tiktok":    "https://www.tiktok.com/@blacklabelmarket",
-    "linkedin":  "https://www.linkedin.com/company/blacklabelmarket"
+    "instagram": "https://www.instagram.com/blacklabel_premiumcars/",
+    "tiktok":    "https://www.tiktok.com/@blacklabelmarket.es",
+    "facebook":  "https://www.facebook.com/blacklabel.es",
+    "youtube":   "https://www.youtube.com/@BlackLabelPremium"
   }'::jsonb
 )
 ON CONFLICT (key) DO UPDATE
