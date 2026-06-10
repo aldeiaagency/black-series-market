@@ -21,11 +21,13 @@ const articleJsonLd = {
     '@type': 'Organization',
     name: 'Black Label Market',
     url: SITE_URL,
+    '@id': `${SITE_URL}/#organization`,
   },
   author: {
     '@type': 'Organization',
     name: 'Black Label Market',
     url: SITE_URL,
+    '@id': `${SITE_URL}/#organization`,
   },
   isPartOf: { '@id': `${SITE_URL}/#website` },
 }

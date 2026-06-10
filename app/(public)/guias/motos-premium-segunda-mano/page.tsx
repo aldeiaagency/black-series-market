@@ -17,7 +17,8 @@ const articleJsonLd = {
   description: 'Guía práctica para comprar motos premium de segunda mano: qué verificar, documentación, precio justo y cómo encontrar especialistas de confianza en España.',
   url: `${SITE_URL}/guias/motos-premium-segunda-mano`,
   inLanguage: 'es-ES',
-  publisher: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL },
+  publisher: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL, '@id': `${SITE_URL}/#organization` },
+  author: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL, '@id': `${SITE_URL}/#organization` },
   datePublished: '2026-06-09',
   dateModified: '2026-06-09',
 }

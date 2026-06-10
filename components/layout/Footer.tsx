@@ -11,14 +11,16 @@ const EXPLORAR = [
   { label: 'Marcas',                        href: '/marcas' },
   { label: 'Concesionarios y compraventas', href: '/dealers' },
   { label: 'Vehículos a la carta',          href: '/vehiculos-a-la-carta' },
-  { label: 'Mis favoritos',                 href: '/mis-favoritos' },
+  { label: 'Guías del mercado',             href: '/guias' },
+  { label: 'Glosario premium',              href: '/glosario' },
   { label: 'Cómo funciona',                 href: '/como-funciona' },
 ]
 
 const PROFESIONALES = [
+  { label: 'Para profesionales',      href: '/para-profesionales' },
   { label: 'Publicar vehículos',      href: '/registro' },
   { label: 'Criterios para publicar', href: '/legal/criterios-publicacion' },
-  { label: 'Planes de suscripción',    href: '/precios' },
+  { label: 'Planes de suscripción',   href: '/precios' },
   { label: 'Soporte',                 href: '/contacto' },
 ]
 

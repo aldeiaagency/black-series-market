@@ -50,9 +50,16 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': `${SITE_URL}/#organization`,
   name: 'Black Label Market',
   legalName: 'KAZAWEB, S.L.U.',
   url: SITE_URL,
+  logo: {
+    '@type': 'ImageObject',
+    url: `${SITE_URL}/brand/black-label-market-logo.webp`,
+    width: 693,
+    height: 324,
+  },
   description:
     'Marketplace de coches y motos premium, deportivos, clásicos y unidades especiales en España, con concesionarios y especialistas verificados.',
   brand: { '@type': 'Brand', name: 'Black Label Market' },

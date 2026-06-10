@@ -17,7 +17,8 @@ const articleJsonLd = {
   description: 'Guía para invertir en coches clásicos y youngtimers: factores de valorización, evaluación de unidades, documentación y errores comunes en España.',
   url: `${SITE_URL}/guias/coches-clasicos-youngtimers-como-invertir`,
   inLanguage: 'es-ES',
-  publisher: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL },
+  publisher: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL, '@id': `${SITE_URL}/#organization` },
+  author: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL, '@id': `${SITE_URL}/#organization` },
   datePublished: '2026-06-09',
   dateModified: '2026-06-09',
 }
