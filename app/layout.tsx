@@ -67,7 +67,8 @@ const organizationJsonLd = {
   sameAs: [
     'https://www.instagram.com/blacklabel_premiumcars/',
     'https://www.tiktok.com/@blacklabelmarket.es',
-    // LinkedIn, YouTube — se añadirán al crear cada perfil
+    'https://www.youtube.com/@BlackLabelPremium',
+    // LinkedIn — se añadirá al crear el perfil
   ],
 }
 
