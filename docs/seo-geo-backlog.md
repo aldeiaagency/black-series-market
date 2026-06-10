@@ -215,6 +215,14 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 
 **Leyenda:** ✅ Hecho · ⬜ Pendiente · 🔴 Crítico (riesgo sanción AEPD)
 
+- ✅ **L01 · 💻 — Punto de contacto DSA en Aviso Legal** `1a2b636`
+- ✅ **L02 · 💻 — Enlace ODR (Resolución Alternativa de Litigios) en Aviso Legal** `1a2b636`
+- ✅ **L03 · 💻 — Plazo respuesta derechos RGPD art. 12 (1 mes + prórroga) en Privacidad** `1a2b636`
+- ✅ **L04 · 💻 — Encargados del tratamiento (Supabase/Vercel/Stripe/Google) en Privacidad** `1a2b636`
+- ✅ **L06 · 💻 — Mecanismo reclamación DSA art. 17 + plazo razonable en Términos** `1a2b636`
+- ✅ **L07 · 💻 — Garantías legales RDL 7/2021 (Directiva 2019/771) en Términos** `1a2b636`
+- ✅ **L08 · 💻 — Parámetros de ordenación del catálogo DSA art. 27 en Criterios** `1a2b636`
+- ✅ **L09 · 💻 — Verificación datos profesional DSA art. 30 en Condiciones Prof.** `1a2b636`
 - 🔴 **L05 · 💻⚙️ — Verificar que GTM/GA4 NO se cargan sin consentimiento previo.**
   `app/layout.tsx`: GA4 y GTM se cargan con `strategy="afterInteractive"` sin condicionar al consentimiento del `CookieConsentBanner`. Si los IDs están configurados en `platform_config`, hay cookies de Google activas sin Consent Mode v2 → infracción directa de la AEPD.
   **Acción doble:**
