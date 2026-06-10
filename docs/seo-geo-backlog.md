@@ -223,11 +223,8 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 - ✅ **L07 · 💻 — Garantías legales RDL 7/2021 (Directiva 2019/771) en Términos** `1a2b636`
 - ✅ **L08 · 💻 — Parámetros de ordenación del catálogo DSA art. 27 en Criterios** `1a2b636`
 - ✅ **L09 · 💻 — Verificación datos profesional DSA art. 30 en Condiciones Prof.** `1a2b636`
-- 🔴 **L05 · 💻⚙️ — Verificar que GTM/GA4 NO se cargan sin consentimiento previo.**
-  `app/layout.tsx`: GA4 y GTM se cargan con `strategy="afterInteractive"` sin condicionar al consentimiento del `CookieConsentBanner`. Si los IDs están configurados en `platform_config`, hay cookies de Google activas sin Consent Mode v2 → infracción directa de la AEPD.
-  **Acción doble:**
-  - Confirmar si `ga_id` / `gtm_id` están ya en la tabla `platform_config` (si no lo están, no hay riesgo ahora).
-  - AN16 (Consent Mode v2) debe completarse **antes** de entrar esos IDs en producción. No entrar los IDs hasta tener el bloqueo de consentimiento activo.
+- ✅ **L05 · 💻⚙️ — GTM/GA4 condicionados a Consent Mode v2.** `commit c9147d2`
+  Script síncrono inline en `app/layout.tsx` inicializa todos los estados en `denied` antes de que cargue GTM o GA4. Los IDs se entraron en `platform_config` sólo tras completar AN02. Riesgo AEPD resuelto.
 
 ---
 
@@ -240,28 +237,21 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 
 ### BLOQUE 1 — Infraestructura base (obligatorio, día 1)
 
-- ⬜ **AN01 · ⚙️ — Crear contenedor GTM.**
-  Ir a tagmanager.google.com → Crear cuenta + Contenedor web para `blacklabelmarket.es`.
-  Obtener `GTM-XXXXXXX`. **No entrar el ID en `platform_config` hasta completar AN03.**
+- ✅ **AN01 · ⚙️ — Crear contenedor GTM.**
+  Contenedor `GTM-PDZJ56X5` creado en cuenta principal (Black Series → nuevo contenedor Black Label Market).
 
-- ⬜ **AN02 · 💻⚙️ — Consent Mode v2: auditar `CookieConsentBanner` e integrar con GTM.**
-  **Paso previo obligatorio antes de activar cualquier tracking.**
-  - Auditar `components/legal/CookieConsentBanner.tsx`: verificar si ya envía señales `gtag('consent', 'update', {...})` cuando el usuario acepta/rechaza.
-  - Si no las envía: añadir la llamada de actualización de consentimiento.
-  - En GTM: configurar tag "Consent Initialization" con estado por defecto denegado para `analytics_storage`, `ad_storage`, `ad_personalization`, `functionality_storage`.
-  - Verificar en GTM Preview que las señales llegan correctamente antes de publicar.
-  ⚠️ Sin esto: riesgo de sanción AEPD directo.
+- ✅ **AN02 · 💻⚙️ — Consent Mode v2: auditar `CookieConsentBanner` e integrar con GTM.**
+  - `app/layout.tsx`: script inline síncrono antes de GTM/GA4 → `gtag('consent','default', {...denied})` + restaura consentimiento previo desde localStorage en `wait_for_update: 500ms`.
+  - `lib/cookies/consent.ts`: `saveConsent()` notifica `gtag('consent','update',{...})` en tiempo real cuando el usuario decide.
+  - `CookieConsentBanner.tsx`: enlace `/legal/cookies` corregido.
 
-- ⬜ **AN03 · ⚙️ — Entrar GTM Container ID en `platform_config`.**
-  🔒 Bloqueado hasta completar AN02.
-  Panel admin `/admin/configuracion` → campo GTM. Formato: `GTM-XXXXXXX`.
+- ✅ **AN03 · ⚙️ — Entrar GTM Container ID en `platform_config`.**
+  `platform_config` key=`seo` → `gtm_id: "GTM-PDZJ56X5"` vía REST API.
 
-- ⬜ **AN04 · ⚙️ — Configurar GA4 Data Stream y conectar a GTM.**
-  🔒 Bloqueado hasta completar AN03.
-  - Google Analytics → Admin → Data Streams → Web → `blacklabelmarket.es` → obtener `G-XXXXXXXXXX`.
-  - Configurar en GTM: tag "Google Analytics: GA4 Configuration" con el Measurement ID. **No usar el campo GA4 directo del panel** — mejor a través de GTM para respetar Consent Mode.
-  - Activar Enhanced Measurement en GA4: scroll, outbound clicks, site search, video engagement, file downloads.
-  - En GA4 Admin: enlazar con Google Search Console (Property Settings → Search Console).
+- ✅ **AN04 · ⚙️ — Configurar GA4 Data Stream.**
+  Data Stream creado: `Black Label Market` · `https://blacklabelmarket.es` · Enhanced Measurement activo.
+  Measurement ID: `G-419RRDTX12` → `platform_config` key=`seo` → `ga_id: "G-419RRDTX12"`.
+  GA4 cargado directamente en `app/layout.tsx` (condicionado a `gaId`); respeta Consent Mode v2 porque el script de consentimiento se ejecuta síncronamente antes.
 
 - ⬜ **AN05 · ⚙️ — Google Search Console: enviar sitemap.**
   🔒 Bloqueado hasta G01 (noindex quitado).
@@ -361,10 +351,10 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 1. ✅ P01-P09 completados (código + legales)
 2. ✅ L01-L09 completados (compliance RGPD/DSA)
 3. P09 — Rich Results Test (acción tuya)
-4. **AN01** — Crear contenedor GTM (acción tuya, 5 min)
-5. **AN02** — Consent Mode v2: auditar banner + integrar GTM (código + config GTM)
-6. **AN03** — Entrar GTM ID en `platform_config` (acción tuya)
-7. **AN04** — GA4 Data Stream + conectar a GTM (config GA4 + GTM)
+4. ✅ **AN01** — GTM container `GTM-PDZJ56X5`
+5. ✅ **AN02** — Consent Mode v2 en código + banner
+6. ✅ **AN03** — GTM ID en `platform_config`
+7. ✅ **AN04** — GA4 Data Stream `G-419RRDTX12` en `platform_config`
 8. **G01** — Quitar noindex → abrir indexación
 9. **AN05** — Search Console: enviar sitemap (acción tuya, inmediato tras G01)
 10. **AN06** — Bing Webmaster Tools (acción tuya)
