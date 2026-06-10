@@ -105,12 +105,34 @@ export default function GuiasPage() {
       </div>
 
       <div className="mt-14 pt-10 border-t border-bsm-border">
-        <p className="text-sm text-bsm-text-muted mb-4">¿Buscas un vehículo concreto?</p>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/coches" className="text-sm text-gold hover:text-gold-light transition-colors">Explorar coches →</Link>
-          <Link href="/motos" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">Explorar motos →</Link>
-          <Link href="/vehiculos-a-la-carta" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">Solicitar a la carta →</Link>
-          <Link href="/glosario" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">Glosario del sector →</Link>
+        <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-5">
+          Explorar el catálogo
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/coches"
+            className="inline-flex items-center gap-2 border border-gold/40 bg-surface px-4 py-2.5 text-sm text-gold hover:border-gold hover:bg-gold/5 transition-all"
+          >
+            Explorar coches <span aria-hidden="true">→</span>
+          </Link>
+          <Link
+            href="/motos"
+            className="inline-flex items-center gap-2 border border-bsm-border bg-surface px-4 py-2.5 text-sm text-bsm-text-secondary hover:border-gold/40 hover:text-gold transition-all"
+          >
+            Explorar motos <span aria-hidden="true">→</span>
+          </Link>
+          <Link
+            href="/vehiculos-a-la-carta"
+            className="inline-flex items-center gap-2 border border-bsm-border bg-surface px-4 py-2.5 text-sm text-bsm-text-secondary hover:border-gold/40 hover:text-gold transition-all"
+          >
+            Solicitar a la carta <span aria-hidden="true">→</span>
+          </Link>
+          <Link
+            href="/glosario"
+            className="inline-flex items-center gap-2 border border-bsm-border bg-surface px-4 py-2.5 text-sm text-bsm-text-secondary hover:border-gold/40 hover:text-gold transition-all"
+          >
+            Glosario del sector <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </div>
     </div>

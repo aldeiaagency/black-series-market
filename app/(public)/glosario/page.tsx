@@ -148,40 +148,63 @@ export default function GlosarioPage() {
         ))}
       </div>
 
-      <div className="mt-16 pt-10 border-t border-bsm-border space-y-8">
+      <div className="mt-16 pt-10 border-t border-bsm-border space-y-10">
+
+        {/* Catalog CTAs */}
         <div>
-          <p className="text-sm text-bsm-text-muted mb-4">
-            ¿Buscas un vehículo con estas características? Explorar el catálogo es el siguiente paso.
+          <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-5">
+            Explorar el catálogo
           </p>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/coches/clasicos" className="text-sm text-gold hover:text-gold-light transition-colors">
-              Coches clásicos y youngtimers →
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/coches/clasicos"
+              className="inline-flex items-center gap-2 border border-gold/40 bg-surface px-4 py-2.5 text-sm text-gold hover:border-gold hover:bg-gold/5 transition-all"
+            >
+              Coches clásicos y youngtimers <span aria-hidden="true">→</span>
             </Link>
-            <Link href="/coches/deportivos" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-              Deportivos y superdeportivos →
+            <Link
+              href="/coches/deportivos"
+              className="inline-flex items-center gap-2 border border-bsm-border bg-surface px-4 py-2.5 text-sm text-bsm-text-secondary hover:border-gold/40 hover:text-gold transition-all"
+            >
+              Deportivos y superdeportivos <span aria-hidden="true">→</span>
             </Link>
-            <Link href="/vehiculos-a-la-carta" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-              Solicitar vehículo a la carta →
+            <Link
+              href="/vehiculos-a-la-carta"
+              className="inline-flex items-center gap-2 border border-bsm-border bg-surface px-4 py-2.5 text-sm text-bsm-text-secondary hover:border-gold/40 hover:text-gold transition-all"
+            >
+              Solicitar vehículo a la carta <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>
+
+        {/* Related guides */}
         <div>
-          <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-3">Guías relacionadas</p>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/guias/como-comprar-supercar-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-              Cómo comprar un supercar de segunda mano →
-            </Link>
-            <Link href="/guias/como-vender-coche-premium-profesionales" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-              Cómo vender un coche premium →
-            </Link>
-            <Link href="/guias/motos-premium-segunda-mano" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-              Cómo comprar una moto premium de segunda mano →
-            </Link>
-            <Link href="/guias/coches-clasicos-youngtimers-como-invertir" className="text-sm text-bsm-text-muted hover:text-gold transition-colors">
-              Coches clásicos y youngtimers como inversión →
-            </Link>
+          <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-5">
+            Guías relacionadas
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {[
+              { href: '/guias/como-comprar-supercar-segunda-mano',        label: 'Cómo comprar un supercar de segunda mano' },
+              { href: '/guias/como-vender-coche-premium-profesionales',   label: 'Cómo vender un coche premium' },
+              { href: '/guias/motos-premium-segunda-mano',                label: 'Cómo comprar una moto premium de segunda mano' },
+              { href: '/guias/coches-clasicos-youngtimers-como-invertir', label: 'Coches clásicos y youngtimers como inversión' },
+            ].map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group flex items-center justify-between gap-4 border border-bsm-border bg-surface px-4 py-3.5 hover:border-gold/30 hover:bg-gold/3 transition-all"
+              >
+                <span className="text-sm text-bsm-text-secondary group-hover:text-bsm-text-primary transition-colors">
+                  {label}
+                </span>
+                <span className="text-gold opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-sm" aria-hidden="true">
+                  →
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
+
       </div>
     </div>
   )
