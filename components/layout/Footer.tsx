@@ -14,6 +14,7 @@ const EXPLORAR = [
   { label: 'Guías del mercado',             href: '/guias' },
   { label: 'Glosario premium',              href: '/glosario' },
   { label: 'Cómo funciona',                 href: '/como-funciona' },
+  { label: 'Sobre nosotros',               href: '/sobre-nosotros' },
 ]
 
 const PROFESIONALES = [
