@@ -207,6 +207,54 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 
 ---
 
+## ⚖️ LEGAL COMPLIANCE — Auditoría RGPD / LSSI / DSA (antes de G01)
+
+> Resultado de la auditoría legal del 10-jun contra LSSI (34/2002), RGPD (2016/679), LOPDGDD (3/2018), LGDCU (RDL 1/2007), DSA (2022/2065), Ley RAD 7/2017 y Directiva Garantías 2019/771.
+> Todos son cambios de texto en `app/(public)/legal/[slug]/page.tsx` salvo L05 (estructural).
+> **Ejecutar antes de G01** — la legalidad no espera al lanzamiento.
+
+**Leyenda:** ✅ Hecho · ⬜ Pendiente · 🔴 Crítico (riesgo sanción AEPD)
+
+- 🔴 **L05 · 💻⚙️ — Verificar que GTM/GA4 NO se cargan sin consentimiento previo.**
+  `app/layout.tsx`: GA4 y GTM se cargan con `strategy="afterInteractive"` sin condicionar al consentimiento del `CookieConsentBanner`. Si los IDs están configurados en `platform_config`, hay cookies de Google activas sin Consent Mode v2 → infracción directa de la AEPD.
+  **Acción doble:**
+  - Confirmar si `ga_id` / `gtm_id` están ya en la tabla `platform_config` (si no lo están, no hay riesgo ahora).
+  - AN16 (Consent Mode v2) debe completarse **antes** de entrar esos IDs en producción. No entrar los IDs hasta tener el bloqueo de consentimiento activo.
+
+- ⬜ **L01 · 💻 — Añadir punto de contacto DSA al Aviso Legal.**
+  DSA art. 11 obliga a designar un punto de contacto único para autoridades y para notificación de contenidos ilícitos.
+  Añadir en `aviso-legal`, sección "Comunicaciones legales": `"Punto de contacto para autoridades (DSA Reglamento 2022/2065) y notificación de contenidos ilícitos: hola@blacklabelmarket.es"`.
+
+- ⬜ **L02 · 💻 — Añadir enlace ODR (Resolución de Litigios en Línea) al Aviso Legal.**
+  Obligatorio por Ley 7/2017 (RAD) para contratos online con consumidores, incluidas suscripciones de profesionales persona física.
+  Añadir en `aviso-legal`, sección de resolución de controversias: enlace a `https://ec.europa.eu/consumers/odr/` con texto "Plataforma europea de resolución de litigios en línea".
+
+- ⬜ **L03 · 💻 — Añadir plazo de respuesta a derechos RGPD (art. 12) en Política de Privacidad.**
+  El RGPD art. 12 exige informar explícitamente del plazo de 1 mes para responder solicitudes de derechos (prorrogable a 3 meses en casos complejos).
+  Añadir en `privacidad`, sección de derechos: frase con el plazo de respuesta y la mención a la prórroga justificada.
+
+- ⬜ **L04 · 💻 — Añadir tabla de encargados del tratamiento (sub-processors) en Política de Privacidad.**
+  RGPD art. 13/14 obliga a informar sobre las categorías de destinatarios y encargados del tratamiento.
+  Añadir en `privacidad` tabla con: Supabase (base de datos/auth, EE.UU./UE, cláusulas contractuales tipo), Vercel (hosting, EE.UU./UE), Stripe (pagos, EE.UU./UE), Google LLC (analítica GA4/GTM, solo con consentimiento previo).
+
+- ⬜ **L06 · 💻 — Añadir mecanismo de reclamación interno con plazos en Términos y Condiciones (DSA art. 17).**
+  DSA obliga a plataformas a notificar al afectado los motivos de retirada de contenido o suspensión y a ofrecer un mecanismo de impugnación con plazos razonables.
+  Añadir en `terminos`, sección de moderación: párrafo sobre derecho a recibir motivos principales + cómo impugnar vía hola@blacklabelmarket.es + plazo de respuesta razonable.
+
+- ⬜ **L07 · 💻 — Añadir mención a garantías legales en compraventa (RDL 7/2021) en Términos y Condiciones.**
+  Los vehículos vendidos por profesionales a consumidores están sujetos a garantías legales (2 años nuevos, reducible a 1 año segunda mano por acuerdo). BLM debe mencionarlo aunque la responsabilidad sea del vendedor.
+  Añadir en `terminos`, sección de operaciones entre partes: párrafo aclarando que los vendedores profesionales son responsables de las garantías legales aplicables conforme al RDL 7/2021, y que BLM no otorga garantía propia sobre los vehículos.
+
+- ⬜ **L08 · 💻 — Añadir parámetros principales de ranking al Criterios de Publicación (DSA art. 27).**
+  DSA art. 27 obliga a plataformas en línea a informar sobre los parámetros principales que determinan el orden de presentación de resultados.
+  Añadir en `criterios-publicacion` sección breve: criterios de ordenación del catálogo (por ejemplo: fecha de publicación, completitud de la ficha, calidad fotográfica, precio visible).
+
+- ⬜ **L09 · 💻 — Reforzar verificación de vendedores profesionales en Condiciones para Profesionales (DSA art. 30).**
+  DSA art. 30 obliga a plataformas que conectan consumidores con comerciantes a recopilar y verificar datos del vendedor antes de activar su cuenta.
+  Añadir en `condiciones-profesionales`: mención explícita a la obligación legal de verificación (nombre, dirección, NIF/CIF, datos de contacto) y que BLM puede suspender el acceso si los datos son falsos o no se actualizan.
+
+---
+
 ## 📊 ANALÍTICA Y TRACKING
 
 > Stack completo de medición: analytics, heatmaps, paid media pixels, eventos clave y consent.
@@ -319,12 +367,17 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 3. P06 (sobre-nosotros — copy tuyo) → commit
 4. P07 (sameAs — URLs tuyas) → commit
 5. P08 + P09 (validación — acción tuya)
-6. AN01 + AN02 (GA4 + GTM IDs en admin)
-7. **G01 — abrir indexación** → enviar sitemap en GSC (AN03 + AN04)
-8. AN05 (Clarity — instalar vía GTM)
-9. AN11-AN16 (eventos GTM + Consent Mode)
-10. AN07-AN10 (pixels — cuando actives cada canal de pago)
-11. AN17-AN19 (monitorización — automático con el tiempo)
+6. **L01 + L02 + L03 + L04** (Aviso Legal + Privacidad — código puro) → commit
+7. **L06 + L07** (Términos y Condiciones — código puro) → commit
+8. **L08 + L09** (Criterios + Condiciones Prof. — código puro) → commit
+9. **L05** (verificar GTM/GA4 — ⚠️ confirmar estado DB antes de entrar IDs)
+10. AN16 (Consent Mode v2 — obligatorio ANTES de entrar IDs de GA4/GTM)
+11. AN01 + AN02 (GA4 + GTM IDs en admin — solo tras AN16)
+12. **G01 — abrir indexación** → enviar sitemap en GSC (AN03 + AN04)
+13. AN05 (Clarity — instalar vía GTM)
+14. AN11-AN15 (eventos GTM)
+15. AN07-AN10 (pixels — cuando actives cada canal de pago)
+16. AN17-AN19 (monitorización — automático con el tiempo)
 
 ---
 
