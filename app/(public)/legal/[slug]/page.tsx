@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
@@ -560,17 +561,19 @@ Cuando el usuario tenga la condición de consumidor, serán competentes los juzg
   'criterios-publicacion': {
     title: 'Criterios de Publicación',
     content: `
-**Black Label Market no es un clasificado abierto**
+**Black Label Market no es un clasificado. Es una selección.**
 
-La publicación de vehículos en Black Label Market está sujeta a criterios de calidad y criterios comerciales. Cada solicitud de publicación es revisada por el equipo antes de activarse.
+Cada unidad que aparece en el catálogo ha pasado por un proceso de revisión. No publicamos todo lo que llega: publicamos lo que encaja. La selección es nuestro estándar, y es lo que distingue esta plataforma de cualquier clasificado abierto.
 
-**Criterio general**
+No existe un único criterio automático por precio, kilometraje o antigüedad. Cada solicitud se valora dentro del contexto de la unidad concreta.
 
-Black Label Market no funciona como un clasificado abierto. La publicación de vehículos se revisa caso por caso para mantener una selección coherente con el posicionamiento premium, deportivo, clásico o especial de la plataforma.
+**Compradores cualificados, no curiosos.**
 
-No existe un único criterio automático por precio, kilometraje o antigüedad. Estos factores se tienen en cuenta, pero siempre dentro del contexto de cada unidad.
+Los compradores de Black Label Market buscan una unidad específica con criterio e intención real. No vienen a comparar precios: vienen a encontrar lo correcto. Tu stock compite en relevancia y presentación, no en coste por clic.
 
-**Qué valoramos en un coche o moto**
+**Qué determina el encaje de una unidad**
+
+Revisamos cada solicitud en su conjunto. Los factores que valoramos incluyen:
 
 - Marca, modelo y versión.
 - Configuración concreta de la unidad.
@@ -604,6 +607,8 @@ No todos los vehículos de una marca generalista encajan en Black Label, pero s�
 
 **Requisitos mínimos para publicar**
 
+Estas son las condiciones que toda publicación debe cumplir. Sin excepciones.
+
 - Vendedor profesional identificado y aprobado por Black Label Market.
 - Vehículo real y disponible.
 - Fotografías reales de la unidad concreta, no de archivo ni de otra unidad.
@@ -614,7 +619,7 @@ No todos los vehículos de una marca generalista encajan en Black Label, pero s�
 - Garantía o condiciones de venta indicadas cuando aplique.
 - Ausencia de incidencias relevantes ocultas.
 
-**Motivos habituales de rechazo**
+**Por qué una unidad puede no pasar el filtro**
 
 - Información incompleta, inexacta o engañosa.
 - Fotografías de archivo o de otra unidad.
@@ -627,7 +632,7 @@ No todos los vehículos de una marca generalista encajan en Black Label, pero s�
 
 **Derecho de publicación**
 
-Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o retirar publicaciones conforme a sus criterios de calidad y criterios comerciales, sin necesidad de justificación adicional.
+Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o retirar publicaciones en función de sus criterios de calidad y criterios comerciales.
 
 **Criterios de ordenación del catálogo (DSA art. 27)**
 
@@ -639,10 +644,6 @@ En cumplimiento del artículo 27 del Reglamento (UE) 2022/2065, de Servicios Dig
 - Criterios editoriales: Black Label Market puede destacar unidades de especial relevancia, rareza o interés para los compradores de la plataforma.
 
 El usuario puede modificar el orden de presentación mediante los filtros y opciones de ordenación disponibles en el catálogo.
-
-**¿Quieres publicar en Black Label Market?**
-
-Si eres un profesional del sector y quieres solicitar acceso para publicar vehículos, puedes hacerlo a través del formulario de registro profesional. Tu perfil será revisado antes de habilitar la publicación de vehículos.
     `.trim(),
   },
 
@@ -831,6 +832,44 @@ export default async function LegalPage({ params }: PageProps) {
       <div className="bg-surface border border-bsm-border p-8">
         {renderContent(page.content)}
       </div>
+
+      {slug === 'criterios-publicacion' && (
+        <div className="mt-8 space-y-4">
+          {/* Primary CTA */}
+          <div className="border border-gold/30 bg-surface p-8">
+            <p className="font-display text-xl font-light text-bsm-text-primary mb-2">
+              Tu stock más exclusivo, donde merece estar.
+            </p>
+            <p className="text-sm text-bsm-text-secondary leading-relaxed mb-6 max-w-xl">
+              Si trabajas con vehículos premium, deportivos, clásicos o especiales y crees que tu selección encaja con Black Label Market, solicita acceso profesional. Cada solicitud se revisa de forma individual.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/registro" className="btn-gold px-6 whitespace-nowrap">
+                Solicitar acceso profesional
+              </Link>
+              <Link href="/para-profesionales" className="btn-outline px-6 whitespace-nowrap">
+                Ver qué incluye →
+              </Link>
+            </div>
+          </div>
+
+          {/* Secondary nudge */}
+          <div className="border border-bsm-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs text-gold tracking-widest uppercase mb-1">¿Tienes dudas?</p>
+              <p className="text-sm text-bsm-text-secondary">
+                Escríbenos antes de registrarte. Revisamos tu perfil y te decimos si encaja.
+              </p>
+            </div>
+            <Link
+              href="mailto:hola@blacklabelmarket.es"
+              className="text-sm text-gold hover:text-gold-light transition-colors whitespace-nowrap flex-shrink-0"
+            >
+              hola@blacklabelmarket.es →
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
