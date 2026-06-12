@@ -36,4 +36,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# local claude context (no versionar)
+CLAUDE.local.md

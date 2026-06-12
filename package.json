@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npx supabase db push || true",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -18,7 +17,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.3.0",
     "lucide-react": "^0.400.0",
-    "next": "14.2.5",
+    "next": "14.2.25",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
