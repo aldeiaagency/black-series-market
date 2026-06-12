@@ -17,6 +17,17 @@ const SPECIALTIES = [
   { value: 'custom',     label: 'Custom bikes' },
 ]
 
+const SERVICES = [
+  { value: 'financing',     label: 'Financiación' },
+  { value: 'trade_in',      label: 'Aceptan vehículos' },
+  { value: 'warranty',      label: 'Garantía' },
+  { value: 'transport_nat', label: 'Transporte nacional' },
+  { value: 'transport_intl',label: 'Transporte internacional' },
+  { value: 'own_workshop',  label: 'Taller propio' },
+  { value: 'detailing',     label: 'Detailing' },
+  { value: 'home_delivery', label: 'Entrega a domicilio' },
+]
+
 function sanitizeUrl(value: string | undefined | null): string | null {
   if (!value?.trim()) return null
   try {
@@ -77,6 +88,18 @@ export default function PerfilPage() {
     })
   }
 
+  function toggleService(value: string) {
+    setForm((f: any) => {
+      const current: string[] = f.services || []
+      return {
+        ...f,
+        services: current.includes(value)
+          ? current.filter((s) => s !== value)
+          : [...current, value],
+      }
+    })
+  }
+
   async function handleImageUpload(
     file: File,
     type: 'logo' | 'cover',
@@ -127,6 +150,7 @@ export default function PerfilPage() {
       instagram:         sanitizeUrl(form.instagram),
       years_in_business: form.years_in_business ? parseInt(form.years_in_business) : null,
       certifications:    form.certifications || [],
+      services:          form.services          || [],
     }
 
     const socialFields = {
@@ -360,6 +384,34 @@ export default function PerfilPage() {
                     type="checkbox"
                     checked={selected}
                     onChange={() => toggleSpecialty(value)}
+                    className="accent-gold w-4 h-4"
+                  />
+                  <span className="text-sm">{label}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Servicios */}
+        <div className="bg-surface border border-bsm-border p-6">
+          <h2 className="font-medium text-bsm-text-primary mb-1">Servicios</h2>
+          <p className="text-xs text-bsm-text-muted mb-4">Selecciona los servicios que ofreces. Aparecen como badges en tu perfil público.</p>
+          <div className="grid grid-cols-2 gap-2">
+            {SERVICES.map(({ value, label }) => {
+              const selected = (form.services || []).includes(value)
+              return (
+                <label
+                  key={value}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 border cursor-pointer transition-colors
+                    ${selected
+                      ? 'border-gold/40 bg-gold/5 text-gold'
+                      : 'border-bsm-border text-bsm-text-muted hover:border-bsm-border-light'}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => toggleService(value)}
                     className="accent-gold w-4 h-4"
                   />
                   <span className="text-sm">{label}</span>

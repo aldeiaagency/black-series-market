@@ -70,6 +70,7 @@ export interface Dealer {
   is_featured: boolean
   is_verified: boolean
   certifications: string[] | null
+  services: string[] | null
   postal_code: string | null
   attention_note: string | null
   admin_notes: string | null
