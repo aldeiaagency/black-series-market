@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { stripe, PLAN_PRICES, createCheckoutSession } from '@/lib/stripe'
+import { createAdminClient } from '@/lib/supabase/server'
+import { stripe, PLAN_PRICES, PLAN_PRICES_LEGACY, createCheckoutSession } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const plan = formData.get('plan') as string
+    const billingCycle = (formData.get('billing_cycle') as 'monthly' | 'annual') ?? 'monthly'
 
-    if (!PLAN_PRICES[plan]) {
+    // Validate plan
+    if (!PLAN_PRICES[plan] && !PLAN_PRICES_LEGACY[plan]) {
       return NextResponse.json({ error: 'Plan inválido' }, { status: 400 })
     }
 
@@ -15,7 +18,8 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.redirect(new URL('/login', request.url))
 
-    const { data: dealer } = await supabase
+    const admin = createAdminClient()
+    const { data: dealer } = await admin
       .from('dealers')
       .select('id, stripe_customer_id, email')
       .eq('profile_id', user.id)
@@ -30,10 +34,25 @@ export async function POST(request: NextRequest) {
         metadata: { dealer_id: dealer.id, user_id: user.id },
       })
       customerId = customer.id
-      await supabase.from('dealers').update({ stripe_customer_id: customerId }).eq('id', dealer.id)
+      await admin.from('dealers').update({ stripe_customer_id: customerId }).eq('id', dealer.id)
     }
 
-    const session = await createCheckoutSession(customerId, PLAN_PRICES[plan], dealer.id, plan)
+    // Resolve price ID: use cycle-specific price if available, fallback to legacy
+    const priceId =
+      PLAN_PRICES[plan]?.[billingCycle] ??
+      PLAN_PRICES_LEGACY[plan]
+
+    if (!priceId) {
+      return NextResponse.json({ error: 'Precio no configurado para este plan y ciclo' }, { status: 400 })
+    }
+
+    const session = await createCheckoutSession(
+      customerId,
+      priceId,
+      dealer.id,
+      plan
+    )
+
     return NextResponse.redirect(session.url!, 303)
   } catch (error) {
     console.error('Stripe checkout error:', error)

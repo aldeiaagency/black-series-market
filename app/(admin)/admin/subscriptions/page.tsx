@@ -70,8 +70,8 @@ export default async function AdminSubscriptionsPage({ searchParams }: PageProps
           <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-3">Sistema v2</h2>
           <div className="border border-bsm-border divide-y divide-bsm-border">
             {(subscriptions ?? []).map((sub) => {
-              const plan = sub.plan as { slug: string; name: string } | null
-              const org = sub.organization as { id: string; name: string; slug: string } | null
+              const plan = sub.plan as unknown as { slug: string; name: string } | null
+              const org = sub.organization as unknown as { id: string; name: string; slug: string } | null
 
               return (
                 <div key={sub.id} className="px-5 py-4 flex items-center justify-between gap-4">

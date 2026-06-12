@@ -80,15 +80,15 @@ export default async function AdminBoostsPage() {
         ) : (
           <div className="border border-bsm-border divide-y divide-bsm-border">
             {activeBoosts.map((b) => {
-              const vehicle = b.vehicle as { id: string; title: string | null; make: string | null; model: string | null } | null
-              const org = b.organization as { name: string } | null
+              const vehicle = b.vehicle as unknown as { id: string; title: string | null; make: string | null; model: string | null } | null
+              const org = b.organization as unknown as { name: string } | null
               const daysLeft = Math.ceil((new Date(b.ends_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000))
 
               return (
                 <div key={b.id} className="px-5 py-4 flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-bsm-text-primary truncate">
-                      {vehicle?.title ?? `${vehicle?.make} ${vehicle?.model}` ?? 'Vehículo no disponible'}
+                      {vehicle?.title ?? (vehicle?.make ? `${vehicle.make} ${vehicle.model}` : 'Vehículo no disponible')}
                     </p>
                     <p className="text-xs text-bsm-text-muted">{org?.name ?? '—'}</p>
                   </div>
@@ -114,7 +114,7 @@ export default async function AdminBoostsPage() {
         </h2>
         <div className="border border-bsm-border divide-y divide-bsm-border">
           {credits.map((c) => {
-            const org = c.organization as { name: string } | null
+            const org = c.organization as unknown as { name: string } | null
             const remaining = c.quantity - c.used
             return (
               <div key={c.id} className="px-5 py-3 flex items-center justify-between gap-4">

@@ -62,7 +62,7 @@ export async function getEntitlements(
 
   if (!sub || !sub.plan) return null
 
-  const plan = sub.plan as {
+  const plan = sub.plan as unknown as {
     slug: string
     plan_limits: { key: string; value_number: number | null }[]
     plan_features: { feature_key: string; included: boolean; availability_status: string; display_label: string | null }[]
@@ -83,7 +83,7 @@ export async function getEntitlements(
 
   let extraVehicleSlots = 0
   for (const sa of subAddons ?? []) {
-    const addon = sa.addon as { slug: string; rules: { slots?: number } } | null
+    const addon = sa.addon as unknown as { slug: string; rules: { slots?: number } } | null
     if (!addon) continue
     const slots = addon.rules?.slots ?? 0
     if (addon.slug === 'block_10_vehicles' || addon.slug === 'block_25_vehicles') {

@@ -53,7 +53,7 @@ export default async function AdminFoundingPage() {
           </div>
         ) : (
           (members ?? []).map((m) => {
-            const org = m.organization as { id: string; name: string; slug: string } | null
+            const org = m.organization as unknown as { id: string; name: string; slug: string } | null
             return (
               <div key={m.id} className="px-5 py-4 flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">

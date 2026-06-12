@@ -87,7 +87,7 @@ export default async function AdminEliteCapacityPage() {
           </h2>
           <div className="border border-bsm-border divide-y divide-bsm-border">
             {(waitlist ?? []).map((entry) => {
-              const org = entry.organization as { name: string } | null
+              const org = entry.organization as unknown as { name: string } | null
               return (
                 <div key={entry.id} className="px-5 py-3 flex items-center justify-between">
                   <p className="text-sm text-bsm-text-primary">{org?.name ?? entry.id}</p>
