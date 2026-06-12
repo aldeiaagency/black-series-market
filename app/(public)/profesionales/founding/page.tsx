@@ -1,30 +1,30 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import type { Metadata } from 'next'
+import { PLANS, FOUNDING_MAX_SELLERS, formatEUR } from '@/lib/plans-config'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
   title: 'Programa Founding — Black Label Market',
   description:
-    'Los primeros 15-20 profesionales seleccionados acceden a precio Founding bloqueado de por vida. Descubre las condiciones del programa.',
+    `Los primeros ${FOUNDING_MAX_SELLERS} profesionales seleccionados acceden a precio Founding —mitad de precio— bloqueado de por vida. Descubre las condiciones del programa.`,
   alternates: { canonical: '/profesionales/founding' },
 }
 
 const CONDITIONS = [
   'Precio Founding bloqueado mientras se mantenga la suscripción activa y en buen estado.',
   'Condición personal e intransferible: no se traspasa si cambia el titular de la cuenta.',
-  'Founding + plan anual no son acumulables.',
   'El precio se mantiene aunque el plan suba de características en futuras versiones.',
   'La condición Founding se revoca si la suscripción se cancela o caduca más de 30 días.',
   'Black Label Market se reserva el derecho de aprobar o denegar solicitudes sin justificación.',
 ]
 
-const INCLUDES = [
-  { plan: 'Essential Founding', price: '149 €/mes', normal: '179 €/mes', saving: 'Ahorras 360 €/año' },
-  { plan: 'Professional Founding', price: '349 €/mes', normal: '449 €/mes', saving: 'Ahorras 1.200 €/año' },
-  { plan: 'Elite Founding', price: '699 €/mes', normal: '899 €/mes', saving: 'Ahorras 2.400 €/año' },
-]
+const INCLUDES = PLANS.map((p) => ({
+  plan: `${p.name} Founding`,
+  price: `${formatEUR(p.foundingPrice)}/mes`,
+  normal: `${p.monthlyPrice} €/mes`,
+}))
 
 export default function FoundingPage() {
   return (
@@ -50,9 +50,9 @@ export default function FoundingPage() {
           Para los que llegan primero
         </h1>
         <p className="text-bsm-text-secondary max-w-xl leading-relaxed">
-          Black Label Market selecciona entre 15 y 20 profesionales fundadores.
-          Su precio queda bloqueado de por vida. No es una oferta de lanzamiento: es un reconocimiento
-          a quienes apuestan por el proyecto desde el principio.
+          Black Label Market selecciona a los primeros {FOUNDING_MAX_SELLERS} profesionales fundadores.
+          Acceden a mitad de precio, bloqueado de por vida. No es una oferta de lanzamiento: es un
+          reconocimiento a quienes apuestan por el proyecto desde el principio.
         </p>
       </div>
 
@@ -60,13 +60,12 @@ export default function FoundingPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-14">
         {INCLUDES.map((item) => (
           <div key={item.plan} className="bg-surface border border-gold/20 p-6">
-            <p className="text-xs text-gold tracking-widest uppercase mb-3">Founding</p>
+            <p className="text-xs text-gold tracking-widest uppercase mb-3">Founding · −50%</p>
             <h2 className="font-medium text-bsm-text-primary mb-1">{item.plan}</h2>
             <div className="flex items-baseline gap-2 mb-1">
               <span className="font-display text-3xl font-light text-bsm-text-primary">{item.price}</span>
             </div>
-            <p className="text-xs text-bsm-text-muted line-through mb-1">Precio normal: {item.normal}</p>
-            <p className="text-xs text-gold">{item.saving}</p>
+            <p className="text-xs text-bsm-text-muted line-through">Precio normal: {item.normal}</p>
           </div>
         ))}
       </div>

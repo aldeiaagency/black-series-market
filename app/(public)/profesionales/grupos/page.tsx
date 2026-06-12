@@ -3,9 +3,9 @@ import { Check } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Modelo Grupo — Black Label Market',
+  title: 'Varias sedes — Black Label Market',
   description:
-    'Gestiona varias sedes desde una única cuenta. Plan Elite por sede principal + 50% por cada sede adicional. Vista consolidada de inventario y oportunidades.',
+    'Gestiona varias sedes desde una única cuenta, con visión consolidada de inventario y oportunidades. El acceso se gestiona de forma consultiva: ponte en contacto con nosotros.',
   alternates: { canonical: '/profesionales/grupos' },
 }
 
@@ -17,27 +17,6 @@ const FEATURES = [
   'Analítica comparada entre sedes',
   'Showroom Destacado para cada sede que lo active',
   'Boosts individuales por sede',
-]
-
-const EXAMPLES = [
-  {
-    title: '2 sedes',
-    calc: '899 + 449,50',
-    total: '1.348,50 €/mes',
-    note: 'Por sede: Essential descontado al 50% del plan base Elite',
-  },
-  {
-    title: '3 sedes',
-    calc: '899 + 449,50 + 449,50',
-    total: '1.798 €/mes',
-    note: 'Precio por cada sede adicional: 50% de 899 €',
-  },
-  {
-    title: '4+ sedes',
-    calc: 'Presupuesto a medida',
-    total: 'Consultar',
-    note: 'Grupos de 4 o más sedes: precio y configuración a medida',
-  },
 ]
 
 export default function GruposPage() {
@@ -58,27 +37,16 @@ export default function GruposPage() {
       <div className="mb-14">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />
-          <span className="text-xs text-gold tracking-widest uppercase">Multi-sede</span>
+          <span className="text-xs text-gold tracking-widest uppercase">Varias sedes</span>
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary mb-4">
-          Modelo Grupo
+          ¿Operas varias sedes?
         </h1>
         <p className="text-bsm-text-secondary max-w-xl leading-relaxed">
           Para empresas con varias ubicaciones o marcas. Un solo contrato, visión unificada,
-          autonomía operativa por sede.
+          autonomía operativa por sede. Si gestionas más de una sede, ponte en contacto con nosotros
+          y te preparamos una propuesta a medida.
         </p>
-      </div>
-
-      {/* Pricing examples */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-14">
-        {EXAMPLES.map((ex) => (
-          <div key={ex.title} className={`bg-surface border p-6 ${ex.title === '2 sedes' ? 'border-gold/30' : 'border-bsm-border'}`}>
-            <p className="text-xs text-gold tracking-widest uppercase mb-3">{ex.title}</p>
-            <p className="text-sm text-bsm-text-muted font-mono mb-2">{ex.calc}</p>
-            <p className="font-display text-2xl font-light text-bsm-text-primary mb-1">{ex.total}</p>
-            <p className="text-xs text-bsm-text-muted">{ex.note}</p>
-          </div>
-        ))}
       </div>
 
       {/* Features */}
@@ -96,12 +64,11 @@ export default function GruposPage() {
 
       {/* How it works */}
       <div className="border border-bsm-border bg-surface p-8 mb-14">
-        <h2 className="font-display text-xl font-light mb-4">Estructura de precios</h2>
+        <h2 className="font-display text-xl font-light mb-4">Cómo funciona</h2>
         <ul className="space-y-3 text-sm text-bsm-text-secondary">
-          <li className="flex gap-2"><span className="text-gold">1.</span> Sede principal: plan Elite completo (899 €/mes).</li>
-          <li className="flex gap-2"><span className="text-gold">2.</span> Cada sede adicional: 50% del plan Elite (449,50 €/mes).</li>
-          <li className="flex gap-2"><span className="text-gold">3.</span> Grupos de 4 o más sedes: presupuesto personalizado, contáctanos.</li>
-          <li className="flex gap-2"><span className="text-gold">4.</span> Cada sede tiene sus propios 100 slots de vehículos activos, 10 usuarios y 3 boosts/mes.</li>
+          <li className="flex gap-2"><span className="text-gold">1.</span> Nos cuentas cuántas sedes operas y cómo se reparten tu inventario y tu equipo.</li>
+          <li className="flex gap-2"><span className="text-gold">2.</span> Diseñamos una configuración a medida con visión consolidada y autonomía por sede.</li>
+          <li className="flex gap-2"><span className="text-gold">3.</span> Te preparamos una propuesta adaptada a tu estructura.</li>
         </ul>
       </div>
 

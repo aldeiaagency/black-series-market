@@ -43,9 +43,6 @@ export default async function AdminPlansPage() {
                     <span className="font-display text-2xl text-bsm-text-primary">{plan.monthly_price ?? '—'}€</span>
                     <span className="text-bsm-text-muted">/mes</span>
                   </p>
-                  {plan.annual_price && (
-                    <p className="text-xs text-bsm-text-muted">{plan.annual_price}€/año</p>
-                  )}
                   {plan.founding_monthly_price && (
                     <p className="text-xs text-gold">Founding: {plan.founding_monthly_price}€/mes</p>
                   )}
@@ -83,9 +80,6 @@ export default async function AdminPlansPage() {
                     )}
                     {plan.stripe_monthly_price_id && (
                       <span className="text-xs text-bsm-text-muted font-mono">monthly: {plan.stripe_monthly_price_id}</span>
-                    )}
-                    {plan.stripe_annual_price_id && (
-                      <span className="text-xs text-bsm-text-muted font-mono">annual: {plan.stripe_annual_price_id}</span>
                     )}
                   </div>
                 </div>

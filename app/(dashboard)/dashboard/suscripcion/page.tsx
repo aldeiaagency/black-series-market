@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Check, Zap, ArrowUpRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getOrganizationIdForUser, getEntitlements } from '@/lib/entitlements'
+import { PLANS, ADDONS, getPlan, formatEUR, ELITE_LIMIT_NOTE } from '@/lib/plans-config'
 
 function UsageBar({ used, max, label }: { used: number; max: number; label: string }) {
   const pct = max > 0 ? Math.min(100, Math.round((used / max) * 100)) : 0
@@ -45,24 +47,19 @@ export default async function SuscripcionPage() {
 
   const ent = orgId ? await getEntitlements(orgId) : null
 
-  const planLabel = ent?.plan ?? dealer.subscription_plan ?? 'sin plan'
+  const planLabel = ent?.plan ?? dealer.subscription_plan ?? 'essential'
   const isFounding = ent?.isFounding ?? false
+  const currentPlan = getPlan(planLabel)
 
-  const { data: plans } = await admin
-    .from('plans')
-    .select('slug, name, monthly_price, annual_price, plan_limits(key, value_number)')
-    .in('slug', ['essential', 'professional', 'elite'])
-    .eq('status', 'active')
-    .order('sort_order')
-
-  const currentPlan = plans?.find((p) => p.slug === planLabel)
+  // Complementos relevantes para el plan actual
+  const relevantAddons = ADDONS.filter((a) => (a.appliesTo as string[]).includes(planLabel) || a.includedInElite)
 
   return (
     <div className="p-8 max-w-4xl">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-light mb-1">Suscripción</h1>
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-sm text-bsm-text-muted capitalize">
+          <span className="text-sm text-bsm-text-muted">
             Plan: <span className="text-gold">{currentPlan?.name ?? planLabel}</span>
           </span>
           {isFounding && (
@@ -113,9 +110,7 @@ export default async function SuscripcionPage() {
               <div className="flex gap-3 flex-wrap">
                 <Link href="/dashboard/inventario" className="text-xs text-gold hover:underline">Archivar vehículos →</Link>
                 <Link href="/profesionales/precios" className="text-xs text-gold hover:underline">Subir de plan →</Link>
-                {planLabel === 'essential' && (
-                  <Link href="/profesionales/precios#addons" className="text-xs text-gold hover:underline">Comprar +10 vehículos →</Link>
-                )}
+                <Link href="#complementos" className="text-xs text-gold hover:underline">Ampliar con complementos →</Link>
               </div>
             </div>
           )}
@@ -124,11 +119,9 @@ export default async function SuscripcionPage() {
 
       {/* Plan cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {(plans ?? []).map((plan) => {
+        {PLANS.map((plan) => {
           const isCurrentPlan = plan.slug === planLabel
-          const monthly = plan.monthly_price ?? 0
-          const maxVehicles = (plan.plan_limits as { key: string; value_number: number | null }[])
-            ?.find((l) => l.key === 'max_active_vehicles')?.value_number ?? 0
+          const maxVehicles = plan.values.max_active_vehicles as number
 
           return (
             <div
@@ -146,26 +139,32 @@ export default async function SuscripcionPage() {
               )}
 
               <h3 className="font-medium text-bsm-text-primary mb-1">{plan.name}</h3>
-              <div className="flex items-baseline gap-1 mb-1">
-                <span className="font-display text-3xl font-light text-bsm-text-primary">{monthly}€</span>
+              <div className="flex items-baseline gap-1 mb-0.5">
+                <span className="font-display text-3xl font-light text-bsm-text-primary">{plan.monthlyPrice}€</span>
                 <span className="text-xs text-bsm-text-muted">/mes</span>
               </div>
-              <p className="text-xs text-bsm-text-muted mb-4">
-                {maxVehicles >= 99 ? 'Hasta 100 vehículos' : `Hasta ${maxVehicles} vehículos`}
+              <p className="text-[11px] text-gold mb-3">Founding {formatEUR(plan.foundingPrice)}/mes</p>
+              <p className="text-xs text-bsm-text-muted mb-2">
+                {maxVehicles >= 100 ? 'Hasta 100 vehículos' : `Hasta ${maxVehicles} vehículos`}
               </p>
-
-              {isCurrentPlan ? (
-                <button className="btn-outline text-sm w-full justify-center opacity-40 cursor-not-allowed" disabled>
-                  Plan actual
-                </button>
-              ) : (
-                <form action="/api/stripe/create-checkout" method="POST">
-                  <input type="hidden" name="plan" value={plan.slug} />
-                  <button type="submit" className="btn-outline text-sm w-full justify-center">
-                    Cambiar a {plan.name}
-                  </button>
-                </form>
+              {plan.limited && (
+                <p className="text-[10px] text-bsm-text-muted mb-4 leading-relaxed">{ELITE_LIMIT_NOTE}</p>
               )}
+
+              <div className="mt-auto pt-2">
+                {isCurrentPlan ? (
+                  <button className="btn-outline text-sm w-full justify-center opacity-40 cursor-not-allowed" disabled>
+                    Plan actual
+                  </button>
+                ) : (
+                  <form action="/api/stripe/create-checkout" method="POST">
+                    <input type="hidden" name="plan" value={plan.slug} />
+                    <button type="submit" className="btn-outline text-sm w-full justify-center">
+                      Cambiar a {plan.name}
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
           )
         })}
@@ -184,18 +183,47 @@ export default async function SuscripcionPage() {
         </div>
       )}
 
-      {/* Addons */}
-      <div className="bg-surface border border-bsm-border p-5">
-        <h3 className="text-sm font-medium text-bsm-text-primary mb-4">Complementos</h3>
+      {/* Complementos */}
+      <div id="complementos" className="scroll-mt-8">
+        <div className="mb-4">
+          <h2 className="text-sm font-medium text-bsm-text-primary">Complementos</h2>
+          <p className="text-xs text-bsm-text-muted">Amplía tu plan según tus necesidades, sin cambiar de nivel.</p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Link href="/dashboard/inventario" className="border border-bsm-border p-4 hover:border-gold/40 transition-colors">
-            <p className="text-sm text-bsm-text-primary mb-0.5">Boost 7 días — 49 €</p>
-            <p className="text-xs text-bsm-text-muted">Activa desde la ficha de cada vehículo</p>
-          </Link>
-          <Link href="/profesionales/precios#addons" className="border border-bsm-border p-4 hover:border-gold/40 transition-colors">
-            <p className="text-sm text-bsm-text-primary mb-0.5">Ver todos los complementos →</p>
-            <p className="text-xs text-bsm-text-muted">Bloques de vehículos, usuarios, editorial…</p>
-          </Link>
+          {relevantAddons.map((addon) => {
+            const includedHere = addon.includedInElite && planLabel === 'elite'
+
+            return (
+              <div key={addon.slug} className="bg-surface border border-bsm-border p-4 flex flex-col">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-sm font-medium text-bsm-text-primary">{addon.name}</p>
+                  <p className="font-display text-base font-light text-gold whitespace-nowrap">
+                    {includedHere ? 'Incluido' : addon.price}
+                    {!includedHere && <span className="text-[10px] text-bsm-text-muted ml-1">{addon.unit}</span>}
+                  </p>
+                </div>
+                <p className="text-xs text-bsm-text-muted mb-3 flex-1">{addon.desc}</p>
+
+                {includedHere ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400">
+                    <Check className="w-3.5 h-3.5" /> Incluido en tu plan Elite
+                  </span>
+                ) : addon.action === 'inventory' ? (
+                  <Link href="/dashboard/inventario" className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline">
+                    <Zap className="w-3.5 h-3.5" /> Activar desde la ficha del vehículo
+                  </Link>
+                ) : (
+                  <a
+                    href={`mailto:hola@blacklabelmarket.es?subject=${encodeURIComponent(`Complemento: ${addon.name}`)}&body=${encodeURIComponent(`Hola, soy ${dealer.name} y quiero contratar el complemento "${addon.name}" (${addon.price} ${addon.unit}).`)}`}
+                    className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline"
+                  >
+                    <ArrowUpRight className="w-3.5 h-3.5" /> Solicitar complemento
+                  </a>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
