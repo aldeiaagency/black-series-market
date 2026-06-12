@@ -6,9 +6,13 @@ import { createClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import SocialLinks from '@/components/social/SocialLinks'
 import ShareButton from '@/components/social/ShareButton'
+import DealerGallery from '@/components/marketplace/DealerGallery'
+import type { DealerGalleryImage } from '@/components/marketplace/DealerGallery'
 import type { Metadata } from 'next'
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+const SITE_URL      = process.env.NEXT_PUBLIC_APP_URL    || 'https://blacklabelmarket.es'
+const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const STORAGE_BASE  = `${SUPABASE_URL}/storage/v1/object/public/vehicle-images`
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -67,6 +71,20 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
     .single()
 
   if (!dealer) notFound()
+
+  // Gallery images (sorted by position, active dealer only)
+  const { data: galleryRows } = await supabase
+    .from('dealer_gallery_images')
+    .select('id, storage_path')
+    .eq('dealer_id', dealer.id)
+    .order('position', { ascending: true })
+
+  const galleryImages: DealerGalleryImage[] = (galleryRows ?? []).map(
+    (row: { id: string; storage_path: string }) => ({
+      id:  row.id,
+      url: `${STORAGE_BASE}/${row.storage_path}`,
+    }),
+  )
 
   // Track profile view (non-blocking)
   supabase.from('analytics_events').insert({
@@ -381,6 +399,11 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
               </div>
             </div>
           </div>
+
+          {/* ── Gallery ── */}
+          {galleryImages.length > 0 && (
+            <DealerGallery images={galleryImages} dealerName={dealer.name} />
+          )}
 
           {/* ── Inventory ── */}
           <div className="pb-8">

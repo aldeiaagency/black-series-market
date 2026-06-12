@@ -199,6 +199,15 @@ export interface SubscriptionPlanConfig {
   sort_order: number
 }
 
+export interface DealerGalleryImage {
+  id: string
+  dealer_id: string
+  storage_path: string
+  position: number
+  created_at: string
+  updated_at: string
+}
+
 export interface VehicleFilters {
   type?: VehicleType
   brand?: string

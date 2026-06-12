@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckCircle, Upload, X } from 'lucide-react'
+import DealerGalleryManager from '@/components/dashboard/DealerGalleryManager'
 
 const SPECIALTIES = [
   { value: 'sport',      label: 'Deportivos' },
@@ -287,6 +288,9 @@ export default function PerfilPage() {
           </p>
         )}
       </div>
+
+      {/* Galería de instalaciones */}
+      <DealerGalleryManager />
 
       <form onSubmit={handleSave} className="space-y-6">
 
