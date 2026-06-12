@@ -30,6 +30,11 @@ const breadcrumbJsonLd = {
   ],
 }
 
+// Logos alternativos por tipo — para marcas que tienen imagen distinta en motos vs coches.
+const MOTO_LOGO_OVERRIDES: Record<string, string> = {
+  'honda': '/brand/honda moto.webp',
+}
+
 // Slugs canónicos por tipo — determina sección cuando no hay vehículos publicados.
 // Honda aparece en ambas listas porque fabrica coches y motos.
 const CAR_BRAND_SLUGS = new Set([
@@ -91,7 +96,8 @@ export default async function MarcasPage() {
     return count === 1 ? '1 vehículo' : `${count} vehículos`
   }
 
-  function BrandCard({ brand }: { brand: any }) {
+  function BrandCard({ brand, logoUrl }: { brand: any; logoUrl?: string }) {
+    const displayLogo = logoUrl ?? brand.logo_url
     return (
       <Link
         href={`/marcas/${brand.slug}`}
@@ -100,10 +106,10 @@ export default async function MarcasPage() {
       >
         <div className="w-24 h-24 flex items-center justify-center mb-4 p-3
           bg-white rounded-sm overflow-hidden flex-shrink-0">
-          {brand.logo_url ? (
+          {displayLogo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={brand.logo_url}
+              src={displayLogo}
               alt={brand.name}
               className="w-full h-full object-contain"
             />
@@ -163,7 +169,13 @@ export default async function MarcasPage() {
             Motos
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {motoBrands.map((brand: any) => <BrandCard key={brand.id} brand={brand} />)}
+            {motoBrands.map((brand: any) => (
+              <BrandCard
+                key={brand.id}
+                brand={brand}
+                logoUrl={MOTO_LOGO_OVERRIDES[brand.slug]}
+              />
+            ))}
           </div>
         </div>
       )}
