@@ -158,6 +158,7 @@ type Action =
   | 'import_csv'
   | 'use_pipeline'
   | 'view_analytics_advanced'
+  | 'view_analytics_elite'
   | 'invite_user'
   | 'activate_boost'
   | 'showroom_featured'
@@ -184,6 +185,9 @@ export async function can(
 
     case 'view_analytics_advanced':
       return (ent.features['analytics_advanced']?.included) ?? false
+
+    case 'view_analytics_elite':
+      return (ent.features['analytics_extended_compare']?.included) ?? false
 
     case 'invite_user':
       return ent.usage.users < ent.limits.maxUsers

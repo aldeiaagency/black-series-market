@@ -60,7 +60,7 @@ const PLANS = [
       'Vehículos ilimitados',
       'Aparición permanente en portada',
       'Showroom Destacado en el marketplace',
-      'Analíticas premium con benchmarks de mercado',
+      'Analíticas avanzadas de rendimiento y evolución temporal',
       'Account manager dedicado',
       'Acceso a eventos exclusivos Black Series',
     ],
