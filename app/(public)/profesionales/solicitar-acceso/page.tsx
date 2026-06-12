@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useTransition } from 'react'
+import { useState, useTransition, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 const PLANS = [
@@ -18,7 +18,7 @@ const VEHICLE_VOLUMES = [
   'Más de 100 unidades activas',
 ]
 
-export default function SolicitarAccesoPage() {
+function SolicitarAccesoForm() {
   const params = useSearchParams()
   const defaultPlan = params.get('plan') ?? ''
   const isFounding = params.get('tipo') === 'founding'
@@ -292,5 +292,19 @@ export default function SolicitarAccesoPage() {
         </p>
       </form>
     </div>
+  )
+}
+
+export default function SolicitarAccesoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-screen-sm mx-auto px-6 pt-40 pb-24 text-center">
+          <p className="text-sm text-bsm-text-muted">Cargando…</p>
+        </div>
+      }
+    >
+      <SolicitarAccesoForm />
+    </Suspense>
   )
 }
