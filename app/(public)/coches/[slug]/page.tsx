@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import VehicleDetailContent from '@/components/marketplace/VehicleDetailContent'
+import { resolveContactMode } from '@/lib/contact-mode'
 import { FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS } from '@/lib/utils'
 import type { Metadata } from 'next'
 
@@ -62,6 +63,10 @@ export default async function CocheDetailPage({ params }: PageProps) {
 
   // Increment view counter
   supabase.from('vehicles').update({ views: vehicle.views + 1 }).eq('id', vehicle.id).then(() => {})
+
+  const contactMode = vehicle.dealer?.profile_id
+    ? await resolveContactMode(vehicle.dealer.profile_id)
+    : 'classic'
 
   let simQuery = supabase
     .from('vehicles')
@@ -156,6 +161,7 @@ export default async function CocheDetailPage({ params }: PageProps) {
         dealerVehicles={dealerVehicles || []}
         backHref="/coches"
         backLabel="Coches"
+        contactMode={contactMode}
       />
     </>
   )

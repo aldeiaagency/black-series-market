@@ -7,6 +7,7 @@ import {
 import VehicleGallery from '@/components/marketplace/VehicleGallery'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import QualifiedLeadForm from '@/components/marketplace/QualifiedLeadForm'
+import AssistantWidget from '@/components/marketplace/AssistantWidget'
 import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
 import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
@@ -16,12 +17,15 @@ import StickyAwareSidebar from '@/components/marketplace/StickyAwareSidebar'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS, VEHICLE_CONDITION_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 
+export type ContactMode = 'classic' | 'assistant'
+
 interface Props {
   vehicle: Vehicle & { dealer: any }
   similarVehicles: (Vehicle & { dealer?: any })[]
   dealerVehicles: (Vehicle & { dealer?: any })[]
   backHref: string
   backLabel: string
+  contactMode?: ContactMode
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -93,6 +97,7 @@ export default function VehicleDetailContent({
   dealerVehicles,
   backHref,
   backLabel,
+  contactMode = 'classic',
 }: Props) {
   const isCar = vehicle.vehicle_type === 'car'
   const title = `${vehicle.brand_name} ${vehicle.model_name}${vehicle.version ? ' ' + vehicle.version : ''}`
@@ -658,17 +663,30 @@ export default function VehicleDetailContent({
                   </div>
                 )}
 
-                {/* Qualified lead form */}
+                {/* Contact block — classic form or assistant widget */}
                 <div className="bg-surface border border-bsm-border p-6">
-                  <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">Pedir información sobre este vehículo</h3>
+                  <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">
+                    {contactMode === 'assistant' ? 'Consultar sobre este vehículo' : 'Pedir información sobre este vehículo'}
+                  </h3>
                   <p className="text-xs text-bsm-text-muted mb-5">
-                    Déjanos tus datos y el vendedor te responderá directamente.
+                    {contactMode === 'assistant'
+                      ? 'Nuestro asistente puede ayudarte ahora mismo.'
+                      : 'Déjanos tus datos y el vendedor te responderá directamente.'}
                   </p>
-                  <QualifiedLeadForm
-                    vehicleId={vehicle.id}
-                    dealerId={vehicle.dealer_id}
-                    vehicleTitle={title}
-                  />
+                  {contactMode === 'assistant' ? (
+                    <AssistantWidget
+                      vehicleId={vehicle.id}
+                      dealerId={vehicle.dealer_id}
+                      vehicleTitle={title}
+                      dealerWhatsapp={vehicle.dealer?.whatsapp ?? null}
+                    />
+                  ) : (
+                    <QualifiedLeadForm
+                      vehicleId={vehicle.id}
+                      dealerId={vehicle.dealer_id}
+                      vehicleTitle={title}
+                    />
+                  )}
                 </div>
               </>
             )}
