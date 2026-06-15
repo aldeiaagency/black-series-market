@@ -1050,8 +1050,8 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     <>
       {/* ── FILTER BAR ── */}
       <div className="space-y-3">
-        {/* Search — su propia fila, centrada */}
-        <form onSubmit={submitSearch} className="relative w-full max-w-md mx-auto">
+        {/* Search — su propia fila, alineada a la izquierda */}
+        <form onSubmit={submitSearch} className="relative w-full max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-bsm-text-muted pointer-events-none" />
           <input
             type="text"
@@ -1063,8 +1063,8 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           />
         </form>
 
-        {/* Filtros rápidos — fila centrada */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5">
+        {/* Filtros rápidos — fila alineada a la izquierda */}
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Quick: Marca */}
           <select
             className={`${quickSelectCls} hidden sm:block`}
