@@ -402,19 +402,20 @@ export default async function HomePage() {
           ))}
         </ul>
 
-        <div className="flex flex-wrap gap-3">
-          <Link href="/vehiculos-a-la-carta" className="btn-gold px-6 py-3 text-sm">
+        <div className="flex flex-col gap-3 max-w-md">
+          <Link href="/vehiculos-a-la-carta" className="btn-gold w-full">
             Solicitar vehículo a la carta
             <ArrowRight className="w-4 h-4" />
           </Link>
 
-          <Link href="/coches" className="btn-outline px-6 py-3 text-sm">
-            Explorar coches
-          </Link>
-
-          <Link href="/motos" className="btn-outline px-6 py-3 text-sm">
-            Explorar motos
-          </Link>
+          <div className="grid grid-cols-2 gap-3">
+            <Link href="/coches" className="btn-outline w-full">
+              Explorar coches
+            </Link>
+            <Link href="/motos" className="btn-outline w-full">
+              Explorar motos
+            </Link>
+          </div>
         </div>
       </div>
 
