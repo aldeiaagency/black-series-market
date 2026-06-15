@@ -23,12 +23,20 @@ const FAQ_ITEMS = [
     a: 'Black Label Market solo admite profesionales verificados (concesionarios, compraventas y especialistas que han pasado revisión previa) y solo publica vehículos con información real, imágenes propias y disponibilidad confirmada. No somos un portal masivo de anuncios; nos centramos en unidades premium, deportivos, clásicos y motos de interés.',
   },
   {
+    q: '¿Comprar en Black Label Market tiene algún coste?',
+    a: 'No. Para el comprador, Black Label Market es totalmente gratuito: explorar el catálogo, guardar favoritos, comparar vehículos y contactar con los vendedores no tiene ningún coste. El servicio se sostiene con los profesionales que publican su inventario.',
+  },
+  {
     q: '¿Puedo contactar directamente con el vendedor?',
     a: 'Sí. Black Label Market facilita el contacto directo entre comprador y vendedor. No intervenimos como intermediarios en la operación de compraventa.',
   },
   {
     q: '¿Qué significa que un profesional esté verificado?',
     a: 'Antes de publicar, revisamos la reputación online, la especialización y la calidad de presentación de cada profesional. El badge "verificado" indica que ha superado ese proceso de selección.',
+  },
+  {
+    q: '¿Puedo vender mi vehículo si soy particular?',
+    a: 'Black Label Market trabaja únicamente con profesionales verificados: concesionarios, compraventas y especialistas. Si eres particular y quieres vender tu vehículo, lo habitual es hacerlo a través de uno de los profesionales de la plataforma.',
   },
   {
     q: '¿Qué garantías tienen los vehículos publicados?',
