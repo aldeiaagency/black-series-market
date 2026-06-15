@@ -28,7 +28,7 @@ function Row({ label, values, cols }: { label: string; values: (string | null | 
     <div className={`grid border-b border-bsm-border ${grid}`}>
       <div className="px-4 py-3 text-xs text-bsm-text-muted bg-[#0A0A0A] flex items-center">{label}</div>
       {values.map((v, i) => (
-        <div key={i} className={`px-4 py-3 flex items-center ${!allSame && v ? 'bg-[#C6A64B]/3' : ''}`}>
+        <div key={i} className={`px-4 py-3 flex items-center border-l border-bsm-border ${!allSame && v ? 'bg-[#C6A64B]/3' : ''}`}>
           <Cell value={v} />
         </div>
       ))}
@@ -42,7 +42,7 @@ function BoolRow({ label, values, cols }: { label: string; values: boolean[]; co
     <div className={`grid border-b border-bsm-border ${grid}`}>
       <div className="px-4 py-3 text-xs text-bsm-text-muted bg-[#0A0A0A] flex items-center">{label}</div>
       {values.map((v, i) => (
-        <div key={i} className="px-4 py-3 flex items-center justify-center">
+        <div key={i} className="px-4 py-3 flex items-center justify-center border-l border-bsm-border">
           <BoolCell value={v} />
         </div>
       ))}

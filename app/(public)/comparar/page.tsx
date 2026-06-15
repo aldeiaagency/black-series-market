@@ -42,7 +42,7 @@ function Row({ label, values, cols }: { label: string; values: (string | null | 
     <div className={`grid border-b border-bsm-border ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
       <div className="px-4 py-3 text-xs text-bsm-text-muted bg-[#0A0A0A] flex items-center">{label}</div>
       {values.map((v, i) => (
-        <div key={i} className={`px-4 py-3 flex items-center ${!allSame && v ? 'bg-[#C6A64B]/3' : ''}`}>
+        <div key={i} className={`px-4 py-3 flex items-center border-l border-bsm-border ${!allSame && v ? 'bg-[#C6A64B]/3' : ''}`}>
           <CompareCell value={v} />
         </div>
       ))}
@@ -55,7 +55,7 @@ function BoolRow({ label, values, cols }: { label: string; values: boolean[]; co
     <div className={`grid border-b border-bsm-border ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
       <div className="px-4 py-3 text-xs text-bsm-text-muted bg-[#0A0A0A] flex items-center">{label}</div>
       {values.map((v, i) => (
-        <div key={i} className="px-4 py-3 flex items-center justify-center">
+        <div key={i} className="px-4 py-3 flex items-center justify-center border-l border-bsm-border">
           <BoolCell value={v} />
         </div>
       ))}
@@ -127,10 +127,10 @@ export default async function CompararPage({ searchParams }: PageProps) {
         <h1 className="section-title">Comparar vehículos</h1>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto xl:overflow-visible">
 
-        {/* Vehicle headers */}
-        <div className={`grid border border-bsm-border ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
+        {/* Vehicle headers — sticky en desktop (xl) para no perder de vista qué columna es cada coche */}
+        <div className={`grid border border-bsm-border bg-[#050505] xl:sticky xl:top-[70px] xl:z-30 ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
           <div className="bg-[#0A0A0A] border-r border-bsm-border" />
           {vehicles.map((v) => {
             const primaryImg = v.images?.[0]?.url
@@ -196,13 +196,10 @@ export default async function CompararPage({ searchParams }: PageProps) {
             {vehicles.map((v) => {
               const href = `/${v.vehicle_type === 'motorcycle' ? 'motos' : 'coches'}/${v.slug}`
               return (
-                <div key={v.id} className="p-4 flex flex-col gap-2.5 border-r border-bsm-border last:border-0">
+                <div key={v.id} className="p-4 border-r border-bsm-border last:border-0">
                   <Link href={href} className="btn-gold w-full">
                     Ver ficha
                     <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link href={`${href}#contactar`} className="btn-outline w-full">
-                    Contactar
                   </Link>
                 </div>
               )
