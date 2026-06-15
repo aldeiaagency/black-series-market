@@ -43,7 +43,7 @@ const breadcrumbJsonLd = {
 
 export default function SobreNosotrosPage() {
   return (
-    <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-24">
+    <div className="max-w-3xl mx-auto px-6 lg:px-12 pt-28 pb-24">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
@@ -57,7 +57,7 @@ export default function SobreNosotrosPage() {
       </nav>
 
       {/* Hero */}
-      <div className="max-w-2xl mb-20">
+      <div className="mb-20">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Sobre nosotros</span>
