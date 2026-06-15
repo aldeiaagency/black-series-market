@@ -367,11 +367,12 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const [draft, setDraft] = useState<URLSearchParams | null>(null)
   const [draftCount, setDraftCount] = useState<number | null>(null)
   const [countLoading, setCountLoading] = useState(false)
+  const [brandsWithStock, setBrandsWithStock] = useState<string[]>([])
   const view = draft ?? searchParams
 
   const isMoto      = vehicleType === 'motorcycle'
   const categories  = isMoto ? MOTO_CATEGORIES : CAR_CATEGORIES
-  const allBrands   = isMoto ? ALL_BRANDS_MOTO : ALL_BRANDS_CAR
+  const allBrands   = brandsWithStock
 
   const currentBrand = view.get('marca') || ''
   const currentModel = view.get('modelo') || ''
@@ -440,6 +441,15 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
       .then((data: string[]) => setModels(data))
       .finally(() => setLoadingModels(false))
   }, [currentBrand, isMoto])
+
+  // Filtro de marca "centrado en stock": solo marcas con vehículos publicados.
+  useEffect(() => {
+    const type = isMoto ? 'motorcycle' : 'car'
+    fetch(`/api/brands?type=${type}`)
+      .then((r) => r.json())
+      .then((data: string[]) => setBrandsWithStock(Array.isArray(data) ? data : []))
+      .catch(() => setBrandsWithStock([]))
+  }, [isMoto])
 
   useEffect(() => {
     setSearchDraft(searchParams.get('search') || '')
