@@ -10,9 +10,14 @@ export const CAR_CATEGORIES_PUBLIC = [
     examples: 'Ferrari 488, Lamborghini Huracán, McLaren 720S, Porsche 911 GT3 RS, Bugatti Chiron',
   },
   {
+    value: 'berlinas_compactos',
+    label: 'Berlinas, compactos y familiares',
+    examples: 'Audi A3, BMW Serie 3, Mercedes Clase C, Audi A4, Alfa Romeo Giulia, Tesla Model 3, Lexus ES',
+  },
+  {
     value: 'suv_premium',
     label: 'SUV premium',
-    examples: 'Porsche Cayenne Turbo, Range Rover Sport SVR, BMW X5 M, Mercedes GLE 63 AMG, Lamborghini Urus',
+    examples: 'Audi Q5, BMW X3, Porsche Macan, Range Rover, Mercedes GLC, Lamborghini Urus',
   },
   {
     value: 'lujo_alta_gama',
