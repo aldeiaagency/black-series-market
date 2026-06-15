@@ -21,8 +21,10 @@ export default function PublicarPage() {
   const [dealerId, setDealerId] = useState<string | null>(null)
   const [dealerLocation, setDealerLocation] = useState<string | null>(null)
   const [dealerPlan, setDealerPlan] = useState<string | null>(null)
-  const [allBrands, setAllBrands] = useState<{ name: string; slug: string }[]>([])
+  const [allBrands, setAllBrands] = useState<{ id: string; name: string; slug: string }[]>([])
   const [customBrandMode, setCustomBrandMode] = useState(false)
+  const [allModels, setAllModels] = useState<string[]>([])
+  const [customModelMode, setCustomModelMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -110,7 +112,9 @@ export default function PublicarPage() {
       ...f,
       vehicle_type: newType,
       brand_name: compatible ? f.brand_name : '',
+      model_name: '',
     }))
+    setCustomModelMode(false)
     if (!compatible) setCustomBrandMode(false)
   }
 
@@ -138,13 +142,35 @@ export default function PublicarPage() {
       const supabase = createClient()
       const { data } = await supabase
         .from('brands')
-        .select('name, slug')
+        .select('id, name, slug')
         .eq('is_active', true)
         .order('name')
       setAllBrands(data ?? [])
     }
     loadBrands()
   }, [])
+
+  // Catálogo de modelos de la marca seleccionada (tabla `models`, curada).
+  useEffect(() => {
+    async function loadModels() {
+      const brand = allBrands.find((b) => b.name === form.brand_name)
+      if (!brand) { setAllModels([]); return }
+      const supabase = createClient()
+      const vtype = form.vehicle_type === 'motorcycle' ? 'motorcycle' : 'car'
+      const { data } = await supabase
+        .from('models')
+        .select('name')
+        .eq('brand_id', brand.id)
+        .eq('vehicle_type', vtype)
+        .eq('is_active', true)
+        .order('name')
+      const names = (data ?? []).map((m: any) => m.name)
+      setAllModels(names)
+      // Edición: si el modelo guardado no está en el catálogo, permitir texto libre.
+      if (form.model_name && !names.includes(form.model_name)) setCustomModelMode(true)
+    }
+    loadModels()
+  }, [form.brand_name, form.vehicle_type, allBrands])
 
   async function handleSave(publish = false) {
     setError('')
@@ -290,11 +316,14 @@ export default function PublicarPage() {
                 <select
                   value={customBrandMode ? '__other__' : form.brand_name}
                   onChange={(e) => {
+                    update('model_name', '')
                     if (e.target.value === '__other__') {
                       setCustomBrandMode(true)
+                      setCustomModelMode(true)
                       update('brand_name', '')
                     } else {
                       setCustomBrandMode(false)
+                      setCustomModelMode(false)
                       update('brand_name', e.target.value)
                     }
                   }}
@@ -320,7 +349,37 @@ export default function PublicarPage() {
               </div>
               <div>
                 <label className="label-base">Modelo *</label>
-                <input value={form.model_name} onChange={(e) => update('model_name', e.target.value)} placeholder="F8 Tributo, M5, Panigale V4..." className="input-base" required />
+                <select
+                  value={customModelMode ? '__other__' : form.model_name}
+                  onChange={(e) => {
+                    if (e.target.value === '__other__') {
+                      setCustomModelMode(true)
+                      update('model_name', '')
+                    } else {
+                      setCustomModelMode(false)
+                      update('model_name', e.target.value)
+                    }
+                  }}
+                  className="select-base"
+                  required={!customModelMode}
+                  disabled={!form.brand_name}
+                >
+                  <option value="">{form.brand_name ? 'Seleccionar modelo…' : 'Elige primero la marca'}</option>
+                  {allModels.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                  <option value="__other__">Otro modelo (escribir)</option>
+                </select>
+                {customModelMode && (
+                  <input
+                    autoFocus
+                    value={form.model_name}
+                    onChange={(e) => update('model_name', e.target.value)}
+                    placeholder="Escribe el modelo..."
+                    className="input-base mt-2"
+                    required
+                  />
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
