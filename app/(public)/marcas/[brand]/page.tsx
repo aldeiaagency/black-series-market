@@ -4,40 +4,10 @@ import VehicleCard from '@/components/marketplace/VehicleCard'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
+import { BRAND_EDITORIAL } from '@/lib/brand-editorial'
 
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
-
-const BRAND_EDITORIAL: Record<string, string> = {
-  ferrari:
-    'Ferrari representa el punto más alto de la ingeniería deportiva italiana. Cada Ferrari en el mercado de segunda mano es una pieza de historia del motor: rendimiento sin concesiones, líneas que no pasan de moda y un valor que el tiempo tiende a respetar. Los Ferrari publicados en Black Label Market provienen de especialistas que conocen cada modelo a fondo, con historial verificado y documentación en orden.',
-  porsche:
-    'Pocos fabricantes logran combinar usabilidad diaria con prestaciones puras como Porsche. El 911, el Cayman, el Taycan o el Panamera son referencias absolutas en sus segmentos. Los Porsche publicados aquí provienen de profesionales especializados: kilometraje verificado, mantenimientos al día y configuraciones originales documentadas.',
-  lamborghini:
-    'Lamborghini es emoción en estado puro: diseño extremo, sonido inconfundible y una exclusividad que se cotiza. Un Lamborghini bien documentado y con historial trazable es uno de los activos más demandados del mercado premium. Los vendedores especializados en Black Label Market aportan la confianza necesaria para este tipo de operación.',
-  bmw:
-    'La gama M de BMW y los modelos más exclusivos de BMW Motorrad son referentes para quienes buscan prestaciones reales con refinamiento diario. Los vehículos BMW publicados en Black Label Market son seleccionados por profesionales con inventario especializado, historial documentado y exigencia en la presentación.',
-  ducati:
-    'Ducati es sinónimo de pasión, precisión y carácter italiano. Desde la Panigale V4 hasta la Scrambler, cada modelo tiene una personalidad definida y un seguimiento de culto. En Black Label Market encontrarás Ducati de especialistas que entienden el producto: motos con historial claro, mantenimiento oficial y presentación a la altura.',
-  mclaren:
-    'McLaren lleva la tecnología de la Fórmula 1 a la carretera. Sus modelos —720S, Artura, Senna, P1— son máquinas de referencia absoluta en el segmento superdeportivo. Encontrar un McLaren con historial documentado y en manos de un especialista de confianza es exactamente lo que hace Black Label Market.',
-  'rolls-royce':
-    'Rolls-Royce define el lujo sin compromiso. Cada unidad es prácticamente única: materiales de primera calidad, personalización a medida y una presencia en carretera inigualable. Los Rolls-Royce disponibles en Black Label Market son ofrecidos por los pocos especialistas que manejan este tipo de producto con el cuidado que merece.',
-  bentley:
-    'Bentley combina artesanía british con prestaciones deportivas reales. El Continental GT, el Bentayga o el Flying Spur son elecciones de quienes no quieren elegir entre lujo y dinámicas. Los vendedores especializados en Black Label Market son los únicos en los que merece confiar para este tipo de adquisición.',
-  'mercedes-benz':
-    'Mercedes-Benz define el estándar de lo que significa el lujo alemán en movimiento. Desde el SL clásico hasta el AMG GT, la Clase S o el G63, cada modelo combina ingeniería de vanguardia con un refinamiento que ningún otro fabricante iguala en volumen. Los vehículos Mercedes-Benz publicados en Black Label Market son seleccionados por profesionales con historial documentado, mantenimiento en red oficial y configuraciones de alto equipamiento.',
-  audi:
-    'Audi lleva décadas estableciendo referencias en tecnología, diseño y tracción quattro. La gama RS, el A8 o el e-tron GT son ejemplos de un fabricante que no necesita elevar el tono para ser premium. Los vehículos Audi publicados en Black Label Market son seleccionados por concesionarios especializados con historial verificado y presentación a la altura de la marca.',
-  bugatti:
-    'Bugatti produce los hipercars más exclusivos del mundo. Cada Veyron, Chiron o Divo es una obra de ingeniería sin parangón: más de 1.000 CV, producción medida en decenas de unidades y un proceso de fabricación artesanal en Molsheim. Una operación Bugatti exige el máximo rigor en documentación, trazabilidad y especialización: exactamente lo que ofrecen los vendedores de Black Label Market.',
-  triumph:
-    'Triumph es la esencia de la moto británica de carácter: desde la Speed Triple hasta la Bonneville o la Tiger 900, cada modelo tiene una identidad definida y un legado de décadas. Los Triumph publicados en Black Label Market provienen de especialistas con inventario bien seleccionado, mantenimiento documentado y conocimiento real del producto.',
-  'harley-davidson':
-    'Harley-Davidson no es solo una moto, es una cultura de conducción. Desde el Sportster hasta el Road King o el Fat Bob, cada modelo carga con décadas de historia y una comunidad que valora la autenticidad por encima de todo. Los Harley-Davidson publicados en Black Label Market son ofrecidos por especialistas que entienden el valor de una moto bien mantenida, documentada y en su configuración original.',
-  'mv-agusta':
-    'MV Agusta produce algunas de las motos más hermosas del mundo. La Brutale, la F4, la Superveloce... piezas de orfebrería sobre dos ruedas que combinan rendimiento superlativo con un diseño inimitable. Encontrar una MV Agusta con historial claro y en manos de un especialista de confianza es el tipo de operación que hace Black Label Market.',
-}
 
 interface PageProps {
   params: Promise<{ brand: string }>
@@ -46,12 +16,24 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { brand } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('brands').select('name').eq('slug', brand).single()
+  const { data } = await supabase.from('brands').select('name, logo_url').eq('slug', brand).single()
   if (!data) return {}
+  const title = `${data.name} en venta en España`
+  const editorial = BRAND_EDITORIAL[brand]
+  const description = editorial
+    ? (editorial.length > 160 ? editorial.slice(0, 157).replace(/\s+\S*$/, '') + '…' : editorial)
+    : `Vehículos ${data.name} disponibles en Black Label Market: coches y motos premium con vendedores verificados.`
   return {
-    title: `${data.name} en venta en España`,
-    description: `Vehículos ${data.name} disponibles en Black Label Market: coches y motos premium con vendedores verificados.`,
+    title,
+    description,
     alternates: { canonical: `/marcas/${brand}` },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `${SITE_URL}/marcas/${brand}`,
+      ...(data.logo_url ? { images: [data.logo_url] } : {}),
+    },
   }
 }
 
@@ -103,9 +85,21 @@ export default async function BrandPage({ params }: PageProps) {
     ],
   }
 
+  const editorial = BRAND_EDITORIAL[brandData.slug] || (brandData as any).description || null
+
+  const brandJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Brand',
+    name: brandData.name,
+    url: `${SITE_URL}/marcas/${brandData.slug}`,
+    ...(brandData.logo_url && { logo: brandData.logo_url }),
+    ...(editorial && { description: editorial }),
+  }
+
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(brandJsonLd) }} />
       {/* Header */}
       <div className="mb-12">
         <nav aria-label="breadcrumb" className="mb-8">
@@ -139,15 +133,12 @@ export default async function BrandPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Editorial — solo para marcas top con contenido definido */}
-      {(() => {
-        const editorial = BRAND_EDITORIAL[brandData.slug] || (brandData as any).description
-        return editorial ? (
-          <div className="mb-12 max-w-2xl">
-            <p className="text-sm text-bsm-text-secondary leading-relaxed">{editorial}</p>
-          </div>
-        ) : null
-      })()}
+      {/* Editorial — texto SEO único por marca */}
+      {editorial && (
+        <div className="mb-12 max-w-2xl">
+          <p className="text-sm text-bsm-text-secondary leading-relaxed">{editorial}</p>
+        </div>
+      )}
 
       {/* Cars */}
       {cars.length > 0 && (
