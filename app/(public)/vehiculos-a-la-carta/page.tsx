@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import PrivateSearchForm from '@/components/marketplace/PrivateSearchForm'
-import { AlertCircle, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -44,15 +44,10 @@ export default function VehiculosALaCartaPage() {
           Vehículos a la carta
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
-          Si no encuentras la unidad que buscas, Black Label puede registrar tu demanda
-          y conectarla con profesionales seleccionados cuando aparezca una oportunidad compatible.
+          Si el vehículo que buscas no está publicado, lo buscamos por ti. Trasladamos tu
+          solicitud a nuestra red de especialistas verificados y, cuando surja una unidad
+          a tu medida, te lo comunicamos en privado.
         </p>
-        <div className="flex items-start gap-2 mt-5 p-4 border border-[#1A1A1A] bg-[#0A0A0A]">
-          <AlertCircle className="w-4 h-4 text-[#737373] flex-shrink-0 mt-0.5" />
-          <p className="text-[11px] text-[#808080] leading-relaxed">
-            Registramos tu demanda y la conectamos con profesionales verificados. Te avisamos cuando aparezca una oportunidad compatible.
-          </p>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
