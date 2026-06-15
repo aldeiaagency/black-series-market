@@ -145,6 +145,28 @@ function renderPage(
         </p>
       </div>
 
+      {/* Editorial — confianza / qué showrooms publican */}
+      <div className="mb-8 max-w-2xl">
+        <p className="text-sm text-bsm-text-secondary leading-relaxed">
+          En Black Label Market no publica cualquiera. Cada showroom —concesionario, compraventa o especialista— pasa por un proceso de verificación antes de poder publicar: revisamos su reputación, su trayectoria y su presencia online para asegurarnos de que está a la altura de los vehículos que ofrece. El resultado es una red de profesionales seleccionados en la que el comprador puede confiar desde el primer contacto, y un entorno donde un deportivo, un clásico o una moto premium se presentan junto a vendedores de su mismo nivel.
+        </p>
+      </div>
+
+      {/* Proceso de verificación — 3 pasos */}
+      <div className="grid grid-cols-1 md:grid-cols-3 border border-bsm-border mb-12">
+        {[
+          { n: '01', title: 'Solicitud de acceso',     desc: 'Reservado a profesionales del sector: concesionarios, compraventas y especialistas.' },
+          { n: '02', title: 'Revisión de reputación',  desc: 'Analizamos su trayectoria, presencia online y nivel de servicio antes de aceptarlo.' },
+          { n: '03', title: 'Aceptación y estándar',   desc: 'Solo se publica cumpliendo un estándar de presentación a la altura del vehículo.' },
+        ].map((s, i) => (
+          <div key={s.n} className={`p-6 ${i > 0 ? 'border-t md:border-t-0 md:border-l border-bsm-border' : ''}`}>
+            <div className="font-display text-xs text-gold/50 mb-3 tracking-[0.2em]">{s.n}</div>
+            <h3 className="text-[13px] font-medium text-bsm-text-primary mb-2 tracking-wide">{s.title}</h3>
+            <p className="text-[12px] text-bsm-text-muted leading-relaxed">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Filtros */}
       <div className="space-y-3 mb-10">
 
