@@ -184,7 +184,7 @@ export default function ComoFuncionaPage() {
         <div className="mt-8 flex flex-wrap gap-4">
           <Link href="/coches" className="btn-gold px-6">Explorar coches</Link>
           <Link href="/motos" className="btn-outline px-6">Explorar motos</Link>
-          <Link href="/vehiculos-a-la-carta" className="btn-ghost px-6 text-sm">Solicitar vehículos a la carta</Link>
+          <Link href="/vehiculos-a-la-carta" className="btn-outline px-6">Solicitar vehículos a la carta</Link>
         </div>
       </section>
 
@@ -247,9 +247,14 @@ export default function ComoFuncionaPage() {
           <p className="text-sm text-bsm-text-muted mb-6 leading-relaxed">
             Explora el catálogo, guarda en favoritos y solicita la unidad que buscas si no la encuentras.
           </p>
-          <Link href="/coches" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
-            Explorar vehículos <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-col gap-3">
+            <Link href="/coches" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
+              Explorar coches <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/motos" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
+              Explorar motos <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
         <div className="border border-[#C6A64B]/20 bg-[#C6A64B]/3 p-8">
           <h3 className="font-display text-2xl font-light mb-3 text-bsm-text-primary">Soy profesional</h3>
