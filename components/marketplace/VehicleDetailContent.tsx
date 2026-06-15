@@ -105,6 +105,8 @@ export default function VehicleDetailContent({
   const statusBadge = STATUS_BADGE[vehicle.status as keyof typeof STATUS_BADGE]
   const vehicleTypeParam: 'car' | 'motorcycle' = isCar ? 'car' : 'motorcycle'
   const vehicleWord = isCar ? 'vehículo' : 'moto'
+  const fmtDate = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }) : ''
 
   // ── Summary specs (always show with "Consultar con el vendedor" fallback) ─────
   const summarySpecs = isCar
@@ -159,7 +161,7 @@ export default function VehicleDetailContent({
         vehicle.dgt_label          && { label: 'Etiqueta DGT',         value: vehicle.dgt_label },
         vehicle.registration_year  && { label: 'Año de matriculación', value: String(vehicle.registration_year) },
         vehicle.registration_country && { label: 'País de origen',     value: vehicle.registration_country },
-        vehicle.itv_valid_until    && { label: 'ITV válida hasta',     value: vehicle.itv_valid_until },
+        vehicle.itv_valid_until    && { label: 'ITV válida hasta',     value: fmtDate(vehicle.itv_valid_until) },
       ].filter(Boolean) as { label: string; value: string }[]
     : [
         vehicle.displacement_cc    && { label: 'Cilindrada',                  value: `${vehicle.displacement_cc} cc` },
@@ -180,7 +182,7 @@ export default function VehicleDetailContent({
         vehicle.has_panniers           && { label: 'Maletas incluidas',        value: 'Sí' },
         vehicle.registration_year  && { label: 'Año de matriculación',        value: String(vehicle.registration_year) },
         vehicle.registration_country && { label: 'País de origen',            value: vehicle.registration_country },
-        vehicle.itv_valid_until    && { label: 'ITV válida hasta',            value: vehicle.itv_valid_until },
+        vehicle.itv_valid_until    && { label: 'ITV válida hasta',            value: fmtDate(vehicle.itv_valid_until) },
       ].filter(Boolean) as { label: string; value: string }[]
 
 
@@ -350,7 +352,7 @@ export default function VehicleDetailContent({
               <HistoryRow icon={Users}       label="Número de propietarios"  value={vehicle.num_owners != null ? String(vehicle.num_owners) : null} />
               <HistoryRow icon={Wrench}      label="Historial de mantenimiento" value={vehicle.has_service_history ? 'Disponible' : null} />
               <HistoryRow icon={FileText}    label="Informe Carfax"          value={vehicle.has_carfax ? 'Disponible' : null} />
-              <HistoryRow icon={Clock}       label="ITV válida hasta"        value={vehicle.itv_valid_until || null} />
+              <HistoryRow icon={Clock}       label="ITV válida hasta"        value={vehicle.itv_valid_until ? fmtDate(vehicle.itv_valid_until) : null} />
             </div>
             <div className="flex items-start gap-2 p-4 bg-[#0D0D0D] border border-[#1A1A1A]">
               <AlertCircle className="w-4 h-4 text-[#808080] flex-shrink-0 mt-0.5" />

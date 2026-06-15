@@ -56,6 +56,7 @@ export default function PublicarPage() {
     cylinders: '',
     engine_config: '',
     registration_year: '',
+    registration_country: '',
     itv_valid_until: '',
     has_service_history: false,
     has_carfax: false,
@@ -215,6 +216,7 @@ export default function PublicarPage() {
       color_interior:  form.color_interior  || null,
       equipment_extra: form.equipment_extra || null,
       video_url:       form.video_url       || null,
+      registration_country: form.registration_country || null,
       itv_valid_until: form.itv_valid_until || null,
       status:          publish ? 'pending_review' : 'draft',
       published_at:    publish ? new Date().toISOString() : null,
@@ -595,6 +597,10 @@ export default function PublicarPage() {
               <div>
                 <label className="label-base">Año de matriculación</label>
                 <input type="number" value={form.registration_year} onChange={(e) => update('registration_year', e.target.value)} placeholder="2021" className="input-base" />
+              </div>
+              <div>
+                <label className="label-base">País de origen</label>
+                <input value={form.registration_country} onChange={(e) => update('registration_country', e.target.value)} placeholder="España, Alemania, Italia…" className="input-base" />
               </div>
               <div>
                 <label className="label-base">ITV válida hasta</label>

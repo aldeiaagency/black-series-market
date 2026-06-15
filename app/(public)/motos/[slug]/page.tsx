@@ -137,7 +137,6 @@ export default async function MotoDetailPage({ params }: PageProps) {
     model: vehicle.model_name,
     vehicleModelDate: String(vehicle.year),
     itemCondition,
-    ...(vehicle.vin && { vehicleIdentificationNumber: vehicle.vin }),
     ...(vehicle.color_exterior && { color: vehicle.color_exterior }),
     ...(vehicle.fuel_type && { fuelType: FUEL_LABELS[vehicle.fuel_type as keyof typeof FUEL_LABELS] ?? vehicle.fuel_type }),
     ...(vehicle.transmission && { vehicleTransmission: TRANSMISSION_LABELS[vehicle.transmission as keyof typeof TRANSMISSION_LABELS] ?? vehicle.transmission }),
