@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ArrowLeft, Check, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 import type { Metadata } from 'next'
@@ -134,17 +134,20 @@ export default async function CompararPage({ searchParams }: PageProps) {
           <div className="bg-[#0A0A0A] border-r border-bsm-border" />
           {vehicles.map((v) => {
             const primaryImg = v.images?.[0]?.url
+            const href = `/${v.vehicle_type === 'motorcycle' ? 'motos' : 'coches'}/${v.slug}`
             return (
               <div key={v.id} className="p-5 border-r border-bsm-border last:border-0">
-                {primaryImg && (
-                  <div className="aspect-[16/10] overflow-hidden mb-4 bg-surface">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={primaryImg} alt={`${v.brand_name} ${v.model_name}`} className="w-full h-full object-cover" />
-                  </div>
-                )}
-                <div className="text-[10px] text-gold/80 tracking-widest uppercase mb-0.5">{v.brand_name}</div>
-                <div className="font-display text-lg font-light text-bsm-text-primary">{v.model_name}</div>
-                {v.version && <p className="text-xs text-bsm-text-muted mt-0.5">{v.version}</p>}
+                <Link href={href} className="group block">
+                  {primaryImg && (
+                    <div className="aspect-[16/10] overflow-hidden mb-4 bg-surface">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={primaryImg} alt={`${v.brand_name} ${v.model_name}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    </div>
+                  )}
+                  <div className="text-[10px] text-gold/80 tracking-widest uppercase mb-0.5">{v.brand_name}</div>
+                  <div className="font-display text-lg font-light text-bsm-text-primary group-hover:text-gold transition-colors">{v.model_name}</div>
+                  {v.version && <p className="text-xs text-bsm-text-muted mt-0.5">{v.version}</p>}
+                </Link>
                 <div className="mt-3 font-display text-xl font-light text-gold">
                   {formatPrice(v.price, v.currency, v.price_on_request)}
                 </div>
@@ -186,6 +189,25 @@ export default async function CompararPage({ searchParams }: PageProps) {
 
           {/* Client component: expandable extra fields */}
           <CompareExpandToggle vehicles={vehicles} cols={cols} />
+
+          {/* CTA por vehículo — cierra el bucle de conversión */}
+          <div className={`grid ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
+            <div className="bg-[#0A0A0A] border-r border-bsm-border" />
+            {vehicles.map((v) => {
+              const href = `/${v.vehicle_type === 'motorcycle' ? 'motos' : 'coches'}/${v.slug}`
+              return (
+                <div key={v.id} className="p-4 flex flex-col gap-2.5 border-r border-bsm-border last:border-0">
+                  <Link href={href} className="btn-gold w-full">
+                    Ver ficha
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link href={`${href}#contactar`} className="btn-outline w-full">
+                    Contactar
+                  </Link>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>

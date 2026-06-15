@@ -664,7 +664,7 @@ export default function VehicleDetailContent({
                 )}
 
                 {/* Contact block — classic form or assistant widget */}
-                <div className="bg-surface border border-bsm-border p-6">
+                <div id="contactar" className="bg-surface border border-bsm-border p-6 scroll-mt-28">
                   <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">
                     {contactMode === 'assistant' ? 'Consultar sobre este vehículo' : 'Pedir información sobre este vehículo'}
                   </h3>
