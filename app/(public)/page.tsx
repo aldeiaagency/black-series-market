@@ -409,7 +409,11 @@ export default async function HomePage() {
           </Link>
 
           <Link href="/coches" className="btn-outline px-6 py-3 text-sm">
-            Explorar vehículos
+            Explorar coches
+          </Link>
+
+          <Link href="/motos" className="btn-outline px-6 py-3 text-sm">
+            Explorar motos
           </Link>
         </div>
       </div>
@@ -534,6 +538,7 @@ export default async function HomePage() {
             'Tu stock aparece en un entorno alineado con su valor',
             'El comprador entiende mejor qué vendes y por qué merece atención',
             'Un canal exclusivo para convertir vehículos especiales en oportunidades mejor presentadas',
+            'Tu propio perfil profesional: catálogo completo, ubicación y contacto directo del comprador',
           ].map((point) => (
             <li key={point} className="flex items-start gap-3">
               <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
