@@ -129,29 +129,39 @@ export default async function CompararPage({ searchParams }: PageProps) {
 
       <div className="overflow-x-auto xl:overflow-visible">
 
-        {/* Vehicle headers — sticky en desktop (xl) para no perder de vista qué columna es cada coche */}
-        <div className={`grid border border-bsm-border bg-[#050505] xl:sticky xl:top-[70px] xl:z-30 ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
+        {/* Imágenes — hero NO fijo: sube y desaparece al hacer scroll */}
+        <div className={`grid border border-bsm-border border-b-0 ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
           <div className="bg-[#0A0A0A] border-r border-bsm-border" />
           {vehicles.map((v) => {
             const primaryImg = v.images?.[0]?.url
             const href = `/${v.vehicle_type === 'motorcycle' ? 'motos' : 'coches'}/${v.slug}`
             return (
-              <div key={v.id} className="p-5 border-r border-bsm-border last:border-0">
-                <Link href={href} className="group block">
+              <Link key={v.id} href={href} className="group block p-5 border-r border-bsm-border last:border-0">
+                <div className="aspect-[16/10] overflow-hidden bg-surface">
                   {primaryImg && (
-                    <div className="aspect-[16/10] overflow-hidden mb-4 bg-surface">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={primaryImg} alt={`${v.brand_name} ${v.model_name}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    </div>
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={primaryImg} alt={`${v.brand_name} ${v.model_name}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   )}
-                  <div className="text-[10px] text-gold/80 tracking-widest uppercase mb-0.5">{v.brand_name}</div>
-                  <div className="font-display text-lg font-light text-bsm-text-primary group-hover:text-gold transition-colors">{v.model_name}</div>
-                  {v.version && <p className="text-xs text-bsm-text-muted mt-0.5">{v.version}</p>}
-                </Link>
-                <div className="mt-3 font-display text-xl font-light text-gold">
-                  {formatPrice(v.price, v.currency, v.price_on_request)}
                 </div>
-              </div>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Info compacta — ESTO es lo único que queda fijo (sticky) al hacer scroll en desktop */}
+        <div className={`grid border border-bsm-border bg-[#050505] xl:sticky xl:top-[70px] xl:z-30 ${cols === 2 ? 'grid-cols-[180px_1fr_1fr]' : 'grid-cols-[180px_1fr_1fr_1fr]'}`}>
+          <div className="bg-[#0A0A0A] border-r border-bsm-border" />
+          {vehicles.map((v) => {
+            const href = `/${v.vehicle_type === 'motorcycle' ? 'motos' : 'coches'}/${v.slug}`
+            return (
+              <Link key={v.id} href={href} className="group block px-5 py-3.5 border-r border-bsm-border last:border-0">
+                <div className="text-[10px] text-gold/80 tracking-widest uppercase mb-0.5">{v.brand_name}</div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-display text-base lg:text-lg font-light text-bsm-text-primary group-hover:text-gold transition-colors leading-tight">{v.model_name}</span>
+                  <span className="font-display text-base lg:text-lg font-light text-gold whitespace-nowrap">{formatPrice(v.price, v.currency, v.price_on_request)}</span>
+                </div>
+                {v.version && <p className="text-[11px] text-bsm-text-muted mt-0.5 truncate">{v.version}</p>}
+              </Link>
             )
           })}
         </div>
