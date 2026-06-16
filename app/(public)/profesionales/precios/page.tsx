@@ -1,13 +1,12 @@
 import Link from 'next/link'
-import { Check, Minus } from 'lucide-react'
+import { Check, Minus, Info } from 'lucide-react'
 import type { Metadata } from 'next'
 import { checkEliteAvailability } from '@/lib/elite-capacity'
 import {
   PLANS,
-  COMPARISON_ROWS,
+  PLAN_FEATURES,
   ELITE_LIMIT_NOTE,
-  type PlanDef,
-  type ComparisonRow,
+  type PlanFeatureRow,
 } from '@/lib/plans-config'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -25,34 +24,37 @@ export const metadata: Metadata = {
   },
 }
 
-function renderCell(plan: PlanDef, row: ComparisonRow) {
-  const val = plan.values[row.key]
-
-  if (row.type === 'limit') {
-    if (typeof val !== 'number') return <span className="text-bsm-text-muted text-sm">—</span>
-    if (row.key === 'max_active_vehicles' && val >= 100) {
-      return <span className="text-sm text-bsm-text-primary">Hasta {val}</span>
-    }
-    if (val >= 99 && row.key === 'max_users') {
-      return <span className="text-sm text-bsm-text-primary">Sin límite</span>
-    }
-    return <span className="text-sm text-bsm-text-primary">{val}{row.suffix ?? ''}</span>
-  }
-
-  if (val === 'destacado') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-[10px] text-gold tracking-widest uppercase border border-gold/30 px-2 py-0.5">
-        <Check className="w-3 h-3" /> Destacado
-      </span>
-    )
-  }
-  if (val === true) return <Check className="w-4 h-4 text-gold mx-auto" />
-  return <Minus className="w-4 h-4 text-bsm-text-muted mx-auto" />
+function FeatureRow({ row }: { row: PlanFeatureRow }) {
+  return (
+    <li className="py-2.5 border-b border-bsm-border/40 last:border-b-0">
+      <div className="flex items-start justify-between gap-3">
+        <span className={`text-sm ${row.kind === 'excluded' ? 'text-bsm-text-muted' : 'text-bsm-text-secondary'}`}>
+          {row.label}
+        </span>
+        <span className="flex-shrink-0 pt-0.5">
+          {row.kind === 'value' && (
+            <span className="text-sm text-bsm-text-primary font-medium whitespace-nowrap">{row.value}</span>
+          )}
+          {row.kind === 'included' && <Check className="w-4 h-4 text-gold" />}
+          {row.kind === 'excluded' && <Minus className="w-4 h-4 text-bsm-text-muted" />}
+          {row.kind === 'destacado' && (
+            <span className="inline-flex items-center gap-1 text-[10px] text-gold tracking-widest uppercase border border-gold/30 px-1.5 py-0.5 whitespace-nowrap">
+              <Check className="w-3 h-3" /> Destacado
+            </span>
+          )}
+        </span>
+      </div>
+      {row.info && (
+        <details className="mt-1 group">
+          <summary className="text-[11px] text-gold/70 hover:text-gold cursor-pointer list-none inline-flex items-center gap-1 select-none">
+            <Info className="w-3 h-3" /> Más información
+          </summary>
+          <p className="text-[11px] text-bsm-text-muted mt-1 leading-relaxed">{row.info}</p>
+        </details>
+      )}
+    </li>
+  )
 }
-
-const KEY_FEATURE_ROWS = COMPARISON_ROWS.filter(
-  (r) => r.type === 'feature' && r.key !== 'verified_profile' && r.key !== 'manual_inventory' && r.key !== 'analytics_basic',
-)
 
 export default async function PreciosPage() {
   const eliteCap = await checkEliteAvailability()
@@ -95,12 +97,10 @@ export default async function PreciosPage() {
       </div>
 
       {/* Plan cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
         {PLANS.map((plan) => {
           const isElite = plan.limited
           const isPopular = plan.popular
-          const maxVehicles = plan.values.max_active_vehicles as number
-          const limitLabel = maxVehicles >= 100 ? 'Hasta 100 vehículos activos' : `Hasta ${maxVehicles} vehículos activos`
 
           return (
             <div
@@ -128,7 +128,6 @@ export default async function PreciosPage() {
                   <span className="text-bsm-text-muted text-sm">/mes</span>
                 </div>
                 <p className="text-xs text-bsm-text-muted">+ IVA</p>
-                <p className="text-xs text-bsm-text-muted mt-2">{limitLabel}</p>
                 {isElite && (
                   <p className="text-[11px] text-bsm-text-muted mt-2 leading-relaxed border-t border-bsm-border pt-2">
                     {ELITE_LIMIT_NOTE}
@@ -136,21 +135,11 @@ export default async function PreciosPage() {
                 )}
               </div>
 
-              {/* Key features */}
-              <ul className="space-y-2.5 flex-1 mb-8">
-                {KEY_FEATURE_ROWS.map((row) => {
-                  const val = plan.values[row.key]
-                  if (!val) return null
-                  return (
-                    <li key={row.key} className="flex items-start gap-2.5 text-sm text-bsm-text-secondary">
-                      <Check className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
-                      {row.label}
-                      {val === 'destacado' && (
-                        <span className="ml-1 text-[10px] text-gold tracking-widest uppercase border border-gold/30 px-1.5 py-0.5">Destacado</span>
-                      )}
-                    </li>
-                  )
-                })}
+              {/* Ficha completa del plan */}
+              <ul className="flex-1 mb-8">
+                {PLAN_FEATURES[plan.slug].map((row) => (
+                  <FeatureRow key={row.label} row={row} />
+                ))}
               </ul>
 
               {isElite ? (
@@ -172,49 +161,6 @@ export default async function PreciosPage() {
           )
         })}
       </div>
-
-      {/* Comparison table */}
-      <div className="mb-12">
-        <h2 className="font-display text-2xl font-light text-center mb-8">Comparativa de planes</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse min-w-[640px]">
-            <thead>
-              <tr className="border-b border-bsm-border">
-                <th className="text-left py-4 px-4 text-xs text-bsm-text-muted font-normal w-2/5" />
-                {PLANS.map((plan) => (
-                  <th key={plan.slug} className="py-4 px-4 text-center align-bottom">
-                    <span className="block text-sm font-medium text-bsm-text-primary">{plan.name}</span>
-                    <span className="block font-display text-2xl font-light text-bsm-text-primary mt-1">
-                      {plan.monthlyPrice}€<span className="text-xs text-bsm-text-muted font-sans"> /mes</span>
-                    </span>
-                    <span className="block text-[11px] text-bsm-text-muted mt-0.5">+ IVA</span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON_ROWS.map((row) => (
-                <tr key={row.key} className="border-b border-bsm-border/50 hover:bg-surface/60 transition-colors">
-                  <td className="py-3 px-4 text-sm text-bsm-text-secondary">{row.label}</td>
-                  {PLANS.map((plan) => (
-                    <td key={plan.slug} className="py-3 px-4 text-center">
-                      {renderCell(plan, row)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="text-[11px] text-bsm-text-muted mt-4 text-center max-w-2xl mx-auto">
-          La sincronización del stock está incluida en Elite y disponible como complemento en los demás planes desde tu panel.
-        </p>
-      </div>
-
-      {/* Note */}
-      <p className="text-center text-xs text-bsm-text-muted mb-16 max-w-2xl mx-auto">
-        Precios indicados sin IVA (se añade en el pago). Las funcionalidades todavía no operativas solo aparecerán como incluidas cuando estén desarrolladas, verificadas y activadas.
-      </p>
 
       {/* Multi-sede */}
       <div className="border border-bsm-border bg-surface p-8 mb-20 flex flex-col md:flex-row md:items-center justify-between gap-6">

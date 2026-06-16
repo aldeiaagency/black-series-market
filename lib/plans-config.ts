@@ -19,35 +19,142 @@ export interface PlanDef {
   values: Record<string, CellValue>
 }
 
-export interface ComparisonRow {
-  key: string
-  label: string
-  type: 'limit' | 'feature'
-  suffix?: string
-}
-
 /**
  * Aclaración pública del plan Elite. Nunca debe exponer el tope interno de
  * vendedores (cifra de gestión interna, no publicada): solo el copy genérico.
  */
 export const ELITE_LIMIT_NOTE = 'Plazas limitadas según disponibilidad y zona.'
 
-export const COMPARISON_ROWS: ComparisonRow[] = [
-  { key: 'max_active_vehicles',       label: 'Vehículos activos',           type: 'limit' },
-  { key: 'max_users',                 label: 'Usuarios',                    type: 'limit' },
-  { key: 'verified_profile',          label: 'Perfil verificado',           type: 'feature' },
-  { key: 'manual_inventory',          label: 'Inventario manual',           type: 'feature' },
-  { key: 'csv_recurring',             label: 'Importación CSV recurrente',   type: 'feature' },
-  { key: 'stock_sync',                label: 'Sincronización del stock',     type: 'feature' },
-  { key: 'opportunities_inbox',       label: 'Bandeja de oportunidades',     type: 'feature' },
-  { key: 'pipeline',                  label: 'Pipeline kanban',             type: 'feature' },
-  { key: 'analytics_basic',           label: 'Analítica básica',            type: 'feature' },
-  { key: 'analytics_retention_days',  label: 'Historial analítico',         type: 'limit', suffix: ' días' },
-  { key: 'analytics_advanced',        label: 'Analítica avanzada',          type: 'feature' },
-  { key: 'vehicles_on_request',       label: 'Vehículos a la carta',        type: 'feature' },
-  { key: 'showroom_featured',         label: 'Showroom Destacado',          type: 'feature' },
-  { key: 'showroom_listing_priority', label: 'Prioridad en listados',       type: 'feature' },
-]
+// --- Ficha completa de cada plan para la página pública de precios ---
+// Cada fila es una funcionalidad o un límite, ya redactado en lenguaje natural.
+// 'info' es el texto que se despliega bajo la fila (icono ℹ️) cuando aporta
+// una aclaración necesaria (igual que en docs/planes-suscripcion-definitivos.md).
+// No incluye add-ons: esos solo se muestran dentro del dashboard del vendedor.
+
+export type FeatureRowKind = 'value' | 'included' | 'excluded' | 'destacado'
+
+export interface PlanFeatureRow {
+  label: string
+  kind: FeatureRowKind
+  /** Texto a la derecha cuando kind === 'value' (ej. "Hasta 50") */
+  value?: string
+  /** Texto explicativo desplegable (icono ℹ️) */
+  info?: string
+}
+
+const ACTIVACION_PREMIUM_INFO =
+  'Alta de tu perfil e importación inicial de tu inventario, optimizada con IA, incluida una vez. ' +
+  'También cubre la migración de catálogos grandes o desordenados: no se cobra aparte en ningún plan.'
+
+export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
+  essential: [
+    { label: 'Vehículos activos', kind: 'value', value: 'Hasta 15' },
+    { label: 'Usuarios', kind: 'value', value: '1' },
+    { label: 'Sedes', kind: 'value', value: '1' },
+    { label: 'Perfil verificado', kind: 'included' },
+    { label: 'Activación Premium del showroom', kind: 'included', info: ACTIVACION_PREMIUM_INFO },
+    { label: 'Gestión de inventario', kind: 'value', value: 'Manual' },
+    {
+      label: 'Panel de oportunidades',
+      kind: 'included',
+      info: 'Bandeja con los contactos que generan tus vehículos: quién te ha contactado, sobre qué vehículo y cuándo, con estados para hacerles seguimiento. En Essential es una bandeja; en los planes superiores se convierte en un pipeline visual.',
+    },
+    {
+      label: 'Analítica de tu showroom',
+      kind: 'value',
+      value: 'Básica · 30 días',
+      info: 'Vistas, contactos y vehículos guardados de los últimos 30 días.',
+    },
+    {
+      label: 'Vehículos a la carta',
+      kind: 'excluded',
+      info: 'Cuando un comprador busca algo que no tienes publicado, la oportunidad se reparte primero entre Professional y Elite.',
+    },
+    { label: 'Showroom destacado', kind: 'excluded', info: 'Posición preferente en los listados. Exclusivo del plan Elite.' },
+    { label: 'Boosts incluidos', kind: 'value', value: '0' },
+  ],
+  professional: [
+    { label: 'Vehículos activos', kind: 'value', value: 'Hasta 50' },
+    { label: 'Usuarios', kind: 'value', value: '3' },
+    { label: 'Sedes', kind: 'value', value: '1' },
+    { label: 'Perfil verificado', kind: 'included' },
+    { label: 'Activación Premium del showroom', kind: 'included', info: ACTIVACION_PREMIUM_INFO },
+    {
+      label: 'Gestión de inventario',
+      kind: 'value',
+      value: 'Manual + carga por CSV',
+      info: 'Además de la carga manual, sube o actualiza tu inventario completo con un archivo CSV cuando lo necesites, sin crear cada ficha a mano.',
+    },
+    {
+      label: 'Pipeline de oportunidades',
+      kind: 'included',
+      info: 'Gestiona tus oportunidades en un tablero visual con estados (Nueva → Contactada → Cita → Ganada/Perdida).',
+    },
+    {
+      label: 'Analítica de tu showroom',
+      kind: 'value',
+      value: 'Avanzada · 180 días',
+      info: 'Sobre la analítica básica: rendimiento por vehículo, funnel de visita→contacto, evolución temporal e histórico de 180 días.',
+    },
+    {
+      label: 'Vehículos a la carta',
+      kind: 'included',
+      info: 'Acceso al tablón general: cuando un comprador busca algo que no tienes publicado, tu showroom entra en el reparto de esa oportunidad.',
+    },
+    {
+      label: 'Agente de cualificación en la ficha',
+      kind: 'included',
+      info: 'En lugar del formulario, un asistente conversa con el comprador en la ficha y cualifica su interés (qué busca, presupuesto y plazo). El contacto te llega ya valorado y entra directamente en tu pipeline.',
+    },
+    { label: 'Showroom destacado', kind: 'excluded', info: 'Posición preferente en los listados. Exclusivo del plan Elite.' },
+    { label: 'Boosts incluidos', kind: 'value', value: '1/mes' },
+  ],
+  elite: [
+    { label: 'Vehículos activos', kind: 'value', value: 'Hasta 100', info: 'Ampliable en bloques de 25 vehículos adicionales desde tu panel.' },
+    { label: 'Usuarios', kind: 'value', value: '10' },
+    { label: 'Sedes', kind: 'value', value: '1' },
+    { label: 'Perfil verificado', kind: 'included' },
+    { label: 'Activación Premium del showroom', kind: 'included', info: ACTIVACION_PREMIUM_INFO },
+    {
+      label: 'Gestión de inventario',
+      kind: 'value',
+      value: 'Manual + CSV + stock automatizado',
+      info: 'Conecta tu feed o DMS: tu inventario se mantiene sincronizado automáticamente, sin subir nada a mano.',
+    },
+    {
+      label: 'Pipeline de oportunidades',
+      kind: 'included',
+      info: 'Tablero visual con estados, además de citas integradas con calendario, scoring del lead en la tarjeta y aviso de leads calientes sin atender.',
+    },
+    {
+      label: 'Analítica de tu showroom',
+      kind: 'value',
+      value: '365 días',
+      info: 'Toda la analítica de Professional + histórico de 365 días, comparativas ampliadas de rendimiento, scoring por ficha, alertas proactivas y una sugerencia de mejora basada en tus datos.',
+    },
+    {
+      label: 'Vehículos a la carta',
+      kind: 'included',
+      info: 'Tablón general con ventana exclusiva de 24 h: ves antes que el resto del market las búsquedas que coinciden con tu stock.',
+    },
+    {
+      label: 'Agente con reserva de cita en la ficha',
+      kind: 'included',
+      info: 'Además de cualificar al comprador, el asistente propone y reserva una cita en tu calendario (Google Calendar), dejando la oportunidad lista para cerrar.',
+    },
+    {
+      label: 'Showroom destacado',
+      kind: 'destacado',
+      info: 'Tu showroom aparece con etiqueta "Destacado" y en posición preferente (bloque superior) en los listados, por delante de Essential y Professional. Rotación equitativa entre los Elite.',
+    },
+    {
+      label: 'Diagnóstico Anti-Fuga Express',
+      kind: 'included',
+      info: 'Mini-auditoría que detecta 3 fugas de oportunidades de tu showroom y te da recomendaciones priorizadas. Incluido de serie, una vez al semestre.',
+    },
+    { label: 'Boosts incluidos', kind: 'value', value: '3/mes' },
+  ],
+}
 
 export const PLANS: PlanDef[] = [
   {
@@ -176,10 +283,10 @@ export const ADDONS: AddonDef[] = [
   },
   {
     slug: 'stock_sync',
-    name: 'Sincronización del stock',
+    name: 'Stock automatizado',
     price: '149 €',
     unit: '/mes',
-    desc: 'Conecta tu feed o DMS y mantén el inventario sincronizado automáticamente. Incluida en el plan Elite.',
+    desc: 'Conecta tu feed o DMS y mantén el inventario sincronizado automáticamente, sin subir nada a mano. Incluido en el plan Elite.',
     appliesTo: ['essential', 'professional'],
     action: 'request',
     includedInElite: true,
