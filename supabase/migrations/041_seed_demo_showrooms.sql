@@ -341,141 +341,8 @@ BEGIN
     admin_notes = EXCLUDED.admin_notes,
     updated_at = NOW();
 
-  WITH showrooms AS (
-    SELECT * FROM jsonb_to_recordset($orgs$
-    [
-      {"slug":"nero-madrid-performance","name":"Nero Madrid Performance","email":"demo+nero-madrid@blacklabelmarket.es","city":"Madrid","region":"Comunidad de Madrid","plan":"elite","featured":true},
-      {"slug":"costa-blanca-classics","name":"Costa Blanca Classics","email":"demo+costa-blanca@blacklabelmarket.es","city":"Alicante","region":"Comunitat Valenciana","plan":"professional","featured":false},
-      {"slug":"barcelona-grand-touring","name":"Barcelona Grand Touring","email":"demo+barcelona-gt@blacklabelmarket.es","city":"Barcelona","region":"Cataluna","plan":"professional","featured":false},
-      {"slug":"sierra-norte-4x4-premium","name":"Sierra Norte 4x4 Premium","email":"demo+sierra-norte@blacklabelmarket.es","city":"San Agustin del Guadalix","region":"Comunidad de Madrid","plan":"professional","featured":false},
-      {"slug":"atlantic-collectors-garage","name":"Atlantic Collectors Garage","email":"demo+atlantic-collectors@blacklabelmarket.es","city":"Pontevedra","region":"Galicia","plan":"elite","featured":true},
-      {"slug":"ducati-barcelona-corse","name":"Ducati Barcelona Corse","email":"demo+ducati-corse@blacklabelmarket.es","city":"Barcelona","region":"Cataluna","plan":"professional","featured":false},
-      {"slug":"bilbao-heritage-motorcycles","name":"Bilbao Heritage Motorcycles","email":"demo+bilbao-heritage@blacklabelmarket.es","city":"Bilbao","region":"Pais Vasco","plan":"professional","featured":false},
-      {"slug":"valencia-track-bikes","name":"Valencia Track Bikes","email":"demo+valencia-track@blacklabelmarket.es","city":"Valencia","region":"Comunitat Valenciana","plan":"elite","featured":true},
-      {"slug":"marbella-adventure-moto","name":"Marbella Adventure Moto","email":"demo+marbella-adventure@blacklabelmarket.es","city":"Marbella","region":"Andalucia","plan":"professional","featured":false},
-      {"slug":"sevilla-custom-icons","name":"Sevilla Custom & Icons","email":"demo+sevilla-custom@blacklabelmarket.es","city":"Sevilla","region":"Andalucia","plan":"professional","featured":false}
-    ]
-    $orgs$::jsonb) AS s(slug TEXT, name TEXT, email TEXT, city TEXT, region TEXT, plan TEXT, featured BOOLEAN)
-  )
-  INSERT INTO organizations (id, dealer_id, name, slug, is_verified, is_featured, status, updated_at)
-  SELECT
-    uuid_generate_v5(demo_ns, 'org:' || slug),
-    uuid_generate_v5(demo_ns, 'dealer:' || slug),
-    name,
-    slug,
-    true,
-    featured,
-    'active',
-    NOW()
-  FROM showrooms
-  ON CONFLICT (slug) DO UPDATE SET
-    dealer_id = EXCLUDED.dealer_id,
-    name = EXCLUDED.name,
-    is_verified = true,
-    is_featured = EXCLUDED.is_featured,
-    status = 'active',
-    updated_at = NOW();
-
-  WITH showrooms AS (
-    SELECT * FROM jsonb_to_recordset($orgs$
-    [
-      {"slug":"nero-madrid-performance","email":"demo+nero-madrid@blacklabelmarket.es","city":"Madrid","region":"Comunidad de Madrid","plan":"elite"},
-      {"slug":"costa-blanca-classics","email":"demo+costa-blanca@blacklabelmarket.es","city":"Alicante","region":"Comunitat Valenciana","plan":"professional"},
-      {"slug":"barcelona-grand-touring","email":"demo+barcelona-gt@blacklabelmarket.es","city":"Barcelona","region":"Cataluna","plan":"professional"},
-      {"slug":"sierra-norte-4x4-premium","email":"demo+sierra-norte@blacklabelmarket.es","city":"San Agustin del Guadalix","region":"Comunidad de Madrid","plan":"professional"},
-      {"slug":"atlantic-collectors-garage","email":"demo+atlantic-collectors@blacklabelmarket.es","city":"Pontevedra","region":"Galicia","plan":"elite"},
-      {"slug":"ducati-barcelona-corse","email":"demo+ducati-corse@blacklabelmarket.es","city":"Barcelona","region":"Cataluna","plan":"professional"},
-      {"slug":"bilbao-heritage-motorcycles","email":"demo+bilbao-heritage@blacklabelmarket.es","city":"Bilbao","region":"Pais Vasco","plan":"professional"},
-      {"slug":"valencia-track-bikes","email":"demo+valencia-track@blacklabelmarket.es","city":"Valencia","region":"Comunitat Valenciana","plan":"elite"},
-      {"slug":"marbella-adventure-moto","email":"demo+marbella-adventure@blacklabelmarket.es","city":"Marbella","region":"Andalucia","plan":"professional"},
-      {"slug":"sevilla-custom-icons","email":"demo+sevilla-custom@blacklabelmarket.es","city":"Sevilla","region":"Andalucia","plan":"professional"}
-    ]
-    $orgs$::jsonb) AS s(slug TEXT, email TEXT, city TEXT, region TEXT, plan TEXT)
-  )
-  INSERT INTO locations (id, organization_id, name, city, region, country, is_primary)
-  SELECT
-    uuid_generate_v5(demo_ns, 'location:' || slug),
-    uuid_generate_v5(demo_ns, 'org:' || slug),
-    'Showroom principal',
-    city,
-    region,
-    'ES',
-    true
-  FROM showrooms
-  ON CONFLICT (id) DO UPDATE SET
-    organization_id = EXCLUDED.organization_id,
-    name = EXCLUDED.name,
-    city = EXCLUDED.city,
-    region = EXCLUDED.region,
-    country = EXCLUDED.country,
-    is_primary = true;
-
-  WITH showrooms AS (
-    SELECT * FROM jsonb_to_recordset($orgs$
-    [
-      {"slug":"nero-madrid-performance","email":"demo+nero-madrid@blacklabelmarket.es","plan":"elite"},
-      {"slug":"costa-blanca-classics","email":"demo+costa-blanca@blacklabelmarket.es","plan":"professional"},
-      {"slug":"barcelona-grand-touring","email":"demo+barcelona-gt@blacklabelmarket.es","plan":"professional"},
-      {"slug":"sierra-norte-4x4-premium","email":"demo+sierra-norte@blacklabelmarket.es","plan":"professional"},
-      {"slug":"atlantic-collectors-garage","email":"demo+atlantic-collectors@blacklabelmarket.es","plan":"elite"},
-      {"slug":"ducati-barcelona-corse","email":"demo+ducati-corse@blacklabelmarket.es","plan":"professional"},
-      {"slug":"bilbao-heritage-motorcycles","email":"demo+bilbao-heritage@blacklabelmarket.es","plan":"professional"},
-      {"slug":"valencia-track-bikes","email":"demo+valencia-track@blacklabelmarket.es","plan":"elite"},
-      {"slug":"marbella-adventure-moto","email":"demo+marbella-adventure@blacklabelmarket.es","plan":"professional"},
-      {"slug":"sevilla-custom-icons","email":"demo+sevilla-custom@blacklabelmarket.es","plan":"professional"}
-    ]
-    $orgs$::jsonb) AS s(slug TEXT, email TEXT, plan TEXT)
-  )
-  INSERT INTO organization_members (id, organization_id, location_id, user_id, role)
-  SELECT
-    uuid_generate_v5(demo_ns, 'member:' || slug),
-    uuid_generate_v5(demo_ns, 'org:' || slug),
-    uuid_generate_v5(demo_ns, 'location:' || slug),
-    uuid_generate_v5(demo_ns, 'user:' || email),
-    'owner'
-  FROM showrooms
-  ON CONFLICT (organization_id, user_id) DO UPDATE SET
-    location_id = EXCLUDED.location_id,
-    role = 'owner';
-
-  WITH showrooms AS (
-    SELECT * FROM jsonb_to_recordset($orgs$
-    [
-      {"slug":"nero-madrid-performance","plan":"elite"},
-      {"slug":"costa-blanca-classics","plan":"professional"},
-      {"slug":"barcelona-grand-touring","plan":"professional"},
-      {"slug":"sierra-norte-4x4-premium","plan":"professional"},
-      {"slug":"atlantic-collectors-garage","plan":"elite"},
-      {"slug":"ducati-barcelona-corse","plan":"professional"},
-      {"slug":"bilbao-heritage-motorcycles","plan":"professional"},
-      {"slug":"valencia-track-bikes","plan":"elite"},
-      {"slug":"marbella-adventure-moto","plan":"professional"},
-      {"slug":"sevilla-custom-icons","plan":"professional"}
-    ]
-    $orgs$::jsonb) AS s(slug TEXT, plan TEXT)
-  )
-  INSERT INTO subscriptions (
-    id, organization_id, plan_id, billing_cycle, status, current_period_start,
-    current_period_end, metadata, updated_at
-  )
-  SELECT
-    uuid_generate_v5(demo_ns, 'subscription:' || s.slug),
-    uuid_generate_v5(demo_ns, 'org:' || s.slug),
-    p.id,
-    'monthly',
-    'active',
-    NOW() - INTERVAL '7 days',
-    NOW() + INTERVAL '12 months',
-    jsonb_build_object('source', 'demo_seed'),
-    NOW()
-  FROM showrooms s
-  JOIN plans p ON p.slug = s.plan
-  ON CONFLICT (id) DO UPDATE SET
-    plan_id = EXCLUDED.plan_id,
-    status = 'active',
-    current_period_end = EXCLUDED.current_period_end,
-    metadata = EXCLUDED.metadata,
-    updated_at = NOW();
+  -- Organization/subscription demo rows are intentionally omitted here.
+  -- This seed targets the currently deployed public dealer/vehicle schema.
 
   WITH vehicles AS (
     SELECT * FROM jsonb_to_recordset($vehicles$
@@ -555,7 +422,7 @@ BEGIN
     registration_country, has_carfax, has_service_history, condition_type, iva_deducible,
     location_province, category, num_owners, has_warranty, warranty_months, doors, seats,
     dgt_label, has_abs, has_traction_control, has_riding_modes, has_electronic_suspension,
-    has_panniers, has_test_drive, national_delivery, price, price_on_request, is_negotiable,
+    has_panniers, has_test_drive, price, price_on_request, is_negotiable,
     accepts_trade_in, financing_available, title, description, equipment, equipment_extra,
     images, is_featured, is_editors_pick, is_exclusive, badge, views, published_at, expires_at,
     updated_at
@@ -602,7 +469,6 @@ BEGIN
     v.type = 'motorcycle' AND v.category IN ('moto_adventure', 'moto_touring', 'moto_sport'),
     v.type = 'motorcycle' AND v.category IN ('moto_adventure', 'moto_touring'),
     v.type = 'motorcycle',
-    true,
     v.price,
     false,
     false,
@@ -663,7 +529,6 @@ BEGIN
     has_electronic_suspension = EXCLUDED.has_electronic_suspension,
     has_panniers = EXCLUDED.has_panniers,
     has_test_drive = EXCLUDED.has_test_drive,
-    national_delivery = EXCLUDED.national_delivery,
     price = EXCLUDED.price,
     price_on_request = false,
     is_negotiable = false,
