@@ -1,7 +1,6 @@
 'use client'
 
 import { Heart } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useFavorites } from '@/hooks/useFavorites'
 import { cn } from '@/lib/utils'
 
@@ -12,17 +11,12 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({ vehicleId, variant = 'card', className }: FavoriteButtonProps) {
-  const { isFavorite, toggle, mounted, isAuthenticated } = useFavorites()
-  const router = useRouter()
+  const { isFavorite, toggle, mounted } = useFavorites()
   const saved = mounted && isFavorite(vehicleId)
 
   function handleClick(e?: React.MouseEvent) {
     if (e) { e.preventDefault(); e.stopPropagation() }
     if (!mounted) return
-    if (!isAuthenticated) {
-      router.push('/login')
-      return
-    }
     toggle(vehicleId)
   }
 
@@ -30,7 +24,7 @@ export default function FavoriteButton({ vehicleId, variant = 'card', className 
     return (
       <button
         onClick={() => handleClick()}
-        title={mounted && !isAuthenticated ? 'Inicia sesión para guardar vehículos' : undefined}
+        title={saved ? 'Quitar de guardados' : 'Guardar vehículo'}
         className={cn(
           'flex items-center gap-2 px-3 py-1.5 border text-xs transition-all duration-200',
           saved
@@ -49,11 +43,7 @@ export default function FavoriteButton({ vehicleId, variant = 'card', className 
   return (
     <button
       onClick={(e) => handleClick(e)}
-      title={
-        mounted
-          ? (isAuthenticated ? (saved ? 'Quitar de guardados' : 'Guardar vehículo') : 'Inicia sesión para guardar vehículos')
-          : undefined
-      }
+      title={saved ? 'Quitar de guardados' : 'Guardar vehículo'}
       className={cn(
         'w-9 h-9 flex items-center justify-center bg-black/75 backdrop-blur-md border transition-all duration-200',
         saved

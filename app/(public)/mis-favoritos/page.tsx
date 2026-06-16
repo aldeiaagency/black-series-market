@@ -9,7 +9,7 @@ import { useFavorites } from '@/hooks/useFavorites'
 import type { Vehicle } from '@/lib/types'
 
 export default function MisFavoritosPage() {
-  const { favorites, mounted } = useFavorites()
+  const { favorites, mounted, isAuthenticated } = useFavorites()
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -87,7 +87,7 @@ export default function MisFavoritosPage() {
         </div>
       )}
 
-      {vehicles.length > 0 && (
+      {vehicles.length > 0 && !isAuthenticated && (
         <div className="mt-10 p-4 border border-[#1A1A1A] bg-[#0A0A0A] text-[11px] text-[#737373] text-center">
           Los favoritos se guardan en este dispositivo.{' '}
           <a href="/registro-comprador" className="text-[#C6A64B] hover:underline">
