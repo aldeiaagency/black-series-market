@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { slugify } from '@/lib/utils'
 import Logo from '@/components/brand/Logo'
 
 export default function RegistroPage() {
@@ -32,37 +31,28 @@ export default function RegistroPage() {
     setError('')
     setLoading(true)
 
-    const supabase = createClient()
-
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: { data: { full_name: form.full_name } },
+    const response = await fetch('/api/auth/register-dealer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
     })
 
-    if (authError || !authData.user) {
-      setError(authError?.message || 'Error al crear la cuenta')
+    const result = await response.json()
+
+    if (!response.ok) {
+      setError(result.error || 'Error al crear la cuenta')
       setLoading(false)
       return
     }
 
-    await supabase.from('profiles').update({ role: 'dealer' }).eq('id', authData.user.id)
-
-    const slug = slugify(form.dealer_name) + '-' + Math.random().toString(36).slice(2, 6)
-    const { data: dealerData, error: dealerError } = await supabase.from('dealers').insert({
-      profile_id: authData.user.id,
-      slug,
-      name: form.dealer_name,
-      location_city: form.location_city,
-      location_region: form.location_region,
-      phone: form.phone,
+    const supabase = createClient()
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email: form.email,
-      status: 'pending',
-      vehicle_slots: 5,
-    }).select('id').single()
+      password: form.password,
+    })
 
-    if (dealerError) {
-      setError('Error al crear el perfil de concesionario.')
+    if (signInError) {
+      setError('La solicitud se ha creado, pero no se pudo iniciar sesión automáticamente. Accede con tu email y contraseña.')
       setLoading(false)
       return
     }
@@ -72,11 +62,11 @@ export default function RegistroPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        dealer_id: dealerData?.id,
-        dealer_name: form.dealer_name,
-        email: form.email,
-        location_city: form.location_city,
-        phone: form.phone,
+        dealer_id: result.dealer_id,
+        dealer_name: result.dealer_name,
+        email: result.email,
+        location_city: result.location_city,
+        phone: result.phone,
       }),
     }).catch(() => {})
 
@@ -101,7 +91,7 @@ export default function RegistroPage() {
                 {s}
               </div>
               <span className={`text-xs ${step >= s ? 'text-bsm-text-primary' : 'text-bsm-text-muted'}`}>
-                {s === 1 ? 'Cuenta' : 'Concesionario'}
+                {s === 1 ? 'Cuenta' : 'Showroom'}
               </span>
               {s < 2 && <div className={`flex-1 h-px ${step > s ? 'bg-gold' : 'bg-bsm-border'}`} />}
             </div>
@@ -109,9 +99,9 @@ export default function RegistroPage() {
         </div>
 
         <div className="bg-surface border border-bsm-border p-8">
-          <h1 className="font-display text-2xl font-light mb-1">Registrar concesionario</h1>
+          <h1 className="font-display text-2xl font-light mb-1">Registrar showroom</h1>
           <p className="text-sm text-bsm-text-muted mb-8">
-            {step === 1 ? 'Datos de acceso a tu cuenta' : 'Información de tu concesionario'}
+            {step === 1 ? 'Datos de acceso a tu cuenta' : 'Información de tu showroom'}
           </p>
 
           <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2) } : handleSubmit}>
@@ -159,7 +149,7 @@ export default function RegistroPage() {
             {step === 2 && (
               <div className="space-y-4">
                 <div>
-                  <label className="label-base">Nombre del concesionario</label>
+                  <label className="label-base">Nombre del showroom</label>
                   <input
                     value={form.dealer_name}
                     onChange={(e) => update('dealer_name', e.target.value)}
@@ -247,10 +237,6 @@ export default function RegistroPage() {
           </div>
         </div>
 
-        {/* Plan info */}
-        <p className="text-center text-xs text-bsm-text-muted mt-6">
-          Empieza con 5 vehículos gratuitos · Sin compromiso · Actualiza cuando quieras
-        </p>
       </div>
     </div>
   )
