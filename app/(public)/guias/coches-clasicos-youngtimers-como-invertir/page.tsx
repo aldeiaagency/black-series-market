@@ -5,7 +5,7 @@ import { GuideAuthorBox, GuideFaq, GuideHeroImage, GuideToc, type FaqItem, type 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 const PAGE_PATH = '/guias/coches-clasicos-youngtimers-como-invertir'
 const PAGE_URL = `${SITE_URL}${PAGE_PATH}`
-const HERO_IMAGE = '/images/hero/vehicle-concierge-black-label.webp'
+const HERO_IMAGE = '/images/guides/clasicos-youngtimers-inversion.webp'
 const HERO_IMAGE_URL = `${SITE_URL}${HERO_IMAGE}`
 const PUBLISHED_DATE = '2026-06-09'
 const MODIFIED_DATE = '2026-06-16'

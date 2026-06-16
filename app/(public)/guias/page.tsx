@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { commercialGuides } from './_data/commercialGuides'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
-const HUB_IMAGE = '/images/hero/black-label-hero-gt3rs-ducati.webp'
+const HUB_IMAGE = '/images/guides/coches-premium-segunda-mano.webp'
 const HUB_IMAGE_URL = `${SITE_URL}${HUB_IMAGE}`
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ const GUIDES = [
     title: 'Cómo comprar un supercar de segunda mano',
     desc: 'Inspección, historial, documentación y price discovery para Ferrari, Lamborghini, McLaren y similares. Guía completa para compradores exigentes.',
     tag: 'Compradores · Supercars',
-    image: '/images/hero/black-label-hero-gt3rs-ducati.webp',
+    image: '/images/guides/comprar-supercar-segunda-mano.webp',
     imageAlt: 'Supercar Porsche GT3 RS junto a una Ducati premium',
     datePublished: '2026-06-09',
     dateModified: '2026-06-16',
@@ -42,7 +42,7 @@ const GUIDES = [
     title: 'Cómo comprar una moto premium de segunda mano',
     desc: 'Qué verificar, qué documentación exigir y cómo valorar el precio en deportivas, naked, touring, custom y clásicas de moto.',
     tag: 'Compradores · Motos',
-    image: '/images/hero/black-label-hero-gt3rs-ducati.webp',
+    image: '/images/guides/comprar-moto-premium-segunda-mano.webp',
     imageAlt: 'Moto premium Ducati en un entorno de vehículos de alta gama',
     datePublished: '2026-06-09',
     dateModified: '2026-06-16',
@@ -52,7 +52,7 @@ const GUIDES = [
     title: 'Coches clásicos y youngtimers como inversión',
     desc: 'Qué hace que un clásico se valorice, cómo evaluar una unidad, documentación imprescindible y errores que evitar en el mercado de clásicos en España.',
     tag: 'Inversión · Clásicos',
-    image: '/images/hero/vehicle-concierge-black-label.webp',
+    image: '/images/guides/clasicos-youngtimers-inversion.webp',
     imageAlt: 'Servicio de búsqueda de vehículos premium y clásicos',
     datePublished: '2026-06-09',
     dateModified: '2026-06-16',
@@ -62,7 +62,7 @@ const GUIDES = [
     title: 'Cómo vender un coche premium: guía para profesionales',
     desc: 'Estrategia, documentación, precio correcto y canales para dealers, compraventas y especialistas que quieren maximizar el valor de su stock.',
     tag: 'Profesionales · Venta',
-    image: '/images/hero/professional-showroom-black-label.webp',
+    image: '/images/guides/vender-coche-premium-profesionales.webp',
     imageAlt: 'Showroom profesional de coches premium',
     datePublished: '2026-06-09',
     dateModified: '2026-06-16',
@@ -143,30 +143,33 @@ export default function GuiasPage() {
         </p>
       </div>
 
-      <div className="space-y-0 divide-y divide-bsm-border border border-bsm-border">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {GUIDES.map((g) => (
           <Link
             key={g.href}
             href={g.href}
-            className="group px-6 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5 hover:bg-surface transition-colors"
+            className="group overflow-hidden border border-bsm-border bg-[#0B0B0B] transition-colors hover:border-gold/50 hover:bg-surface"
           >
-            <div className="relative h-28 w-full overflow-hidden border border-bsm-border bg-surface sm:w-44 sm:flex-shrink-0">
+            <div className="relative aspect-[16/9] overflow-hidden bg-surface">
               <Image
                 src={g.image}
                 alt={g.imageAlt}
                 fill
-                sizes="(max-width: 640px) 100vw, 176px"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0B0B0B] to-transparent" />
             </div>
-            <div className="flex-1">
+            <div className="p-5">
               <p className="text-[10px] text-gold tracking-widest uppercase mb-2">{g.tag}</p>
-              <h2 className="text-sm font-semibold text-bsm-text-primary group-hover:text-gold transition-colors mb-1.5">
+              <h2 className="text-sm font-semibold text-bsm-text-primary group-hover:text-gold transition-colors mb-2 leading-snug line-clamp-2">
                 {g.title}
               </h2>
-              <p className="text-xs text-bsm-text-muted leading-relaxed max-w-xl">{g.desc}</p>
+              <p className="text-xs text-bsm-text-muted leading-relaxed line-clamp-3">{g.desc}</p>
+              <span className="mt-4 inline-flex text-xs text-gold group-hover:text-gold-light transition-colors">
+                Leer guía →
+              </span>
             </div>
-            <span className="text-gold text-sm flex-shrink-0 group-hover:text-gold-light transition-colors">→</span>
           </Link>
         ))}
       </div>

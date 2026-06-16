@@ -38,7 +38,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'Coches premium de segunda mano en España',
     description: 'Guía comercial para comprar coches premium de segunda mano en España: marcas clave, segmentos, rangos de precio, documentación y cómo encontrar unidades verificadas.',
     tag: 'Coches premium',
-    image: '/images/hero/black-label-hero-gt3rs-ducati.webp',
+    image: '/images/guides/coches-premium-segunda-mano.webp',
     imageAlt: 'Coche premium deportivo en Black Label Market',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -93,6 +93,33 @@ export const commercialGuides: CommercialGuide[] = [
           'En Black Label Market, el objetivo es conectar compradores con concesionarios, compraventas y especialistas verificados del mercado de coches premium en España.',
         ],
       },
+      {
+        id: 'marcas-y-modelos',
+        title: 'Marcas y modelos que conviene comparar',
+        paragraphs: [
+          'Si buscas un coche premium polivalente, tiene sentido comparar berlinas y SUV de BMW, Mercedes-Benz, Audi, Lexus o Porsche. Si buscas una compra más emocional, el foco cambia hacia deportivos, versiones M, AMG, RS, Porsche 911, Cayman o unidades de baja producción.',
+          'La búsqueda más inteligente no empieza por una marca cerrada, sino por un uso: diario premium, fin de semana deportivo, coche familiar de alta gama, unidad de colección o vehículo de representación. Desde ahí, el catálogo se filtra mejor y se evitan compras impulsivas.',
+        ],
+      },
+      {
+        id: 'senales-buena-unidad',
+        title: 'Señales de una buena unidad en un anuncio',
+        paragraphs: [
+          'Una buena ficha de coche premium debe explicar más que año, kilómetros y precio. Debería mostrar fotos amplias, detalles interiores, desgaste real, equipamiento, estado de neumáticos, procedencia, revisiones y motivo comercial de la unidad.',
+          'También ayuda que el vendedor sea identificable y que existan vías claras de contacto. En importes altos, la transparencia no es un extra: es una parte esencial de la compra.',
+        ],
+      },
+      {
+        id: 'errores-comunes',
+        title: 'Errores habituales al buscar coches premium',
+        bullets: [
+          'Ordenar solo por precio y no por trazabilidad.',
+          'Ignorar costes de mantenimiento, seguro, neumáticos y frenos.',
+          'No comprobar si el equipamiento anunciado corresponde realmente a la unidad.',
+          'Asumir que pocos kilómetros siempre significan mejor estado.',
+          'No comparar la reputación del vendedor junto al vehículo.',
+        ],
+      },
     ],
     faq: [
       { question: '¿Qué marcas se consideran premium en coches de segunda mano?', answer: 'Depende del segmento, pero Porsche, Mercedes-Benz, BMW, Audi, Range Rover, Lexus, Maserati, Bentley, Aston Martin, Ferrari, Lamborghini y McLaren suelen formar parte del mercado premium o de lujo.' },
@@ -116,7 +143,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'Coches de lujo de segunda mano',
     description: 'Guía para comprar coches de lujo de segunda mano: Bentley, Rolls-Royce, Mercedes-Maybach, Aston Martin, Maserati y otros modelos premium en España.',
     tag: 'Coches de lujo',
-    image: '/images/hero/professional-showroom-black-label.webp',
+    image: '/images/guides/coches-lujo-segunda-mano.webp',
     imageAlt: 'Showroom de coches de lujo y alta gama',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -167,6 +194,33 @@ export const commercialGuides: CommercialGuide[] = [
           'Un vendedor especializado debe saber explicar procedencia, historial, estado y equipamiento sin obligar al comprador a reconstruir la historia de la unidad. En coches de lujo, esa transparencia forma parte de la propuesta de valor.',
         ],
       },
+      {
+        id: 'depreciacion',
+        title: 'Depreciación y oportunidad de compra',
+        paragraphs: [
+          'Muchos coches de lujo sufren una depreciación fuerte durante sus primeros años, especialmente berlinas grandes y gran turismos con alto coste nuevo. Esa caída puede crear oportunidades interesantes si la unidad conserva historial, configuración y mantenimiento adecuados.',
+          'El comprador debe distinguir entre precio atractivo y coste oculto. Un coche de lujo barato puede necesitar suspensión, neumáticos, frenos, electrónica o detalles interiores que convierten la oportunidad en una reparación cara.',
+        ],
+      },
+      {
+        id: 'uso-correcto',
+        title: 'Qué uso encaja con un coche de lujo usado',
+        paragraphs: [
+          'Para viajes largos y representación, una berlina de lujo o un gran turismo puede tener más sentido que un deportivo. Para uso familiar premium, un SUV de lujo puede ofrecer mejor acceso, confort y versatilidad. Para conducción de fin de semana, un coupé de lujo combina presencia y experiencia.',
+          'Definir el uso evita comprar por imagen. El mejor coche de lujo de segunda mano es el que mantiene coherencia entre precio, mantenimiento, disponibilidad de servicio y estilo de vida del comprador.',
+        ],
+      },
+      {
+        id: 'checklist-lujo',
+        title: 'Checklist rápido antes de reservar',
+        bullets: [
+          'Revisar funcionamiento de todos los sistemas eléctricos y de confort.',
+          'Comprobar desgaste de cuero, mandos, volante, alfombrillas y plazas traseras.',
+          'Solicitar facturas de mantenimiento y trabajos recientes.',
+          'Verificar neumáticos homologados y estado de suspensión.',
+          'Confirmar garantía, titularidad y ausencia de cargas.',
+        ],
+      },
     ],
     faq: [
       { question: '¿Qué coche de lujo usado conserva mejor valor?', answer: 'Depende del modelo, pero las unidades con demanda estable, historial completo, configuración sobria y mantenimiento oficial suelen conservar mejor valor que coches muy personalizados o con documentación incompleta.' },
@@ -190,7 +244,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'Superdeportivos de segunda mano en España',
     description: 'Guía comercial para comparar superdeportivos de segunda mano: Ferrari, Lamborghini, McLaren y Porsche GT usados, con claves de precio, historial y compra.',
     tag: 'Superdeportivos',
-    image: '/images/hero/black-label-hero-gt3rs-ducati.webp',
+    image: '/images/guides/superdeportivos-segunda-mano.webp',
     imageAlt: 'Superdeportivo premium en Black Label Market',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -243,6 +297,33 @@ export const commercialGuides: CommercialGuide[] = [
           'El comprador de superdeportivos necesita filtrar por confianza, no por volumen. Un entorno especializado permite comparar unidades con mayor calidad de presentación, vendedores más relevantes y menos ruido de anuncios genéricos.',
         ],
       },
+      {
+        id: 'garantia-y-servicio',
+        title: 'Garantía, servicio y disponibilidad de taller',
+        paragraphs: [
+          'Antes de comprar un superdeportivo usado, conviene saber dónde se mantendrá y qué red de especialistas existe cerca. En algunos modelos, la diferencia entre taller oficial, especialista independiente y mantenimiento no documentado cambia mucho el valor percibido.',
+          'La garantía comercial también debe leerse con detalle: qué cubre, durante cuánto tiempo, con qué límite y cómo se gestiona si el vehículo se encuentra en otra provincia.',
+        ],
+      },
+      {
+        id: 'kilometraje',
+        title: 'Kilometraje bajo no siempre significa mejor compra',
+        paragraphs: [
+          'En superdeportivos, una unidad con muy pocos kilómetros puede parecer ideal, pero también puede haber pasado largos periodos parada. Baterías, juntas, neumáticos, líquidos y sistemas hidráulicos sufren cuando el coche no se usa.',
+          'Una unidad con más kilómetros, uso regular y mantenimiento impecable puede resultar más sólida que otra con kilometraje muy bajo y revisiones espaciadas.',
+        ],
+      },
+      {
+        id: 'preguntas-vendedor',
+        title: 'Preguntas que deberías hacer al vendedor',
+        bullets: [
+          '¿Cuándo fue la última revisión y qué trabajos incluyó?',
+          '¿La unidad ha tenido uso en circuito o eventos de conducción?',
+          '¿Conserva piezas originales si tiene modificaciones?',
+          '¿Hay mediciones o informes de pintura y carrocería?',
+          '¿Se permite inspección pre-compra por un especialista independiente?',
+        ],
+      },
     ],
     faq: [
       { question: '¿Qué superdeportivo de segunda mano es más fácil de revender?', answer: 'Suelen tener mejor liquidez las unidades reconocibles, con historial completo, configuración demandada y comunidad fuerte, como ciertos Porsche GT, Ferrari V8 o Lamborghini Huracán. Aun así, depende del precio de entrada y del estado.' },
@@ -267,7 +348,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'SUV premium de segunda mano',
     description: 'Guía para comprar SUV premium de segunda mano: Range Rover, Porsche Cayenne, Mercedes Clase G, BMW X5, Audi Q8 y otros SUV de lujo.',
     tag: 'SUV premium',
-    image: '/images/hero/professional-showroom-black-label.webp',
+    image: '/images/guides/suv-premium-segunda-mano.webp',
     imageAlt: 'SUV y coches premium en showroom profesional',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -320,6 +401,33 @@ export const commercialGuides: CommercialGuide[] = [
           'El mejor SUV premium no siempre es el más barato. Busca coherencia entre precio, kilómetros, estado, equipamiento, vendedor y mantenimiento. Si una unidad parece muy por debajo del mercado, normalmente hay una razón que merece investigarse.',
         ],
       },
+      {
+        id: 'versiones',
+        title: 'Versiones que cambian mucho la experiencia',
+        paragraphs: [
+          'Dentro de un mismo modelo, una versión básica y una versión alta pueden sentirse como coches distintos. Motor, suspensión, paquete interior, sonido, llantas, frenos y asistentes de conducción influyen tanto en disfrute como en valor de reventa.',
+          'En SUV premium, las versiones deportivas pueden ser muy atractivas, pero también elevan consumo, neumáticos y mantenimiento. Las versiones híbridas enchufables encajan bien si el uso diario permite cargar con frecuencia.',
+        ],
+      },
+      {
+        id: 'familia-viajes',
+        title: 'Uso familiar y viajes largos',
+        paragraphs: [
+          'Muchos compradores llegan al SUV premium buscando un coche único para familia, viajes y presencia profesional. En ese caso, conviene revisar espacio real, maletero, plazas traseras, confort acústico, conectividad y facilidad de mantenimiento.',
+          'También es importante probar la unidad en ciudad y carretera. Un SUV grande puede ser excelente para viajar y menos cómodo para aparcar o circular a diario en zonas estrechas.',
+        ],
+      },
+      {
+        id: 'checklist-suv',
+        title: 'Checklist rápido para SUV premium',
+        bullets: [
+          'Suspensión neumática o adaptativa sin ruidos ni avisos.',
+          'Neumáticos iguales por eje y con medidas homologadas.',
+          'Historial claro de caja de cambios, diferenciales y sistema 4x4.',
+          'Funcionamiento de cámaras, sensores, techo, climatización y portón eléctrico.',
+          'Consumo realista para el uso previsto.',
+        ],
+      },
     ],
     faq: [
       { question: '¿Cuál es el mejor SUV premium de segunda mano?', answer: 'No hay uno universal. Porsche Cayenne destaca por conducción, Range Rover por lujo y presencia, Clase G por valor aspiracional, BMW X5 por equilibrio y Audi Q8 por calidad interior. La mejor compra depende del uso y presupuesto.' },
@@ -344,7 +452,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'Coches clásicos premium en venta',
     description: 'Guía comercial para buscar coches clásicos premium en venta: Porsche 911, Ferrari clásicos, Mercedes SL, BMW M y youngtimers de colección.',
     tag: 'Clásicos premium',
-    image: '/images/hero/vehicle-concierge-black-label.webp',
+    image: '/images/guides/coches-clasicos-premium-venta.webp',
     imageAlt: 'Búsqueda editorial de coches clásicos premium',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -393,6 +501,33 @@ export const commercialGuides: CommercialGuide[] = [
           'La búsqueda debe priorizar confianza: vendedores especializados, fotos detalladas, documentación clara y descripciones que expliquen procedencia. En este segmento, una buena ficha ahorra llamadas improductivas y mejora la calidad de la decisión.',
         ],
       },
+      {
+        id: 'piezas-y-mantenimiento',
+        title: 'Disponibilidad de piezas y mantenimiento',
+        paragraphs: [
+          'La belleza de un clásico no debe ocultar la realidad práctica: disponibilidad de piezas, especialistas de marca, tiempos de reparación y coste de restauración. Un modelo muy deseado puede ser más fácil de mantener si existe comunidad, documentación técnica y recambio.',
+          'Antes de comprar, conviene preguntar quién ha mantenido el coche, qué trabajos recientes se han hecho y qué intervenciones quedan pendientes.',
+        ],
+      },
+      {
+        id: 'documentos-clave',
+        title: 'Documentos que aumentan confianza',
+        bullets: [
+          'Historial de propietarios y facturas antiguas.',
+          'Certificados de origen o documentación del fabricante si existe.',
+          'Fotos de restauración o trabajos de chapa y pintura.',
+          'ITV, ficha técnica y homologaciones de modificaciones.',
+          'Manual, herramientas, libros y accesorios originales.',
+        ],
+      },
+      {
+        id: 'valor-disfrute',
+        title: 'Comprar para disfrutar, no solo para especular',
+        paragraphs: [
+          'El mejor clásico premium suele ser el que puedes mantener, usar y entender. Comprar solo por expectativa de revalorización puede llevar a pagar demasiado o elegir un coche que no encaja con tu uso real.',
+          'Una unidad equilibrada combina deseo, estado, documentación, facilidad de mantenimiento y un precio que deja margen para conservarla correctamente.',
+        ],
+      },
     ],
     faq: [
       { question: '¿Qué coche clásico premium comprar?', answer: 'Depende del presupuesto, uso y gusto personal. Porsche 911, Mercedes SL, BMW M y ciertos Ferrari son opciones frecuentes por comunidad, demanda y disponibilidad de información.' },
@@ -417,7 +552,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'Motos premium de segunda mano en España',
     description: 'Guía comercial para buscar motos premium de segunda mano en España: Ducati, BMW Motorrad, Harley-Davidson, MV Agusta, Triumph y motos especiales.',
     tag: 'Motos premium',
-    image: '/images/hero/black-label-hero-gt3rs-ducati.webp',
+    image: '/images/guides/motos-premium-segunda-mano.webp',
     imageAlt: 'Moto premium Ducati en Black Label Market',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -458,6 +593,33 @@ export const commercialGuides: CommercialGuide[] = [
           'El precio debe ajustarse por versión, año, kilometraje, accesorios homologados, garantías, estado de consumibles y reputación del vendedor. Una unidad aparentemente cara puede ser mejor compra si evita mantenimiento inmediato.',
         ],
       },
+      {
+        id: 'tipo-de-uso',
+        title: 'Elegir por uso: carretera, viaje, ciudad o colección',
+        paragraphs: [
+          'La moto premium correcta depende del uso. Una deportiva exige postura, mantenimiento y tolerancia al calor; una touring prioriza comodidad y equipaje; una naked premium busca equilibrio; una custom valora presencia, sonido y personalización.',
+          'Antes de comparar precios, define si la moto será de fin de semana, viajes largos, uso diario, colección o rutas deportivas. Esa decisión ordena mejor el catálogo.',
+        ],
+      },
+      {
+        id: 'accesorios',
+        title: 'Accesorios que suman y accesorios que restan',
+        paragraphs: [
+          'Maletas originales, escapes homologados, protecciones, cúpulas, asientos confort o suspensiones mejoradas pueden aportar valor si están documentados. En cambio, modificaciones no homologadas, piezas sin factura o cambios irreversibles reducen confianza.',
+          'Una moto premium muy personalizada puede ser perfecta para su propietario anterior y menos líquida para el siguiente comprador.',
+        ],
+      },
+      {
+        id: 'checklist-moto-premium',
+        title: 'Checklist rápido de compra',
+        bullets: [
+          'Revisiones por tiempo y kilómetros al día.',
+          'Estado de neumáticos, frenos, kit de transmisión y suspensiones.',
+          'Ausencia de caídas estructurales o reparaciones mal acabadas.',
+          'Accesorios homologados y piezas originales disponibles.',
+          'Vendedor identificable y documentación completa.',
+        ],
+      },
     ],
     faq: [
       { question: '¿Qué marcas de moto premium tienen más demanda?', answer: 'Ducati, BMW Motorrad, Harley-Davidson, Triumph, MV Agusta, Aprilia, KTM e Indian suelen concentrar mucha demanda en el mercado premium y de alta gama.' },
@@ -481,7 +643,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'Motos deportivas premium de segunda mano',
     description: 'Guía para buscar motos deportivas premium de segunda mano: Ducati Panigale, BMW S1000RR, Aprilia RSV4, MV Agusta y superbikes usadas.',
     tag: 'Motos deportivas',
-    image: '/images/hero/black-label-hero-gt3rs-ducati.webp',
+    image: '/images/guides/motos-deportivas-premium.webp',
     imageAlt: 'Moto deportiva premium Ducati junto a un superdeportivo',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -526,6 +688,33 @@ export const commercialGuides: CommercialGuide[] = [
           'Ausencia de caídas estructurales o reparaciones dudosas.',
         ],
       },
+      {
+        id: 'ergonomia',
+        title: 'Ergonomía y uso real',
+        paragraphs: [
+          'Una superbike premium puede ser espectacular y poco adecuada para uso diario. La posición de conducción, el calor, el radio de giro, el consumo de neumáticos y la protección aerodinámica importan mucho si la moto no será solo para rutas cortas.',
+          'Probar la postura y revisar si hay accesorios de confort o piezas originales ayuda a evitar una compra muy emocional y poco utilizable.',
+        ],
+      },
+      {
+        id: 'ediciones',
+        title: 'Versiones especiales y ediciones limitadas',
+        paragraphs: [
+          'Algunas deportivas premium tienen versiones SP, R, Factory, S, M o ediciones limitadas con suspensiones, frenos, electrónica o componentes más deseados. Estas versiones pueden mantener mejor valor si se conservan originales y bien documentadas.',
+          'La diferencia de precio debe justificarse con equipamiento real, no solo con estética o adhesivos añadidos.',
+        ],
+      },
+      {
+        id: 'preguntas-deportiva',
+        title: 'Preguntas para una deportiva usada',
+        bullets: [
+          '¿Ha tenido caídas, circuito o preparación?',
+          '¿Qué neumáticos monta y cuándo se cambiaron?',
+          '¿Funciona correctamente el quickshifter y la electrónica?',
+          '¿Conserva carenados, escape y piezas originales?',
+          '¿Tiene revisiones documentadas por especialista?',
+        ],
+      },
     ],
     faq: [
       { question: '¿Qué deportiva premium usada es más recomendable?', answer: 'Ducati Panigale, BMW S1000RR, Aprilia RSV4 y MV Agusta son opciones habituales. La mejor depende de ergonomía, uso, presupuesto de mantenimiento y disponibilidad de servicio especializado.' },
@@ -550,7 +739,7 @@ export const commercialGuides: CommercialGuide[] = [
     h1: 'Motos touring y trail premium de segunda mano',
     description: 'Guía para comprar motos touring y trail premium de segunda mano: BMW GS, Ducati Multistrada, Triumph Tiger, KTM Adventure y motos viajeras usadas.',
     tag: 'Touring y trail',
-    image: '/images/hero/vehicle-concierge-black-label.webp',
+    image: '/images/guides/motos-touring-trail-premium.webp',
     imageAlt: 'Búsqueda de motos touring y trail premium',
     datePublished: TODAY,
     dateModified: TODAY,
@@ -589,6 +778,33 @@ export const commercialGuides: CommercialGuide[] = [
         title: 'Uso trail real: qué comprobar',
         paragraphs: [
           'Si la moto ha salido de asfalto, conviene revisar bajos, llantas, radios, defensas, suspensión, manillar, estriberas y posibles golpes. El uso off-road ligero no es un problema si está bien mantenido y reflejado en el precio.',
+        ],
+      },
+      {
+        id: 'viajes',
+        title: 'Preparación para viajar',
+        paragraphs: [
+          'En touring y trail premium, el valor no está solo en la moto base. Maletas, soportes, defensas, navegación, asiento confort, pantalla alta y mantenimiento reciente pueden hacer que una unidad sea mucho más atractiva para viajar desde el primer día.',
+          'Conviene revisar que todos los accesorios estén bien instalados, sean compatibles y no oculten caídas o reparaciones.',
+        ],
+      },
+      {
+        id: 'altura-peso',
+        title: 'Altura, peso y facilidad de uso',
+        paragraphs: [
+          'Muchas trail premium son altas y pesadas. Antes de comprar, el usuario debe comprobar si llega bien al suelo, si puede mover la moto en parado y si la altura con pasajero o maletas sigue siendo cómoda.',
+          'Una unidad con asiento bajo, suspensiones ajustables o configuración touring puede ser más usable que una versión extrema si el uso será principalmente carretera.',
+        ],
+      },
+      {
+        id: 'checklist-touring',
+        title: 'Checklist rápido para touring y trail',
+        bullets: [
+          'Historial de revisiones y campañas actualizado.',
+          'Estado de maletas, soportes, defensas y cúpula.',
+          'Neumáticos adecuados al uso real.',
+          'Suspensiones sin fugas ni ruidos.',
+          'Prueba de electrónica, modos, ABS, control de tracción y puños calefactables.',
         ],
       },
     ],

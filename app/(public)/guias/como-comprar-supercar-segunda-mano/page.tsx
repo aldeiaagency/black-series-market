@@ -5,7 +5,7 @@ import { GuideAuthorBox, GuideFaq, GuideHeroImage, GuideToc, type FaqItem, type 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 const PAGE_PATH = '/guias/como-comprar-supercar-segunda-mano'
 const PAGE_URL = `${SITE_URL}${PAGE_PATH}`
-const HERO_IMAGE = '/images/hero/black-label-hero-gt3rs-ducati.webp'
+const HERO_IMAGE = '/images/guides/comprar-supercar-segunda-mano.webp'
 const HERO_IMAGE_URL = `${SITE_URL}${HERO_IMAGE}`
 const PUBLISHED_DATE = '2026-06-09'
 const MODIFIED_DATE = '2026-06-16'
