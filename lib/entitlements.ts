@@ -32,7 +32,6 @@ export interface UsageSnapshot {
 
 export interface Entitlements {
   plan: PlanSlug
-  isFounding: boolean
   subscriptionStatus: string
   limits: PlanLimits
   features: Record<string, PlanFeature>
@@ -51,7 +50,7 @@ export async function getEntitlements(
   const { data: sub } = await admin
     .from('subscriptions')
     .select(`
-      id, status, is_founding, billing_cycle,
+      id, status, billing_cycle,
       plan:plans(slug, plan_limits(key, value_number), plan_features(feature_key, included, availability_status, display_label))
     `)
     .eq('organization_id', organizationId)
@@ -143,7 +142,6 @@ export async function getEntitlements(
 
   return {
     plan: plan.slug as PlanSlug,
-    isFounding: sub.is_founding,
     subscriptionStatus: sub.status,
     limits,
     features,

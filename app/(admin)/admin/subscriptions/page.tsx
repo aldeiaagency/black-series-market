@@ -20,7 +20,7 @@ export default async function AdminSubscriptionsPage({ searchParams }: PageProps
   let query = admin
     .from('subscriptions')
     .select(`
-      id, status, billing_cycle, is_founding, created_at, current_period_end, cancel_at_period_end,
+      id, status, billing_cycle, created_at, current_period_end, cancel_at_period_end,
       plan:plans(slug, name),
       organization:organizations(id, name, slug)
     `, { count: 'exact' })
@@ -80,11 +80,6 @@ export default async function AdminSubscriptionsPage({ searchParams }: PageProps
                       <p className="text-sm text-bsm-text-primary font-medium truncate">
                         {org?.name ?? sub.id}
                       </p>
-                      {sub.is_founding && (
-                        <span className="text-[9px] text-gold border border-gold/30 px-1.5 py-0.5 tracking-widest uppercase flex-shrink-0">
-                          Founding
-                        </span>
-                      )}
                     </div>
                     <p className="text-xs text-bsm-text-muted">
                       {plan?.name ?? '—'} · {sub.billing_cycle}

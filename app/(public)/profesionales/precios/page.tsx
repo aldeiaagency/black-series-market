@@ -5,9 +5,7 @@ import { checkEliteAvailability } from '@/lib/elite-capacity'
 import {
   PLANS,
   COMPARISON_ROWS,
-  FOUNDING_MAX_SELLERS,
   ELITE_LIMIT_NOTE,
-  formatEUR,
   type PlanDef,
   type ComparisonRow,
 } from '@/lib/plans-config'
@@ -17,7 +15,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es
 export const metadata: Metadata = {
   title: 'Precios y planes para profesionales — Black Label Market',
   description:
-    'Essential 179 €/mes · Professional 449 €/mes · Elite 899 €/mes. Sin comisiones por venta. Sin permanencia. Precios para concesionarios y especialistas premium.',
+    'Essential 197 €/mes · Professional 449 €/mes · Elite 899 €/mes. Sin comisiones por venta. Sin permanencia. Precios para concesionarios y especialistas premium.',
   alternates: { canonical: '/profesionales/precios' },
   openGraph: {
     title: 'Precios y planes — Black Label Market',
@@ -129,9 +127,7 @@ export default async function PreciosPage() {
                   <span className="font-display text-5xl font-light text-bsm-text-primary">{plan.monthlyPrice}€</span>
                   <span className="text-bsm-text-muted text-sm">/mes</span>
                 </div>
-                <p className="text-xs text-gold">
-                  o {formatEUR(plan.foundingPrice)}/mes con condición Founding
-                </p>
+                <p className="text-xs text-bsm-text-muted">+ IVA</p>
                 <p className="text-xs text-bsm-text-muted mt-2">{limitLabel}</p>
                 {isElite && (
                   <p className="text-[11px] text-bsm-text-muted mt-2 leading-relaxed border-t border-bsm-border pt-2">
@@ -177,18 +173,6 @@ export default async function PreciosPage() {
         })}
       </div>
 
-      {/* Founding note */}
-      <div className="border border-gold/20 bg-surface p-6 mb-12 text-center">
-        <p className="text-xs text-gold tracking-widest uppercase mb-2">Programa Founding</p>
-        <p className="text-sm text-bsm-text-secondary max-w-2xl mx-auto">
-          Los primeros {FOUNDING_MAX_SELLERS} profesionales seleccionados acceden a precio Founding
-          —mitad de precio— bloqueado de por vida mientras mantengan su suscripción activa.{' '}
-          <Link href="/profesionales/founding" className="text-gold hover:text-gold-light underline underline-offset-2">
-            Ver condiciones del Founding →
-          </Link>
-        </p>
-      </div>
-
       {/* Comparison table */}
       <div className="mb-12">
         <h2 className="font-display text-2xl font-light text-center mb-8">Comparativa de planes</h2>
@@ -203,9 +187,7 @@ export default async function PreciosPage() {
                     <span className="block font-display text-2xl font-light text-bsm-text-primary mt-1">
                       {plan.monthlyPrice}€<span className="text-xs text-bsm-text-muted font-sans"> /mes</span>
                     </span>
-                    <span className="block text-[11px] text-gold mt-0.5">
-                      Founding {formatEUR(plan.foundingPrice)}/mes
-                    </span>
+                    <span className="block text-[11px] text-bsm-text-muted mt-0.5">+ IVA</span>
                   </th>
                 ))}
               </tr>
@@ -225,13 +207,13 @@ export default async function PreciosPage() {
           </table>
         </div>
         <p className="text-[11px] text-bsm-text-muted mt-4 text-center max-w-2xl mx-auto">
-          {ELITE_LIMIT_NOTE} La sincronización del stock está incluida en Elite y disponible como complemento en los demás planes desde tu panel.
+          La sincronización del stock está incluida en Elite y disponible como complemento en los demás planes desde tu panel.
         </p>
       </div>
 
       {/* Note */}
       <p className="text-center text-xs text-bsm-text-muted mb-16 max-w-2xl mx-auto">
-        Precios sin IVA. Las funcionalidades todavía no operativas solo aparecerán como incluidas cuando estén desarrolladas, verificadas y activadas.
+        Precios indicados sin IVA (se añade en el pago). Las funcionalidades todavía no operativas solo aparecerán como incluidas cuando estén desarrolladas, verificadas y activadas.
       </p>
 
       {/* Multi-sede */}
@@ -270,8 +252,8 @@ export default async function PreciosPage() {
             a: 'No. Todos los perfiles y vehículos pasan verificación editorial previa a la publicación, idéntica para todos los planes.',
           },
           {
-            q: '¿Cuándo se activa el plan Founding?',
-            a: 'Una vez aprobada tu solicitud, el equipo de Black Label Market te confirma la condición Founding. El precio queda bloqueado mientras mantengas la suscripción activa.',
+            q: '¿Los precios incluyen IVA?',
+            a: 'No. Todos los precios mostrados son sin IVA; se añade en el momento del pago.',
           },
         ].map(({ q, a }) => (
           <div key={q} className="border-b border-bsm-border py-5">

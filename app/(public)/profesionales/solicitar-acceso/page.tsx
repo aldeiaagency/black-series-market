@@ -5,7 +5,7 @@ import { useState, useTransition, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 const PLANS = [
-  { value: 'essential',    label: 'Essential — 179 €/mes' },
+  { value: 'essential',    label: 'Essential — 197 €/mes' },
   { value: 'professional', label: 'Professional — 449 €/mes' },
   { value: 'elite',        label: 'Elite — 899 €/mes (plazas limitadas)' },
   { value: 'grupo',        label: 'Modelo Grupo (multi-sede)' },
@@ -21,7 +21,6 @@ const VEHICLE_VOLUMES = [
 function SolicitarAccesoForm() {
   const params = useSearchParams()
   const defaultPlan = params.get('plan') ?? ''
-  const isFounding = params.get('tipo') === 'founding'
   const isWaitlist = params.get('waitlist') === '1'
   const isConsulta = params.get('consulta') === '1'
 
@@ -38,7 +37,6 @@ function SolicitarAccesoForm() {
     volume: '',
     city: '',
     message: '',
-    interested_founding: isFounding,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -68,11 +66,10 @@ function SolicitarAccesoForm() {
               `Plan de interés: ${form.plan}`,
               `Volumen: ${form.volume}`,
               `Ciudad: ${form.city}`,
-              form.interested_founding ? 'Interesado en Founding' : '',
               isWaitlist ? 'Lista de espera Elite' : '',
               form.message,
             ].filter(Boolean).join('\n'),
-            metadata: { plan: form.plan, volume: form.volume, founding: form.interested_founding },
+            metadata: { plan: form.plan, volume: form.volume },
           }),
         })
         if (!res.ok) throw new Error('Error al enviar')
@@ -87,8 +84,6 @@ function SolicitarAccesoForm() {
     ? 'Lista de espera Elite'
     : isConsulta
     ? 'Consulta disponibilidad Elite'
-    : isFounding
-    ? 'Solicitar acceso Founding'
     : 'Solicitar acceso profesional'
 
   if (sent) {
@@ -260,19 +255,6 @@ function SolicitarAccesoForm() {
             placeholder="Cuéntanos algo sobre tu negocio o lo que necesitas"
           />
         </div>
-
-        {isFounding && (
-          <label className="flex items-start gap-3 text-sm text-bsm-text-secondary cursor-pointer">
-            <input
-              type="checkbox"
-              name="interested_founding"
-              checked={form.interested_founding}
-              onChange={handleChange}
-              className="mt-0.5 accent-gold"
-            />
-            Estoy interesado/a en la condición Founding (precio bloqueado de por vida)
-          </label>
-        )}
 
         {error && (
           <p className="text-sm text-red-400">{error}</p>

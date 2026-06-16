@@ -3,7 +3,7 @@
 // debe renderizar vacía por depender del estado de los seeds en la BD.
 //
 // IMPORTANTE: En ninguna parte de la web se habla de facturación anual.
-// Todos los precios son mensuales (€/mes), sin IVA.
+// Todos los precios son mensuales (€/mes), sin IVA. No existe programa Founding.
 
 export type CellValue = number | boolean | 'destacado'
 
@@ -12,8 +12,6 @@ export interface PlanDef {
   name: string
   /** Precio mensual normal (€/mes, sin IVA) */
   monthlyPrice: number
-  /** Precio Founding: mitad del precio mensual, bloqueado de por vida */
-  foundingPrice: number
   tagline: string
   popular?: boolean
   /** Elite: plazas limitadas y gobernadas por disponibilidad */
@@ -28,14 +26,11 @@ export interface ComparisonRow {
   suffix?: string
 }
 
-/** Tope de vendedores con condición Founding (programa cerrado). */
-export const FOUNDING_MAX_SELLERS = 20
-
-/** Tope de vendedores con plan Elite en la plataforma. */
-export const ELITE_MAX_SELLERS = 50
-
-/** Aclaración pública del plan Elite (sin exponer números internos de capacidad). */
-export const ELITE_LIMIT_NOTE = `Plan limitado a ${ELITE_MAX_SELLERS} vendedores en la plataforma. Se habilitarán nuevas plazas según disponibilidad.`
+/**
+ * Aclaración pública del plan Elite. Nunca debe exponer el tope interno de
+ * vendedores (cifra de gestión interna, no publicada): solo el copy genérico.
+ */
+export const ELITE_LIMIT_NOTE = 'Plazas limitadas según disponibilidad y zona.'
 
 export const COMPARISON_ROWS: ComparisonRow[] = [
   { key: 'max_active_vehicles',       label: 'Vehículos activos',           type: 'limit' },
@@ -58,8 +53,7 @@ export const PLANS: PlanDef[] = [
   {
     slug: 'essential',
     name: 'Essential',
-    monthlyPrice: 179,
-    foundingPrice: 89.5,
+    monthlyPrice: 197,
     tagline: 'Presencia premium para empezar.',
     values: {
       max_active_vehicles: 15,
@@ -82,7 +76,6 @@ export const PLANS: PlanDef[] = [
     slug: 'professional',
     name: 'Professional',
     monthlyPrice: 449,
-    foundingPrice: 224.5,
     tagline: 'El estándar para concesionarios activos.',
     popular: true,
     values: {
@@ -99,14 +92,13 @@ export const PLANS: PlanDef[] = [
       analytics_advanced: false,
       vehicles_on_request: true,
       showroom_featured: false,
-      showroom_listing_priority: true,
+      showroom_listing_priority: false,
     },
   },
   {
     slug: 'elite',
     name: 'Elite',
     monthlyPrice: 899,
-    foundingPrice: 449.5,
     tagline: 'Máxima visibilidad y automatización.',
     limited: true,
     values: {

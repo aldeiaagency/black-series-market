@@ -71,7 +71,6 @@ async function handleCheckoutCompleted(
   const dealerId = meta.dealer_id
   const planSlug = meta.plan
   const billingCycle = (meta.billing_cycle as 'monthly' | 'annual') ?? 'monthly'
-  const isFounding = meta.is_founding === 'true'
   const vehicleId = meta.vehicle_id  // boost purchase
 
   // ── Boost purchase ──
@@ -103,7 +102,6 @@ async function handleCheckoutCompleted(
         organization_id: organizationId,
         plan_id: plan.id,
         billing_cycle: billingCycle,
-        is_founding: isFounding,
         stripe_subscription_id: session.subscription as string,
         stripe_customer_id: session.customer as string,
         status: 'active',

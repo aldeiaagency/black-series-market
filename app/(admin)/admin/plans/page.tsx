@@ -43,9 +43,7 @@ export default async function AdminPlansPage() {
                     <span className="font-display text-2xl text-bsm-text-primary">{plan.monthly_price ?? '—'}€</span>
                     <span className="text-bsm-text-muted">/mes</span>
                   </p>
-                  {plan.founding_monthly_price && (
-                    <p className="text-xs text-gold">Founding: {plan.founding_monthly_price}€/mes</p>
-                  )}
+                  <p className="text-[10px] text-bsm-text-muted">+ IVA</p>
                 </div>
               </div>
 

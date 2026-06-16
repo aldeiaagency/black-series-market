@@ -10,17 +10,14 @@ export const PLAN_PRICES: Record<string, Record<string, string>> = {
   essential: {
     monthly:  process.env.STRIPE_PRICE_ESSENTIAL_MONTHLY!,
     annual:   process.env.STRIPE_PRICE_ESSENTIAL_ANNUAL!,
-    founding: process.env.STRIPE_PRICE_ESSENTIAL_FOUNDING!,
   },
   professional: {
     monthly:  process.env.STRIPE_PRICE_PROFESSIONAL_MONTHLY!,
     annual:   process.env.STRIPE_PRICE_PROFESSIONAL_ANNUAL!,
-    founding: process.env.STRIPE_PRICE_PROFESSIONAL_FOUNDING!,
   },
   elite: {
     monthly:  process.env.STRIPE_PRICE_ELITE_MONTHLY!,
     annual:   process.env.STRIPE_PRICE_ELITE_ANNUAL!,
-    founding: process.env.STRIPE_PRICE_ELITE_FOUNDING!,
   },
 }
 
@@ -38,13 +35,12 @@ export interface CheckoutOptions {
   dealerId: string
   plan: string
   billingCycle: 'monthly' | 'annual'
-  isFounding?: boolean
 }
 
 export async function createCheckoutSession(options: CheckoutOptions | string, priceId?: string, dealerId?: string, plan?: string) {
   // Overloaded: new API (CheckoutOptions) or legacy (customerId, priceId, dealerId, plan)
   if (typeof options === 'object') {
-    const { customerId, priceId: pid, organizationId, dealerId: did, plan: p, billingCycle, isFounding } = options
+    const { customerId, priceId: pid, organizationId, dealerId: did, plan: p, billingCycle } = options
 
     return stripe.checkout.sessions.create({
       customer: customerId,
@@ -59,7 +55,6 @@ export async function createCheckoutSession(options: CheckoutOptions | string, p
         dealer_id: did,
         plan: p,
         billing_cycle: billingCycle,
-        is_founding: isFounding ? 'true' : 'false',
       },
     })
   }

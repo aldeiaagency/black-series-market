@@ -4,7 +4,7 @@ import { Check, Zap, ArrowUpRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getOrganizationIdForUser, getEntitlements } from '@/lib/entitlements'
-import { PLANS, ADDONS, getPlan, formatEUR, ELITE_LIMIT_NOTE } from '@/lib/plans-config'
+import { PLANS, ADDONS, getPlan, ELITE_LIMIT_NOTE } from '@/lib/plans-config'
 
 function UsageBar({ used, max, label }: { used: number; max: number; label: string }) {
   const pct = max > 0 ? Math.min(100, Math.round((used / max) * 100)) : 0
@@ -48,7 +48,6 @@ export default async function SuscripcionPage() {
   const ent = orgId ? await getEntitlements(orgId) : null
 
   const planLabel = ent?.plan ?? dealer.subscription_plan ?? 'essential'
-  const isFounding = ent?.isFounding ?? false
   const currentPlan = getPlan(planLabel)
 
   // Complementos relevantes para el plan actual
@@ -62,11 +61,6 @@ export default async function SuscripcionPage() {
           <span className="text-sm text-bsm-text-muted">
             Plan: <span className="text-gold">{currentPlan?.name ?? planLabel}</span>
           </span>
-          {isFounding && (
-            <span className="text-[10px] text-gold border border-gold/30 px-2 py-0.5 tracking-widest uppercase">
-              Founding
-            </span>
-          )}
           {dealer.subscription_end_at && (
             <span className="text-sm text-bsm-text-muted">
               · Próxima renovación: {new Date(dealer.subscription_end_at).toLocaleDateString('es-ES')}
@@ -143,7 +137,7 @@ export default async function SuscripcionPage() {
                 <span className="font-display text-3xl font-light text-bsm-text-primary">{plan.monthlyPrice}€</span>
                 <span className="text-xs text-bsm-text-muted">/mes</span>
               </div>
-              <p className="text-[11px] text-gold mb-3">Founding {formatEUR(plan.foundingPrice)}/mes</p>
+              <p className="text-[11px] text-bsm-text-muted mb-3">+ IVA</p>
               <p className="text-xs text-bsm-text-muted mb-2">
                 {maxVehicles >= 100 ? 'Hasta 100 vehículos' : `Hasta ${maxVehicles} vehículos`}
               </p>
