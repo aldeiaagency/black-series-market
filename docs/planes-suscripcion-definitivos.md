@@ -24,7 +24,7 @@
 |---|---|
 | **Precio** | **197 €/mes + IVA** (sin anual, sin founding) |
 | **Perfil verificado** | Sí (como todos los showrooms que pueden publicar) |
-| **Activación Premium del Showroom** | Alta del perfil e importación inicial del inventario, **optimizada con IA** (incluida una vez) |
+| **Activación Premium del Showroom** | Alta del perfil e importación inicial del inventario, **optimizada con IA** (incluida una vez) — incluye también la **migración avanzada de inventario heredado**: ya no es un add-on de pago, es parte de esta funcionalidad en todos los planes |
 | **Vehículos activos** | Hasta **15** |
 | **Gestión de inventario** | **Manual** |
 | **Panel de oportunidades** | Bandeja de contactos con estados (con icono ℹ️ de información — texto abajo) |
@@ -38,7 +38,7 @@
 **Texto del icono ℹ️ "Panel de oportunidades":**
 > "Bandeja con los contactos que generan tus vehículos: quién te ha contactado, sobre qué vehículo y cuándo, con estados para hacerles seguimiento. En Essential es una bandeja; en los planes superiores se convierte en un pipeline visual."
 
-**Add-ons disponibles en Essential:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +10 vehículos (59 €/mes, máx. 2 bloques) · Migración avanzada (desde 290 €) · Slot editorial · Diagnóstico Anti-Fuga Express (149 €).
+**Add-ons disponibles en Essential:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +10 vehículos (59 €/mes, máx. 2 bloques) · Diagnóstico Anti-Fuga Express (149 €) · Sincronización automática de stock (feed). *(Ver tabla cerrada en la sección "Add-ons — definitivo" más abajo.)*
 
 **Cambios respecto a los docs previos:** precio 179 € → **197 € + IVA** · **vehículos a la carta eliminado** de Essential · founding y anual eliminados (global).
 
@@ -62,6 +62,8 @@
 | **Boosts incluidos** | 1/mes |
 | **Usuarios / Sedes** | 3 / 1 |
 | **Showroom destacado / prioridad listados** | No |
+
+**Add-ons disponibles en Professional:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +10 vehículos (59 €/mes) · Diagnóstico Anti-Fuga Express (149 €) · Sincronización automática de stock (feed). *(Ver tabla cerrada abajo.)*
 
 ---
 
@@ -87,12 +89,14 @@
 
 > Los ítems `future` están **incluidos en el plan** pero se activan/anuncian **cuando estén operativos** (principio v2: no prometer públicamente lo que no funciona). El "destacado" no es comprable como add-on (exclusivo Elite).
 
+**Add-ons disponibles en Elite:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +25 vehículos (99 €/mes). El Diagnóstico y la sincronización de stock **no se ofrecen como add-on** porque ya van incluidos de serie en el plan.
+
 ---
 
 ## Diagnóstico Anti-Fuga Express + capa nurture (transversal market→agencia)
 
 - **En qué consiste:** mini-auditoría consultiva (sin implementación) que detecta **3 "fugas"** de oportunidades del showroom + recomendaciones prioritarias. Es la **puerta a Black Series Agency** (la implantación se factura en la agencia, nunca en la cuota del market). Tesis "Anti-Fuga".
-- **Por plan:** Elite → **incluido de serie (1/semestre)** · Professional → **add-on 149 €** + 1 sugerencia contextual · Essential → add-on 149 € disponible.
+- **Por plan:** Elite → **incluido de serie (1/semestre)**, no se vende como add-on · Professional → **add-on 149 €** + 1 sugerencia contextual · Essential → **add-on 149 €** disponible.
 - **Regla de la capa nurture (de §12 de los docs):** **máximo 1 recomendación de agencia visible a la vez**, disparada por una **señal real**, **discreta y honesta** (NO encubierta), value-first.
 - **Idea de campaña (registrada):** ofrecer el Diagnóstico **gratis como promoción** a showrooms Essential/Pro **ya activos**, como **campaña de captación orgánica para la agencia** (les ofrecemos servicio + solución de forma natural).
 
@@ -107,6 +111,27 @@
 - **Analítica avanzada (Professional):** "Sobre la analítica básica: rendimiento por vehículo, funnel de visita→contacto, evolución temporal e histórico de 180 días."
 - **Analítica Elite:** "Toda la analítica de Professional + histórico de 365 días, comparativas ampliadas de rendimiento, scoring por ficha (qué anuncios rinden mejor), alertas proactivas y una sugerencia de mejora basada en tus datos."
 - **Showroom destacado (Elite):** "Tu showroom aparece con etiqueta 'Destacado' y en posición preferente (bloque superior) en los listados, por delante de Essential y Professional. Rotación equitativa entre los Elite; no altera el orden de los vehículos individuales."
+
+---
+
+## Add-ons — ✅ CERRADO
+
+**Regla de visualización (todos los add-ons):** los add-ons **solo se muestran dentro del dashboard del showroom** (nunca en la web pública de precios). Cada add-on muestra su **precio con la indicación "+ IVA"** junto al importe.
+
+| Add-on | Precio | Recurrencia | Planes en los que se ofrece |
+|---|---|---|---|
+| Boost de vehículo (7 días) | 49 € + IVA | Puntual | Essential, Professional, Elite |
+| Pack 5 boosts | 199 € + IVA | Puntual (caduca a 6 meses) | Essential, Professional, Elite |
+| Bloque +10 vehículos | 59 €/mes + IVA | Recurrente (máx. 2 bloques en Essential) | Essential, Professional |
+| Bloque +25 vehículos | 99 €/mes + IVA | Recurrente | Elite |
+| Diagnóstico Anti-Fuga Express | 149 € + IVA | Puntual | Essential, Professional *(Elite ya lo tiene incluido de serie, no se ofrece como add-on)* |
+| Sincronización automática de stock (feed) | 99 €/mes + IVA (+150 € setup si el feed no es estándar) | Recurrente | Essential, Professional *(Elite ya lo tiene incluido de serie, no se ofrece como add-on)* |
+
+**Add-ons descartados / ya no aplican:**
+- **Usuario adicional** → eliminado, no se ofrece.
+- **Sede adicional** → no es add-on: ya está contemplada dentro del plan Grupo (50 % del precio base por sede).
+- **Migración avanzada / importación asistida** → eliminado como add-on de pago: pasa a ser una **funcionalidad incluida en todos los planes** (forma parte de la Activación Premium del Showroom).
+- **Slot editorial (newsletter / contenido patrocinado)** → eliminado, no se ofrece.
 
 ---
 
