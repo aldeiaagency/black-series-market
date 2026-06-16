@@ -42,9 +42,13 @@ export interface PlanFeatureRow {
   info?: string
 }
 
-const ACTIVACION_PREMIUM_INFO =
+const ALTA_PREMIUM_LABEL = 'Alta Premium del showroom'
+const ALTA_PREMIUM_INFO =
   'Alta de tu perfil e importación inicial de tu inventario, optimizada con IA, incluida una vez. ' +
   'También cubre la migración de catálogos grandes o desordenados: no se cobra aparte en ningún plan.'
+
+const BOOST_INFO =
+  'Posiciona uno de tus vehículos en primer lugar de los resultados durante 7 días, dándole visibilidad extra frente al resto del inventario.'
 
 export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
   essential: [
@@ -52,7 +56,7 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
     { label: 'Usuarios', kind: 'value', value: '1' },
     { label: 'Sedes', kind: 'value', value: '1' },
     { label: 'Perfil verificado', kind: 'included' },
-    { label: 'Activación Premium del showroom', kind: 'included', info: ACTIVACION_PREMIUM_INFO },
+    { label: ALTA_PREMIUM_LABEL, kind: 'included', info: ALTA_PREMIUM_INFO },
     { label: 'Gestión de inventario', kind: 'value', value: 'Manual' },
     {
       label: 'Panel de oportunidades',
@@ -65,20 +69,14 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
       value: 'Básica · 30 días',
       info: 'Vistas, contactos y vehículos guardados de los últimos 30 días.',
     },
-    {
-      label: 'Vehículos a la carta',
-      kind: 'excluded',
-      info: 'Cuando un comprador busca algo que no tienes publicado, la oportunidad se reparte primero entre Professional y Elite.',
-    },
-    { label: 'Showroom destacado', kind: 'excluded', info: 'Posición preferente en los listados. Exclusivo del plan Elite.' },
-    { label: 'Boosts incluidos', kind: 'value', value: '0' },
+    { label: 'Boosts incluidos', kind: 'value', value: '0', info: BOOST_INFO },
   ],
   professional: [
     { label: 'Vehículos activos', kind: 'value', value: 'Hasta 50' },
     { label: 'Usuarios', kind: 'value', value: '3' },
     { label: 'Sedes', kind: 'value', value: '1' },
     { label: 'Perfil verificado', kind: 'included' },
-    { label: 'Activación Premium del showroom', kind: 'included', info: ACTIVACION_PREMIUM_INFO },
+    { label: ALTA_PREMIUM_LABEL, kind: 'included', info: ALTA_PREMIUM_INFO },
     {
       label: 'Gestión de inventario',
       kind: 'value',
@@ -106,19 +104,17 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
       kind: 'included',
       info: 'En lugar del formulario, un asistente conversa con el comprador en la ficha y cualifica su interés (qué busca, presupuesto y plazo). El contacto te llega ya valorado y entra directamente en tu pipeline.',
     },
-    { label: 'Showroom destacado', kind: 'excluded', info: 'Posición preferente en los listados. Exclusivo del plan Elite.' },
-    { label: 'Boosts incluidos', kind: 'value', value: '1/mes' },
+    { label: 'Boosts incluidos', kind: 'value', value: '1/mes', info: BOOST_INFO },
   ],
   elite: [
     { label: 'Vehículos activos', kind: 'value', value: 'Hasta 100', info: 'Ampliable en bloques de 25 vehículos adicionales desde tu panel.' },
     { label: 'Usuarios', kind: 'value', value: '10' },
     { label: 'Sedes', kind: 'value', value: '1' },
     { label: 'Perfil verificado', kind: 'included' },
-    { label: 'Activación Premium del showroom', kind: 'included', info: ACTIVACION_PREMIUM_INFO },
+    { label: ALTA_PREMIUM_LABEL, kind: 'included', info: ALTA_PREMIUM_INFO },
     {
-      label: 'Gestión de inventario',
-      kind: 'value',
-      value: 'Manual + CSV + stock automatizado',
+      label: 'Gestión del stock automatizado',
+      kind: 'included',
       info: 'Conecta tu feed o DMS: tu inventario se mantiene sincronizado automáticamente, sin subir nada a mano.',
     },
     {
@@ -152,7 +148,7 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
       kind: 'included',
       info: 'Mini-auditoría que detecta 3 fugas de oportunidades de tu showroom y te da recomendaciones priorizadas. Incluido de serie, una vez al semestre.',
     },
-    { label: 'Boosts incluidos', kind: 'value', value: '3/mes' },
+    { label: 'Boosts incluidos', kind: 'value', value: '3/mes', info: BOOST_INFO },
   ],
 }
 

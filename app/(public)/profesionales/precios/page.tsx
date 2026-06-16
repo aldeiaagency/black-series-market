@@ -28,8 +28,13 @@ function FeatureRow({ row }: { row: PlanFeatureRow }) {
   return (
     <li className="py-2.5 border-b border-bsm-border/40 last:border-b-0">
       <div className="flex items-start justify-between gap-3">
-        <span className={`text-sm ${row.kind === 'excluded' ? 'text-bsm-text-muted' : 'text-bsm-text-secondary'}`}>
+        <span className={`text-sm inline-flex items-center gap-1.5 ${row.kind === 'excluded' ? 'text-bsm-text-muted' : 'text-bsm-text-secondary'}`}>
           {row.label}
+          {row.info && (
+            <span title={row.info} className="inline-flex text-gold/60 hover:text-gold cursor-help">
+              <Info className="w-3.5 h-3.5" />
+            </span>
+          )}
         </span>
         <span className="flex-shrink-0 pt-0.5">
           {row.kind === 'value' && (
@@ -44,14 +49,6 @@ function FeatureRow({ row }: { row: PlanFeatureRow }) {
           )}
         </span>
       </div>
-      {row.info && (
-        <details className="mt-1 group">
-          <summary className="text-[11px] text-gold/70 hover:text-gold cursor-pointer list-none inline-flex items-center gap-1 select-none">
-            <Info className="w-3 h-3" /> Más información
-          </summary>
-          <p className="text-[11px] text-bsm-text-muted mt-1 leading-relaxed">{row.info}</p>
-        </details>
-      )}
     </li>
   )
 }
@@ -200,6 +197,10 @@ export default async function PreciosPage() {
           {
             q: '¿Los precios incluyen IVA?',
             a: 'No. Todos los precios mostrados son sin IVA; se añade en el momento del pago.',
+          },
+          {
+            q: '¿Qué es un boost?',
+            a: 'Un boost posiciona uno de tus vehículos en primer lugar de los resultados de búsqueda durante 7 días, dándole visibilidad extra frente al resto del inventario. Cada plan incluye un número de boosts al mes; si necesitas más, puedes comprarlos desde tu panel.',
           },
         ].map(({ q, a }) => (
           <div key={q} className="border-b border-bsm-border py-5">
