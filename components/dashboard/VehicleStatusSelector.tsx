@@ -29,8 +29,15 @@ export default function VehicleStatusSelector({ vehicleId, initialStatus }: Prop
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value as SelectableStatus
+    const prev = status
     setStatus(next)
-    startTransition(() => updateVehicleStatus(vehicleId, next))
+    startTransition(async () => {
+      const res = await updateVehicleStatus(vehicleId, next)
+      if (!res.ok) {
+        setStatus(prev) // revertir el optimista
+        if (typeof window !== 'undefined') window.alert(res.error)
+      }
+    })
   }
 
   return (

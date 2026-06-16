@@ -14,6 +14,7 @@ import {
 
 interface PageProps {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ error?: string }>
 }
 
 async function approveVehicle(formData: FormData) {
@@ -22,10 +23,18 @@ async function approveVehicle(formData: FormData) {
   const { createAdminClient } = await import('@/lib/supabase/server')
   const { notifyN8n } = await import('@/lib/integrations/n8n')
   const supabase = await createAdminClient()
-  const { data: updated } = await supabase.from('vehicles').update({
+  const { data: updated, error } = await supabase.from('vehicles').update({
     status: 'active',
     published_at: new Date().toISOString(),
   }).eq('id', id).select('id, brand_name, model_name, year, dealer_id').single()
+
+  // El trigger de BD bloquea si el dealer supera su tope de vehículos activos.
+  if (error) {
+    if (error.message.includes('VEHICLE_LIMIT_REACHED')) {
+      redirect(`/admin/vehiculos/${id}?error=vehicle_limit`)
+    }
+    redirect(`/admin/vehiculos/${id}?error=approve_failed`)
+  }
 
   await notifyN8n('vehicle.approved', {
     entityType: 'vehicle',
@@ -61,8 +70,9 @@ async function rejectVehicle(formData: FormData) {
   redirect(`/admin/vehiculos/${id}`)
 }
 
-export default async function AdminVehicleDetailPage({ params }: PageProps) {
+export default async function AdminVehicleDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params
+  const { error: errorFlag } = await searchParams
   const supabase = await createAdminClient()
 
   const { data: vehicle } = await supabase
@@ -123,6 +133,18 @@ export default async function AdminVehicleDetailPage({ params }: PageProps) {
         <ArrowLeft className="w-3.5 h-3.5" />
         Volver a cola de revisión
       </Link>
+
+      {/* Error de aprobación */}
+      {errorFlag && (
+        <div className="flex items-start gap-3 p-4 border border-amber-400/30 bg-amber-400/5 mb-6">
+          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-400">
+            {errorFlag === 'vehicle_limit'
+              ? 'No se pudo aprobar: el showroom ha alcanzado el límite de vehículos activos de su plan. Debe pausar otro vehículo, ampliar con un bloque de inventario o subir de plan antes de publicar este.'
+              : 'No se pudo aprobar el vehículo. Inténtalo de nuevo.'}
+          </p>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
