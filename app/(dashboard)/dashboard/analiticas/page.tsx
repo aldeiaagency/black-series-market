@@ -19,9 +19,11 @@ const ComparativesPanel = dynamic(() => import('@/components/dashboard/analytics
 
 type AnalyticsTier = 'basic' | 'advanced' | 'elite'
 
+// Gating = included por plan (acumulativo: Elite incluye lo de Professional + su extra).
+// El status NO oculta nada (es informativo): ver docs/pendientes-configuracion-externa.md.
 function resolveTier(features: Record<string, { included: boolean; status: string }>): AnalyticsTier {
-  if (features['analytics_extended_compare']?.included && features['analytics_extended_compare']?.status === 'operative') return 'elite'
-  if (features['analytics_advanced']?.included            && features['analytics_advanced']?.status            === 'operative') return 'advanced'
+  if (features['analytics_extended_compare']?.included) return 'elite'
+  if (features['analytics_advanced']?.included)         return 'advanced'
   return 'basic'
 }
 

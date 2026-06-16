@@ -46,47 +46,87 @@ export async function getEntitlements(
 ): Promise<Entitlements | null> {
   const admin = createAdminClient()
 
-  // 1. Fetch active subscription
+  // 0. Resolve org → dealer_id (usage on dealer-scoped tables like vehicles needs the
+  //    dealer id, NOT the org id) and the legacy plan as fallback.
+  const { data: org } = await admin
+    .from('organizations')
+    .select('dealer_id')
+    .eq('id', organizationId)
+    .single()
+
+  const dealerId = org?.dealer_id ?? null
+
+  let legacyPlanSlug: string | null = null
+  if (dealerId) {
+    const { data: dealer } = await admin
+      .from('dealers')
+      .select('subscription_plan')
+      .eq('id', dealerId)
+      .single()
+    legacyPlanSlug = dealer?.subscription_plan ?? null
+  }
+
+  // 1. Active subscription (new system). May not exist for legacy/manual dealers.
   const { data: sub } = await admin
     .from('subscriptions')
-    .select(`
-      id, status, billing_cycle,
-      plan:plans(slug, plan_limits(key, value_number), plan_features(feature_key, included, availability_status, display_label))
-    `)
+    .select('id, status')
     .eq('organization_id', organizationId)
     .in('status', ['active', 'trialing', 'past_due'])
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
 
-  if (!sub || !sub.plan) return null
+  // 2. Determine effective plan: subscription wins; otherwise fall back to dealers.subscription_plan.
+  let planSlug: string | null = null
+  if (sub) {
+    const { data: subPlan } = await admin
+      .from('subscriptions')
+      .select('plan:plans(slug)')
+      .eq('id', sub.id)
+      .single()
+    planSlug = (subPlan?.plan as unknown as { slug: string } | null)?.slug ?? null
+  }
+  if (!planSlug) planSlug = legacyPlanSlug
 
-  const plan = sub.plan as unknown as {
+  if (!planSlug) return null
+
+  // 3. Load plan config (limits + features) from the single source of truth.
+  const { data: plan } = await admin
+    .from('plans')
+    .select('slug, plan_limits(key, value_number), plan_features(feature_key, included, availability_status, display_label)')
+    .eq('slug', planSlug)
+    .single()
+
+  if (!plan) return null
+
+  const planRow = plan as unknown as {
     slug: string
     plan_limits: { key: string; value_number: number | null }[]
     plan_features: { feature_key: string; included: boolean; availability_status: string; display_label: string | null }[]
   }
 
-  // 2. Build limits from DB
+  // 4. Build limits from DB
   const limitsMap: Record<string, number | null> = {}
-  for (const l of plan.plan_limits) {
+  for (const l of planRow.plan_limits) {
     limitsMap[l.key] = l.value_number
   }
 
-  // 3. Fetch active vehicle-block addons for this subscription
-  const { data: subAddons } = await admin
-    .from('subscription_addons')
-    .select('quantity, addon:addons(slug, rules)')
-    .eq('subscription_id', sub.id)
-    .eq('status', 'active')
-
+  // 5. Active vehicle-block addons (only when there is a real subscription)
   let extraVehicleSlots = 0
-  for (const sa of subAddons ?? []) {
-    const addon = sa.addon as unknown as { slug: string; rules: { slots?: number } } | null
-    if (!addon) continue
-    const slots = addon.rules?.slots ?? 0
-    if (addon.slug === 'block_10_vehicles' || addon.slug === 'block_25_vehicles') {
-      extraVehicleSlots += slots * sa.quantity
+  if (sub) {
+    const { data: subAddons } = await admin
+      .from('subscription_addons')
+      .select('quantity, addon:addons(slug, rules)')
+      .eq('subscription_id', sub.id)
+      .eq('status', 'active')
+
+    for (const sa of subAddons ?? []) {
+      const addon = sa.addon as unknown as { slug: string; rules: { slots?: number } } | null
+      if (!addon) continue
+      const slots = addon.rules?.slots ?? 0
+      if (addon.slug === 'block_10_vehicles' || addon.slug === 'block_25_vehicles') {
+        extraVehicleSlots += slots * sa.quantity
+      }
     }
   }
 
@@ -100,9 +140,9 @@ export async function getEntitlements(
     extraVehicleSlots,
   }
 
-  // 4. Build features map
+  // 6. Build features map
   const features: Record<string, PlanFeature> = {}
-  for (const f of plan.plan_features) {
+  for (const f of planRow.plan_features) {
     features[f.feature_key] = {
       included: f.included,
       status: f.availability_status as FeatureStatus,
@@ -110,13 +150,15 @@ export async function getEntitlements(
     }
   }
 
-  // 5. Usage snapshot
+  // 7. Usage snapshot (vehicles are dealer-scoped → use dealerId; the rest is org-scoped)
   const [vehicleCount, memberCount, locationCount, boostUsed] = await Promise.all([
-    admin
-      .from('vehicles')
-      .select('id', { count: 'exact', head: true })
-      .eq('dealer_id', organizationId)   // NOTE: adjust join once org↔dealer mapping is complete
-      .eq('status', 'active'),
+    dealerId
+      ? admin
+          .from('vehicles')
+          .select('id', { count: 'exact', head: true })
+          .eq('dealer_id', dealerId)
+          .eq('status', 'active')
+      : Promise.resolve({ count: 0 }),
     admin
       .from('organization_members')
       .select('id', { count: 'exact', head: true })
@@ -125,12 +167,12 @@ export async function getEntitlements(
       .from('locations')
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', organizationId),
-    // Boosts used in current billing cycle
+    // Boosts used in current billing cycle (~last 32 days)
     admin
       .from('boost_activations')
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
-      .gte('created_at', sub.plan ? new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString() : '1970-01-01'),
+      .gte('created_at', new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString()),
   ])
 
   const usage: UsageSnapshot = {
@@ -141,8 +183,8 @@ export async function getEntitlements(
   }
 
   return {
-    plan: plan.slug as PlanSlug,
-    subscriptionStatus: sub.status,
+    plan: planRow.slug as PlanSlug,
+    subscriptionStatus: sub?.status ?? 'active',
     limits,
     features,
     usage,
@@ -176,7 +218,8 @@ export async function can(
       return ent.usage.activeVehicles < ent.limits.maxActiveVehicles
 
     case 'import_csv':
-      return (ent.features['csv_recurring']?.included && ent.features['csv_recurring']?.status === 'operative') ?? false
+      // Gating = included por plan. El status es informativo (ver docs/pendientes-configuracion-externa.md).
+      return ent.features['csv_recurring']?.included ?? false
 
     case 'use_pipeline':
       return (ent.features['pipeline']?.included) ?? false

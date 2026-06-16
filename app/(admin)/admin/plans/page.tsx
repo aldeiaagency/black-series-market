@@ -68,6 +68,36 @@ export default async function AdminPlansPage() {
                 </div>
               </div>
 
+              {/* Features incluidas + estado (operative / pendiente de config externa) */}
+              {features.filter((f) => f.included).length > 0 && (
+                <div className="border-t border-bsm-border pt-3 mt-3">
+                  <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-2">
+                    Funcionalidades incluidas · acceso por plan (el estado es informativo)
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {features
+                      .filter((f) => f.included)
+                      .map((f) => {
+                        const pending = f.availability_status === 'future'
+                        return (
+                          <span
+                            key={f.feature_key}
+                            className={`inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 border ${
+                              pending
+                                ? 'border-amber-400/30 text-amber-400'
+                                : 'border-emerald-400/20 text-bsm-text-secondary'
+                            }`}
+                            title={pending ? 'Pendiente de configuración externa (ver docs/pendientes-configuracion-externa.md)' : 'Operativa'}
+                          >
+                            {f.feature_key}
+                            {pending && <span className="text-[9px] uppercase tracking-wider">· pendiente externo</span>}
+                          </span>
+                        )
+                      })}
+                  </div>
+                </div>
+              )}
+
               {/* Stripe IDs */}
               {(plan.stripe_product_id || plan.stripe_monthly_price_id) && (
                 <div className="border-t border-bsm-border pt-3 mt-3">

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { getOrganizationIdForUser, can } from '@/lib/entitlements'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -183,6 +184,17 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Sesión no válida. Inicia sesión de nuevo.' }, { status: 401 })
     const { data: dealer } = await supabase.from('dealers').select('id').eq('profile_id', user.id).single()
     if (!dealer) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
+
+    // Plan gating: la importación por CSV es de Professional en adelante.
+    const orgId = await getOrganizationIdForUser(user.id)
+    const allowed = orgId ? await can(orgId, 'import_csv') : false
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'La importación por CSV está disponible en los planes Professional y Elite. Mejora tu plan para usarla.' },
+        { status: 403 },
+      )
+    }
+
     dealerId = dealer.id
   }
 

@@ -145,8 +145,8 @@ export default async function OportunidadesPage() {
   const orgId = await getOrganizationIdForUser(user.id)
   const ent   = orgId ? await getEntitlements(orgId) : null
 
-  const hasPipeline = ent?.features['pipeline']?.included &&
-                      ent?.features['pipeline']?.status !== 'future'
+  // Gating = included por plan (el status es informativo).
+  const hasPipeline = ent?.features['pipeline']?.included ?? false
 
   const { data: dealer } = await admin
     .from('dealers')
