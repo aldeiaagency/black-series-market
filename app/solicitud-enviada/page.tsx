@@ -6,9 +6,63 @@ import { Clock, Mail, MapPin, LogOut } from 'lucide-react'
 
 export const metadata = { title: 'Solicitud en revisión — Black Label Market' }
 
-export default async function SolicitudEnviadaPage() {
+interface PageProps {
+  searchParams: Promise<{ tipo?: string; email?: string }>
+}
+
+export default async function SolicitudEnviadaPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const isPublicShowroomRequest = params.tipo === 'showroom'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user && !isPublicShowroomRequest) redirect('/login')
+
+  if (!user && isPublicShowroomRequest) {
+    return (
+      <div className="min-h-screen bg-obsidian flex flex-col items-center justify-center px-6 py-16">
+        <div className="w-full max-w-md">
+          <div className="flex justify-center mb-12">
+            <Link href="/"><Logo width={160} /></Link>
+          </div>
+
+          <div className="bg-surface border border-bsm-border p-8 text-center">
+            <div className="w-14 h-14 rounded-full bg-amber-400/10 border border-amber-400/25 flex items-center justify-center mx-auto mb-6">
+              <Clock className="w-6 h-6 text-amber-400" />
+            </div>
+
+            <h1 className="font-display text-2xl font-light mb-2">Solicitud recibida</h1>
+            <p className="text-sm text-bsm-text-muted leading-relaxed mb-8">
+              Hemos recibido la solicitud de alta de tu showroom. Nuestro equipo revisará la reputación,
+              trayectoria y encaje profesional antes de habilitar cualquier acceso al market.
+            </p>
+
+            <div className="flex items-start gap-3 p-4 bg-amber-400/5 border border-amber-400/15 text-left mb-8">
+              <Mail className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-bsm-text-muted leading-relaxed">
+                Si la solicitud es aprobada, recibirás un email{params.email ? <> en <span className="text-bsm-text-primary">{params.email}</span></> : null} con las instrucciones de acceso.
+                Hasta entonces no se crea una cuenta operativa ni se habilita el panel profesional.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Link href="/" className="btn-gold w-full justify-center text-sm">
+                Volver al market
+              </Link>
+              <Link href="/contacto" className="btn-outline w-full justify-center text-sm">
+                ¿Tienes alguna pregunta?
+              </Link>
+            </div>
+          </div>
+
+          <p className="text-center text-xs text-bsm-text-muted mt-6">
+            Black Label Market · Marketplace curado de vehículos premium
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   if (!user) redirect('/login')
 
   const { data: dealer } = await supabase

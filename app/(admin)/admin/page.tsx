@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatNumber } from '@/lib/utils'
-import { Users, Car, MessageSquare, Clock, CheckCircle, TrendingUp } from 'lucide-react'
+import { Users, UserCheck, Car, MessageSquare, Clock, CheckCircle, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
 const VEHICLE_STATUS_BADGE: Record<string, string> = {
@@ -36,6 +36,7 @@ export default async function AdminPage() {
     { count: totalLeads },
     { count: leads30d },
     { count: requests30d },
+    { count: pendingShowroomApplications },
     { data: recentDealers },
     { data: pendingReviewVehicles },
   ] = await Promise.all([
@@ -47,6 +48,8 @@ export default async function AdminPage() {
     supabase.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', d30),
     supabase.from('custom_requests').select('*', { count: 'exact', head: true })
       .gte('created_at', d30),
+    supabase.from('showroom_applications').select('*', { count: 'exact', head: true })
+      .in('status', ['new', 'in_review']),
     supabase.from('dealers')
       .select('id, name, status, subscription_plan, created_at')
       .order('created_at', { ascending: false })
@@ -66,6 +69,14 @@ export default async function AdminPage() {
       icon: Users,
       color: 'text-gold',
       href: '/admin/dealers',
+    },
+    {
+      label: 'Altas showroom',
+      sub: 'solicitudes por revisar',
+      value: formatNumber(pendingShowroomApplications || 0),
+      icon: UserCheck,
+      color: pendingShowroomApplications ? 'text-amber-400' : 'text-bsm-text-muted',
+      href: '/admin/altas-showroom',
     },
     {
       label: 'Vehículos activos',
@@ -98,14 +109,6 @@ export default async function AdminPage() {
       icon: TrendingUp,
       color: 'text-purple-400',
       href: '/admin/analiticas',
-    },
-    {
-      label: 'Aprobados',
-      sub: 'showrooms activos',
-      value: formatNumber(activeDealers || 0),
-      icon: CheckCircle,
-      color: 'text-emerald-400',
-      href: '/admin/dealers?status=active',
     },
   ]
 

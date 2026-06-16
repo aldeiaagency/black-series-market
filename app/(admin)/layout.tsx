@@ -2,12 +2,13 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
-  LayoutDashboard, Users, Car, Settings, TrendingUp, MessageSquare, ClipboardList, Bell,
+  LayoutDashboard, Users, UserCheck, Car, Settings, TrendingUp, MessageSquare, ClipboardList, Bell,
 } from 'lucide-react'
 
 const ADMIN_NAV = [
   { label: 'Panel',           href: '/admin',                icon: LayoutDashboard },
   { label: 'Showrooms',       href: '/admin/dealers',        icon: Users },
+  { label: 'Altas showroom',  href: '/admin/altas-showroom', icon: UserCheck },
   { label: 'Vehículos',       href: '/admin/vehiculos',      icon: Car },
   { label: 'Contactos',       href: '/admin/contactos',      icon: MessageSquare },
   { label: 'Solicitudes',     href: '/admin/solicitudes',    icon: ClipboardList },

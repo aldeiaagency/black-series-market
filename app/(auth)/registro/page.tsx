@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/brand/Logo'
 
 export default function RegistroPage() {
@@ -15,11 +14,12 @@ export default function RegistroPage() {
   const [form, setForm] = useState({
     full_name: '',
     email: '',
-    password: '',
     dealer_name: '',
     location_city: '',
     location_region: '',
     phone: '',
+    website: '',
+    message: '',
   })
 
   function update(key: string, value: string) {
@@ -40,37 +40,12 @@ export default function RegistroPage() {
     const result = await response.json()
 
     if (!response.ok) {
-      setError(result.error || 'Error al crear la cuenta')
+      setError(result.error || 'Error al enviar la solicitud')
       setLoading(false)
       return
     }
 
-    const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    })
-
-    if (signInError) {
-      setError('La solicitud se ha creado, pero no se pudo iniciar sesión automáticamente. Accede con tu email y contraseña.')
-      setLoading(false)
-      return
-    }
-
-    // Notify internal team via n8n (fire and forget)
-    fetch('/api/webhooks/dealer-registered', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        dealer_id: result.dealer_id,
-        dealer_name: result.dealer_name,
-        email: result.email,
-        location_city: result.location_city,
-        phone: result.phone,
-      }),
-    }).catch(() => {})
-
-    router.push('/solicitud-enviada')
+    router.push(`/solicitud-enviada?tipo=showroom&email=${encodeURIComponent(result.email || form.email)}`)
   }
 
   return (
@@ -91,7 +66,7 @@ export default function RegistroPage() {
                 {s}
               </div>
               <span className={`text-xs ${step >= s ? 'text-bsm-text-primary' : 'text-bsm-text-muted'}`}>
-                {s === 1 ? 'Cuenta' : 'Showroom'}
+                {s === 1 ? 'Contacto' : 'Showroom'}
               </span>
               {s < 2 && <div className={`flex-1 h-px ${step > s ? 'bg-gold' : 'bg-bsm-border'}`} />}
             </div>
@@ -101,7 +76,7 @@ export default function RegistroPage() {
         <div className="bg-surface border border-bsm-border p-8">
           <h1 className="font-display text-2xl font-light mb-1">Registrar showroom</h1>
           <p className="text-sm text-bsm-text-muted mb-8">
-            {step === 1 ? 'Datos de acceso a tu cuenta' : 'Información de tu showroom'}
+            {step === 1 ? 'Datos de contacto para revisar la solicitud' : 'Información de tu showroom'}
           </p>
 
           <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2) } : handleSubmit}>
@@ -118,25 +93,13 @@ export default function RegistroPage() {
                   />
                 </div>
                 <div>
-                  <label className="label-base">Email de acceso</label>
+                  <label className="label-base">Email de contacto</label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => update('email', e.target.value)}
                     placeholder="tu@email.com"
                     className="input-base"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="label-base">Contraseña</label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => update('password', e.target.value)}
-                    placeholder="Mínimo 8 caracteres"
-                    className="input-base"
-                    minLength={8}
                     required
                   />
                 </div>
@@ -190,6 +153,25 @@ export default function RegistroPage() {
                     required
                   />
                 </div>
+                <div>
+                  <label className="label-base">Web o perfil público</label>
+                  <input
+                    type="url"
+                    value={form.website}
+                    onChange={(e) => update('website', e.target.value)}
+                    placeholder="https://tushowroom.com"
+                    className="input-base"
+                  />
+                </div>
+                <div>
+                  <label className="label-base">Mensaje para revisión</label>
+                  <textarea
+                    value={form.message}
+                    onChange={(e) => update('message', e.target.value)}
+                    placeholder="Cuéntanos brevemente qué tipo de stock trabajáis y dónde podemos revisar vuestra trayectoria."
+                    className="input-base min-h-[96px] resize-none"
+                  />
+                </div>
 
                 {error && (
                   <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
@@ -210,12 +192,12 @@ export default function RegistroPage() {
                     disabled={loading}
                     className="btn-gold flex-1 justify-center"
                   >
-                    {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+                    {loading ? 'Enviando solicitud...' : 'Solicitar alta'}
                   </button>
                 </div>
 
                 <p className="text-[10px] text-bsm-text-muted text-center pt-2">
-                  El envío de esta solicitud no implica aceptación automática. Black Label Market revisa cada perfil profesional antes de habilitar la publicación de vehículos.
+                  El envío de esta solicitud no crea una cuenta ni implica aceptación automática. Black Label Market revisa cada showroom antes de habilitar el acceso.
                 </p>
                 <p className="text-[10px] text-bsm-text-muted text-center pt-1">
                   Al registrarte aceptas nuestros{' '}
