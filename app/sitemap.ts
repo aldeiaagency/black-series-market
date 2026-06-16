@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { commercialGuides } from '@/app/(public)/guias/_data/commercialGuides'
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -105,5 +106,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }))
 
-  return [...staticRoutes, ...vehicleRoutes, ...dealerRoutes, ...brandRoutes, ...brandTypeRoutes]
+  const commercialGuideRoutes: MetadataRoute.Sitemap = commercialGuides.map((guide) => ({
+    url: `${BASE_URL}/guias/${guide.slug}`,
+    lastModified: new Date(guide.dateModified),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
+  return [...staticRoutes, ...commercialGuideRoutes, ...vehicleRoutes, ...dealerRoutes, ...brandRoutes, ...brandTypeRoutes]
 }

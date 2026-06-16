@@ -1,13 +1,62 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { GuideAuthorBox, GuideFaq, GuideHeroImage, GuideToc, type FaqItem, type TocItem } from '../_components/GuideSeoBlocks'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+const PAGE_PATH = '/guias/motos-premium-segunda-mano'
+const PAGE_URL = `${SITE_URL}${PAGE_PATH}`
+const HERO_IMAGE = '/images/hero/black-label-hero-gt3rs-ducati.webp'
+const HERO_IMAGE_URL = `${SITE_URL}${HERO_IMAGE}`
+const PUBLISHED_DATE = '2026-06-09'
+const MODIFIED_DATE = '2026-06-16'
+const HERO_ALT = 'Moto Ducati premium junto a un deportivo Porsche en Black Label Market'
 
 export const metadata: Metadata = {
-  title: 'Cómo comprar una moto premium de segunda mano — Guía completa',
+  title: 'Cómo comprar una moto premium de segunda mano en España',
   description: 'Guía práctica para comprar motos premium de segunda mano: qué verificar, documentación imprescindible, precio justo, marcas clave y cómo encontrar especialistas de confianza en España.',
-  alternates: { canonical: '/guias/motos-premium-segunda-mano' },
+  alternates: { canonical: PAGE_PATH },
+  openGraph: {
+    title: 'Cómo comprar una moto premium de segunda mano en España',
+    description: 'Guía para comprar Ducati, BMW Motorrad, MV Agusta, Harley-Davidson o Triumph usadas con historial, precio justo y vendedor fiable.',
+    type: 'article',
+    url: PAGE_PATH,
+    images: [{ url: HERO_IMAGE, width: 1200, height: 675, alt: HERO_ALT }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cómo comprar una moto premium de segunda mano en España',
+    description: 'Qué verificar antes de comprar una moto premium usada: historial, documentación, kilometraje, precio y especialista.',
+    images: [HERO_IMAGE],
+  },
 }
+
+const faqItems: FaqItem[] = [
+  {
+    question: '¿Qué se considera una moto premium de segunda mano?',
+    answer: 'Una moto premium de segunda mano suele ser una motocicleta de marca aspiracional, alto precio de origen, prestaciones elevadas, tecnología avanzada o interés de colección. Incluye deportivas, naked, touring, custom, trail premium y clásicas de marcas como Ducati, BMW Motorrad, MV Agusta, Triumph o Harley-Davidson.',
+  },
+  {
+    question: '¿Cómo puedo saber si una moto premium ha tenido uso en circuito?',
+    answer: 'Conviene revisar neumáticos, frenos, suspensiones, carenados, tornillería, protecciones, historial de mantenimiento y posibles facturas de preparación. El uso en circuito no invalida una compra, pero debe estar declarado, reflejado en el precio y revisado por un especialista.',
+  },
+  {
+    question: '¿Qué documentación es imprescindible al comprar una moto usada de alta gama?',
+    answer: 'Debes revisar permiso de circulación, ficha técnica, historial de ITV, libro de mantenimiento, facturas de taller, justificante de cargas y cualquier documentación de accesorios homologados. En motos premium, el historial completo puede justificar una prima de precio frente a unidades similares.',
+  },
+  {
+    question: '¿Es recomendable comprar una moto premium a un profesional?',
+    answer: 'Sí, especialmente si buscas trazabilidad, garantía comercial, documentación ordenada y una revisión previa más transparente. Un especialista verificado reduce la incertidumbre en modelos con costes de mantenimiento altos o historial difícil de interpretar.',
+  },
+]
+
+const tocItems: TocItem[] = [
+  { href: '#segmento-moto-premium', label: 'Qué cubre el segmento premium' },
+  { href: '#verificaciones-compra', label: 'Qué verificar antes de comprar' },
+  { href: '#documentacion-moto', label: 'Documentación imprescindible' },
+  { href: '#valorar-precio-moto', label: 'Cómo valorar el precio' },
+  { href: '#errores-moto-premium', label: 'Errores frecuentes' },
+  { href: '#faq', label: 'Preguntas frecuentes' },
+]
 
 const articleJsonLd = {
   '@context': 'https://schema.org',
@@ -15,12 +64,30 @@ const articleJsonLd = {
   '@id': `${SITE_URL}/guias/motos-premium-segunda-mano#article`,
   headline: 'Cómo comprar una moto premium de segunda mano: guía completa',
   description: 'Guía práctica para comprar motos premium de segunda mano: qué verificar, documentación, precio justo y cómo encontrar especialistas de confianza en España.',
-  url: `${SITE_URL}/guias/motos-premium-segunda-mano`,
+  url: PAGE_URL,
   inLanguage: 'es-ES',
+  image: {
+    '@type': 'ImageObject',
+    url: HERO_IMAGE_URL,
+    width: 1200,
+    height: 675,
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': PAGE_URL },
   publisher: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL, '@id': `${SITE_URL}/#organization` },
   author: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL, '@id': `${SITE_URL}/#organization` },
-  datePublished: '2026-06-09',
-  dateModified: '2026-06-09',
+  datePublished: PUBLISHED_DATE,
+  dateModified: MODIFIED_DATE,
+  isPartOf: { '@id': `${SITE_URL}/#website` },
+}
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
 }
 
 const breadcrumbJsonLd = {
@@ -38,6 +105,7 @@ export default function GuiaMotosPage() {
     <div className="max-w-screen-lg mx-auto px-6 lg:px-12 pt-28 pb-24">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       <div className="mb-12">
         <nav aria-label="breadcrumb" className="mb-6">
@@ -54,12 +122,15 @@ export default function GuiaMotosPage() {
           <span className="text-xs text-gold tracking-widest uppercase">Guía de compra</span>
         </div>
         <h1 className="section-title mb-4">Cómo comprar una moto premium de segunda mano</h1>
-        <p className="text-sm text-bsm-text-muted">Por el equipo editorial de Black Label Market · Junio 2026</p>
+        <p className="text-sm text-bsm-text-muted">Por el equipo editorial de Black Label Market · Actualizado en junio de 2026</p>
       </div>
+
+      <GuideHeroImage src={HERO_IMAGE} alt={HERO_ALT} />
+      <GuideToc items={tocItems} />
 
       <div className="space-y-10 text-bsm-text-secondary leading-relaxed">
 
-        <section>
+        <section id="segmento-moto-premium">
           <p className="text-base leading-relaxed mb-4">
             El mercado de motos premium de segunda mano tiene una lógica propia. No es solo una cuestión de precio: es cuestión de documentación, historial de mantenimiento, kilometraje real y el tipo de uso que la moto ha tenido. Una Ducati Panigale V4 que ha rodado en circuito y otra que ha circulado exclusivamente en carretera pueden tener el mismo precio anunciado y un valor real completamente diferente.
           </p>
@@ -76,7 +147,7 @@ export default function GuiaMotosPage() {
           <ul className="space-y-3 text-sm list-none pl-0 mb-4">
             <li className="flex gap-3">
               <span className="text-gold flex-shrink-0">◈</span>
-              <span><strong className="text-bsm-text-primary">Deportivas</strong>: Ducati Panigale V4, BMW M1000RR, Aprilia RSV4, Honda CBR1000RR-R. Diseñadas para el máximo rendimiento en circuito o carretera.</span>
+              <span><strong className="text-bsm-text-primary">Deportivas</strong>: <Link href="/marcas/ducati" className="text-gold hover:text-gold-light transition-colors">Ducati</Link> Panigale V4, <Link href="/marcas/bmw-motorrad" className="text-gold hover:text-gold-light transition-colors">BMW Motorrad</Link> M1000RR, <Link href="/marcas/aprilia" className="text-gold hover:text-gold-light transition-colors">Aprilia</Link> RSV4, Honda CBR1000RR-R. Diseñadas para el máximo rendimiento en circuito o carretera.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-gold flex-shrink-0">◈</span>
@@ -84,11 +155,11 @@ export default function GuiaMotosPage() {
             </li>
             <li className="flex gap-3">
               <span className="text-gold flex-shrink-0">◈</span>
-              <span><strong className="text-bsm-text-primary">Touring y adventure</strong>: BMW R1250GS, Ducati Multistrada V4, Triumph Tiger 1200. Orientadas a grandes distancias con máximo confort y tecnología.</span>
+              <span><strong className="text-bsm-text-primary">Touring y adventure</strong>: BMW R1250GS, Ducati Multistrada V4, <Link href="/marcas/triumph" className="text-gold hover:text-gold-light transition-colors">Triumph</Link> Tiger 1200. Orientadas a grandes distancias con máximo confort y tecnología.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-gold flex-shrink-0">◈</span>
-              <span><strong className="text-bsm-text-primary">Custom y cruiser</strong>: Harley-Davidson Softail, Indian Chief, BMW R18. Carácter, presencia y un tipo de disfrute diferente al de la deportiva pura.</span>
+              <span><strong className="text-bsm-text-primary">Custom y cruiser</strong>: <Link href="/marcas/harley-davidson" className="text-gold hover:text-gold-light transition-colors">Harley-Davidson</Link> Softail, <Link href="/marcas/indian" className="text-gold hover:text-gold-light transition-colors">Indian</Link> Chief, BMW R18. Carácter, presencia y un tipo de disfrute diferente al de la deportiva pura.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-gold flex-shrink-0">◈</span>
@@ -100,7 +171,7 @@ export default function GuiaMotosPage() {
           </p>
         </section>
 
-        <section>
+        <section id="verificaciones-compra">
           <h2 className="font-display text-2xl font-light text-bsm-text-primary mb-4">2. Qué verificar antes de comprar</h2>
           <p className="text-sm leading-relaxed mb-6">
             La verificación antes de la compra es el paso que más diferencia a los compradores con experiencia de los que aprenden a su costa. Estos son los puntos críticos:
@@ -127,7 +198,7 @@ export default function GuiaMotosPage() {
           </p>
         </section>
 
-        <section>
+        <section id="documentacion-moto">
           <h2 className="font-display text-2xl font-light text-bsm-text-primary mb-4">3. Documentación imprescindible</h2>
           <p className="text-sm leading-relaxed mb-4">En una operación de compraventa de moto premium, la documentación básica es:</p>
           <ul className="space-y-3 text-sm list-none pl-0">
@@ -154,7 +225,7 @@ export default function GuiaMotosPage() {
           </ul>
         </section>
 
-        <section>
+        <section id="valorar-precio-moto">
           <h2 className="font-display text-2xl font-light text-bsm-text-primary mb-4">4. Cómo valorar el precio</h2>
           <p className="text-sm leading-relaxed mb-4">
             El precio de una moto premium de segunda mano depende de múltiples factores que el precio anunciado no siempre refleja. Las guías de valoración como Eurotax o Schwacke son un punto de partida, pero en el segmento premium el mercado real puede diferir significativamente.
@@ -167,7 +238,7 @@ export default function GuiaMotosPage() {
           </p>
         </section>
 
-        <section>
+        <section id="errores-moto-premium">
           <h2 className="font-display text-2xl font-light text-bsm-text-primary mb-4">5. Errores más frecuentes al comprar una moto premium</h2>
           <ul className="space-y-3 text-sm list-none pl-0">
             <li className="flex gap-3">
@@ -192,6 +263,9 @@ export default function GuiaMotosPage() {
             </li>
           </ul>
         </section>
+
+        <GuideFaq items={faqItems} />
+        <GuideAuthorBox />
 
       </div>
 
