@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CheckCircle, Save, ChevronDown, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import { CheckCircle, Save, ChevronDown } from 'lucide-react'
 
 type SectionKey = 'email' | 'seo' | 'social_links'
 
@@ -73,26 +72,6 @@ export default function AdminConfiguracionPage() {
       <div className="mb-8">
         <h1 className="font-display text-3xl font-light mb-1">Configuración</h1>
         <p className="text-sm text-bsm-text-muted">Ajustes globales del marketplace</p>
-      </div>
-
-      {/* Quick links to plan/subscription management */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-        <Link href="/admin/plans"
-          className="flex items-center justify-between p-4 border border-bsm-border bg-surface hover:border-gold/30 transition-colors group">
-          <div>
-            <p className="text-sm font-medium text-bsm-text-primary">Planes y precios</p>
-            <p className="text-xs text-bsm-text-muted mt-0.5">Gestionar planes, límites y features en la BD</p>
-          </div>
-          <ExternalLink className="w-4 h-4 text-bsm-text-muted group-hover:text-gold transition-colors flex-shrink-0" />
-        </Link>
-        <Link href="/admin/subscriptions"
-          className="flex items-center justify-between p-4 border border-bsm-border bg-surface hover:border-gold/30 transition-colors group">
-          <div>
-            <p className="text-sm font-medium text-bsm-text-primary">Suscripciones activas</p>
-            <p className="text-xs text-bsm-text-muted mt-0.5">Ver y gestionar suscripciones de showrooms</p>
-          </div>
-          <ExternalLink className="w-4 h-4 text-bsm-text-muted group-hover:text-gold transition-colors flex-shrink-0" />
-        </Link>
       </div>
 
       <div className="max-w-3xl space-y-4">
