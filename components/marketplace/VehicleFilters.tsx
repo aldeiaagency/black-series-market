@@ -186,23 +186,23 @@ const FEATURED_EQUIPMENT = [
 ]
 
 const MOTO_STYLES = [
-  { value: 'Superbike',            label: 'Superbike' },
-  { value: 'Deportiva',            label: 'Deportiva' },
-  { value: 'Naked',                label: 'Naked' },
-  { value: 'Naked deportiva',      label: 'Naked deportiva' },
-  { value: 'Hypernaked',           label: 'Hypernaked' },
-  { value: 'Trail / Adventure',    label: 'Trail / Adventure' },
-  { value: 'Maxitrail',            label: 'Maxitrail' },
-  { value: 'Turismo',              label: 'Turismo' },
-  { value: 'Sport Touring',        label: 'Sport Touring' },
-  { value: 'Custom / Cruiser',     label: 'Custom / Cruiser' },
-  { value: 'Scrambler',            label: 'Scrambler' },
-  { value: 'Café Racer',           label: 'Café Racer' },
-  { value: 'Clásica / Neo-retro',  label: 'Clásica / Neo-retro' },
-  { value: 'Maxi scooter',         label: 'Maxi scooter' },
-  { value: 'Scooter premium',      label: 'Scooter premium' },
-  { value: 'Supermotard / Enduro', label: 'Supermotard / Enduro' },
-  { value: 'Especial / Collector', label: 'Especial / Collector' },
+  { value: 'Superbike',            label: 'Superbike',            examples: 'Ducati Panigale V4, BMW M1000RR, Honda CBR1000RR-R, Aprilia RSV4 Factory, Kawasaki Ninja H2' },
+  { value: 'Deportiva',            label: 'Deportiva',            examples: 'Yamaha R6, Honda CBR600RR, Kawasaki ZX-6R, Triumph Daytona 765 Moto2' },
+  { value: 'Naked',                label: 'Naked',                examples: 'KTM Duke 890, Yamaha MT-09, Honda CB650R, Triumph Street Triple RS' },
+  { value: 'Naked deportiva',      label: 'Naked deportiva',      examples: 'BMW S1000R, Ducati Streetfighter V4, Aprilia Tuono V4 Factory' },
+  { value: 'Hypernaked',           label: 'Hypernaked',           examples: 'KTM 1290 Super Duke R, Kawasaki Z H2, Yamaha MT-10 SP, MV Agusta Brutale 1000 RR' },
+  { value: 'Trail / Adventure',    label: 'Trail / Adventure',    examples: 'BMW R1250GS, Honda Africa Twin, Triumph Tiger 900, KTM 890 Adventure' },
+  { value: 'Maxitrail',            label: 'Maxitrail',            examples: 'Ducati Multistrada V4, BMW R1250GS Adventure, Triumph Tiger 1200, Honda CRF1100L Africa Twin Adventure' },
+  { value: 'Turismo',              label: 'Turismo',              examples: 'Honda Gold Wing, BMW K1600 GTL, Harley-Davidson Road Glide Ultra, Kawasaki Concours 14' },
+  { value: 'Sport Touring',        label: 'Sport Touring',        examples: 'BMW S1000XR, Ducati Multistrada 950, Kawasaki Versys 1000, Honda NT1100' },
+  { value: 'Custom / Cruiser',     label: 'Custom / Cruiser',     examples: 'Harley-Davidson Fat Boy, Indian Chief, BMW R18, Yamaha V-Max, Triumph Bonneville Bobber' },
+  { value: 'Scrambler',            label: 'Scrambler',            examples: 'Ducati Scrambler 1100 Sport Pro, Triumph Street Scrambler, Royal Enfield Meteor, BMW R nineT Scrambler' },
+  { value: 'Café Racer',           label: 'Café Racer',           examples: 'Triumph Thruxton RS, BMW R Nine T Pure, Honda CB1000R Black Edition, Ducati Sport Classic' },
+  { value: 'Clásica / Neo-retro',  label: 'Clásica / Neo-retro',  examples: 'Triumph Bonneville T120, BMW R Nine T, Royal Enfield Classic 500, Moto Guzzi V7 Stone' },
+  { value: 'Maxi scooter',         label: 'Maxi scooter',         examples: 'Yamaha T-Max 560 Tech Max, Honda Forza 750, BMW C650 GT, Kymco AK 550' },
+  { value: 'Scooter premium',      label: 'Scooter premium',      examples: 'Vespa GTS Super 300, Piaggio Beverly 400, Honda ADV350, Yamaha Xmax 400' },
+  { value: 'Supermotard / Enduro', label: 'Supermotard / Enduro', examples: 'KTM 690 SMC R, Husqvarna 701 Supermoto, Beta RR 390, Sherco SE-F 300' },
+  { value: 'Especial / Collector', label: 'Especial / Collector', examples: 'Ducati 916, Honda RC30 (VFR750R), Bimota Tesi 3D, MV Agusta 750 Sport, Kawasaki ZXR750' },
 ]
 
 const MOTO_COLOR_OPTIONS = [
@@ -873,9 +873,37 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           <>
             <FilterGroup title="Tipo de moto">
               <div className="space-y-2">
-                {MOTO_STYLES.map((o) => (
-                  <CheckOption key={o.value} param="estilo" value={o.value} label={o.label} />
-                ))}
+                {MOTO_STYLES.map((style) => {
+                  const isExpanded = expandedCategory === style.value
+                  return (
+                    <div key={style.value}>
+                      <label className="flex items-center gap-2.5 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          className="accent-gold w-3.5 h-3.5 flex-shrink-0"
+                          checked={searchParams.get('estilo') === style.value}
+                          onChange={(e) => updateParam('estilo', e.target.checked ? style.value : null)}
+                        />
+                        <span className="text-sm text-bsm-text-secondary group-hover:text-bsm-text-primary transition-colors leading-tight">
+                          {style.label}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); setExpandedCategory(isExpanded ? null : style.value) }}
+                          className="ml-auto flex-shrink-0 w-4 h-4 rounded-full border border-[#444] text-[#666]
+                            hover:border-gold hover:text-gold transition-colors text-[9px]
+                            flex items-center justify-center select-none"
+                          aria-label={`Ejemplos de ${style.label}`}
+                        >i</button>
+                      </label>
+                      {isExpanded && (
+                        <p className="mt-1.5 ml-6 text-[10px] text-[#737373] leading-relaxed">
+                          <span className="text-[#555] mr-1">Ej:</span>{style.examples}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </FilterGroup>
             <FilterGroup title="Cilindrada" defaultOpen={false}>

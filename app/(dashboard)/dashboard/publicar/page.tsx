@@ -16,6 +16,26 @@ import { brandSlugsForType } from '@/lib/brand-types'
 
 const STEPS = ['Tipo y marca', 'Especificaciones', 'Equipamiento', 'Imágenes', 'Precio y publicar']
 
+const MOTO_BODY_TYPE_EXAMPLES: Record<string, string> = {
+  'Superbike':            'Ducati Panigale V4, BMW M1000RR, Honda CBR1000RR-R, Aprilia RSV4 Factory, Kawasaki Ninja H2',
+  'Deportiva':            'Yamaha R6, Honda CBR600RR, Kawasaki ZX-6R, Triumph Daytona 765 Moto2',
+  'Naked':                'KTM Duke 890, Yamaha MT-09, Honda CB650R, Triumph Street Triple RS',
+  'Naked deportiva':      'BMW S1000R, Ducati Streetfighter V4, Aprilia Tuono V4 Factory',
+  'Hypernaked':           'KTM 1290 Super Duke R, Kawasaki Z H2, Yamaha MT-10 SP, MV Agusta Brutale 1000 RR',
+  'Trail / Adventure':    'BMW R1250GS, Honda Africa Twin, Triumph Tiger 900, KTM 890 Adventure',
+  'Maxitrail':            'Ducati Multistrada V4, BMW R1250GS Adventure, Triumph Tiger 1200, Honda Africa Twin Adventure',
+  'Turismo':              'Honda Gold Wing, BMW K1600 GTL, Harley-Davidson Road Glide Ultra',
+  'Sport Touring':        'BMW S1000XR, Ducati Multistrada 950, Kawasaki Versys 1000, Honda NT1100',
+  'Custom / Cruiser':     'Harley-Davidson Fat Boy, Indian Chief, BMW R18, Yamaha V-Max, Triumph Bonneville Bobber',
+  'Scrambler':            'Ducati Scrambler 1100 Sport Pro, Triumph Street Scrambler, BMW R nineT Scrambler',
+  'Café Racer':           'Triumph Thruxton RS, BMW R Nine T Pure, Honda CB1000R Black Edition, Ducati Sport Classic',
+  'Clásica / Neo-retro':  'Triumph Bonneville T120, BMW R Nine T, Royal Enfield Classic 500, Moto Guzzi V7 Stone',
+  'Maxi scooter':         'Yamaha T-Max 560 Tech Max, Honda Forza 750, BMW C650 GT, Kymco AK 550',
+  'Scooter premium':      'Vespa GTS Super 300, Piaggio Beverly 400, Honda ADV350',
+  'Supermotard / Enduro': 'KTM 690 SMC R, Husqvarna 701 Supermoto, Beta RR 390, Sherco SE-F 300',
+  'Especial / Collector': 'Ducati 916, Honda RC30 (VFR750R), Bimota Tesi 3D, MV Agusta 750 Sport, Kawasaki ZXR750',
+}
+
 export default function PublicarPage() {
   const [step, setStep] = useState(0)
   const [dealerId, setDealerId] = useState<string | null>(null)
@@ -28,6 +48,8 @@ export default function PublicarPage() {
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [showCatInfo, setShowCatInfo] = useState(false)
+  const [showBodyTypeInfo, setShowBodyTypeInfo] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const editId = searchParams.get('edit')
@@ -413,17 +435,66 @@ export default function PublicarPage() {
               <input type="number" min="0" value={form.mileage_km} onChange={(e) => update('mileage_km', e.target.value)} placeholder="12000" className="input-base" required />
             </div>
             <div>
-              <label className="label-base">Carrocería</label>
+              <label className="label-base flex items-center gap-1.5">
+                Carrocería
+                {form.vehicle_type === 'motorcycle' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowBodyTypeInfo(!showBodyTypeInfo)}
+                    className="w-3.5 h-3.5 rounded-full border border-bsm-text-muted text-bsm-text-muted text-[9px] flex items-center justify-center hover:border-gold hover:text-gold transition-colors select-none"
+                    aria-label="Ver tipos de carrocería con ejemplos"
+                  >i</button>
+                )}
+              </label>
+              {form.vehicle_type === 'motorcycle' && showBodyTypeInfo && (
+                <div className="mb-2 border border-bsm-border bg-surface p-3 space-y-2.5">
+                  {bodyTypes.map((b) => (
+                    <div key={b}>
+                      <p className="text-[11px] font-medium text-bsm-text-secondary">{b}</p>
+                      {MOTO_BODY_TYPE_EXAMPLES[b] && (
+                        <p className="text-[10px] text-[#737373] leading-relaxed">
+                          <span className="text-[#555] mr-1">Ej:</span>{MOTO_BODY_TYPE_EXAMPLES[b]}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
               <select value={form.body_type} onChange={(e) => update('body_type', e.target.value)} className="select-base">
                 <option value="">Seleccionar...</option>
                 {bodyTypes.map((b) => <option key={b} value={b}>{b}</option>)}
               </select>
+              {form.vehicle_type === 'motorcycle' && form.body_type && MOTO_BODY_TYPE_EXAMPLES[form.body_type] && (
+                <p className="mt-1.5 text-[11px] text-[#737373] leading-relaxed">
+                  <span className="text-[#555] mr-1">Ej:</span>{MOTO_BODY_TYPE_EXAMPLES[form.body_type]}
+                </p>
+              )}
             </div>
 
             {/* Categoría — solo coches */}
             {form.vehicle_type !== 'motorcycle' && (
               <div>
-                <label className="label-base">Categoría del vehículo</label>
+                <label className="label-base flex items-center gap-1.5">
+                  Categoría del vehículo
+                  <button
+                    type="button"
+                    onClick={() => setShowCatInfo(!showCatInfo)}
+                    className="w-3.5 h-3.5 rounded-full border border-bsm-text-muted text-bsm-text-muted text-[9px] flex items-center justify-center hover:border-gold hover:text-gold transition-colors select-none"
+                    aria-label="Ver todas las categorías con ejemplos"
+                  >i</button>
+                </label>
+                {showCatInfo && (
+                  <div className="mb-2 border border-bsm-border bg-surface p-3 space-y-2.5">
+                    {CAR_CATEGORIES_PUBLIC.map((cat) => (
+                      <div key={cat.value}>
+                        <p className="text-[11px] font-medium text-bsm-text-secondary">{cat.label}</p>
+                        <p className="text-[10px] text-[#737373] leading-relaxed">
+                          <span className="text-[#555] mr-1">Ej:</span>{cat.examples}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <select
                   value={form.category}
                   onChange={(e) => update('category', e.target.value)}
