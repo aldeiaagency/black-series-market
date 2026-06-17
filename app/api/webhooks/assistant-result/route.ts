@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       intent?: string; budget_range?: string; timeline?: string
       financing?: string; trade_in?: string
       score?: 'hot' | 'warm' | 'cold'; summary?: string; next_action?: string
+      score_reason?: string; score_confidence?: number; next_follow_up_at?: string
     }
     contact?: { name?: string; email?: string; phone?: string }
     language?: string
@@ -81,6 +82,12 @@ export async function POST(req: NextRequest) {
       message:        qualification?.summary ?? 'Contacto via asistente de cualificación',
       source_channel: result_type === 'whatsapp_handoff' ? 'whatsapp_click' : 'ficha_assistant',
       qualification:  qualData,
+      lead_score:     qualification?.score ?? null,
+      score_reason:   qualification?.score_reason ?? null,
+      score_confidence: typeof qualification?.score_confidence === 'number' ? qualification.score_confidence : null,
+      recommended_next_action: qualification?.next_action ?? null,
+      scored_at:      qualification?.score ? new Date().toISOString() : null,
+      next_follow_up_at: qualification?.next_follow_up_at ?? null,
       status:         'new',
     })
     .select('id')
@@ -108,6 +115,18 @@ export async function POST(req: NextRequest) {
       payload:    { score: qualification?.score, summary: qualification?.summary },
       created_at: new Date().toISOString(),
     },
+    ...(qualification?.score ? [{
+      lead_id:    lead.id,
+      dealer_id,
+      type:       'lead_scored',
+      payload:    {
+        score:       qualification.score,
+        reason:      qualification.score_reason ?? null,
+        confidence:  qualification.score_confidence ?? null,
+        next_action: qualification.next_action ?? null,
+      },
+      created_at: new Date().toISOString(),
+    }] : []),
   ]
 
   await admin.from('lead_events').insert(eventRows)
