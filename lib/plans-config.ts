@@ -1,6 +1,6 @@
 // Fuente única de verdad para la presentación de planes en la web pública y el
-// dashboard del vendedor. Es estática a propósito: una página de precios nunca
-// debe renderizar vacía por depender del estado de los seeds en la BD.
+dashboard del vendedor. Es estática a propósito: una página de precios nunca
+debe renderizar vacía por depender del estado de los seeds en la BD.
 //
 // IMPORTANTE: En ninguna parte de la web se habla de facturación anual.
 // Todos los precios son mensuales (€/mes), sin IVA. No existe programa Founding.
@@ -120,13 +120,13 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
     {
       label: 'Pipeline de oportunidades',
       kind: 'included',
-      info: 'Tablero visual con estados, además de citas integradas con calendario, scoring del lead en la tarjeta y aviso de leads calientes sin atender.',
+      info: 'Tablero visual para gestionar oportunidades con estados claros y seguimiento comercial del equipo.',
     },
     {
       label: 'Analítica de tu showroom',
       kind: 'value',
       value: '365 días',
-      info: 'Toda la analítica de Professional + histórico de 365 días, comparativas ampliadas de rendimiento, scoring por ficha, alertas proactivas y una sugerencia de mejora basada en tus datos.',
+      info: 'Toda la analítica de Professional + histórico de 365 días, comparativas ampliadas de rendimiento y una sugerencia de mejora basada en tus datos.',
     },
     {
       label: 'Vehículos a la carta',
@@ -134,9 +134,9 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
       info: 'Tablón general con ventana exclusiva de 24 h: ves antes que el resto del market las búsquedas que coinciden con tu stock.',
     },
     {
-      label: 'Agente con reserva de cita en la ficha',
+      label: 'Agente de cualificación en la ficha',
       kind: 'included',
-      info: 'Además de cualificar al comprador, el asistente propone y reserva una cita en tu calendario (Google Calendar), dejando la oportunidad lista para cerrar.',
+      info: 'El asistente conversa con el comprador en la ficha y cualifica su interés antes de crear la oportunidad en tu pipeline.',
     },
     {
       label: 'Showroom destacado',
