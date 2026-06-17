@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { X, Mail, Phone, MessageSquare } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { timeAgo, LEAD_STATUS_LABELS, getLeadStatusColor } from '@/lib/utils'
+import type { LeadStatus } from '@/lib/types'
 
 export interface BandejaLead {
   id: string
@@ -93,7 +94,7 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
                     )}
                   </p>
                 </div>
-                <span className={`badge text-[10px] flex-shrink-0 ${getLeadStatusColor(lead.status)}`}>
+                <span className={`badge text-[10px] flex-shrink-0 ${getLeadStatusColor(lead.status as LeadStatus)}`}>
                   {LEAD_STATUS_LABELS[lead.status as keyof typeof LEAD_STATUS_LABELS] ?? lead.status}
                 </span>
               </div>

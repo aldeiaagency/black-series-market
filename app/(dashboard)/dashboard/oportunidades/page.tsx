@@ -85,14 +85,18 @@ export default async function OportunidadesPage() {
     id:             l.id,
     status:         l.status,
     created_at:     l.created_at,
-    buyer_name:     l.buyer_name,
-    buyer_email:    l.buyer_email,
-    buyer_phone:    l.buyer_phone,
-    buyer_whatsapp: l.buyer_whatsapp,
-    message:        l.message,
-    source_channel: l.source_channel,
-    qualification:  l.qualification,
-    vehicle:        l.vehicle,
+    buyer_name:     l.buyer_name     ?? null,
+    buyer_email:    l.buyer_email    ?? null,
+    buyer_phone:    l.buyer_phone    ?? null,
+    buyer_whatsapp: l.buyer_whatsapp ?? null,
+    message:        l.message        ?? null,
+    source_channel: l.source_channel ?? null,
+    qualification:  l.qualification  ?? null,
+    vehicle:        l.vehicle ? {
+      brand_name: l.vehicle.brand_name ?? '',
+      model_name: l.vehicle.model_name ?? '',
+      year:       l.vehicle.year ?? 0,
+    } : null,
   }))
 
   return (
