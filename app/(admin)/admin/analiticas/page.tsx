@@ -2,7 +2,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { formatNumber } from '@/lib/utils'
 import {
   Eye, MessageSquare, Heart, Bell, Car, Users, TrendingUp,
-  ArrowRight, PhoneCall, Share2,
+  ArrowRight, PhoneCall, Share2, CreditCard, Zap,
 } from 'lucide-react'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -46,6 +46,10 @@ export default async function AdminAnaliticasPage() {
     { data: allDealers },
     { data: leadsByStatus },
     { data: planDistribution },
+    { count: _viewsExtra },           // 14th existing query — result unused
+    { data: activeAlertsList },
+    { data: openRequestsList },
+    { count: activeBoosts },
   ] = await Promise.all([
     // Overview counts
     supabase.from('analytics_events').select('*', { count: 'exact', head: true })
@@ -107,6 +111,17 @@ export default async function AdminAnaliticasPage() {
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'view')
       .gte('created_at', d30),
+
+    // Active search alerts for demand signals (brand breakdown)
+    supabase.from('search_alerts').select('brand, vehicle_type').eq('is_active', true).limit(500),
+
+    // Open requests for demand signals (brand breakdown)
+    supabase.from('custom_requests').select('brand, vehicle_type')
+      .in('status', ['new', 'in_review', 'contacted', 'matched']).limit(500),
+
+    // Active boosts count
+    supabase.from('boost_activations').select('*', { count: 'exact', head: true })
+      .eq('status', 'active').gte('ends_at', new Date().toISOString()),
   ])
 
   // ── Aggregations from events ────────────────────────────────────────────
@@ -186,6 +201,25 @@ export default async function AdminAnaliticasPage() {
     planCount[plan] = (planCount[plan] || 0) + 1
   }
 
+  // MRR from plan distribution
+  const PLAN_PRICES: Record<string, number> = { essential: 197, professional: 449, elite: 899, trial: 0 }
+  const mrr = Object.entries(planCount).reduce((sum, [plan, cnt]) => sum + cnt * (PLAN_PRICES[plan] || 0), 0)
+  const paidDealers = (planCount.essential || 0) + (planCount.professional || 0) + (planCount.elite || 0)
+
+  // Demand signal brand aggregations
+  const alertBrands: Record<string, number> = {}
+  for (const a of (activeAlertsList || []) as any[]) {
+    if (a.brand) alertBrands[a.brand] = (alertBrands[a.brand] || 0) + 1
+  }
+  const requestBrands: Record<string, number> = {}
+  for (const r of (openRequestsList || []) as any[]) {
+    if (r.brand) requestBrands[r.brand] = (requestBrands[r.brand] || 0) + 1
+  }
+  const topAlertBrands   = Object.entries(alertBrands).sort(([, a], [, b]) => b - a).slice(0, 8)
+  const topRequestBrands = Object.entries(requestBrands).sort(([, a], [, b]) => b - a).slice(0, 8)
+  const totalActiveAlerts   = (activeAlertsList || []).length
+  const totalOpenRequests   = (openRequestsList || []).length
+
   const v30 = views30d    || 0
   const c30 = contacts30d || 0
   const s30 = saved30d    || 0
@@ -216,6 +250,26 @@ export default async function AdminAnaliticasPage() {
         <h1 className="font-display text-3xl font-light mb-1">Analíticas del marketplace</h1>
         <p className="text-sm text-bsm-text-muted">Últimos 30 días · datos internos</p>
       </div>
+
+      {/* ── Ingresos ────────────────────────────────────────────────────────── */}
+      <section>
+        <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-4">Ingresos</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: 'MRR estimado',  value: `${formatNumber(mrr)}€`,      icon: CreditCard, color: 'text-emerald-400', sub: 'ingresos mensuales estimados' },
+            { label: 'ARR estimado',  value: `${formatNumber(mrr * 12)}€`, icon: TrendingUp,  color: 'text-emerald-300', sub: 'proyección anual' },
+            { label: 'Boosts activos', value: formatNumber(activeBoosts || 0), icon: Zap, color: 'text-gold', sub: 'activaciones vigentes' },
+            { label: 'Dealers de pago', value: formatNumber(paidDealers), icon: Users, color: 'text-blue-400', sub: 'Essential + Pro + Elite' },
+          ].map((s) => (
+            <div key={s.label} className="stat-card">
+              <div className={`${s.color} mb-2`}><s.icon className="w-4 h-4" /></div>
+              <div className="font-display text-2xl font-light mb-0.5">{s.value}</div>
+              <div className="text-[10px] text-bsm-text-muted uppercase tracking-wide leading-tight">{s.label}</div>
+              <div className="text-[9px] text-bsm-text-muted mt-0.5 opacity-60">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ── Overview ───────────────────────────────────────────────────────── */}
       <section>
@@ -468,6 +522,71 @@ export default async function AdminAnaliticasPage() {
               }) : <p className="text-sm text-bsm-text-muted p-6">Sin datos aún</p>}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Demanda no satisfecha ─────────────────────────────────────────── */}
+      <section>
+        <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-1">Demanda no satisfecha</h2>
+        <p className="text-xs text-bsm-text-muted mb-4">
+          Marcas más buscadas en alertas activas ({totalActiveAlerts}) y solicitudes a la carta abiertas ({totalOpenRequests}) — stock que falta en el market.
+        </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Top alert brands */}
+          <div className="bg-surface border border-bsm-border p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <Bell className="w-3.5 h-3.5 text-purple-400" />
+              <h3 className="font-medium text-sm">Marcas en alertas activas</h3>
+            </div>
+            <div className="space-y-3">
+              {topAlertBrands.length > 0 ? topAlertBrands.map(([brand, cnt], i) => {
+                const max = topAlertBrands[0][1]
+                return (
+                  <div key={brand}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-bsm-text-muted w-4">{i + 1}</span>
+                        <span className="text-sm text-bsm-text-secondary">{brand}</span>
+                      </div>
+                      <span className="text-sm text-bsm-text-primary">{cnt}</span>
+                    </div>
+                    <div className="h-1 bg-surface-elevated rounded-full overflow-hidden">
+                      <div className="h-full bg-purple-400/40 rounded-full" style={{ width: `${(cnt / max) * 100}%` }} />
+                    </div>
+                  </div>
+                )
+              }) : <p className="text-sm text-bsm-text-muted">Sin alertas activas con marca especificada</p>}
+            </div>
+          </div>
+
+          {/* Top request brands */}
+          <div className="bg-surface border border-bsm-border p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <Car className="w-3.5 h-3.5 text-gold" />
+              <h3 className="font-medium text-sm">Marcas en solicitudes abiertas</h3>
+            </div>
+            <div className="space-y-3">
+              {topRequestBrands.length > 0 ? topRequestBrands.map(([brand, cnt], i) => {
+                const max = topRequestBrands[0][1]
+                return (
+                  <div key={brand}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-bsm-text-muted w-4">{i + 1}</span>
+                        <span className="text-sm text-bsm-text-secondary">{brand}</span>
+                      </div>
+                      <span className="text-sm text-bsm-text-primary">{cnt}</span>
+                    </div>
+                    <div className="h-1 bg-surface-elevated rounded-full overflow-hidden">
+                      <div className="h-full bg-gold/40 rounded-full" style={{ width: `${(cnt / max) * 100}%` }} />
+                    </div>
+                  </div>
+                )
+              }) : <p className="text-sm text-bsm-text-muted">Sin solicitudes abiertas con marca especificada</p>}
+            </div>
+          </div>
+
         </div>
       </section>
 
