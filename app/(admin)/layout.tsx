@@ -3,22 +3,17 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
   LayoutDashboard, Users, UserCheck, Car, Settings, TrendingUp, MessageSquare, ClipboardList,
-  CreditCard, Receipt, Zap, Star,
 } from 'lucide-react'
 
 const ADMIN_NAV = [
-  { label: 'Panel',           href: '/admin',                icon: LayoutDashboard },
-  { label: 'Showrooms',       href: '/admin/dealers',        icon: Users },
-  { label: 'Altas showroom',  href: '/admin/altas-showroom', icon: UserCheck },
-  { label: 'Vehículos',       href: '/admin/vehiculos',      icon: Car },
-  { label: 'Contactos',       href: '/admin/contactos',      icon: MessageSquare },
-  { label: 'Solicitudes',     href: '/admin/solicitudes',    icon: ClipboardList },
-  { label: 'Analíticas',      href: '/admin/analiticas',     icon: TrendingUp },
-  { label: 'Planes',          href: '/admin/plans',          icon: CreditCard },
-  { label: 'Suscripciones',   href: '/admin/subscriptions',  icon: Receipt },
-  { label: 'Boosts',          href: '/admin/boosts',         icon: Zap },
-  { label: 'Capacidad Elite', href: '/admin/elite-capacity', icon: Star },
-  { label: 'Configuración',   href: '/admin/configuracion',  icon: Settings },
+  { label: 'Panel',          href: '/admin',                icon: LayoutDashboard },
+  { label: 'Showrooms',      href: '/admin/dealers',        icon: Users },
+  { label: 'Altas showroom', href: '/admin/altas-showroom', icon: UserCheck },
+  { label: 'Vehículos',      href: '/admin/vehiculos',      icon: Car },
+  { label: 'Contactos',      href: '/admin/contactos',      icon: MessageSquare },
+  { label: 'Solicitudes',    href: '/admin/solicitudes',    icon: ClipboardList },
+  { label: 'Analíticas',     href: '/admin/analiticas',     icon: TrendingUp },
+  { label: 'Configuración',  href: '/admin/configuracion',  icon: Settings },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
