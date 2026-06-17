@@ -23,7 +23,11 @@ export async function GET(request: NextRequest) {
   if (priceMax) query = query.lte('price', parseInt(priceMax))
 
   const featured = searchParams.get('featured')
-  if (featured === 'true') query = query.eq('is_featured', true)
+  if (featured === 'true') {
+    query = query
+      .eq('is_featured', true)
+      .gt('featured_until', new Date().toISOString())
+  }
 
   const limit = parseInt(searchParams.get('limit') || '24')
   const offset = parseInt(searchParams.get('offset') || '0')

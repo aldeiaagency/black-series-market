@@ -155,6 +155,7 @@ export interface Vehicle {
   images: VehicleImage[]
   video_url: string | null
   is_featured: boolean
+  featured_until?: string | null
   is_editors_pick: boolean
   is_exclusive: boolean
   badge: string | null

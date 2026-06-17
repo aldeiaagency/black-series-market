@@ -20,6 +20,11 @@ function isNewVehicle(publishedAt: string | null): boolean {
   return Date.now() - new Date(publishedAt).getTime() < 15 * 24 * 60 * 60 * 1000
 }
 
+function hasActiveBoost(featuredUntil?: string | null): boolean {
+  if (!featuredUntil) return false
+  return new Date(featuredUntil).getTime() > Date.now()
+}
+
 const STATUS_CONFIG = {
   sold:    { label: 'Vendido',        cls: 'text-[#9A9A9A] bg-[#141414]/95 border-[#2A2A2A]' },
   paused:  { label: 'Reservado',      cls: 'text-[#C6A64B] bg-[#141414]/95 border-[#C6A64B]/30' },
@@ -39,8 +44,8 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
     ? STATUS_CONFIG[vehicle.status as keyof typeof STATUS_CONFIG]
     : null
 
-  const showFeatured = vehicle.is_featured && isActive
-  const showNew      = !showFeatured && isActive && isNewVehicle(vehicle.published_at)
+  const showFeatured = isActive && vehicle.is_featured && hasActiveBoost(vehicle.featured_until)
+  const showNew      = isActive && isNewVehicle(vehicle.published_at)
 
   // Extra meta badges
   const showIva             = isActive && vehicle.iva_deducible === true

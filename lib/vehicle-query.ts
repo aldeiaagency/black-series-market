@@ -57,7 +57,11 @@ export async function applyVehicleFilters(
   if (params.showroom)              query = query.eq('dealer_id', params.showroom)
   if (params.condicion)             query = query.eq('condition_type', params.condicion)
   if (params.ivaDeducible === 'si') query = query.eq('iva_deducible', true)
-  if (params.destacados === 'true') query = query.eq('is_featured', true)
+  if (params.destacados === 'true') {
+    query = query
+      .eq('is_featured', true)
+      .gt('featured_until', new Date().toISOString())
+  }
   if (params.garantia === 'si')     query = query.eq('has_warranty', true)
   if (params.financiacion === 'si') query = query.eq('financing_available', true)
   if (params.equipamiento)          query = query.contains('equipment', [params.equipamiento])
