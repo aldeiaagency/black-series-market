@@ -199,6 +199,10 @@ type Action =
   | 'use_pipeline'
   | 'view_analytics_advanced'
   | 'view_analytics_elite'
+  | 'use_lead_scoring'
+  | 'use_hot_lead_alerts'
+  | 'use_calendar_integration'
+  | 'use_appointment_booking'
   | 'invite_user'
   | 'activate_boost'
   | 'showroom_featured'
@@ -229,6 +233,26 @@ export async function can(
 
     case 'view_analytics_elite':
       return (ent.features['analytics_extended_compare']?.included) ?? false
+
+    case 'use_lead_scoring': {
+      const feature = ent.features['lead_scoring']
+      return feature?.included === true && feature.status === 'operative'
+    }
+
+    case 'use_hot_lead_alerts': {
+      const feature = ent.features['hot_lead_alerts']
+      return feature?.included === true && feature.status === 'operative'
+    }
+
+    case 'use_calendar_integration': {
+      const feature = ent.features['calendar_integration']
+      return feature?.included === true && feature.status === 'operative'
+    }
+
+    case 'use_appointment_booking': {
+      const feature = ent.features['appointment_booking']
+      return feature?.included === true && feature.status === 'operative'
+    }
 
     case 'invite_user':
       return ent.usage.users < ent.limits.maxUsers
