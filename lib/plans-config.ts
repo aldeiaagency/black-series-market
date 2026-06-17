@@ -1,6 +1,6 @@
 // Fuente única de verdad para la presentación de planes en la web pública y el
-dashboard del vendedor. Es estática a propósito: una página de precios nunca
-debe renderizar vacía por depender del estado de los seeds en la BD.
+// dashboard del vendedor. Es estática a propósito: una página de precios nunca
+// debe renderizar vacía por depender del estado de los seeds en la BD.
 //
 // IMPORTANTE: En ninguna parte de la web se habla de facturación anual.
 // Todos los precios son mensuales (€/mes), sin IVA. No existe programa Founding.
