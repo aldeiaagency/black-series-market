@@ -41,7 +41,7 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
       setWaNumber(dealerWhatsapp ?? null)
       setMessages([{
         role: 'assistant',
-        text: `¡Hola! Soy el asistente de este showroom. Puedo resolver tus dudas sobre el ${vehicleTitle} y, si quieres, organizar una visita. ¿Qué te gustaría saber?`,
+        text: `¡Hola! Soy el asistente de este showroom. Puedo resolver tus dudas sobre el ${vehicleTitle} y preparar tu consulta para el vendedor. ¿Qué te gustaría saber?`,
       }])
       setMode('consent')
       return
