@@ -139,7 +139,7 @@ export default async function DashboardPage() {
         <div className="bg-surface border border-bsm-border">
           <div className="flex items-center justify-between p-5 border-b border-bsm-border">
             <h2 className="font-medium text-bsm-text-primary">Últimos leads</h2>
-            <Link href="/dashboard/mensajes" className="text-xs text-gold hover:text-gold-light">
+            <Link href="/dashboard/oportunidades" className="text-xs text-gold hover:text-gold-light">
               Ver todos →
             </Link>
           </div>
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className={`mt-8 grid grid-cols-1 gap-4 ${dealer.subscription_plan === 'elite' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
         <Link href="/dashboard/publicar" className="btn-gold justify-center py-4">
           <PlusCircle className="w-4 h-4" />
           Publicar vehículo
@@ -172,10 +172,12 @@ export default async function DashboardPage() {
           <Car className="w-4 h-4" />
           Gestionar inventario
         </Link>
-        <Link href="/dashboard/suscripcion" className="btn-outline justify-center py-4">
-          <ArrowRight className="w-4 h-4" />
-          Mejorar plan
-        </Link>
+        {dealer.subscription_plan !== 'elite' && (
+          <Link href="/dashboard/suscripcion" className="btn-outline justify-center py-4">
+            <ArrowRight className="w-4 h-4" />
+            Mejorar plan
+          </Link>
+        )}
       </div>
     </div>
   )

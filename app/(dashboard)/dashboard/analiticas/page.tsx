@@ -290,7 +290,7 @@ export default async function AnaliticasPage({
 
   // ── Tier label for header ──────────────────────────────────────────────────
   const tierLabel: Record<AnalyticsTier, string> = {
-    basic:    `Essential · ${retentionDays} días`,
+    basic:    `Básica · ${retentionDays} días`,
     advanced: `Professional · ${retentionDays} días`,
     elite:    `Elite · ${retentionDays} días`,
   }

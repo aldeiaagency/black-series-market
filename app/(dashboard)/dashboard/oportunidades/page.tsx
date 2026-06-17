@@ -98,7 +98,7 @@ export default async function OportunidadesPage() {
             Gestiona las oportunidades en un kanban con estados claros: Nueva, Contactada, Cita, Ganada, Perdida y Archivada.
           </p>
         </div>
-        <Link href="/profesionales/precios" className="btn-outline text-sm px-4 flex-shrink-0">
+        <Link href="/dashboard/suscripcion" className="btn-outline text-sm px-4 flex-shrink-0">
           Ver planes →
         </Link>
       </div>
