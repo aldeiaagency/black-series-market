@@ -1,10 +1,10 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { timeAgo } from '@/lib/utils'
-import { ClipboardList, Mail, Phone, MapPin, Car, Wallet, Clock } from 'lucide-react'
+import { ClipboardList, Mail, Phone, MapPin, Car, Wallet, Clock, Trash2 } from 'lucide-react'
 
 interface PageProps {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; confirmDelete?: string }>
 }
 
 const STATUS_FLOW = ['new', 'in_review', 'contacted', 'matched', 'closed', 'discarded'] as const
@@ -43,8 +43,18 @@ async function updateStatus(formData: FormData) {
   revalidatePath('/admin/solicitudes')
 }
 
+async function deleteRequest(formData: FormData) {
+  'use server'
+  const id = formData.get('id') as string
+  if (!id) return
+  const { createAdminClient } = await import('@/lib/supabase/server')
+  const supabase = createAdminClient()
+  await supabase.from('custom_requests').delete().eq('id', id)
+  revalidatePath('/admin/solicitudes')
+}
+
 export default async function AdminSolicitudesPage({ searchParams }: PageProps) {
-  const { status: statusFilter } = await searchParams
+  const { status: statusFilter, confirmDelete: deleteId } = await searchParams
   const supabase = createAdminClient()
 
   let query = supabase
@@ -170,18 +180,46 @@ export default async function AdminSolicitudesPage({ searchParams }: PageProps) 
                   )}
                 </div>
 
-                {/* Right: status changer */}
-                <form action={updateStatus} className="flex items-center gap-2 flex-shrink-0">
-                  <input type="hidden" name="id" value={r.id} />
-                  <select name="status" defaultValue={st} className="select-base text-xs py-1.5 w-36">
-                    {STATUS_FLOW.map((s) => (
-                      <option key={s} value={s}>{STATUS_LABEL[s]}</option>
-                    ))}
-                  </select>
-                  <button type="submit" className="btn-outline text-xs px-3 py-1.5 whitespace-nowrap">
-                    Actualizar
-                  </button>
-                </form>
+                {/* Right: status changer + delete */}
+                <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                  <form action={updateStatus} className="flex items-center gap-2">
+                    <input type="hidden" name="id" value={r.id} />
+                    <select name="status" defaultValue={st} className="select-base text-xs py-1.5 w-36">
+                      {STATUS_FLOW.map((s) => (
+                        <option key={s} value={s}>{STATUS_LABEL[s]}</option>
+                      ))}
+                    </select>
+                    <button type="submit" className="btn-outline text-xs px-3 py-1.5 whitespace-nowrap">
+                      Actualizar
+                    </button>
+                  </form>
+
+                  {deleteId !== r.id ? (
+                    <a
+                      href={`/admin/solicitudes?${statusFilter ? `status=${statusFilter}&` : ''}confirmDelete=${r.id}`}
+                      className="flex items-center gap-1.5 text-xs text-bsm-text-muted hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Eliminar
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-red-400">¿Eliminar definitivamente?</span>
+                      <form action={deleteRequest} className="inline">
+                        <input type="hidden" name="id" value={r.id} />
+                        <button type="submit"
+                          className="text-xs bg-red-900/30 border border-red-500/40 text-red-400 px-3 py-1 hover:bg-red-900/50 transition-colors">
+                          Confirmar
+                        </button>
+                      </form>
+                      <a
+                        href={`/admin/solicitudes${statusFilter ? `?status=${statusFilter}` : ''}`}
+                        className="text-xs text-bsm-text-muted hover:text-bsm-text-primary px-2 py-1 border border-bsm-border"
+                      >
+                        Cancelar
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )

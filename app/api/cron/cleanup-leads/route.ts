@@ -15,16 +15,22 @@ export async function GET(req: NextRequest) {
   cutoff.setFullYear(cutoff.getFullYear() - 1)
 
   const admin = createAdminClient()
-  const { error, count } = await admin
-    .from('leads')
-    .delete({ count: 'exact' })
-    .lt('created_at', cutoff.toISOString())
+  const cutoffIso = cutoff.toISOString()
 
-  if (error) {
-    console.error('[cleanup-leads] Error:', error.message)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  const [leadsResult, requestsResult] = await Promise.all([
+    admin.from('leads').delete({ count: 'exact' }).lt('created_at', cutoffIso),
+    admin.from('custom_requests').delete({ count: 'exact' }).lt('created_at', cutoffIso),
+  ])
+
+  if (leadsResult.error) {
+    console.error('[cleanup] leads error:', leadsResult.error.message)
+    return NextResponse.json({ error: leadsResult.error.message }, { status: 500 })
+  }
+  if (requestsResult.error) {
+    console.error('[cleanup] custom_requests error:', requestsResult.error.message)
+    return NextResponse.json({ error: requestsResult.error.message }, { status: 500 })
   }
 
-  console.log(`[cleanup-leads] Deleted ${count} leads older than 12 months`)
-  return NextResponse.json({ ok: true, deleted: count })
+  console.log(`[cleanup] Deleted ${leadsResult.count} leads + ${requestsResult.count} custom_requests older than 12 months`)
+  return NextResponse.json({ ok: true, deleted_leads: leadsResult.count, deleted_requests: requestsResult.count })
 }

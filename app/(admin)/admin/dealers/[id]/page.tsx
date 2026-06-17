@@ -92,6 +92,23 @@ async function setVerification(formData: FormData) {
   redirect(`/admin/dealers/${dealerId}`)
 }
 
+async function saveProfile(formData: FormData) {
+  'use server'
+  const dealerId = formData.get('dealerId') as string
+  const supabase = await createAdminClient()
+  await supabase.from('dealers').update({
+    name:          (formData.get('name') as string)?.trim() || undefined,
+    description:   (formData.get('description') as string)?.trim() || null,
+    logo_url:      (formData.get('logo_url') as string)?.trim() || null,
+    email:         (formData.get('email') as string)?.trim() || null,
+    phone:         (formData.get('phone') as string)?.trim() || null,
+    website:       (formData.get('website') as string)?.trim() || null,
+    location_city: (formData.get('location_city') as string)?.trim() || null,
+  }).eq('id', dealerId)
+  revalidatePath(`/admin/dealers/${dealerId}`)
+  redirect(`/admin/dealers/${dealerId}`)
+}
+
 export default async function AdminDealerDetailPage({ params }: PageProps) {
   const { id } = await params
   // createAdminClient bypasses RLS for cross-showroom data access
@@ -541,6 +558,58 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Profile editor */}
+      <div className="mt-8 bg-surface border border-bsm-border">
+        <div className="p-5 border-b border-bsm-border">
+          <h2 className="font-medium text-sm">Editar perfil del showroom</h2>
+          <p className="text-xs text-bsm-text-muted mt-0.5">Datos visibles en la ficha pública · los cambios son inmediatos</p>
+        </div>
+        <form action={saveProfile} className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <input type="hidden" name="dealerId" value={id} />
+          <div>
+            <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Nombre del showroom</label>
+            <input type="text" name="name" defaultValue={dealer.name || ''} required
+              className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+          </div>
+          <div>
+            <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Email de contacto</label>
+            <input type="email" name="email" defaultValue={dealer.email || ''}
+              className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+          </div>
+          <div>
+            <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Teléfono</label>
+            <input type="text" name="phone" defaultValue={dealer.phone || ''}
+              className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+          </div>
+          <div>
+            <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Web</label>
+            <input type="text" name="website" defaultValue={dealer.website || ''}
+              className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+          </div>
+          <div>
+            <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Ciudad</label>
+            <input type="text" name="location_city" defaultValue={dealer.location_city || ''}
+              className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+          </div>
+          <div>
+            <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">URL del logo</label>
+            <input type="text" name="logo_url" defaultValue={dealer.logo_url || ''}
+              className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+          </div>
+          <div className="lg:col-span-2">
+            <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Descripción</label>
+            <textarea name="description" rows={4} defaultValue={dealer.description || ''}
+              className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary p-2.5 resize-none focus:outline-none focus:border-gold/50 transition-colors" />
+          </div>
+          <div className="lg:col-span-2 flex justify-end">
+            <button type="submit"
+              className="text-xs px-4 py-2 border border-bsm-border text-bsm-text-secondary hover:border-gold/40 hover:text-gold transition-colors">
+              Guardar perfil
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import {
   VEHICLE_STATUS_LABELS, getVehicleStatusColor,
@@ -67,6 +68,24 @@ async function rejectVehicle(formData: FormData) {
     vehicleId: id,
     payload: { brand: updated?.brand_name, model: updated?.model_name, year: updated?.year, reason: reason || null },
   })
+  redirect(`/admin/vehiculos/${id}`)
+}
+
+async function editVehicle(formData: FormData) {
+  'use server'
+  const id          = formData.get('vehicleId') as string
+  const priceRaw    = formData.get('price') as string
+  const yearRaw     = formData.get('year') as string
+  const mileageRaw  = formData.get('mileage_km') as string
+  const supabase    = await createAdminClient()
+  await supabase.from('vehicles').update({
+    status:      formData.get('status') as string || undefined,
+    price:       priceRaw    ? parseFloat(priceRaw)   : null,
+    year:        yearRaw     ? parseInt(yearRaw)       : null,
+    mileage_km:  mileageRaw  ? parseInt(mileageRaw)   : null,
+    admin_notes: (formData.get('admin_notes') as string)?.trim() || null,
+  }).eq('id', id)
+  revalidatePath(`/admin/vehiculos/${id}`)
   redirect(`/admin/vehiculos/${id}`)
 }
 
@@ -502,13 +521,49 @@ export default async function AdminVehicleDetailPage({ params, searchParams }: P
             )}
           </div>
 
-          {/* Admin notes */}
-          {vehicle.admin_notes && (
-            <div className="bg-surface border border-bsm-border p-5">
-              <p className="text-xs text-bsm-text-muted uppercase tracking-wide mb-2">Notas internas</p>
-              <p className="text-xs text-bsm-text-secondary">{vehicle.admin_notes}</p>
-            </div>
-          )}
+          {/* Quick edit */}
+          <div className="bg-surface border border-bsm-border p-5">
+            <h3 className="text-xs font-medium mb-4 uppercase tracking-wide text-bsm-text-muted">Edición rápida</h3>
+            <form action={editVehicle} className="space-y-3">
+              <input type="hidden" name="vehicleId" value={id} />
+              <div>
+                <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Estado</label>
+                <select name="status" defaultValue={vehicle.status}
+                  className="select-base text-xs mt-1 w-full">
+                  <option value="draft">Borrador</option>
+                  <option value="pending_review">En revisión</option>
+                  <option value="active">Activo</option>
+                  <option value="paused">Reservado</option>
+                  <option value="sold">Vendido</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Precio (€)</label>
+                <input type="number" name="price" defaultValue={vehicle.price ?? ''}
+                  className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+              </div>
+              <div>
+                <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Año</label>
+                <input type="number" name="year" defaultValue={vehicle.year ?? ''}
+                  className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+              </div>
+              <div>
+                <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Kilómetros</label>
+                <input type="number" name="mileage_km" defaultValue={vehicle.mileage_km ?? ''}
+                  className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-gold/50 transition-colors" />
+              </div>
+              <div>
+                <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">Notas internas</label>
+                <textarea name="admin_notes" rows={2} defaultValue={vehicle.admin_notes ?? ''}
+                  className="mt-1 w-full bg-surface-elevated border border-bsm-border text-xs text-bsm-text-secondary p-2 resize-none focus:outline-none focus:border-gold/50 transition-colors" />
+              </div>
+              <button type="submit"
+                className="text-xs px-3 py-1.5 border border-bsm-border text-bsm-text-secondary hover:border-gold/40 hover:text-gold transition-colors">
+                Guardar cambios
+              </button>
+            </form>
+          </div>
+
 
           {/* Location */}
           {vehicle.location_province && (
