@@ -68,7 +68,7 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-bsm-border">
-              {['Concesionario', 'Email', 'Ciudad', 'Plan', 'Slots', 'Estado', 'Registro', 'Acciones'].map((h) => (
+              {['Concesionario', 'Email', 'Ciudad', 'Plan', 'Vehículos', 'Estado', 'Registro', 'Acciones'].map((h) => (
                 <th key={h} className="text-left px-4 py-3 text-xs text-bsm-text-muted font-medium uppercase tracking-wide">
                   {h}
                 </th>

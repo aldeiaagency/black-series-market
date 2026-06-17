@@ -12,9 +12,17 @@ interface Props {
   dealerId:       string
   vehicleTitle:   string
   dealerWhatsapp?: string | null
+  /** Vista previa: muestra la UI del agente con un guion local, sin backend de IA. */
+  preview?:       boolean
 }
 
-export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dealerWhatsapp }: Props) {
+// Guion de cualificación usado solo en modo preview (sin IA conectada).
+const PREVIEW_SCRIPT = [
+  'Gracias por tu interés. Para orientarte mejor: ¿lo buscas para uso personal o como inversión, y prefieres pago al contado o financiación?',
+  'Perfecto. Una última cosa: ¿en qué plazo te gustaría cerrarlo? Así el showroom prioriza tu consulta.',
+]
+
+export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dealerWhatsapp, preview = false }: Props) {
   const [mode,       setMode]       = useState<Mode>('init')
   const [sessionId,  setSessionId]  = useState<string | null>(null)
   const [waNumber,   setWaNumber]   = useState<string | null>(null)
@@ -22,10 +30,23 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
   const [input,      setInput]      = useState('')
   const [loading,    setLoading]    = useState(false)
   const [consent,    setConsent]    = useState(false)
+  const [previewTurn, setPreviewTurn] = useState(0)
   const endRef = useRef<HTMLDivElement>(null)
 
   // Open session on mount
   useEffect(() => {
+    // Modo preview: no llamamos al backend. Mostramos la UI del agente con guion local.
+    if (preview) {
+      setSessionId('preview')
+      setWaNumber(dealerWhatsapp ?? null)
+      setMessages([{
+        role: 'assistant',
+        text: `¡Hola! Soy el asistente de este showroom. Puedo resolver tus dudas sobre el ${vehicleTitle} y, si quieres, organizar una visita. ¿Qué te gustaría saber?`,
+      }])
+      setMode('consent')
+      return
+    }
+
     let cancelled = false
     ;(async () => {
       try {
@@ -49,7 +70,7 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
       }
     })()
     return () => { cancelled = true }
-  }, [vehicleId, dealerWhatsapp])
+  }, [vehicleId, dealerWhatsapp, preview, vehicleTitle])
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
@@ -58,6 +79,28 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
     if (!msg || !sessionId || loading) return
     setInput('')
     setMessages(prev => [...prev, { role: 'user', text: msg }])
+
+    // Modo preview: respondemos con el guion local; al agotarlo, pasamos al formulario
+    // para capturar el lead de verdad (el agente real lo hará en la conversación).
+    if (preview) {
+      setLoading(true)
+      setTimeout(() => {
+        if (previewTurn < PREVIEW_SCRIPT.length) {
+          setMessages(prev => [...prev, { role: 'assistant', text: PREVIEW_SCRIPT[previewTurn] }])
+          setPreviewTurn(t => t + 1)
+          setLoading(false)
+        } else {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            text: 'Genial, ya tengo lo necesario. Déjame tus datos de contacto y el vendedor te responde enseguida.',
+          }])
+          setLoading(false)
+          setTimeout(() => setMode('classic'), 900)
+        }
+      }, 650)
+      return
+    }
+
     setLoading(true)
     try {
       const res  = await fetch('/api/assistant/message', {

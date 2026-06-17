@@ -28,7 +28,7 @@ async function approveVehicle(formData: FormData) {
     published_at: new Date().toISOString(),
   }).eq('id', id).select('id, brand_name, model_name, year, dealer_id').single()
 
-  // El trigger de BD bloquea si el dealer supera su tope de vehículos activos.
+  // El trigger de BD bloquea si el dealer supera su tope de vehículos publicados.
   if (error) {
     if (error.message.includes('VEHICLE_LIMIT_REACHED')) {
       redirect(`/admin/vehiculos/${id}?error=vehicle_limit`)
@@ -140,7 +140,7 @@ export default async function AdminVehicleDetailPage({ params, searchParams }: P
           <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-amber-400">
             {errorFlag === 'vehicle_limit'
-              ? 'No se pudo aprobar: el showroom ha alcanzado el límite de vehículos activos de su plan. Debe pausar otro vehículo, ampliar con un bloque de inventario o subir de plan antes de publicar este.'
+              ? 'No se pudo aprobar: el showroom ha alcanzado el límite de vehículos publicados de su plan. Debe pausar otro vehículo, ampliar con un bloque de inventario o subir de plan antes de publicar este.'
               : 'No se pudo aprobar el vehículo. Inténtalo de nuevo.'}
           </p>
         </div>

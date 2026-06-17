@@ -7,25 +7,25 @@ const DEFAULT_PLANS = [
   {
     id: 'essential',
     name: 'Essential',
-    price: 149,
+    price: 197,
     slots: 15,
-    features: ['15 vehículos activos', 'Ficha de concesionario', 'Leads ilimitados', 'Estadísticas básicas'],
+    features: ['15 vehículos publicados', 'Perfil verificado', 'Bandeja de oportunidades', 'Analítica básica 30 días'],
     highlighted: false,
   },
   {
     id: 'professional',
     name: 'Professional',
-    price: 349,
-    slots: 40,
-    features: ['40 vehículos activos', 'Perfil destacado en búsquedas', 'Estadísticas avanzadas', 'Boost de visibilidad mensual'],
+    price: 449,
+    slots: 50,
+    features: ['50 vehículos publicados', '3 usuarios', 'Pipeline de oportunidades', 'Analítica avanzada 180 días', '1 boost mensual'],
     highlighted: true,
   },
   {
     id: 'elite',
     name: 'Elite',
-    price: 699,
+    price: 899,
     slots: 100,
-    features: ['Hasta 100 vehículos activos', 'Badge Destacado', 'Posición prioritaria', 'Account manager dedicado'],
+    features: ['100 vehículos publicados', '10 usuarios', 'Stock automatizado', 'Analítica Elite 365 días', 'Showroom destacado', '3 boosts mensuales'],
     highlighted: false,
   },
 ]
@@ -190,7 +190,7 @@ export default function AdminConfiguracionPage() {
                             />
                           </div>
                           <div>
-                            <label className="label-base">Slots de vehículos</label>
+                            <label className="label-base">Vehículos publicados</label>
                             <input
                               type="number"
                               value={plan.slots}

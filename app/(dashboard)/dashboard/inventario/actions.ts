@@ -29,7 +29,7 @@ export async function updateVehicleStatus(
     if (!allowed) {
       return {
         ok: false,
-        error: 'Has alcanzado el límite de vehículos activos de tu plan. Pausa otro vehículo, amplía con un bloque de inventario o sube de plan.',
+        error: 'Has alcanzado el límite de vehículos publicados de tu plan. Pausa otro vehículo, amplía con un bloque de inventario o sube de plan.',
       }
     }
   }
@@ -45,7 +45,7 @@ export async function updateVehicleStatus(
     if (error.message.includes('VEHICLE_LIMIT_REACHED')) {
       return {
         ok: false,
-        error: 'Has alcanzado el límite de vehículos activos de tu plan. Pausa otro vehículo, amplía con un bloque de inventario o sube de plan.',
+        error: 'Has alcanzado el límite de vehículos publicados de tu plan. Pausa otro vehículo, amplía con un bloque de inventario o sube de plan.',
       }
     }
     return { ok: false, error: 'No se pudo actualizar el estado del vehículo.' }

@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/brand/Logo'
+import PasswordInput from '@/components/auth/PasswordInput'
+import { checkPassword } from '@/lib/password'
 
 export default function RegistroCompradorPage() {
   const [form, setForm] = useState({ full_name: '', email: '', password: '' })
@@ -19,6 +21,13 @@ export default function RegistroCompradorPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+
+    const check = checkPassword(form.password)
+    if (!check.ok) {
+      setError(check.error ?? 'La contraseña no cumple los requisitos.')
+      return
+    }
+
     setLoading(true)
     const supabase = createClient()
 
@@ -81,18 +90,15 @@ export default function RegistroCompradorPage() {
                 required
               />
             </div>
-            <div>
-              <label className="label-base">Contraseña</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => update('password', e.target.value)}
-                placeholder="Mínimo 8 caracteres"
-                className="input-base"
-                minLength={8}
-                required
-              />
-            </div>
+            <PasswordInput
+              value={form.password}
+              onChange={(v) => update('password', v)}
+              autoComplete="new-password"
+              placeholder="Mínimo 8 caracteres"
+              showStrength
+              minLength={8}
+              required
+            />
 
             {error && (
               <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">

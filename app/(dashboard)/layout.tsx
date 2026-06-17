@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getPermissions } from '@/lib/permissions'
 import Sidebar from '@/components/dashboard/Sidebar'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -8,14 +10,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!user) redirect('/login')
 
-  const { data: dealer } = await supabase
+  // Resolución central: dueño directo o miembro del equipo de la organización.
+  const access = await getDealerAccess(user.id)
+  if (!access) redirect('/registro')
+
+  const admin = createAdminClient()
+  const { data: dealer } = await admin
     .from('dealers')
     .select('id, name, slug, status, subscription_plan, vehicle_slots')
-    .eq('profile_id', user.id)
+    .eq('id', access.dealerId)
     .single()
 
   if (!dealer) redirect('/registro')
   if (dealer.status === 'pending') redirect('/solicitud-enviada')
+
+  const perms = getPermissions(access.role)
 
   return (
     <div className="flex min-h-screen bg-obsidian">
@@ -23,6 +32,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         dealerName={dealer.name}
         dealerSlug={dealer.slug}
         plan={dealer.subscription_plan}
+        sections={perms.sections}
+        role={access.role}
       />
       <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto">

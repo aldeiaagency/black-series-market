@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { getOrganizationIdForUser, getEntitlements } from '@/lib/entitlements'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getEntitlements } from '@/lib/entitlements'
 import { formatNumber, VEHICLE_STATUS_LABELS } from '@/lib/utils'
 import {
   Eye, MessageSquare, Heart, TrendingUp, Car,
@@ -95,15 +96,18 @@ export default async function AnaliticasPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: dealer } = await supabase
+  const access = await getDealerAccess(user.id)
+  if (!access) redirect('/registro')
+  const admin = createAdminClient()
+  const { data: dealer } = await admin
     .from('dealers')
     .select('id, profile_id')
-    .eq('profile_id', user.id)
+    .eq('id', access.dealerId)
     .single()
   if (!dealer) redirect('/registro')
 
   // ── Server-side entitlement resolution ─────────────────────────────────────
-  const orgId = await getOrganizationIdForUser(user.id)
+  const orgId = access.orgId
   const ent   = orgId ? await getEntitlements(orgId) : null
   const tier  = resolveTier(ent?.features ?? {})
   const retentionDays = ent?.limits.analyticsRetentionDays ?? 30
@@ -129,14 +133,14 @@ export default async function AnaliticasPage({
 
   // ── Fetch: current period events + vehicles ─────────────────────────────────
   const [{ data: events }, { data: vehicles }] = await Promise.all([
-    supabase
+    admin
       .from('analytics_events')
       .select('event_type, vehicle_id')
       .eq('dealer_id', dealer.id)
       .gte('created_at', rangeFromISO)
       .lte('created_at', rangeToISO),
 
-    supabase
+    admin
       .from('vehicles')
       .select('id, brand_name, model_name, year, version, slug, vehicle_type, status, views, leads_count, images, description, published_at, updated_at')
       .eq('dealer_id', dealer.id)
@@ -179,7 +183,7 @@ export default async function AnaliticasPage({
   // ── Evolution data (Advanced+) — from analytics_daily rollup ───────────────
   let evolutionData: DailyPoint[] = []
   if (tier === 'advanced' || tier === 'elite') {
-    const { data: daily } = await supabase
+    const { data: daily } = await admin
       .from('analytics_daily')
       .select('date, views, contacts, saved')
       .eq('dealer_id', dealer.id)
@@ -204,7 +208,7 @@ export default async function AnaliticasPage({
     const prevFromISO = new Date(rangeFrom.getTime() - spanMs).toISOString()
     const prevToISO   = rangeFrom.toISOString()
 
-    const { data: prevEvents } = await supabase
+    const { data: prevEvents } = await admin
       .from('analytics_events')
       .select('event_type')
       .eq('dealer_id', dealer.id)
@@ -272,6 +276,10 @@ export default async function AnaliticasPage({
   const sortedInsights = insights
     .sort((a, b) => { const o = { warn: 0, good: 1, info: 2 }; return o[a.type] - o[b.type] })
     .slice(0, 5)
+  const visibleInsights =
+    tier === 'basic' ? [] :
+    tier === 'advanced' ? sortedInsights.slice(0, 1) :
+    sortedInsights
 
   // ── Previous period label ──────────────────────────────────────────────────
   const spanMs       = rangeTo.getTime() - rangeFrom.getTime()
@@ -375,11 +383,13 @@ export default async function AnaliticasPage({
       </div>
 
       {/* ── Insights ─────────────────────────────────────────────────────────── */}
-      {sortedInsights.length > 0 && (
+      {visibleInsights.length > 0 && (
         <section>
-          <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-4">Recomendaciones</h2>
+          <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-4">
+            {tier === 'advanced' ? 'Sugerencia contextual' : 'Recomendaciones'}
+          </h2>
           <div className="space-y-3">
-            {sortedInsights.map((ins, i) => (
+            {visibleInsights.map((ins, i) => (
               <div key={i} className={`flex items-start gap-3 p-4 border ${
                 ins.type === 'good'
                   ? 'border-emerald-400/20 bg-emerald-400/5'

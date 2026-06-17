@@ -27,19 +27,32 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
 
-  // Protected dealer dashboard — also gate by dealer status
+  // Protected dealer dashboard — owner or team member
   if (pathname.startsWith('/dashboard')) {
     if (!user) return NextResponse.redirect(new URL('/login', request.url))
 
+    // ¿Dueño directo?
     const { data: dealer } = await supabase
       .from('dealers')
       .select('status')
       .eq('profile_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (!dealer) return NextResponse.redirect(new URL('/registro', request.url))
-    if (dealer.status === 'pending') {
-      return NextResponse.redirect(new URL('/solicitud-enviada', request.url))
+    if (dealer) {
+      if (dealer.status === 'pending') {
+        return NextResponse.redirect(new URL('/solicitud-enviada', request.url))
+      }
+    } else {
+      // ¿Miembro del equipo de alguna organización? (RLS: lee su propia membresía)
+      const { data: member } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle()
+
+      if (!member) return NextResponse.redirect(new URL('/registro', request.url))
+      // Miembro válido → el layout resuelve showroom y permisos.
     }
   }
 
@@ -90,7 +103,7 @@ export async function updateSession(request: NextRequest) {
       .from('dealers')
       .select('id, status')
       .eq('profile_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (dealer) {
       if (dealer.status === 'pending') {
@@ -98,6 +111,18 @@ export async function updateSession(request: NextRequest) {
       }
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
+
+    // Miembro del equipo (no es dueño) → al dashboard del showroom
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+    if (member) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
     if (pathname === '/registro' || pathname === '/registro-comprador') {
       return NextResponse.redirect(new URL('/', request.url))
     }

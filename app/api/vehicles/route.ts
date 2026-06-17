@@ -1,5 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getPermissions } from '@/lib/permissions'
+
+// Crear un vehículo (dueño o miembro con permiso de inventario). El dealer_id se fuerza
+// al showroom del usuario, nunca se confía en el del payload.
+export async function POST(request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Sesión no válida.' }, { status: 401 })
+
+  const access = await getDealerAccess(user.id)
+  if (!access) return NextResponse.json({ error: 'No tienes un showroom activo.' }, { status: 403 })
+  if (!getPermissions(access.role).canEditInventory) {
+    return NextResponse.json({ error: 'No tienes permisos para publicar vehículos.' }, { status: 403 })
+  }
+
+  let payload: Record<string, unknown>
+  try { payload = await request.json() } catch { return NextResponse.json({ error: 'Datos inválidos.' }, { status: 400 }) }
+
+  // Seguridad: el dealer_id lo decide el servidor, no el cliente.
+  payload.dealer_id = access.dealerId
+  delete payload.id
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.from('vehicles').insert(payload).select('id').single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ id: data.id })
+}
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()

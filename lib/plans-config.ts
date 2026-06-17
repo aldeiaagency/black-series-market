@@ -52,7 +52,7 @@ const BOOST_INFO =
 
 export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
   essential: [
-    { label: 'Vehículos activos', kind: 'value', value: 'Hasta 15' },
+    { label: 'Vehículos publicados', kind: 'value', value: 'Hasta 15' },
     { label: 'Usuarios', kind: 'value', value: '1' },
     { label: 'Sedes', kind: 'value', value: '1' },
     { label: 'Perfil verificado', kind: 'included' },
@@ -72,7 +72,7 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
     { label: 'Boosts incluidos', kind: 'value', value: '0', info: BOOST_INFO },
   ],
   professional: [
-    { label: 'Vehículos activos', kind: 'value', value: 'Hasta 50' },
+    { label: 'Vehículos publicados', kind: 'value', value: 'Hasta 50' },
     { label: 'Usuarios', kind: 'value', value: '3' },
     { label: 'Sedes', kind: 'value', value: '1' },
     { label: 'Perfil verificado', kind: 'included' },
@@ -107,7 +107,7 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
     { label: 'Boosts incluidos', kind: 'value', value: '1/mes', info: BOOST_INFO },
   ],
   elite: [
-    { label: 'Vehículos activos', kind: 'value', value: 'Hasta 100', info: 'Ampliable en bloques de 25 vehículos adicionales desde tu panel.' },
+    { label: 'Vehículos publicados', kind: 'value', value: 'Hasta 100', info: 'Ampliable en bloques de 25 vehículos adicionales desde tu panel.' },
     { label: 'Usuarios', kind: 'value', value: '10' },
     { label: 'Sedes', kind: 'value', value: '1' },
     { label: 'Perfil verificado', kind: 'included' },
@@ -192,7 +192,7 @@ export const PLANS: PlanDef[] = [
       pipeline: true,
       analytics_basic: true,
       analytics_retention_days: 180,
-      analytics_advanced: false,
+      analytics_advanced: true,
       vehicles_on_request: true,
       showroom_featured: false,
       showroom_listing_priority: false,
@@ -261,7 +261,7 @@ export const ADDONS: AddonDef[] = [
   },
   {
     slug: 'block_10',
-    name: '+10 vehículos activos',
+    name: '+10 vehículos publicados',
     price: '59 €',
     unit: '/mes por bloque',
     desc: 'Amplía tu límite de inventario publicado en bloques de 10.',
@@ -270,19 +270,29 @@ export const ADDONS: AddonDef[] = [
   },
   {
     slug: 'block_25',
-    name: '+25 vehículos activos',
+    name: '+25 vehículos publicados',
     price: '99 €',
     unit: '/mes por bloque',
     desc: 'Bloques de 25 vehículos adicionales para inventarios grandes.',
-    appliesTo: ['professional', 'elite'],
+    appliesTo: ['elite'],
     action: 'request',
   },
   {
     slug: 'stock_sync',
     name: 'Stock automatizado',
-    price: '149 €',
+    price: '99 €',
     unit: '/mes',
     desc: 'Conecta tu feed o DMS y mantén el inventario sincronizado automáticamente, sin subir nada a mano. Incluido en el plan Elite.',
+    appliesTo: ['essential', 'professional'],
+    action: 'request',
+    includedInElite: true,
+  },
+  {
+    slug: 'diagnostico_antifuga',
+    name: 'Diagnóstico Anti-Fuga Express',
+    price: '149 €',
+    unit: 'puntual',
+    desc: 'Mini-auditoría que detecta 3 fugas de oportunidades de tu showroom con recomendaciones priorizadas. En Elite va incluido de serie (1 al semestre).',
     appliesTo: ['essential', 'professional'],
     action: 'request',
     includedInElite: true,

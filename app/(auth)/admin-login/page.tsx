@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Shield } from 'lucide-react'
+import PasswordInput from '@/components/auth/PasswordInput'
 
 export default function AdminLoginPage() {
   const [email, setEmail]       = useState('')
@@ -75,16 +77,17 @@ export default function AdminLoginPage() {
               />
             </div>
             <div>
-              <label className="label-base">Contraseña</label>
-              <input
-                type="password"
+              <PasswordInput
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input-base"
+                onChange={setPassword}
                 autoComplete="current-password"
                 required
               />
+              <div className="text-right mt-2">
+                <Link href="/recuperar" className="text-xs text-bsm-text-muted hover:text-gold transition-colors">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </div>
 
             {error && (

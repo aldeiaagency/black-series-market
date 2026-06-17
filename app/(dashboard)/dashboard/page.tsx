@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Car, Eye, MessageSquare, TrendingUp, PlusCircle, ArrowRight, UserCheck } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getEntitlements } from '@/lib/entitlements'
+import { getPermissions } from '@/lib/permissions'
 import { formatNumber, VEHICLE_STATUS_LABELS } from '@/lib/utils'
 
 export default async function DashboardPage() {
@@ -9,13 +12,22 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: dealer } = await supabase
+  const access = await getDealerAccess(user.id)
+  if (!access) redirect('/registro')
+  const perms = getPermissions(access.role)
+
+  const admin = createAdminClient()
+  const { data: dealer } = await admin
     .from('dealers')
     .select('*')
-    .eq('profile_id', user.id)
+    .eq('id', access.dealerId)
     .single()
 
   if (!dealer) redirect('/registro')
+
+  // Límite real del plan (fuente de verdad: entitlements). Fallback al campo legacy.
+  const ent = access.orgId ? await getEntitlements(access.orgId) : null
+  const vehicleLimit = ent?.limits.maxActiveVehicles ?? dealer.vehicle_slots
 
   const [
     { data: vehicles },
@@ -25,17 +37,17 @@ export default async function DashboardPage() {
     { data: analytics },
   ] = await Promise.all([
     // Widget "vehículos recientes": solo los 5 últimos para mostrar en pantalla
-    supabase.from('vehicles').select('id, status, brand_name, model_name, year, views, leads_count, images')
+    admin.from('vehicles').select('id, status, brand_name, model_name, year, views, leads_count, images')
       .eq('dealer_id', dealer.id).order('created_at', { ascending: false }).limit(5),
     // Contador real de activos: HEAD request, sin traer filas
-    supabase.from('vehicles').select('*', { count: 'exact', head: true })
+    admin.from('vehicles').select('*', { count: 'exact', head: true })
       .eq('dealer_id', dealer.id).eq('status', 'active'),
     // Contador real de en revisión: HEAD request, sin traer filas
-    supabase.from('vehicles').select('*', { count: 'exact', head: true })
+    admin.from('vehicles').select('*', { count: 'exact', head: true })
       .eq('dealer_id', dealer.id).eq('status', 'pending_review'),
-    supabase.from('leads').select('*', { count: 'exact' })
+    admin.from('leads').select('*', { count: 'exact' })
       .eq('dealer_id', dealer.id).eq('status', 'new').limit(5),
-    supabase.from('analytics_events').select('event_type')
+    admin.from('analytics_events').select('event_type')
       .eq('dealer_id', dealer.id)
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
   ])
@@ -64,7 +76,7 @@ export default async function DashboardPage() {
         </h1>
         <p className="text-sm text-bsm-text-muted">
           Plan {dealer.subscription_plan || 'Trial'} ·{' '}
-          {activeVehicles ?? 0}/{dealer.vehicle_slots} slots usados
+          {activeVehicles ?? 0}/{vehicleLimit} vehículos publicados
         </p>
       </div>
 

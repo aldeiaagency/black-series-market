@@ -3,7 +3,9 @@ import Link from 'next/link'
 import { Check, Zap, ArrowUpRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { getOrganizationIdForUser, getEntitlements } from '@/lib/entitlements'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getPermissions } from '@/lib/permissions'
+import { getEntitlements } from '@/lib/entitlements'
 import { PLANS, ADDONS, getPlan, ELITE_LIMIT_NOTE } from '@/lib/plans-config'
 
 function UsageBar({ used, max, label }: { used: number; max: number; label: string }) {
@@ -16,7 +18,7 @@ function UsageBar({ used, max, label }: { used: number; max: number; label: stri
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs text-bsm-text-muted">{label}</span>
         <span className={`text-xs font-medium ${isDanger ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-bsm-text-secondary'}`}>
-          {used} / {max >= 99 ? '∞' : max}
+          {used} / {max}
         </span>
       </div>
       <div className="h-1 bg-bsm-border rounded-full overflow-hidden">
@@ -34,13 +36,17 @@ export default async function SuscripcionPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const access = await getDealerAccess(user.id)
+  if (!access) redirect('/registro')
+  if (!getPermissions(access.role).canManageSubscription) redirect('/dashboard')
+
   const admin = createAdminClient()
-  const orgId = await getOrganizationIdForUser(user.id)
+  const orgId = access.orgId
 
   const { data: dealer } = await admin
     .from('dealers')
     .select('id, name, subscription_plan, subscription_end_at, stripe_customer_id, stripe_subscription_id')
-    .eq('profile_id', user.id)
+    .eq('id', access.dealerId)
     .single()
 
   if (!dealer) redirect('/registro')
@@ -77,7 +83,7 @@ export default async function SuscripcionPage() {
             <UsageBar
               used={ent.usage.activeVehicles}
               max={ent.limits.maxActiveVehicles}
-              label="Vehículos activos"
+              label="Vehículos publicados"
             />
             <UsageBar
               used={ent.usage.users}
@@ -100,7 +106,7 @@ export default async function SuscripcionPage() {
 
           {ent.usage.activeVehicles >= ent.limits.maxActiveVehicles && (
             <div className="mt-4 border border-amber-400/20 bg-amber-400/5 p-4">
-              <p className="text-xs text-amber-400 mb-2">Has alcanzado el límite de vehículos activos.</p>
+              <p className="text-xs text-amber-400 mb-2">Has alcanzado el límite de vehículos publicados.</p>
               <div className="flex gap-3 flex-wrap">
                 <Link href="/dashboard/inventario" className="text-xs text-gold hover:underline">Archivar vehículos →</Link>
                 <Link href="/profesionales/precios" className="text-xs text-gold hover:underline">Subir de plan →</Link>
@@ -193,8 +199,12 @@ export default async function SuscripcionPage() {
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <p className="text-sm font-medium text-bsm-text-primary">{addon.name}</p>
                   <p className="font-display text-base font-light text-gold whitespace-nowrap">
-                    {includedHere ? 'Incluido' : addon.price}
-                    {!includedHere && <span className="text-[10px] text-bsm-text-muted ml-1">{addon.unit}</span>}
+                    {includedHere ? 'Incluido' : (
+                      <>
+                        {addon.price}
+                        <span className="text-[10px] text-bsm-text-muted ml-1">+ IVA · {addon.unit}</span>
+                      </>
+                    )}
                   </p>
                 </div>
                 <p className="text-xs text-bsm-text-muted mb-3 flex-1">{addon.desc}</p>

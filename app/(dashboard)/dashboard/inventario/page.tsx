@@ -1,8 +1,11 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PlusCircle, Edit, Eye, Zap } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
-import { formatPrice, formatMileage } from '@/lib/utils'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getEntitlements } from '@/lib/entitlements'
+import { getPermissions } from '@/lib/permissions'
+import { formatPrice, formatMileage, VEHICLE_STATUS_LABELS, getVehicleStatusColor } from '@/lib/utils'
 import BoostButton from '@/components/dashboard/BoostButton'
 import VehicleStatusSelector from '@/components/dashboard/VehicleStatusSelector'
 
@@ -11,22 +14,31 @@ export default async function InventarioPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: dealer } = await supabase
+  const access = await getDealerAccess(user.id)
+  if (!access) redirect('/registro')
+  const canEdit = getPermissions(access.role).canEditInventory
+
+  const admin = createAdminClient()
+  const { data: dealer } = await admin
     .from('dealers')
     .select('id, name, vehicle_slots, subscription_plan')
-    .eq('profile_id', user.id)
+    .eq('id', access.dealerId)
     .single()
 
   if (!dealer) redirect('/registro')
 
+  // Límite real del plan (fuente de verdad: entitlements). Fallback al campo legacy.
+  const ent = access.orgId ? await getEntitlements(access.orgId) : null
+  const vehicleLimit = ent?.limits.maxActiveVehicles ?? dealer.vehicle_slots
+
   const [{ data: vehicles }, { data: leadsRaw }] = await Promise.all([
-    supabase
+    admin
       .from('vehicles')
       .select('*', { count: 'exact' })
       .eq('dealer_id', dealer.id)
       .order('created_at', { ascending: false }),
     // Real contact counts — no stale leads_count column
-    supabase
+    admin
       .from('leads')
       .select('vehicle_id')
       .eq('dealer_id', dealer.id),
@@ -46,25 +58,27 @@ export default async function InventarioPage() {
         <div>
           <h1 className="font-display text-3xl font-light mb-1">Inventario</h1>
           <p className="text-sm text-bsm-text-muted">
-            {activeCount} activos de {dealer.vehicle_slots} disponibles
+            {activeCount} activos de {vehicleLimit} disponibles
           </p>
         </div>
-        <Link href="/dashboard/publicar" className="btn-gold">
-          <PlusCircle className="w-4 h-4" />
-          Publicar vehículo
-        </Link>
+        {canEdit && (
+          <Link href="/dashboard/publicar" className="btn-gold">
+            <PlusCircle className="w-4 h-4" />
+            Publicar vehículo
+          </Link>
+        )}
       </div>
 
-      {/* Slots bar */}
+      {/* Vehicles published bar */}
       <div className="mb-8 bg-surface border border-bsm-border p-4">
         <div className="flex items-center justify-between text-xs text-bsm-text-muted mb-2">
-          <span>Slots usados</span>
-          <span>{activeCount} / {dealer.vehicle_slots}</span>
+          <span>Vehículos publicados</span>
+          <span>{activeCount} / {vehicleLimit}</span>
         </div>
         <div className="h-1.5 bg-surface-elevated rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-gold transition-all duration-500"
-            style={{ width: `${Math.min((activeCount / dealer.vehicle_slots) * 100, 100)}%` }}
+            style={{ width: `${Math.min((activeCount / vehicleLimit) * 100, 100)}%` }}
           />
         </div>
       </div>
@@ -111,7 +125,13 @@ export default async function InventarioPage() {
                       {formatMileage(v.mileage_km)}
                     </td>
                     <td className="px-4 py-3">
-                      <VehicleStatusSelector vehicleId={v.id} initialStatus={v.status} />
+                      {canEdit ? (
+                        <VehicleStatusSelector vehicleId={v.id} initialStatus={v.status} />
+                      ) : (
+                        <span className={`badge text-[10px] ${getVehicleStatusColor(v.status)}`}>
+                          {VEHICLE_STATUS_LABELS[v.status as keyof typeof VEHICLE_STATUS_LABELS] ?? v.status}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-bsm-text-muted">{v.views}</td>
                     <td className="px-4 py-3">
@@ -121,20 +141,22 @@ export default async function InventarioPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 justify-end">
-                        {v.status === 'active' && (
+                        {canEdit && v.status === 'active' && (
                           <BoostButton
                             vehicleId={v.id}
                             isFeatured={v.is_featured}
                             featuredUntil={v.featured_until}
                           />
                         )}
-                        <Link
-                          href={`/dashboard/publicar?edit=${v.id}`}
-                          className="p-2 text-bsm-text-muted hover:text-gold transition-colors"
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Link>
+                        {canEdit && (
+                          <Link
+                            href={`/dashboard/publicar?edit=${v.id}`}
+                            className="p-2 text-bsm-text-muted hover:text-gold transition-colors"
+                            title="Editar"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Link>
+                        )}
                         {v.status === 'active' && (
                           <Link
                             href={`/${v.vehicle_type === 'car' ? 'coches' : 'motos'}/${v.slug}`}
@@ -145,7 +167,7 @@ export default async function InventarioPage() {
                             <Eye className="w-4 h-4" />
                           </Link>
                         )}
-                        {v.status === 'draft' && (
+                        {canEdit && v.status === 'draft' && (
                           <Link
                             href={`/dashboard/publicar?edit=${v.id}`}
                             className="text-[10px] px-2 py-1 border border-gold/40 text-gold hover:bg-gold/5 transition-colors"

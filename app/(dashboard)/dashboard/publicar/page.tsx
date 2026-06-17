@@ -121,18 +121,22 @@ export default function PublicarPage() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      const { data: dealer } = await supabase.from('dealers').select('id, location_city, location_region, subscription_plan').eq('profile_id', user.id).single()
-      if (!dealer) { router.push('/registro'); return }
-      setDealerId(dealer.id)
-      setDealerLocation(dealer.location_region || dealer.location_city || null)
-      setDealerPlan(dealer.subscription_plan || null)
+      // Contexto del showroom resuelto en el servidor (dueño o miembro con permiso).
+      const res = await fetch('/api/me/showroom')
+      if (res.status === 401) { router.push('/login'); return }
+      if (!res.ok) { router.push('/registro'); return }
+      const ctx = await res.json()
+      if (!ctx.canEditInventory) { router.push('/dashboard/inventario'); return }
+      setDealerId(ctx.dealerId)
+      setDealerLocation(ctx.locationProvince)
+      setDealerPlan(ctx.plan)
 
       if (editId) {
-        const { data: vehicle } = await supabase.from('vehicles').select('*').eq('id', editId).eq('dealer_id', dealer.id).single()
-        if (vehicle) setForm({ ...vehicle, price: vehicle.price || '', power_hp: vehicle.power_hp || '' })
+        const vres = await fetch(`/api/vehicles/${editId}`)
+        if (vres.ok) {
+          const { data: vehicle } = await vres.json()
+          if (vehicle) setForm({ ...vehicle, price: vehicle.price || '', power_hp: vehicle.power_hp || '' })
+        }
       }
     }
     load()
@@ -176,7 +180,6 @@ export default function PublicarPage() {
   async function handleSave(publish = false) {
     setError('')
     setLoading(true)
-    const supabase = createClient()
 
     const slug = vehicleSlug(form.brand_name, form.model_name, form.year, editId || crypto.randomUUID())
 
@@ -222,19 +225,30 @@ export default function PublicarPage() {
       published_at:    publish ? new Date().toISOString() : null,
     }
 
-    let err
+    let err: string | null = null
     let savedVehicleId: string | null = editId || null
     if (editId) {
-      const { error: e } = await supabase.from('vehicles').update(payload).eq('id', editId).eq('dealer_id', dealerId)
-      err = e
+      const res = await fetch(`/api/vehicles/${editId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) err = (await res.json().catch(() => ({}))).error || 'Error al guardar.'
     } else {
-      const { data: inserted, error: e } = await supabase.from('vehicles').insert(payload).select('id').single()
-      err = e
-      savedVehicleId = inserted?.id ?? null
+      const res = await fetch('/api/vehicles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (res.ok) {
+        savedVehicleId = (await res.json()).id ?? null
+      } else {
+        err = (await res.json().catch(() => ({}))).error || 'Error al guardar.'
+      }
     }
 
     setLoading(false)
-    if (err) { setError(err.message); return }
+    if (err) { setError(err); return }
 
     // Notify automations when the vehicle enters the review queue (non-blocking).
     if (publish && savedVehicleId) {

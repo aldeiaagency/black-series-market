@@ -10,7 +10,7 @@
 > Al conectar cada pieza **no hace falta tocar el gating** (la feature ya está incluida en
 > su plan): solo conectar la herramienta y marcar su `availability_status = 'operative'`.
 
-Última actualización: **2026-06-16**.
+Última actualización: **2026-06-17**.
 
 ---
 
@@ -21,7 +21,7 @@
 - **El acceso se decide por `plan_features.included` por plan**, NO por `availability_status`.
   `availability_status` (`operative` | `partial` | `future`) es **solo informativo**: indica
   si el backend de esa feature está realmente conectado. No oculta nada al showroom.
-- El **límite de vehículos activos** se aplica en BD con el trigger `enforce_active_vehicle_limit`
+- El **límite de vehículos publicados** se aplica en BD con el trigger `enforce_active_vehicle_limit`
   (migración 040): es la barrera real e imposible de saltar, con diseño fail-open.
 
 ---
@@ -30,7 +30,7 @@
 
 | Tarea | Herramienta | Detalle |
 |---|---|---|
-| Aplicar migraciones pendientes | Supabase CLI | `npx supabase db push` — incluye 038 (clasificación features), 040 (trigger límite vehículos) y las previas no aplicadas. Revisar que 039 (otro trabajo) entra en orden. |
+| Aplicar migraciones pendientes | Supabase CLI | `npx supabase db push` — incluye 045 (alineación Professional), 040 (trigger límite vehículos) y las previas no aplicadas. Revisar que 039 (otro trabajo) entra en orden. |
 | Desplegar a producción | Vercel CLI | El auto-deploy GitHub→Vercel está roto: desplegar con `vercel --prod --yes`. |
 | Verificar variables de entorno | Vercel | Claves Supabase, Stripe, `NEXT_PUBLIC_APP_URL`, `IMPORT_API_KEY`. |
 
@@ -41,7 +41,7 @@
 | Tarea | Detalle |
 |---|---|
 | Crear productos y precios por plan | Essential 197 € · Professional 449 € · Elite 899 € (mensual, sin IVA — el IVA lo añade Stripe Tax o se configura aparte). Guardar los `price_id` en `plans.stripe_monthly_price_id` y en env (`STRIPE_PRICE_*_MONTHLY`). |
-| Crear precios de add-ons | Boost 49 €, Pack 5 boosts 199 €, Bloque +10 (59 €/mes), Bloque +25 (99 €/mes), Stock automatizado (149 €/mes), Diagnóstico (149 €). |
+| Crear precios de add-ons | Boost 49 €, Pack 5 boosts 199 €, Bloque +10 (59 €/mes), Bloque +25 (99 €/mes), Stock automatizado (99 €/mes), Diagnóstico (149 €). |
 | Webhook de Stripe | Endpoint `/api/stripe/webhooks` dado de alta en Stripe con el secret correcto; eventos de checkout/subscription. |
 | Stripe Tax / IVA | Configurar el cálculo de IVA en el checkout (los precios se muestran "+ IVA"). |
 
@@ -49,13 +49,10 @@
 
 ## 2. Agente de cualificación en la ficha (`lead_qualification_assistant`)
 
-- **Planes:** Professional, Elite. **Estado:** visible y concedido · backend de IA pendiente.
-- **Tareas:**
-  - Proveedor de IA conversacional (prompt de cualificación: intención, presupuesto, plazo).
-  - Endpoint que reciba la conversación de la ficha y escriba el resultado en `leads.qualification`
-    (estructura ya consumida por `oportunidades`: `score`, `intent`, `budget_range`, `timeline`, `summary`).
-  - Flujo n8n opcional para orquestar y registrar.
-  - Activar por showroom (`assistant_feature_flags`) y marcar `availability_status='operative'`.
+- **Planes:** Professional, Elite. **Estado:** activo y concedido.
+- **Nota:** la migración 045 lo deja como `availability_status='operative'` para ambos planes,
+  igual que la configuración definitiva de Elite. Cualquier ajuste futuro del proveedor de IA
+  debe hacerse sin cambiar el gating comercial del plan.
 
 ---
 
@@ -96,6 +93,27 @@
     carta, confirmación de cita, vehículo aprobado/rechazado).
   - Flujos n8n que reaccionen a los webhooks ya emitidos (`vehicle.approved`, etc.).
   - Ver `docs/backlog-alertas-y-vehiculos-a-la-carta.md` para el detalle de alertas y matcher.
+
+---
+
+## 7. SMTP propio para emails de Auth (recuperación de contraseña + confirmación)
+
+- **Estado:** el flujo de recuperación de contraseña está **construido y desplegado**
+  (`/recuperar` → email → `/auth/confirm` → `/reset-password`). Lo único pendiente es el
+  **SMTP propio**: hoy `smtp_host = null`, así que Supabase usa su SMTP por defecto, que
+  limita a ~2-3 emails/hora y manda desde un dominio genérico (cae en spam). Esto bloquea
+  tanto el reset de contraseña como los emails de confirmación de registro a escala real.
+- **Tareas:**
+  - Dar de alta un proveedor SMTP (Resend / Postmark / SendGrid) con dominio
+    `blacklabelmarket.es` (SPF + DKIM verificados).
+  - Configurar el SMTP custom en Supabase (Authentication → SMTP Settings) o vía Management
+    API (`smtp_host`, `smtp_user`, `smtp_pass`, `smtp_sender_name`, `smtp_admin_email`).
+  - Subir el `rate_limit_email_sent` (hoy 2/h) una vez haya SMTP propio.
+  - **Guía paso a paso completa (DNS, proveedor, Supabase, plantillas, verificación):**
+    `docs/configuracion-email-smtp.md`.
+- **Ya configurado (no tocar):** política de contraseñas (`password_min_length = 8`,
+  letras + números), plantilla de email de recovery (apunta a `/auth/confirm?token_hash=…
+  &type=recovery&next=/reset-password`), Site URL y redirect URLs.
 
 ---
 

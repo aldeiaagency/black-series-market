@@ -17,7 +17,7 @@ import StickyAwareSidebar from '@/components/marketplace/StickyAwareSidebar'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS, VEHICLE_CONDITION_LABELS } from '@/lib/utils'
 import type { Vehicle } from '@/lib/types'
 
-export type ContactMode = 'classic' | 'assistant'
+export type ContactMode = 'classic' | 'assistant' | 'assistant_preview'
 
 interface Props {
   vehicle: Vehicle & { dealer: any }
@@ -89,6 +89,11 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   sold:   { label: 'Vendido',    cls: 'text-[#9A9A9A] border-[#3A3A3A]' },
 }
 
+function hasActiveBoost(featuredUntil?: string | null): boolean {
+  if (!featuredUntil) return false
+  return new Date(featuredUntil).getTime() > Date.now()
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function VehicleDetailContent({
@@ -103,6 +108,7 @@ export default function VehicleDetailContent({
   const title = `${vehicle.brand_name} ${vehicle.model_name}${vehicle.version ? ' ' + vehicle.version : ''}`
   const loc = vehicle.location_province || vehicle.dealer?.location_city || vehicle.registration_country || null
   const statusBadge = STATUS_BADGE[vehicle.status as keyof typeof STATUS_BADGE]
+  const showFeatured = vehicle.status === 'active' && vehicle.is_featured && hasActiveBoost(vehicle.featured_until)
   const vehicleTypeParam: 'car' | 'motorcycle' = isCar ? 'car' : 'motorcycle'
   const vehicleWord = isCar ? 'vehículo' : 'moto'
   const fmtDate = (d?: string | null) =>
@@ -214,7 +220,7 @@ export default function VehicleDetailContent({
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="text-sm font-medium text-gold tracking-widest uppercase">{vehicle.brand_name}</span>
-              {vehicle.is_featured && (
+              {showFeatured && (
                 <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
                   text-gold bg-gold/10 border border-gold/20 font-medium">
                   Destacado
@@ -668,19 +674,20 @@ export default function VehicleDetailContent({
                 {/* Contact block — classic form or assistant widget */}
                 <div id="contactar" className="bg-surface border border-bsm-border p-6 scroll-mt-28">
                   <h3 className="font-display text-lg font-light text-bsm-text-primary mb-1">
-                    {contactMode === 'assistant' ? 'Consultar sobre este vehículo' : 'Pedir información sobre este vehículo'}
+                    {contactMode === 'classic' ? 'Pedir información sobre este vehículo' : 'Consultar sobre este vehículo'}
                   </h3>
                   <p className="text-xs text-bsm-text-muted mb-5">
-                    {contactMode === 'assistant'
-                      ? 'Nuestro asistente puede ayudarte ahora mismo.'
-                      : 'Déjanos tus datos y el vendedor te responderá directamente.'}
+                    {contactMode === 'classic'
+                      ? 'Déjanos tus datos y el vendedor te responderá directamente.'
+                      : 'Nuestro asistente puede ayudarte ahora mismo.'}
                   </p>
-                  {contactMode === 'assistant' ? (
+                  {contactMode === 'assistant' || contactMode === 'assistant_preview' ? (
                     <AssistantWidget
                       vehicleId={vehicle.id}
                       dealerId={vehicle.dealer_id}
                       vehicleTitle={title}
                       dealerWhatsapp={vehicle.dealer?.whatsapp ?? null}
+                      preview={contactMode === 'assistant_preview'}
                     />
                   ) : (
                     <QualifiedLeadForm

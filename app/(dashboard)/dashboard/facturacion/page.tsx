@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getPermissions } from '@/lib/permissions'
 import { createPortalSession } from '@/lib/stripe'
 
 export default async function FacturacionPage() {
@@ -8,11 +10,15 @@ export default async function FacturacionPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const access = await getDealerAccess(user.id)
+  if (!access) redirect('/registro')
+  if (!getPermissions(access.role).canManageSubscription) redirect('/dashboard')
+
   const admin = createAdminClient()
   const { data: dealer } = await admin
     .from('dealers')
     .select('stripe_customer_id, subscription_plan, subscription_end_at')
-    .eq('profile_id', user.id)
+    .eq('id', access.dealerId)
     .single()
 
   if (!dealer) redirect('/registro')

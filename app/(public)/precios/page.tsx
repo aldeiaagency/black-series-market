@@ -6,11 +6,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es
 
 export const metadata: Metadata = {
   title: 'Precios y planes — Black Label Market',
-  description: 'Planes de publicación para concesionarios y especialistas premium. Sin comisiones por venta. Essential 149 €/mes, Professional 349 €/mes, Elite 699 €/mes.',
+  description: 'Planes de publicación para showrooms y especialistas premium. Sin comisiones por venta. Essential 197 €/mes, Professional 449 €/mes, Elite 899 €/mes.',
   alternates: { canonical: '/precios' },
   openGraph: {
     title: 'Precios y planes — Black Label Market',
-    description: 'Planes para publicar en el marketplace premium. Essential 149 €, Professional 349 €, Elite 699 €/mes. Sin comisiones por venta.',
+    description: 'Planes para publicar en el marketplace premium. Essential 197 €, Professional 449 €, Elite 899 €/mes. Sin comisiones por venta.',
     url: 'https://blacklabelmarket.es/precios',
     siteName: 'Black Label Market',
     type: 'website',
@@ -21,48 +21,50 @@ const PLANS = [
   {
     id: 'essential',
     name: 'Essential',
-    price: 149,
-    slots: 10,
-    description: 'Para concesionarios que empiezan en el marketplace',
+    price: 197,
+    slots: 15,
+    description: 'Presencia premium para empezar en el marketplace',
     features: [
-      'Hasta 10 vehículos activos',
-      'Perfil de concesionario básico',
-      'Gestión de leads centralizada',
-      'Analíticas básicas (30 días)',
-      'Soporte por email',
+      'Hasta 15 vehículos publicados',
+      'Perfil verificado',
+      'Alta Premium incluida',
+      'Bandeja de oportunidades',
+      'Analítica básica 30 días',
     ],
     cta: 'Empezar con Essential',
   },
   {
     id: 'professional',
     name: 'Professional',
-    price: 349,
-    slots: 30,
+    price: 449,
+    slots: 50,
     popular: true,
     description: 'El más elegido por concesionarios con inventario activo y criterio editorial',
     features: [
-      'Hasta 30 vehículos activos',
-      'Perfil destacado en resultados de búsqueda',
-      'Badge verificado en el marketplace',
-      'Analíticas avanzadas',
-      'Espacios destacados en portada',
-      'Soporte prioritario',
+      'Hasta 50 vehículos publicados',
+      '3 usuarios',
+      'Carga manual + CSV recurrente',
+      'Pipeline de oportunidades',
+      'Analítica avanzada 180 días',
+      'Agente de cualificación',
+      '1 boost mensual',
     ],
     cta: 'Empezar con Professional',
   },
   {
     id: 'elite',
     name: 'Elite',
-    price: 699,
-    slots: 9999,
+    price: 899,
+    slots: 100,
     description: 'Para los referentes del mercado premium',
     features: [
-      'Vehículos ilimitados',
-      'Aparición permanente en portada',
+      'Hasta 100 vehículos publicados',
+      '10 usuarios',
+      'Stock automatizado incluido',
       'Showroom Destacado en el marketplace',
-      'Analíticas avanzadas de rendimiento y evolución temporal',
-      'Account manager dedicado',
-      'Acceso a eventos exclusivos Black Series',
+      'Analítica Elite 365 días',
+      'Ventana exclusiva 24 h en vehículos a la carta',
+      '3 boosts mensuales',
     ],
     cta: 'Empezar con Elite',
   },
@@ -160,7 +162,7 @@ export default function PreciosPage() {
                 <span className="text-bsm-text-muted">/mes</span>
               </div>
               <p className="text-xs text-bsm-text-muted mt-1">
-                {plan.slots === 9999 ? 'Vehículos ilimitados' : `Hasta ${plan.slots} vehículos activos`}
+                {`Hasta ${plan.slots} vehículos publicados`}
               </p>
             </div>
 

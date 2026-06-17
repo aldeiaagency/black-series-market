@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/brand/Logo'
+import PasswordInput from '@/components/auth/PasswordInput'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -63,15 +64,17 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="label-base">Contraseña</label>
-              <input
-                type="password"
+              <PasswordInput
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input-base"
+                onChange={setPassword}
+                autoComplete="current-password"
                 required
               />
+              <div className="text-right mt-2">
+                <Link href="/recuperar" className="text-xs text-bsm-text-muted hover:text-gold transition-colors">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </div>
 
             {error && (

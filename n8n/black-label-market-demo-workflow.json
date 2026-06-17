@@ -1,0 +1,360 @@
+{
+  "name": "Black Label Market - Demo Router Clientes",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Black Label Market - Demo Router\n\nEste workflow demo recibe eventos del marketplace, los valida, los normaliza y los enruta por tipo de oportunidad.\n\nEventos soportados:\n- lead.created\n- custom_request.created\n- search_alert.created\n- vehicle.submitted_for_review\n- vehicle.approved\n- vehicle.rejected\n\nUsalo para ensenar a clientes como Black Label convierte trafico, inventario y revisiones editoriales en operacion comercial trazable.",
+        "height": 360,
+        "width": 520,
+        "color": 7
+      },
+      "id": "9a14e537-2ec9-48db-8b4f-644be51a86f3",
+      "name": "Nota - Que hace este demo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Payload de prueba\n\nPOST al webhook con este JSON:\n\n```json\n{\n  \"event_type\": \"lead.created\",\n  \"entity_type\": \"lead\",\n  \"entity_id\": \"demo-lead-001\",\n  \"dealer_id\": \"dealer-demo-001\",\n  \"vehicle_id\": \"vehicle-demo-911\",\n  \"source\": \"black-label-market\",\n  \"data\": {\n    \"contact\": {\n      \"name\": \"Cliente Demo\",\n      \"email\": \"cliente@example.com\",\n      \"phone\": \"+34 600 000 000\"\n    },\n    \"vehicle_id\": \"vehicle-demo-911\",\n    \"brand\": \"Porsche\",\n    \"model\": \"911 GT3 Touring\",\n    \"budget\": \"180000\",\n    \"timeline\": \"0-30 dias\"\n  }\n}\n```\n\nSi defines `BSM_N8N_WEBHOOK_SECRET` en n8n, envia tambien la cabecera `X-Webhook-Secret`.",
+        "height": 520,
+        "width": 520,
+        "color": 5
+      },
+      "id": "5ce91095-d8a3-45e5-9483-6a82b3d43b1f",
+      "name": "Nota - Payload demo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -20
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "fdad10ac-173c-49fd-9497-8695c6ea30b0",
+      "name": "Manual Trigger - Demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "black-label-market-demo",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "be0b0178-8832-4b55-8f63-4b3ab09b735e",
+      "name": "Webhook - Eventos Market",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -760,
+        -100
+      ],
+      "webhookId": "black-label-market-demo"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    event_type: 'lead.created',\n    entity_type: 'lead',\n    entity_id: 'demo-lead-001',\n    dealer_id: 'dealer-demo-001',\n    vehicle_id: 'vehicle-demo-911',\n    source: 'black-label-market-demo',\n    created_at: new Date().toISOString(),\n    data: {\n      contact: {\n        name: 'Cliente Demo',\n        email: 'cliente@example.com',\n        phone: '+34 600 000 000'\n      },\n      brand: 'Porsche',\n      model: '911 GT3 Touring',\n      budget: '180000',\n      timeline: '0-30 dias',\n      message: 'Estoy interesado en esta unidad y quiero coordinar una visita.'\n    }\n  }\n}];"
+      },
+      "id": "d27ea5ad-a38e-4204-88bd-6f47804e446d",
+      "name": "Generar Evento Demo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -500,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json || {};\nconst body = input.body && Object.keys(input.body).length ? input.body : input;\nconst headers = input.headers || {};\nconst env = typeof $env !== 'undefined' ? $env : {};\nconst expectedSecret = env.BSM_N8N_WEBHOOK_SECRET || '';\nconst incomingSecret = headers['x-webhook-secret'] || headers['X-Webhook-Secret'] || body.webhook_secret || '';\n\nif (expectedSecret && incomingSecret !== expectedSecret) {\n  return [{\n    json: {\n      ok: false,\n      event_type: 'security.rejected',\n      status: 'rejected',\n      reason: 'invalid_webhook_secret',\n      demo_visible_message: 'Solicitud rechazada: el secreto del webhook no coincide.'\n    }\n  }];\n}\n\nconst data = body.data || body.payload?.data || body.payload || {};\nconst contact = data.contact || body.contact || {};\nconst eventType = body.event_type || body.eventType || 'unknown.event';\n\nconst normalized = {\n  ok: true,\n  event_type: eventType,\n  entity_type: body.entity_type || body.entityType || null,\n  entity_id: body.entity_id || body.entityId || null,\n  dealer_id: body.dealer_id || body.dealerId || null,\n  vehicle_id: body.vehicle_id || body.vehicleId || data.vehicle_id || null,\n  source: body.source || 'black-label-market',\n  received_at: new Date().toISOString(),\n  contact: {\n    name: contact.name || body.buyer_name || null,\n    email: contact.email || body.buyer_email || null,\n    phone: contact.phone || body.buyer_phone || null\n  },\n  vehicle: {\n    brand: data.brand || body.brand || null,\n    model: data.model || body.model || null,\n    year: data.year || body.year || null,\n    budget: data.budget || data.budget_max || body.budget || null,\n    timeline: data.timeline || data.timeframe || body.timeline || null\n  },\n  raw_data: data,\n  original_event: body\n};\n\nreturn [{ json: normalized }];"
+      },
+      "id": "4684f90d-3c08-48bf-bb2e-6704fe691a35",
+      "name": "Validar y Normalizar Evento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.event_type}}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "security.rejected"
+            },
+            {
+              "value2": "lead.created"
+            },
+            {
+              "value2": "custom_request.created"
+            },
+            {
+              "value2": "search_alert.created"
+            },
+            {
+              "value2": "vehicle.submitted_for_review"
+            },
+            {
+              "value2": "vehicle.approved"
+            },
+            {
+              "value2": "vehicle.rejected"
+            }
+          ]
+        },
+        "fallbackOutput": 7
+      },
+      "id": "362897c3-2f53-42f8-8c4a-a9f7e93fd1d6",
+      "name": "Router por Tipo de Evento",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        80,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ok: false,\n  route: 'security',\n  status_code: 401,\n  title: 'Webhook rechazado',\n  client_demo_summary: 'El workflow protege la entrada validando un secreto compartido antes de procesar datos comerciales.',\n  actions: [\n    'No crear lead',\n    'No avisar al equipo comercial',\n    'Registrar intento rechazado para auditoria'\n  ],\n  received_event: $json\n}}];"
+      },
+      "id": "1f94f7fb-5a55-4289-8e0f-8f8063430780",
+      "name": "Demo - Seguridad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        -360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const leadScore = $json.vehicle?.budget ? 'hot' : 'warm';\nreturn [{ json: {\n  ok: true,\n  route: 'lead_to_crm',\n  priority: leadScore,\n  title: 'Nuevo lead cualificado',\n  client_demo_summary: `Nuevo contacto para ${$json.vehicle?.brand || 'vehiculo'} ${$json.vehicle?.model || ''}. El equipo comercial y el showroom reciben aviso con contexto trazable.`,\n  crm_record: {\n    pipeline: 'Compradores Black Label',\n    stage: 'Nuevo',\n    contact: $json.contact,\n    dealer_id: $json.dealer_id,\n    vehicle_id: $json.vehicle_id,\n    score: leadScore,\n    tags: ['marketplace', 'ficha-vehiculo', leadScore]\n  },\n  actions: [\n    'Crear oportunidad en CRM',\n    'Enviar email interno a Black Label',\n    'Avisar al showroom por email o WhatsApp Business',\n    'Programar seguimiento si no cambia de estado en 4 horas'\n  ],\n  next_sla: '4 horas para primer contacto',\n  received_event: $json\n}}];"
+      },
+      "id": "9455a9b1-5507-4e1e-97d2-65b37ec72a47",
+      "name": "Demo - Lead a CRM y Showroom",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ok: true,\n  route: 'private_search',\n  title: 'Solicitud de vehiculo a la carta',\n  client_demo_summary: 'Una busqueda privada se convierte en una oportunidad interna para Black Series y en senal de demanda para captar inventario.',\n  demand_signal: {\n    desired_vehicle: $json.vehicle,\n    contact: $json.contact,\n    source: $json.source,\n    tags: ['vehiculo-a-la-carta', $json.vehicle?.brand, $json.vehicle?.model].filter(Boolean)\n  },\n  actions: [\n    'Crear oportunidad interna Black Series',\n    'Asignar responsable de sourcing',\n    'Buscar matches en inventario actual',\n    'Notificar si aparece una unidad compatible'\n  ],\n  received_event: $json\n}}];"
+      },
+      "id": "ae0ff0c5-452a-4dfb-8c5e-8b8ccf9953a5",
+      "name": "Demo - Busqueda Privada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ok: true,\n  route: 'search_alert',\n  title: 'Nueva alerta guardada',\n  client_demo_summary: 'La alerta guarda demanda futura y permite avisar automaticamente cuando entra inventario compatible.',\n  alert_segment: {\n    email: $json.contact?.email,\n    vehicle: $json.vehicle,\n    tags: ['alerta-busqueda', $json.vehicle?.brand, $json.vehicle?.model].filter(Boolean)\n  },\n  actions: [\n    'Guardar segmento del comprador',\n    'Comparar diariamente contra nuevos vehiculos activos',\n    'Enviar email cuando exista match',\n    'Usar demanda acumulada para recomendar captacion de stock'\n  ],\n  received_event: $json\n}}];"
+      },
+      "id": "cc8630db-86c3-4e48-8d2c-974e5d92a7da",
+      "name": "Demo - Alerta Guardada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ok: true,\n  route: 'editorial_review',\n  title: 'Vehiculo enviado a revision',\n  client_demo_summary: 'Cada vehiculo pasa por control editorial antes de publicarse, reforzando la confianza y la posicion premium.',\n  review_task: {\n    dealer_id: $json.dealer_id,\n    vehicle_id: $json.vehicle_id,\n    vehicle: $json.vehicle,\n    checklist: [\n      'Fotos suficientes y de calidad',\n      'Descripcion completa',\n      'Precio o precio bajo consulta coherente',\n      'Documentacion y garantia revisadas',\n      'Encaje con criterio Black Label'\n    ]\n  },\n  actions: [\n    'Crear tarea de revision editorial',\n    'Avisar al admin',\n    'Preparar mensaje de aprobado o rechazo',\n    'Medir tiempo medio de aprobacion'\n  ],\n  received_event: $json\n}}];"
+      },
+      "id": "167bc18c-04fc-427a-8498-8430a89dc01b",
+      "name": "Demo - Revision Editorial",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ok: true,\n  route: 'vehicle_approved',\n  title: 'Vehiculo aprobado y publicado',\n  client_demo_summary: 'Cuando se aprueba una unidad, el showroom recibe confirmacion y el equipo puede activar promocion, SEO y alertas a compradores.',\n  publication: {\n    dealer_id: $json.dealer_id,\n    vehicle_id: $json.vehicle_id,\n    vehicle: $json.vehicle,\n    status: 'active'\n  },\n  actions: [\n    'Notificar al showroom',\n    'Enviar alertas a compradores compatibles',\n    'Marcar unidad para newsletter o redes si es destacable',\n    'Registrar fecha de publicacion'\n  ],\n  received_event: $json\n}}];"
+      },
+      "id": "9bc49dc6-f6c7-4148-a4f9-2996f0bb0bfd",
+      "name": "Demo - Vehiculo Aprobado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ok: true,\n  route: 'vehicle_rejected',\n  title: 'Vehiculo rechazado con feedback',\n  client_demo_summary: 'Si una ficha no cumple criterio, el workflow devuelve feedback accionable al showroom sin romper la experiencia.',\n  rejection: {\n    dealer_id: $json.dealer_id,\n    vehicle_id: $json.vehicle_id,\n    reason: $json.raw_data?.reason || 'Pendiente de completar por el equipo editorial'\n  },\n  actions: [\n    'Enviar motivo de rechazo al showroom',\n    'Crear tarea de correccion',\n    'Mantener vehiculo como borrador',\n    'Reabrir revision cuando el dealer actualice la ficha'\n  ],\n  received_event: $json\n}}];"
+      },
+      "id": "514e9912-e9a9-466d-ab7d-0454515d6e76",
+      "name": "Demo - Vehiculo Rechazado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ok: false,\n  route: 'unknown_event',\n  title: 'Evento no reconocido',\n  client_demo_summary: 'Los eventos desconocidos se registran para revision, sin romper el flujo principal.',\n  actions: [\n    'Registrar payload',\n    'Avisar a operaciones si se repite',\n    'Decidir si se incorpora como nuevo caso de uso'\n  ],\n  received_event: $json\n}}];"
+      },
+      "id": "c923bd99-57e1-4064-8d05-d068ac5436a7",
+      "name": "Demo - Evento Desconocido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        620
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger - Demo": {
+      "main": [
+        [
+          {
+            "node": "Generar Evento Demo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Eventos Market": {
+      "main": [
+        [
+          {
+            "node": "Validar y Normalizar Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Evento Demo": {
+      "main": [
+        [
+          {
+            "node": "Validar y Normalizar Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar y Normalizar Evento": {
+      "main": [
+        [
+          {
+            "node": "Router por Tipo de Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router por Tipo de Evento": {
+      "main": [
+        [
+          {
+            "node": "Demo - Seguridad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demo - Lead a CRM y Showroom",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demo - Busqueda Privada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demo - Alerta Guardada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demo - Revision Editorial",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demo - Vehiculo Aprobado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demo - Vehiculo Rechazado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Demo - Evento Desconocido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "demo-black-label-market-router-v1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "black-label-market-demo"
+  },
+  "id": "black-label-market-demo-router",
+  "tags": [
+    {
+      "name": "Black Label Market"
+    },
+    {
+      "name": "Demo clientes"
+    }
+  ]
+}

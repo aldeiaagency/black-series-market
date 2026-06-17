@@ -43,7 +43,7 @@ async function setDealerStatus(dealerId: string, status: string) {
 async function setDealerPlan(dealerId: string, plan: string) {
   'use server'
   const supabase = await createAdminClient()
-  const slots = plan === 'elite' ? 100 : plan === 'professional' ? 40 : plan === 'essential' ? 15 : 5
+  const slots = plan === 'elite' ? 100 : plan === 'professional' ? 50 : plan === 'essential' ? 15 : 5
   await supabase.from('dealers').update({ subscription_plan: plan, vehicle_slots: slots }).eq('id', dealerId)
   redirect(`/admin/dealers/${dealerId}`)
 }
@@ -128,10 +128,10 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
   const totalViews = vehicles?.reduce((sum: number, v: any) => sum + (v.views || 0), 0) || 0
 
   const PLAN_OPTIONS = [
-    { value: 'trial',        label: 'Trial (5 slots)' },
-    { value: 'essential',    label: 'Essential (15 slots)' },
-    { value: 'professional', label: 'Professional (40 slots)' },
-    { value: 'elite',        label: 'Elite (100 slots)' },
+    { value: 'trial',        label: 'Trial (5 vehículos publicados)' },
+    { value: 'essential',    label: 'Essential (15 vehículos publicados)' },
+    { value: 'professional', label: 'Professional (50 vehículos publicados)' },
+    { value: 'elite',        label: 'Elite (100 vehículos publicados)' },
   ]
 
   const STATUS_OPTIONS = [
@@ -144,12 +144,12 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
   const LEAD_STATUS_LABEL: Record<string, string> = {
     new:          'Nuevo',
     contacted:    'Contactado',
-    negotiating:  'Negociando',
+    negotiating:  'Contactado',
     appointment:  'Cita',
-    reserved:     'Reservado',
-    closed:       'Cerrado',
+    reserved:     'Cita',
+    closed:       'Ganado',
     lost:         'Perdido',
-    discarded:    'Descartado',
+    discarded:    'Archivado',
   }
   const LEAD_STATUS_COLOR: Record<string, string> = {
     new:          'badge-gold',
@@ -300,7 +300,7 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-bsm-border text-xs text-bsm-text-muted">
-              Slots usados: <span className="text-bsm-text-primary">{activeCount ?? 0} / {dealer.vehicle_slots ?? '—'}</span>
+              Vehículos publicados: <span className="text-bsm-text-primary">{activeCount ?? 0} / {dealer.vehicle_slots ?? '—'}</span>
             </div>
           </div>
 
