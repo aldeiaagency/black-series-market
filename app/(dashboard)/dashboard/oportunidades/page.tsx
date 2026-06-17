@@ -5,6 +5,7 @@ import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions } from '@/lib/permissions'
 import { getEntitlements } from '@/lib/entitlements'
 import KanbanBoard, { type Lead, type Stage } from '@/components/dashboard/KanbanBoard'
+import LeadsBandeja, { type BandejaLead } from '@/components/dashboard/LeadsBandeja'
 import { timeAgo, LEAD_STATUS_LABELS, getLeadStatusColor } from '@/lib/utils'
 
 const VALID_STAGES = new Set([
@@ -80,6 +81,20 @@ export default async function OportunidadesPage() {
   }
 
   // ── Lista básica (Essential) ──────────────────────────────────────────────────
+  const bandejaLeads: BandejaLead[] = leads.map(l => ({
+    id:             l.id,
+    status:         l.status,
+    created_at:     l.created_at,
+    buyer_name:     l.buyer_name,
+    buyer_email:    l.buyer_email,
+    buyer_phone:    l.buyer_phone,
+    buyer_whatsapp: l.buyer_whatsapp,
+    message:        l.message,
+    source_channel: l.source_channel,
+    qualification:  l.qualification,
+    vehicle:        l.vehicle,
+  }))
+
   return (
     <div className="p-8 max-w-3xl">
       <div className="mb-8">
@@ -103,40 +118,7 @@ export default async function OportunidadesPage() {
         </Link>
       </div>
 
-      <div className="border border-bsm-border divide-y divide-bsm-border">
-        {leads.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm text-bsm-text-muted">Aún no tienes oportunidades recibidas.</p>
-          </div>
-        ) : (
-          leads.slice(0, 50).map(opp => {
-            const q = opp.qualification
-            return (
-              <div key={opp.id} className="px-5 py-4">
-                <div className="flex items-start justify-between gap-4 mb-1">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-bsm-text-primary font-medium truncate">
-                      {opp.buyer_name ?? 'Comprador anónimo'}
-                    </p>
-                    <p className="text-xs text-bsm-text-muted">
-                      {timeAgo(opp.created_at)}
-                      {opp.vehicle?.brand_name && (
-                        <span className="ml-1">· <span className="text-[#BFA14A]/80">{opp.vehicle.brand_name} {opp.vehicle.model_name}</span></span>
-                      )}
-                    </p>
-                  </div>
-                  <span className={`badge text-[10px] ${getLeadStatusColor(opp.status)}`}>
-                    {LEAD_STATUS_LABELS[opp.status as keyof typeof LEAD_STATUS_LABELS] ?? opp.status}
-                  </span>
-                </div>
-                {q?.summary && (
-                  <p className="text-xs text-bsm-text-muted italic leading-relaxed mt-1">{q.summary}</p>
-                )}
-              </div>
-            )
-          })
-        )}
-      </div>
+      <LeadsBandeja initialLeads={bandejaLeads} />
     </div>
   )
 }
