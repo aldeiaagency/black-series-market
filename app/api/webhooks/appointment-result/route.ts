@@ -26,13 +26,33 @@ export async function POST(req: NextRequest) {
   let body: {
     lead_id?: string; dealer_id?: string; vehicle_id?: string
     starts_at?: string; preferred_time_text?: string; calendar_event_ref?: string
+    provider?: 'google_calendar' | 'outlook_calendar'
+    external_event_id?: string
+    meeting_url?: string
+    location_text?: string
+    workflow_ref?: string
+    metadata?: Record<string, unknown>
     fallback?: boolean
   }
   try { body = JSON.parse(raw) } catch {
     return NextResponse.json({ ok: false, error: 'invalid_body' }, { status: 400 })
   }
 
-  const { lead_id, dealer_id, vehicle_id, starts_at, preferred_time_text, calendar_event_ref, fallback } = body
+  const {
+    lead_id,
+    dealer_id,
+    vehicle_id,
+    starts_at,
+    preferred_time_text,
+    calendar_event_ref,
+    provider,
+    external_event_id,
+    meeting_url,
+    location_text,
+    workflow_ref,
+    metadata,
+    fallback,
+  } = body
   if (!lead_id || !dealer_id) {
     return NextResponse.json({ ok: false, error: 'missing_fields' }, { status: 400 })
   }
@@ -49,6 +69,12 @@ export async function POST(req: NextRequest) {
       status:              fallback ? 'proposed' : 'confirmed',
       preferred_time_text: preferred_time_text ?? null,
       calendar_event_ref:  calendar_event_ref ?? null,
+      provider:            provider ?? null,
+      external_event_id:   external_event_id ?? calendar_event_ref ?? null,
+      meeting_url:         meeting_url ?? null,
+      location_text:       location_text ?? null,
+      workflow_ref:        workflow_ref ?? null,
+      metadata:            metadata ?? {},
     })
     .select('id')
     .single()
@@ -63,7 +89,14 @@ export async function POST(req: NextRequest) {
       lead_id,
       dealer_id,
       type:    fallback ? 'appointment_proposed' : 'appointment_confirmed',
-      payload: { appointment_id: appt.id, starts_at: starts_at ?? null, fallback: !!fallback },
+      payload: {
+        appointment_id: appt.id,
+        starts_at: starts_at ?? null,
+        fallback: !!fallback,
+        provider: provider ?? null,
+        external_event_id: external_event_id ?? calendar_event_ref ?? null,
+        workflow_ref: workflow_ref ?? null,
+      },
     }),
   ])
 
