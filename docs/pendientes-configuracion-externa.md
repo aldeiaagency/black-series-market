@@ -1,124 +1,125 @@
-# Pendientes de configuración externa
+# Pendientes de configuracion externa
 
-> Registro de las funcionalidades que **ya están concedidas por plan y visibles** en el
-> market (web pública + dashboard del showroom), pero cuyo **funcionamiento real depende
-> de herramientas externas, webhooks, OAuth, despliegues o procesos que aún no están
-> conectados**. Cuando se complete cada tarea de aquí, la funcionalidad queda perfecta.
->
-> Decisión (2026-06-16): todo lo que vive dentro del market se configura por plan y se
-> muestra sin etiquetas de "Próximamente". Lo único que queda pendiente es lo de aquí.
-> Al conectar cada pieza **no hace falta tocar el gating** (la feature ya está incluida en
-> su plan): solo conectar la herramienta y marcar su `availability_status = 'operative'`.
+Registro de funcionalidades que ya estan preparadas o concedidas por plan dentro del market, pero cuyo funcionamiento real depende de herramientas externas, webhooks, OAuth, despliegues o procesos que aun no estan conectados.
 
-Última actualización: **2026-06-17**.
+Ultima actualizacion: **2026-06-17**.
 
 ---
 
-## Cómo funciona el gating (contexto)
+## Contexto de gating
 
-- La **fuente de verdad** de qué incluye cada plan vive en Supabase: `plans`, `plan_limits`,
-  `plan_features`. `lib/entitlements.ts` lo lee y la UI lo consume.
-- **El acceso se decide por `plan_features.included` por plan**, NO por `availability_status`.
-  `availability_status` (`operative` | `partial` | `future`) es **solo informativo**: indica
-  si el backend de esa feature está realmente conectado. No oculta nada al showroom.
-- El **límite de vehículos publicados** se aplica en BD con el trigger `enforce_active_vehicle_limit`
-  (migración 040): es la barrera real e imposible de saltar, con diseño fail-open.
+- La fuente de verdad de cada plan vive en Supabase: `plans`, `plan_limits`, `plan_features`.
+- El acceso se decide por `plan_features.included`.
+- `availability_status` (`operative`, `partial`, `future`) indica si la pieza externa esta conectada.
+- `public_visible=false` mantiene una feature oculta aunque este preparada internamente.
+- El limite de vehiculos publicados se aplica en BD con el trigger `enforce_active_vehicle_limit`.
 
 ---
 
-## 0. Despliegue / infraestructura (hacer primero)
+## 0. Despliegue / infraestructura
 
 | Tarea | Herramienta | Detalle |
 |---|---|---|
-| Aplicar migraciones pendientes | Supabase CLI | `npx supabase db push` — incluye 045 (alineación Professional), 040 (trigger límite vehículos) y las previas no aplicadas. Revisar que 039 (otro trabajo) entra en orden. |
-| Desplegar a producción | Vercel CLI | El auto-deploy GitHub→Vercel está roto: desplegar con `vercel --prod --yes`. |
-| Verificar variables de entorno | Vercel | Claves Supabase, Stripe, `NEXT_PUBLIC_APP_URL`, `IMPORT_API_KEY`. |
+| Aplicar migraciones pendientes | Supabase CLI | `npx supabase db push`: incluye 045 y 046, ademas de las previas pendientes. |
+| Desplegar a produccion | Vercel CLI | El auto-deploy GitHub a Vercel esta roto: desplegar con `vercel --prod --yes`. |
+| Verificar variables | Vercel | Supabase, Stripe, `NEXT_PUBLIC_APP_URL`, `IMPORT_API_KEY` y secretos de webhooks. |
 
 ---
 
-## 1. Stripe (cobro de suscripciones y add-ons)
+## 1. Stripe
 
 | Tarea | Detalle |
 |---|---|
-| Crear productos y precios por plan | Essential 197 € · Professional 449 € · Elite 899 € (mensual, sin IVA — el IVA lo añade Stripe Tax o se configura aparte). Guardar los `price_id` en `plans.stripe_monthly_price_id` y en env (`STRIPE_PRICE_*_MONTHLY`). |
-| Crear precios de add-ons | Boost 49 €, Pack 5 boosts 199 €, Bloque +10 (59 €/mes), Bloque +25 (99 €/mes), Stock automatizado (99 €/mes), Diagnóstico (149 €). |
-| Webhook de Stripe | Endpoint `/api/stripe/webhooks` dado de alta en Stripe con el secret correcto; eventos de checkout/subscription. |
-| Stripe Tax / IVA | Configurar el cálculo de IVA en el checkout (los precios se muestran "+ IVA"). |
+| Crear productos y precios por plan | Essential 197 EUR, Professional 449 EUR, Elite 899 EUR, mensual sin IVA. |
+| Crear precios de add-ons | Boost 49 EUR, Pack 5 boosts 199 EUR, +10 vehiculos 59 EUR/mes, +25 vehiculos 99 EUR/mes, Stock automatizado 99 EUR/mes, Diagnostico 149 EUR. |
+| Webhook de Stripe | Endpoint `/api/stripe/webhooks` dado de alta en Stripe con el secret correcto. |
+| Stripe Tax / IVA | Configurar calculo de IVA en checkout. |
 
 ---
 
-## 2. Agente de cualificación en la ficha (`lead_qualification_assistant`)
+## 2. Agente de cualificacion (`lead_qualification_assistant`)
 
-- **Planes:** Professional, Elite. **Estado:** activo y concedido.
-- **Nota:** la migración 045 lo deja como `availability_status='operative'` para ambos planes,
-  igual que la configuración definitiva de Elite. Cualquier ajuste futuro del proveedor de IA
-  debe hacerse sin cambiar el gating comercial del plan.
-
----
-
-## 3. Reserva de cita del agente (`appointment_booking`)
-
-- **Planes:** Elite. **Estado:** visible y concedido · OAuth pendiente.
-- **Tareas:**
-  - OAuth de Google Calendar por showroom (alta de credenciales + flujo de consentimiento).
-  - Escritura del evento en el calendario del showroom desde la conversación cualificada.
-  - (Posterior) soporte Outlook.
+- **Planes:** Professional, Elite.
+- **Estado:** activo y concedido.
+- **Ya preparado:** el webhook `/api/webhooks/assistant-result` crea leads desde conversaciones del agente y guarda `qualification`.
+- **Nota:** cualquier ajuste futuro del proveedor de IA debe hacerse sin cambiar el gating comercial del plan.
 
 ---
 
-## 4. Stock automatizado / feed-DMS (`feed_sync`)
+## 3. Reserva de cita (`appointment_booking`)
 
-- **Planes:** Elite (incluido) · Essential/Professional (add-on de pago).
-- **Tareas:**
-  - Conector de feed/DMS por proveedor (formatos de inventario).
-  - Job de sincronización recurrente (cron/n8n) que cree/actualice vehículos.
-  - Validación técnica del feed en el alta del add-on.
-
----
-
-## 5. Ventana exclusiva de 24 h en vehículos a la carta (`vehicles_on_request_priority`)
-
-- **Planes:** Elite. **Estado:** visible y concedido · matcher pendiente.
-- **Tareas:**
-  - Lógica de matcher/temporizador que reserve 24 h la oportunidad al showroom Elite antes
-    de abrirla al resto (proceso/cron interno).
-  - Avisos al showroom (ver sección 6).
+- **Planes:** Elite.
+- **Estado:** concedido internamente, oculto y en `future` hasta conectar calendarios.
+- **Ya preparado en el market:**
+  - Feature flag `appointment_booking`.
+  - Tabla `showroom_calendar_connections` para proveedor, estado, calendario y reglas de disponibilidad.
+  - Tabla `appointments` ampliada con proveedor, evento externo, enlace de reunion, ubicacion y referencia de workflow.
+  - Webhook `/api/webhooks/appointment-result` para recibir confirmaciones desde n8n.
+- **Pendiente externo:**
+  - OAuth Google Calendar / Outlook.
+  - Workflow n8n que proponga o confirme cita.
+  - Emails/WhatsApp de confirmacion.
+  - Marcar `appointment_booking` como `operative`.
 
 ---
 
-## 6. Avisos por email y flujos n8n
+## 4. Scoring, alertas y seguimiento comercial Elite
 
-- **Tareas:**
-  - Proveedor de email transaccional (lead caliente sin atender, nuevas oportunidades a la
-    carta, confirmación de cita, vehículo aprobado/rechazado).
-  - Flujos n8n que reaccionen a los webhooks ya emitidos (`vehicle.approved`, etc.).
-  - Ver `docs/backlog-alertas-y-vehiculos-a-la-carta.md` para el detalle de alertas y matcher.
+- **Planes:** Elite.
+- **Estado:** concedido internamente, oculto y en `future` hasta conectar IA/n8n.
+- **Features internas preparadas:** `lead_scoring`, `hot_lead_alerts`, `calendar_integration`.
+- **Ya preparado en el market:**
+  - Campos en `leads`: `lead_score`, `score_reason`, `score_confidence`, `recommended_next_action`, `scored_at`, `last_commercial_touch_at`, `next_follow_up_at`.
+  - Tabla `lead_alerts` para lead caliente sin atender, cita proxima o follow-up pendiente.
+  - Webhook `/api/webhooks/hot-lead-alert` para que n8n cree alertas.
+  - `/api/webhooks/assistant-result` acepta score, motivo, confianza y proxima accion.
+- **Pendiente externo:**
+  - Prompt/modelo de scoring.
+  - Workflow n8n que puntue leads, cree alertas y marque follow-ups.
+  - Activar flags solo cuando el flujo este validado.
 
 ---
 
-## 7. SMTP propio para emails de Auth (recuperación de contraseña + confirmación)
+## 5. Stock automatizado / feed-DMS (`feed_sync`)
 
-- **Estado:** el flujo de recuperación de contraseña está **construido y desplegado**
-  (`/recuperar` → email → `/auth/confirm` → `/reset-password`). Lo único pendiente es el
-  **SMTP propio**: hoy `smtp_host = null`, así que Supabase usa su SMTP por defecto, que
-  limita a ~2-3 emails/hora y manda desde un dominio genérico (cae en spam). Esto bloquea
-  tanto el reset de contraseña como los emails de confirmación de registro a escala real.
-- **Tareas:**
-  - Dar de alta un proveedor SMTP (Resend / Postmark / SendGrid) con dominio
-    `blacklabelmarket.es` (SPF + DKIM verificados).
-  - Configurar el SMTP custom en Supabase (Authentication → SMTP Settings) o vía Management
-    API (`smtp_host`, `smtp_user`, `smtp_pass`, `smtp_sender_name`, `smtp_admin_email`).
-  - Subir el `rate_limit_email_sent` (hoy 2/h) una vez haya SMTP propio.
-  - **Guía paso a paso completa (DNS, proveedor, Supabase, plantillas, verificación):**
-    `docs/configuracion-email-smtp.md`.
-- **Ya configurado (no tocar):** política de contraseñas (`password_min_length = 8`,
-  letras + números), plantilla de email de recovery (apunta a `/auth/confirm?token_hash=…
-  &type=recovery&next=/reset-password`), Site URL y redirect URLs.
+- **Planes:** Elite incluido; Essential/Professional como add-on.
+- **Pendiente externo:**
+  - Conector feed/DMS.
+  - Job recurrente de sincronizacion.
+  - Validacion tecnica del feed.
+
+---
+
+## 6. Ventana exclusiva 24 h a la carta (`vehicles_on_request_priority`)
+
+- **Planes:** Elite.
+- **Estado:** visible y concedido; matcher pendiente.
+- **Pendiente externo:**
+  - Matcher/temporizador que reserve 24 h antes de abrir al resto del market.
+  - Avisos al showroom.
+
+---
+
+## 7. Avisos por email y flujos n8n
+
+- Proveedor de email transaccional.
+- Flujos n8n para vehiculo aprobado/rechazado, nuevas oportunidades a la carta, citas y lead caliente sin atender.
+- Ver `docs/backlog-alertas-y-vehiculos-a-la-carta.md`.
+
+---
+
+## 8. SMTP propio para Auth
+
+- **Estado:** flujo de recuperacion construido (`/recuperar` -> `/auth/confirm` -> `/reset-password`).
+- **Pendiente:** configurar SMTP propio en Supabase para evitar limite del SMTP por defecto.
+- Guia: `docs/configuracion-email-smtp.md`.
 
 ---
 
 ## Procedimiento al completar una pieza
 
-1. Conectar la herramienta/credenciales.
-2. Marcar `availability_status = 'operative'` en `plan_features` (migración o panel admin).
-3. Quitar la fila correspondiente de este documento.
+1. Conectar herramienta externa / credenciales.
+2. Validar workflow en staging o con showroom interno.
+3. Marcar la feature como `availability_status='operative'`.
+4. Si procede, cambiar `public_visible=true`.
+5. Quitar o actualizar la fila de este documento.
