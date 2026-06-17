@@ -384,13 +384,13 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                       {dealer.phone && (
                         <div className="flex items-center gap-2 text-sm text-bsm-text-secondary">
                           <Phone className="w-3.5 h-3.5 text-[#737373] flex-shrink-0" />
-                          <a href={`tel:${dealer.phone}`} className="hover:text-gold transition-colors">{dealer.phone}</a>
+                          <span>{dealer.phone}</span>
                         </div>
                       )}
                       {dealer.email && (
                         <div className="flex items-center gap-2 text-sm text-bsm-text-secondary min-w-0">
                           <Mail className="w-3.5 h-3.5 text-[#737373] flex-shrink-0" />
-                          <a href={`mailto:${dealer.email}`} className="hover:text-gold transition-colors truncate">{dealer.email}</a>
+                          <span className="truncate">{dealer.email}</span>
                         </div>
                       )}
                       {attentionNote && (
