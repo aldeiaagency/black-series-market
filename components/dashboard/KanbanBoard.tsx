@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, ChevronRight, Phone, MessageCircle, Mail, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Phone, MessageCircle, Mail, X, Trash2 } from 'lucide-react'
 
 // ── Pipeline definition ────────────────────────────────────────────────────────
 
@@ -171,13 +171,17 @@ function LeadModal({
   isPending,
   onClose,
   onMove,
+  onDelete,
 }: {
   lead:       Lead
   canManage:  boolean
   isPending:  boolean
   onClose:    () => void
   onMove:     (id: string, stage: Stage) => void
+  onDelete:   (id: string) => Promise<void>
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
@@ -335,6 +339,41 @@ function LeadModal({
               </div>
             </section>
           )}
+
+          {/* Delete */}
+          <div className="pt-2 border-t border-bsm-border">
+            {!confirmDelete ? (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-2 text-xs text-bsm-text-muted hover:text-red-400 transition-colors py-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Eliminar oportunidad
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    setDeleting(true)
+                    await onDelete(lead.id)
+                    setDeleting(false)
+                    onClose()
+                  }}
+                  disabled={deleting}
+                  className="flex items-center gap-1.5 text-xs bg-red-900/30 border border-red-500/40 text-red-400 hover:bg-red-900/50 transition-colors px-3 py-1.5 disabled:opacity-50"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  {deleting ? 'Eliminando…' : 'Confirmar borrado'}
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors px-3 py-1.5 border border-bsm-border"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -414,6 +453,11 @@ export default function KanbanBoard({ initialLeads, canManage }: {
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
   const [showClosed, setShowClosed] = useState(false)
   const [openLead, setOpenLead] = useState<Lead | null>(null)
+
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/leads/${id}`, { method: 'DELETE' })
+    if (res.ok) setLeads(cur => cur.filter(l => l.id !== id))
+  }
 
   async function handleMove(id: string, stage: Stage) {
     const prev = leads.find(l => l.id === id)
@@ -519,6 +563,7 @@ export default function KanbanBoard({ initialLeads, canManage }: {
           isPending={pendingIds.has(openLead.id)}
           onClose={() => setOpenLead(null)}
           onMove={handleMove}
+          onDelete={handleDelete}
         />
       )}
     </>

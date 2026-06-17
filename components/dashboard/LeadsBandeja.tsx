@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Mail, Phone, MessageSquare } from 'lucide-react'
+import { X, Mail, Phone, MessageSquare, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { timeAgo, LEAD_STATUS_LABELS, getLeadStatusColor } from '@/lib/utils'
 import type { LeadStatus } from '@/lib/types'
@@ -42,13 +42,27 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
   const [leads, setLeads] = useState(initialLeads)
   const [selected, setSelected] = useState<BandejaLead | null>(null)
   const [updating, setUpdating] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!selected) return
+    setConfirmDelete(false)
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setSelected(null) }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [selected])
+
+  async function deleteLead(leadId: string) {
+    setDeleting(true)
+    const res = await fetch(`/api/leads/${leadId}`, { method: 'DELETE' })
+    if (res.ok) {
+      setLeads(prev => prev.filter(l => l.id !== leadId))
+      setSelected(null)
+    }
+    setDeleting(false)
+    setConfirmDelete(false)
+  }
 
   async function updateStatus(leadId: string, newStatus: string) {
     setUpdating(true)
@@ -232,8 +246,8 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
             </div>
 
             {/* Footer CTA */}
-            {selected.buyer_email && (
-              <div className="px-6 py-4 border-t border-bsm-border flex-shrink-0">
+            <div className="px-6 py-4 border-t border-bsm-border flex-shrink-0 space-y-2">
+              {selected.buyer_email && (
                 <a
                   href={`mailto:${selected.buyer_email}?subject=Tu consulta en Black Label Market`}
                   className="btn-gold w-full justify-center text-sm py-3"
@@ -241,8 +255,34 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
                   <Mail className="w-4 h-4" />
                   Responder por email
                 </a>
-              </div>
-            )}
+              )}
+              {!confirmDelete ? (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="w-full flex items-center justify-center gap-2 text-xs text-bsm-text-muted hover:text-red-400 transition-colors py-2"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Eliminar oportunidad
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => deleteLead(selected.id)}
+                    disabled={deleting}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-xs bg-red-900/30 border border-red-500/40 text-red-400 hover:bg-red-900/50 transition-colors py-2 disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    {deleting ? 'Eliminando…' : 'Confirmar borrado'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="text-xs text-bsm-text-muted hover:text-bsm-text-primary transition-colors py-2 px-3 border border-bsm-border"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
