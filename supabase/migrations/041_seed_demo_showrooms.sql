@@ -229,16 +229,67 @@ BEGIN
     'authenticated',
     'authenticated',
     email,
-    crypt(demo_password, gen_salt('bf')),
+    crypt(demo_password, gen_salt('bf', 10)),
     NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    jsonb_build_object('full_name', owner),
+    jsonb_build_object('full_name', owner, 'email_verified', true),
     NOW(),
     NOW()
   FROM showrooms
   ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
+    encrypted_password = EXCLUDED.encrypted_password,
     raw_user_meta_data = EXCLUDED.raw_user_meta_data,
+    updated_at = NOW();
+
+  UPDATE auth.users
+  SET confirmation_token = '',
+      recovery_token = '',
+      email_change_token_new = '',
+      email_change = '',
+      email_change_token_current = '',
+      reauthentication_token = '',
+      phone_change = '',
+      phone_change_token = '',
+      updated_at = NOW()
+  WHERE email LIKE 'demo+%@blacklabelmarket.es';
+
+  WITH showrooms AS (
+    SELECT * FROM jsonb_to_recordset($showrooms$
+    [
+      {"slug":"nero-madrid-performance","name":"Nero Madrid Performance","owner":"Claudia Martin","email":"demo+nero-madrid@blacklabelmarket.es"},
+      {"slug":"costa-blanca-classics","name":"Costa Blanca Classics","owner":"Javier Alcaraz","email":"demo+costa-blanca@blacklabelmarket.es"},
+      {"slug":"barcelona-grand-touring","name":"Barcelona Grand Touring","owner":"Marc Vidal","email":"demo+barcelona-gt@blacklabelmarket.es"},
+      {"slug":"sierra-norte-4x4-premium","name":"Sierra Norte 4x4 Premium","owner":"Alvaro Sanz","email":"demo+sierra-norte@blacklabelmarket.es"},
+      {"slug":"atlantic-collectors-garage","name":"Atlantic Collectors Garage","owner":"Nuria Lago","email":"demo+atlantic-collectors@blacklabelmarket.es"},
+      {"slug":"ducati-barcelona-corse","name":"Ducati Barcelona Corse","owner":"Sergi Puig","email":"demo+ducati-corse@blacklabelmarket.es"},
+      {"slug":"bilbao-heritage-motorcycles","name":"Bilbao Heritage Motorcycles","owner":"Iker Etxeberria","email":"demo+bilbao-heritage@blacklabelmarket.es"},
+      {"slug":"valencia-track-bikes","name":"Valencia Track Bikes","owner":"Laura Ferrer","email":"demo+valencia-track@blacklabelmarket.es"},
+      {"slug":"marbella-adventure-moto","name":"Marbella Adventure Moto","owner":"Hugo Benitez","email":"demo+marbella-adventure@blacklabelmarket.es"},
+      {"slug":"sevilla-custom-icons","name":"Sevilla Custom & Icons","owner":"Manuel Rueda","email":"demo+sevilla-custom@blacklabelmarket.es"}
+    ]
+    $showrooms$::jsonb) AS s(slug TEXT, name TEXT, owner TEXT, email TEXT)
+  )
+  INSERT INTO auth.identities (id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+  SELECT
+    uuid_generate_v5(demo_ns, 'identity:' || email),
+    uuid_generate_v5(demo_ns, 'user:' || email)::text,
+    uuid_generate_v5(demo_ns, 'user:' || email),
+    jsonb_build_object(
+      'sub', uuid_generate_v5(demo_ns, 'user:' || email)::text,
+      'email', email,
+      'full_name', owner,
+      'email_verified', true,
+      'phone_verified', false
+    ),
+    'email',
+    NOW(),
+    NOW(),
+    NOW()
+  FROM showrooms
+  ON CONFLICT (provider_id, provider) DO UPDATE SET
+    user_id = EXCLUDED.user_id,
+    identity_data = EXCLUDED.identity_data,
     updated_at = NOW();
 
   WITH showrooms AS (
@@ -307,7 +358,7 @@ BEGIN
     years,
     'active'::dealer_status,
     plan::subscription_plan,
-    50,
+    CASE WHEN plan = 'essential' THEN 15 WHEN plan = 'professional' THEN 50 ELSE 100 END,
     featured,
     true,
     certifications,
