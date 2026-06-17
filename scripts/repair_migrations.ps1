@@ -146,6 +146,14 @@ if (-not $DryRun) {
     }
 }
 
+# FASE 4B: Alineacion comercial y automatizacion futura
+Write-Host "`n-- FASE 4B: Planes y automatizacion comercial (045-046) --" -ForegroundColor Magenta
+
+Apply-Migration "045_professional_plan_alignment.sql"
+Apply-Migration "046_elite_future_commercial_automation.sql"
+Assert-Table "lead_alerts"
+Assert-Table "showroom_calendar_connections"
+
 # FASE 5: Migration tracking CLI
 Write-Host "`n-- FASE 5: Configurar tracking CLI --" -ForegroundColor Magenta
 
@@ -196,12 +204,18 @@ INSERT INTO supabase_migrations.schema_migrations (version) VALUES
   ('037_essential_price_correction'),
   ('038_feature_classification'),
   ('039_showroom_applications'),
-  ('040_enforce_active_vehicle_limit')
+  ('040_enforce_active_vehicle_limit'),
+  ('041_seed_demo_showrooms'),
+  ('042_backfill_organizations'),
+  ('043_expand_lead_status_pipeline'),
+  ('044_repair_showroom_access'),
+  ('045_professional_plan_alignment'),
+  ('046_elite_future_commercial_automation')
 ON CONFLICT (version) DO NOTHING;
 '@
 
 $r = Invoke-SQL -Label "TRACKING: schema_migrations" -Sql $trackingSQL
-if (-not $DryRun) { Write-Host "  OK - tracking configurado (40 versiones)" -ForegroundColor Green }
+if (-not $DryRun) { Write-Host "  OK - tracking configurado (46 versiones)" -ForegroundColor Green }
 
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor White
