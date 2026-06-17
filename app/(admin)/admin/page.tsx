@@ -108,7 +108,7 @@ export default async function AdminPage() {
       value: formatNumber(requests30d || 0),
       icon: TrendingUp,
       color: 'text-purple-400',
-      href: '/admin/analiticas',
+      href: '/admin/solicitudes',
     },
   ]
 

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
   LayoutDashboard, Users, UserCheck, Car, Settings, TrendingUp, MessageSquare, ClipboardList, Bell,
+  CreditCard, Receipt, Zap, Star,
 } from 'lucide-react'
 
 const ADMIN_NAV = [
@@ -14,6 +15,10 @@ const ADMIN_NAV = [
   { label: 'Solicitudes',     href: '/admin/solicitudes',    icon: ClipboardList },
   { label: 'Alertas',         href: '/admin/alertas',        icon: Bell },
   { label: 'Analíticas',      href: '/admin/analiticas',     icon: TrendingUp },
+  { label: 'Planes',          href: '/admin/plans',          icon: CreditCard },
+  { label: 'Suscripciones',   href: '/admin/subscriptions',  icon: Receipt },
+  { label: 'Boosts',          href: '/admin/boosts',         icon: Zap },
+  { label: 'Capacidad Elite', href: '/admin/elite-capacity', icon: Star },
   { label: 'Configuración',   href: '/admin/configuracion',  icon: Settings },
 ]
 

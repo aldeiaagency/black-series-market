@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { DEALER_STATUS_LABELS, VEHICLE_STATUS_LABELS, getVehicleStatusColor, formatPrice, formatNumber, timeAgo } from '@/lib/utils'
 import Link from 'next/link'
@@ -37,6 +38,7 @@ async function setDealerStatus(dealerId: string, status: string) {
   'use server'
   const supabase = await createAdminClient()
   await supabase.from('dealers').update({ status }).eq('id', dealerId)
+  revalidatePath(`/admin/dealers/${dealerId}`)
   redirect(`/admin/dealers/${dealerId}`)
 }
 
@@ -45,6 +47,21 @@ async function setDealerPlan(dealerId: string, plan: string) {
   const supabase = await createAdminClient()
   const slots = plan === 'elite' ? 100 : plan === 'professional' ? 50 : plan === 'essential' ? 15 : 5
   await supabase.from('dealers').update({ subscription_plan: plan, vehicle_slots: slots }).eq('id', dealerId)
+
+  // Sync active subscription so getEntitlements() sees the new plan (subscription wins over legacy fallback)
+  const { data: orgRow } = await supabase.from('organizations').select('id').eq('dealer_id', dealerId).single()
+  if (orgRow) {
+    const { data: planRow } = await supabase.from('plans').select('id').eq('slug', plan).single()
+    if (planRow) {
+      await supabase
+        .from('subscriptions')
+        .update({ plan_id: planRow.id })
+        .eq('organization_id', orgRow.id)
+        .in('status', ['active', 'trialing', 'past_due'])
+    }
+  }
+
+  revalidatePath(`/admin/dealers/${dealerId}`)
   redirect(`/admin/dealers/${dealerId}`)
 }
 
@@ -52,6 +69,7 @@ async function setDealerFeatured(dealerId: string, featured: boolean) {
   'use server'
   const supabase = await createAdminClient()
   await supabase.from('dealers').update({ is_featured: featured }).eq('id', dealerId)
+  revalidatePath(`/admin/dealers/${dealerId}`)
   redirect(`/admin/dealers/${dealerId}`)
 }
 
@@ -70,6 +88,7 @@ async function setVerification(formData: FormData) {
   const isVerified  = formData.get('is_verified') === 'true'
   const supabase    = await createAdminClient()
   await supabase.from('dealers').update({ is_verified: !isVerified }).eq('id', dealerId)
+  revalidatePath(`/admin/dealers/${dealerId}`)
   redirect(`/admin/dealers/${dealerId}`)
 }
 
