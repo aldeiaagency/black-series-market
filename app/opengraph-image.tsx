@@ -3,6 +3,7 @@ import { ImageResponse } from 'next/og'
 export const alt = 'Black Label Market — Coches y motos premium en España'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
+export const runtime = 'edge'
 
 export default function OgImage() {
   return new ImageResponse(

@@ -1,4 +1,5 @@
 import 'server-only'
+import { createHmac } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/server'
 
 /**
@@ -12,6 +13,7 @@ export type IntegrationEventType =
   | 'vehicle.submitted_for_review'
   | 'vehicle.approved'
   | 'vehicle.rejected'
+  | 'showroom_application.created'
 
 interface NotifyOptions {
   entityType?: string | null
@@ -27,6 +29,7 @@ const WEBHOOK_URL =
   process.env.N8N_WEBHOOK_URL || process.env.N8N_WEBHOOK_EVENTS || ''
 const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET || ''
 const POST_TIMEOUT_MS = 2500
+const SHOWROOM_APPLICATION_EVENT = 'showroom_application.created'
 
 /**
  * Records a business event and (best-effort, non-blocking) forwards it to n8n.
@@ -118,6 +121,98 @@ export async function notifyN8n(
           .eq('id', outboxId)
       } catch {
         // swallow — delivery failure must never surface to the user
+      }
+    }
+  }
+}
+
+export async function notifyShowroomApplicationCreated(
+  payload: Record<string, unknown>,
+): Promise<void> {
+  let outboxId: string | null = null
+  const entityId = typeof payload.dealer_application_id === 'string'
+    ? payload.dealer_application_id
+    : typeof payload.application_id === 'string'
+      ? payload.application_id
+      : null
+
+  try {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('integration_events')
+      .insert({
+        event_type: SHOWROOM_APPLICATION_EVENT,
+        entity_type: 'showroom_application',
+        entity_id: entityId,
+        payload,
+        status: 'pending',
+      })
+      .select('id')
+      .single()
+    outboxId = data?.id ?? null
+  } catch {
+    // Outbox failures must not block the public showroom application flow.
+  }
+
+  const webhookUrl = process.env.N8N_WEBHOOK_DEALER_SIGNUP
+  if (!webhookUrl) return
+
+  const webhookSecret = process.env.N8N_WEBHOOK_DEALER_SIGNUP_SECRET
+  if (!webhookSecret) {
+    console.warn('N8N_WEBHOOK_DEALER_SIGNUP is configured but N8N_WEBHOOK_DEALER_SIGNUP_SECRET is missing. Skipping webhook.')
+    return
+  }
+
+  const webhookBody = JSON.stringify(payload)
+  const webhookTimestamp = new Date().toISOString()
+  const webhookSignature = createHmac('sha256', webhookSecret)
+    .update(webhookBody)
+    .digest('hex')
+
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), POST_TIMEOUT_MS)
+    let res: Response
+    try {
+      res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-blacklabel-event': SHOWROOM_APPLICATION_EVENT,
+          'x-blacklabel-timestamp': webhookTimestamp,
+          'x-blacklabel-signature': `sha256=${webhookSignature}`,
+        },
+        body: webhookBody,
+        signal: controller.signal,
+      })
+    } finally {
+      clearTimeout(timeout)
+    }
+
+    if (outboxId) {
+      const admin = createAdminClient()
+      if (res.ok) {
+        await admin
+          .from('integration_events')
+          .update({ status: 'sent', sent_at: new Date().toISOString(), attempts: 1 })
+          .eq('id', outboxId)
+      } else {
+        await admin
+          .from('integration_events')
+          .update({ status: 'failed', attempts: 1, last_error: `HTTP ${res.status}` })
+          .eq('id', outboxId)
+      }
+    }
+  } catch (err) {
+    if (outboxId) {
+      try {
+        const admin = createAdminClient()
+        await admin
+          .from('integration_events')
+          .update({ status: 'failed', attempts: 1, last_error: String(err).slice(0, 500) })
+          .eq('id', outboxId)
+      } catch {
+        // Delivery/outbox update failures must never surface to the user.
       }
     }
   }

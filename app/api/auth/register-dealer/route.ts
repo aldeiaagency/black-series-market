@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { notifyShowroomApplicationCreated } from '@/lib/integrations/n8n'
 
 function clean(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
       .from('showroom_applications')
       .select('id, status')
       .eq('email', email)
-      .in('status', ['new', 'in_review'])
+      .in('status', ['new', 'in_review', 'pending_info'])
       .maybeSingle()
 
     if (existingApplication) {
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
         portal_url:           portalUrl       || null,
         status:               'new',
       })
-      .select('id')
+      .select('id, created_at, status')
       .single()
 
     if (applicationError || !application) {
@@ -74,30 +75,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No se pudo guardar la solicitud de showroom.' }, { status: 500 })
     }
 
-    // Fire n8n webhook for investigation agent
-    const webhookUrl = process.env.N8N_WEBHOOK_DEALER_SIGNUP
-    if (webhookUrl) {
-      await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          application_id:       application.id,
-          dealer_name:          dealerName,
-          full_name:            fullName,
-          email,
-          location_city:        locationCity,
-          location_region:      locationRegion  || null,
-          phone,
-          website:              website         || null,
-          google_business_url:  googleBusinessUrl || null,
-          instagram_url:        instagramUrl    || null,
-          portales:             portales.length > 0 ? portales : null,
-          portal_url:           portalUrl       || null,
-          admin_url:            `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom`,
-          registered_at:        new Date().toISOString(),
-        }),
-      }).catch(() => {})
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+    const createdAt = application.created_at || new Date().toISOString()
+    const applicationStatus = application.status || 'new'
+    const websiteUrl = website || null
+    const locationRegionValue = locationRegion || null
+    const portalList = portales.length > 0 ? portales : null
+    const webhookPayload = {
+      event_type:           'showroom_application.created',
+      schema_version:       1,
+      dealer_application_id: application.id,
+      application_id:       application.id,
+      showroom_name:        dealerName,
+      dealer_name:          dealerName,
+      full_name:            fullName,
+      email,
+      phone,
+      city:                 locationCity,
+      province:             locationRegionValue,
+      location_city:        locationCity,
+      location_region:      locationRegionValue,
+      website_url:          websiteUrl,
+      website:              websiteUrl,
+      google_business_url:  googleBusinessUrl || null,
+      instagram_url:        instagramUrl    || null,
+      portals:              portalList,
+      portales:             portalList,
+      portal_url:           portalUrl       || null,
+      status:               applicationStatus,
+      created_at:           createdAt,
+      admin_url:            `${appUrl}/admin/altas-showroom/${application.id}`,
+      source:               'black-label-market',
     }
+    await notifyShowroomApplicationCreated(webhookPayload)
 
     return NextResponse.json({
       application_id: application.id,
