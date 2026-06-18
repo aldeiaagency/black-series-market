@@ -56,7 +56,7 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
           </div>
 
           <p className="text-center text-xs text-bsm-text-muted mt-6">
-            Black Label Market · Marketplace curado de vehículos premium
+            Black Label Market · Marketplace de vehículos premium
           </p>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
         </div>
 
         <p className="text-center text-xs text-bsm-text-muted mt-6">
-          Black Label Market · Marketplace curado de vehículos premium
+          Black Label Market · Marketplace de vehículos premium
         </p>
       </div>
     </div>
