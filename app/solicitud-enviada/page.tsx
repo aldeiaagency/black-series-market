@@ -32,16 +32,32 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
             </div>
 
             <h1 className="font-display text-2xl font-light mb-2">Solicitud recibida</h1>
-            <p className="text-sm text-bsm-text-muted leading-relaxed mb-8">
-              Hemos recibido la solicitud de alta de tu showroom. Nuestro equipo revisará la reputación,
-              trayectoria y encaje profesional antes de habilitar cualquier acceso al market.
+            <p className="text-sm text-bsm-text-muted leading-relaxed mb-6">
+              Hemos recibido tu solicitud. Nuestro equipo revisará la reputación y encaje profesional
+              antes de habilitar el acceso al market.
             </p>
 
+            {/* Confirmation email */}
+            <div className="flex items-start gap-3 p-4 bg-gold/5 border border-gold/15 text-left mb-3">
+              <Mail className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
+              <div className="space-y-1.5">
+                <p className="text-xs text-bsm-text-muted leading-relaxed">
+                  Te enviaremos un email de confirmación{params.email ? <> a <span className="text-bsm-text-primary font-medium">{params.email}</span></> : null}.
+                  Si no aparece en unos minutos, <span className="text-bsm-text-secondary">revisa la carpeta de spam</span>.
+                </p>
+                <p className="text-xs text-bsm-text-muted leading-relaxed">
+                  Para no perderte el correo de aprobación, <span className="text-bsm-text-secondary">añade nuestra dirección a tus contactos</span>.
+                </p>
+              </div>
+            </div>
+
+            {/* What happens next */}
             <div className="flex items-start gap-3 p-4 bg-amber-400/5 border border-amber-400/15 text-left mb-8">
-              <Mail className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+              <Clock className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-bsm-text-muted leading-relaxed">
-                Si la solicitud es aprobada, recibirás un email{params.email ? <> en <span className="text-bsm-text-primary">{params.email}</span></> : null} con las instrucciones de acceso.
-                Hasta entonces no se crea una cuenta operativa ni se habilita el panel profesional.
+                Si la solicitud es aprobada, recibirás un segundo email con las instrucciones de acceso al panel profesional.
+                El proceso habitualmente tarda entre <span className="text-bsm-text-secondary">24 y 48 horas laborables</span>.
+                Hasta entonces no se crea ninguna cuenta ni se habilita el panel.
               </p>
             </div>
 
