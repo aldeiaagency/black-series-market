@@ -15,6 +15,7 @@ interface PageProps {
 const STATUS_LABEL: Record<string, string> = {
   new: 'Nueva',
   in_review: 'En revisión',
+  pending_info: 'Pendiente de info',
   approved: 'Aprobada',
   rejected: 'Rechazada',
 }
@@ -22,6 +23,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_BADGE: Record<string, string> = {
   new: 'text-gold bg-gold/10 border-gold/30',
   in_review: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
+  pending_info: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
   approved: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
   rejected: 'text-red-400 bg-red-400/10 border-red-400/30',
 }
@@ -40,6 +42,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   const st: string = app.status || 'new'
   const isActionable = st !== 'approved' && st !== 'rejected'
+  const isPendingInfo = st === 'pending_info'
   const portales: string[] = Array.isArray(app.portales) ? app.portales : []
 
   const submittedAt = new Date(app.created_at).toLocaleDateString('es-ES', {
@@ -220,6 +223,29 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     <input type="hidden" name="status" value="in_review" />
                     <button type="submit" className="btn-outline w-full justify-center text-xs">
                       Marcar en revisión
+                    </button>
+                  </form>
+                )}
+
+                {isPendingInfo && (
+                  <form action={setApplicationStatus}>
+                    <input type="hidden" name="id" value={app.id} />
+                    <input type="hidden" name="status" value="in_review" />
+                    <button type="submit" className="btn-outline w-full justify-center text-xs">
+                      Reanudar revisión
+                    </button>
+                  </form>
+                )}
+
+                {!isPendingInfo && (
+                  <form action={setApplicationStatus}>
+                    <input type="hidden" name="id" value={app.id} />
+                    <input type="hidden" name="status" value="pending_info" />
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-orange-400/30 text-orange-400 text-xs hover:bg-orange-400/5 transition-colors"
+                    >
+                      Solicitar más información
                     </button>
                   </form>
                 )}

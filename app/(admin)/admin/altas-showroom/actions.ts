@@ -23,7 +23,7 @@ function revalidateAll(id: string) {
 export async function setApplicationStatus(formData: FormData) {
   const id = formData.get('id') as string
   const status = formData.get('status') as string
-  if (!id || !['new', 'in_review'].includes(status)) return
+  if (!id || !['new', 'in_review', 'pending_info'].includes(status)) return
 
   const admin = createAdminClient()
   await admin

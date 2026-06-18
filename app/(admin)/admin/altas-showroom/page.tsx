@@ -7,12 +7,13 @@ interface PageProps {
   searchParams: Promise<{ status?: string }>
 }
 
-const STATUS_FLOW = ['new', 'in_review', 'approved', 'rejected'] as const
+const STATUS_FLOW = ['new', 'in_review', 'pending_info', 'approved', 'rejected'] as const
 type ApplicationStatus = (typeof STATUS_FLOW)[number]
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
   new: 'Nueva',
   in_review: 'En revisión',
+  pending_info: 'Pend. info',
   approved: 'Aprobada',
   rejected: 'Rechazada',
 }
@@ -20,6 +21,7 @@ const STATUS_LABEL: Record<ApplicationStatus, string> = {
 const STATUS_BADGE: Record<ApplicationStatus, string> = {
   new: 'text-gold bg-gold/10 border-gold/30',
   in_review: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
+  pending_info: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
   approved: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
   rejected: 'text-red-400 bg-red-400/10 border-red-400/30',
 }
