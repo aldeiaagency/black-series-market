@@ -2,17 +2,29 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/brand/Logo'
 import PasswordInput from '@/components/auth/PasswordInput'
 import { checkPassword } from '@/lib/password'
+import { Mail } from 'lucide-react'
+
+function translateAuthError(msg: string): string {
+  if (msg.includes('already registered') || msg.includes('already been registered'))
+    return 'Este email ya tiene una cuenta. Prueba a iniciar sesión o recuperar la contraseña.'
+  if (msg.includes('Signups not allowed'))
+    return 'El registro está temporalmente desactivado. Inténtalo más tarde.'
+  if (msg.includes('rate limit') || msg.includes('too many'))
+    return 'Demasiados intentos. Espera unos minutos antes de volver a intentarlo.'
+  if (msg.includes('Invalid email') || msg.includes('invalid email'))
+    return 'El formato del email no es válido.'
+  return msg || 'Ha ocurrido un error. Inténtalo de nuevo.'
+}
 
 export default function RegistroCompradorPage() {
   const [form, setForm] = useState({ full_name: '', email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [sent, setSent] = useState(false)
 
   function update(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -37,29 +49,62 @@ export default function RegistroCompradorPage() {
       options: { data: { full_name: form.full_name } },
     })
 
-    if (authError || !authData.user) {
-      setError(authError?.message || 'Error al crear la cuenta')
-      setLoading(false)
+    setLoading(false)
+
+    if (authError) {
+      setError(translateAuthError(authError.message))
       return
     }
 
-    // Mark as buyer (profiles row created by trigger)
-    await supabase
-      .from('profiles')
-      .update({ role: 'buyer' })
-      .eq('id', authData.user.id)
+    // If user was created, mark as buyer (profile row created by trigger)
+    if (authData.user) {
+      await supabase.from('profiles').update({ role: 'buyer' }).eq('id', authData.user.id)
+    }
 
-    router.push('/')
-    router.refresh()
+    // Whether email needs confirmation or was already registered (Supabase hides the difference),
+    // always show the "check your email" screen — avoids exposing account existence.
+    setSent(true)
   }
 
+  // ── Email sent confirmation ───────────────────────────────────────────────
+  if (sent) {
+    return (
+      <div className="min-h-screen bg-obsidian flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          <div className="flex justify-center mb-10">
+            <Link href="/"><Logo width={160} /></Link>
+          </div>
+          <div className="bg-surface border border-bsm-border p-8 text-center">
+            <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-5">
+              <Mail className="w-5 h-5 text-gold" />
+            </div>
+            <h1 className="font-display text-2xl font-light mb-2">Revisa tu email</h1>
+            <p className="text-sm text-bsm-text-muted mb-1">
+              Hemos enviado un enlace de confirmación a:
+            </p>
+            <p className="text-sm text-bsm-text-primary font-medium mb-6">{form.email}</p>
+            <p className="text-xs text-bsm-text-muted leading-relaxed mb-6">
+              Haz clic en el enlace para activar tu cuenta. Si no ves el email, revisa la carpeta de spam.
+              El enlace caduca en 24 horas.
+            </p>
+            <p className="text-xs text-bsm-text-muted">
+              ¿Email incorrecto?{' '}
+              <button onClick={() => setSent(false)} className="text-gold hover:text-gold-light transition-colors">
+                Volver e intentarlo de nuevo
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Registration form ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-obsidian flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-10">
-          <Link href="/">
-            <Logo width={160} />
-          </Link>
+          <Link href="/"><Logo width={160} /></Link>
         </div>
 
         <div className="bg-surface border border-bsm-border p-8">
@@ -131,7 +176,7 @@ export default function RegistroCompradorPage() {
             </p>
             <p className="text-xs text-bsm-text-muted">
               ¿Eres concesionario?{' '}
-              <Link href="/registro" className="text-bsm-text-secondary hover:text-gold transition-colors">
+              <Link href="/registro" className="text-gold hover:text-gold-light transition-colors font-medium">
                 Acceso profesional
               </Link>
             </p>
