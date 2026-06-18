@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/brand/Logo'
 
+const PORTALES = ['Coches.net', 'Mobile.de', 'Autoscout24', 'Wallapop', 'Motorflash', 'Otros']
+
 export default function RegistroPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -19,16 +21,38 @@ export default function RegistroPage() {
     location_region: '',
     phone: '',
     website: '',
-    message: '',
+    google_business_url: '',
+    instagram_url: '',
+    portales: [] as string[],
+    portal_url: '',
   })
 
   function update(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
   }
 
+  function togglePortal(p: string) {
+    setForm((f) => ({
+      ...f,
+      portales: f.portales.includes(p) ? f.portales.filter((x) => x !== p) : [...f.portales, p],
+    }))
+  }
+
+  function goToStep2(e: React.FormEvent) {
+    e.preventDefault()
+    setStep(2)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+
+    // At least one public URL required for the investigation agent
+    if (!form.website && !form.google_business_url && !form.instagram_url) {
+      setError('Incluye al menos una URL pública (web, Google Business o Instagram) para que podamos revisar tu showroom.')
+      return
+    }
+
     setLoading(true)
 
     const response = await fetch('/api/auth/register-dealer', {
@@ -52,12 +76,10 @@ export default function RegistroPage() {
     <div className="min-h-screen bg-obsidian flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg">
         <div className="flex justify-center mb-10">
-          <Link href="/">
-            <Logo width={160} />
-          </Link>
+          <Link href="/"><Logo width={160} /></Link>
         </div>
 
-        {/* Steps indicator */}
+        {/* Steps */}
         <div className="flex items-center gap-2 mb-8">
           {[1, 2].map((s) => (
             <div key={s} className="flex items-center gap-2 flex-1">
@@ -66,7 +88,7 @@ export default function RegistroPage() {
                 {s}
               </div>
               <span className={`text-xs ${step >= s ? 'text-bsm-text-primary' : 'text-bsm-text-muted'}`}>
-                {s === 1 ? 'Contacto' : 'Showroom'}
+                {s === 1 ? 'Contacto' : 'Tu showroom'}
               </span>
               {s < 2 && <div className={`flex-1 h-px ${step > s ? 'bg-gold' : 'bg-bsm-border'}`} />}
             </div>
@@ -74,14 +96,14 @@ export default function RegistroPage() {
         </div>
 
         <div className="bg-surface border border-bsm-border p-8">
-          <h1 className="font-display text-2xl font-light mb-1">Registrar showroom</h1>
-          <p className="text-sm text-bsm-text-muted mb-8">
-            {step === 1 ? 'Datos de contacto para revisar la solicitud' : 'Información de tu showroom'}
-          </p>
 
-          <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2) } : handleSubmit}>
-            {step === 1 && (
-              <div className="space-y-4">
+          {/* ── Step 1 ── */}
+          {step === 1 && (
+            <>
+              <h1 className="font-display text-2xl font-light mb-1">Registrar showroom</h1>
+              <p className="text-sm text-bsm-text-muted mb-8">Datos de contacto para revisar la solicitud</p>
+
+              <form onSubmit={goToStep2} className="space-y-4">
                 <div>
                   <label className="label-base">Nombre completo</label>
                   <input
@@ -106,71 +128,145 @@ export default function RegistroPage() {
                 <button type="submit" className="btn-gold w-full justify-center mt-2">
                   Continuar
                 </button>
-              </div>
-            )}
+              </form>
 
-            {step === 2 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="label-base">Nombre del showroom</label>
-                  <input
-                    value={form.dealer_name}
-                    onChange={(e) => update('dealer_name', e.target.value)}
-                    placeholder="Elite Motors Madrid"
-                    className="input-base"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="mt-6 pt-6 border-t border-bsm-border text-center">
+                <p className="text-sm text-bsm-text-muted">
+                  ¿Ya tienes cuenta?{' '}
+                  <Link href="/login" className="text-gold hover:text-gold-light transition-colors">Acceder</Link>
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* ── Step 2 ── */}
+          {step === 2 && (
+            <>
+              <h1 className="font-display text-2xl font-light mb-1">Tu showroom</h1>
+              <p className="text-sm text-bsm-text-muted mb-8">
+                Necesitamos revisar tu reputación antes de activar el acceso — solo te pedimos tus presencias públicas.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+
+                {/* Basic info */}
+                <div className="space-y-4">
                   <div>
-                    <label className="label-base">Ciudad</label>
+                    <label className="label-base">Nombre del showroom</label>
                     <input
-                      value={form.location_city}
-                      onChange={(e) => update('location_city', e.target.value)}
-                      placeholder="Madrid"
+                      value={form.dealer_name}
+                      onChange={(e) => update('dealer_name', e.target.value)}
+                      placeholder="Elite Motors Madrid"
                       className="input-base"
                       required
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="label-base">Ciudad</label>
+                      <input
+                        value={form.location_city}
+                        onChange={(e) => update('location_city', e.target.value)}
+                        placeholder="Madrid"
+                        className="input-base"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="label-base">Provincia</label>
+                      <input
+                        value={form.location_region}
+                        onChange={(e) => update('location_region', e.target.value)}
+                        placeholder="Madrid"
+                        className="input-base"
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <label className="label-base">Provincia</label>
+                    <label className="label-base">Teléfono de contacto</label>
                     <input
-                      value={form.location_region}
-                      onChange={(e) => update('location_region', e.target.value)}
-                      placeholder="Madrid"
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => update('phone', e.target.value)}
+                      placeholder="+34 600 000 000"
                       className="input-base"
+                      required
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="label-base">Teléfono de contacto</label>
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => update('phone', e.target.value)}
-                    placeholder="+34 600 000 000"
-                    className="input-base"
-                    required
-                  />
+
+                {/* Divider */}
+                <div className="border-t border-bsm-border pt-5">
+                  <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-4">
+                    Tu presencia online · al menos una URL
+                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="label-base">Google Business</label>
+                      <input
+                        type="url"
+                        value={form.google_business_url}
+                        onChange={(e) => update('google_business_url', e.target.value)}
+                        placeholder="https://maps.app.goo.gl/..."
+                        className="input-base"
+                      />
+                    </div>
+                    <div>
+                      <label className="label-base">Instagram</label>
+                      <input
+                        type="url"
+                        value={form.instagram_url}
+                        onChange={(e) => update('instagram_url', e.target.value)}
+                        placeholder="https://www.instagram.com/tushowroom"
+                        className="input-base"
+                      />
+                    </div>
+                    <div>
+                      <label className="label-base">Web oficial</label>
+                      <input
+                        type="url"
+                        value={form.website}
+                        onChange={(e) => update('website', e.target.value)}
+                        placeholder="https://tushowroom.com"
+                        className="input-base"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="label-base">Web o perfil público</label>
-                  <input
-                    type="url"
-                    value={form.website}
-                    onChange={(e) => update('website', e.target.value)}
-                    placeholder="https://tushowroom.com"
-                    className="input-base"
-                  />
-                </div>
-                <div>
-                  <label className="label-base">Mensaje para revisión</label>
-                  <textarea
-                    value={form.message}
-                    onChange={(e) => update('message', e.target.value)}
-                    placeholder="Cuéntanos brevemente qué tipo de stock trabajáis y dónde podemos revisar vuestra trayectoria."
-                    className="input-base min-h-[96px] resize-none"
-                  />
+
+                {/* Portales */}
+                <div className="border-t border-bsm-border pt-5">
+                  <p className="text-xs text-bsm-text-muted uppercase tracking-widest mb-3">
+                    Presencia en portales · opcional
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {PORTALES.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => togglePortal(p)}
+                        className={`text-xs px-3 py-1.5 border transition-colors ${
+                          form.portales.includes(p)
+                            ? 'border-gold text-gold bg-gold/5'
+                            : 'border-bsm-border text-bsm-text-muted hover:border-bsm-border-light'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                  {form.portales.length > 0 && (
+                    <div>
+                      <label className="label-base">URL de tu perfil en el portal</label>
+                      <input
+                        type="url"
+                        value={form.portal_url}
+                        onChange={(e) => update('portal_url', e.target.value)}
+                        placeholder="https://www.coches.net/concesionarios/..."
+                        className="input-base"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {error && (
@@ -179,46 +275,29 @@ export default function RegistroPage() {
                   </p>
                 )}
 
-                <div className="flex gap-3 mt-2">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="btn-outline flex-1 justify-center"
-                  >
+                <div className="flex gap-3 pt-1">
+                  <button type="button" onClick={() => setStep(1)} className="btn-outline flex-1 justify-center">
                     Atrás
                   </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-gold flex-1 justify-center"
-                  >
+                  <button type="submit" disabled={loading} className="btn-gold flex-1 justify-center">
                     {loading ? 'Enviando solicitud...' : 'Solicitar alta'}
                   </button>
                 </div>
 
-                <p className="text-[10px] text-bsm-text-muted text-center pt-2">
-                  El envío de esta solicitud no crea una cuenta ni implica aceptación automática. Black Label Market revisa cada showroom antes de habilitar el acceso.
+                <p className="text-[10px] text-bsm-text-muted text-center leading-relaxed">
+                  El envío no crea una cuenta ni implica aceptación automática. Revisamos cada showroom antes de habilitar el acceso.
                 </p>
-                <p className="text-[10px] text-bsm-text-muted text-center pt-1">
+                <p className="text-[10px] text-bsm-text-muted text-center">
                   Al registrarte aceptas nuestros{' '}
                   <Link href="/legal/terminos" className="text-gold">términos de uso</Link>
                   {' '}y{' '}
                   <Link href="/legal/privacidad" className="text-gold">política de privacidad</Link>.
                 </p>
-              </div>
-            )}
-          </form>
+              </form>
+            </>
+          )}
 
-          <div className="mt-6 pt-6 border-t border-bsm-border text-center">
-            <p className="text-sm text-bsm-text-muted">
-              ¿Ya tienes cuenta?{' '}
-              <Link href="/login" className="text-gold hover:text-gold-light transition-colors">
-                Acceder
-              </Link>
-            </p>
-          </div>
         </div>
-
       </div>
     </div>
   )
