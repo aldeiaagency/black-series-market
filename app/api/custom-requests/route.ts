@@ -1,6 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyN8n } from '@/lib/integrations/n8n'
+
+const optionalText = (max: number) =>
+  z.preprocess((value) => {
+    if (value === undefined || value === null) return undefined
+    const text = String(value).trim()
+    return text.length > 0 ? text : undefined
+  }, z.string().max(max).optional())
+
+const requestSchema = z.object({
+  request_type: z.enum(['custom_vehicle', 'dealer_access']).optional(),
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().email().max(180),
+  phone: optionalText(30),
+  vehicle_type: z.enum(['car', 'motorcycle', 'any']).optional(),
+  brand: optionalText(80),
+  model: optionalText(80),
+  version: optionalText(120),
+  budget: optionalText(80),
+  location: optionalText(120),
+  timeline: z.enum(['immediate', '1_3_months', '3_6_months', 'exploring']).optional(),
+  financing: z.enum(['yes', 'no', 'maybe']).optional(),
+  trade_in: z.enum(['yes', 'no']).optional(),
+  notes: optionalText(1200),
+  message: optionalText(1200),
+  metadata: z.record(z.unknown()).optional(),
+}).strict()
+
+function hasUnsafeText(value: string | undefined) {
+  if (!value) return false
+  const withoutAllowedWhitespace = value.replace(/[\r\n\t]/g, '')
+  return /<[^>]*>|https?:\/\/|www\.|[\u0000-\u001F]/i.test(withoutAllowedWhitespace)
+}
+
+function isValidPhone(value: string | undefined) {
+  if (!value) return true
+  return /^[+\d\s().-]{6,30}$/.test(value)
+}
 
 /**
  * POST /api/custom-requests
@@ -16,11 +54,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'invalid_body' }, { status: 400 })
   }
 
-  const name = String(body.name || '').trim()
-  const email = String(body.email || '').trim()
+  const parsed = requestSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 })
+  }
 
-  if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ ok: false, error: 'invalid_contact' }, { status: 400 })
+  const input = parsed.data
+  const requestType = input.request_type ?? 'custom_vehicle'
+  const name = input.name
+  const email = input.email
+
+  if (!isValidPhone(input.phone)) {
+    return NextResponse.json({ ok: false, error: 'invalid_phone' }, { status: 400 })
+  }
+
+  const textValues = [
+    input.name,
+    input.phone,
+    input.brand,
+    input.model,
+    input.version,
+    input.budget,
+    input.location,
+    input.notes,
+    input.message,
+  ]
+  if (textValues.some(hasUnsafeText)) {
+    return NextResponse.json({ ok: false, error: 'invalid_content' }, { status: 400 })
+  }
+
+  if (requestType === 'custom_vehicle') {
+    const hasSearchCriteria = Boolean(input.brand || input.model || input.version || input.notes)
+    if (!input.vehicle_type || !input.timeline || !input.financing || !input.trade_in || !hasSearchCriteria) {
+      return NextResponse.json({ ok: false, error: 'insufficient_vehicle_details' }, { status: 400 })
+    }
   }
 
   // Optional session — link the request to the user when logged in.
@@ -31,26 +98,27 @@ export async function POST(req: NextRequest) {
     userId = user?.id ?? null
   } catch {}
 
-  const vehicleType = ['car', 'motorcycle', 'any'].includes(body.vehicle_type) ? body.vehicle_type : null
+  const vehicleType = input.vehicle_type ?? null
 
   const record = {
-    request_type: 'custom_vehicle',
+    request_type: requestType,
     name,
     email,
-    phone:        body.phone ? String(body.phone).trim() : null,
+    phone:        input.phone ?? null,
     vehicle_type: vehicleType,
-    brand:        body.brand ? String(body.brand).trim() : null,
-    model:        body.model ? String(body.model).trim() : null,
-    version:      body.version ? String(body.version).trim() : null,
-    budget_text:  body.budget ? String(body.budget).trim() : null,
-    location:     body.location ? String(body.location).trim() : null,
-    timeframe:    body.timeline ? String(body.timeline).trim() : null,
-    financing:    body.financing ? String(body.financing).trim() : null,
-    trade_in:     body.trade_in ? String(body.trade_in).trim() : null,
-    message:      body.notes ? String(body.notes).trim() : null,
+    brand:        input.brand ?? null,
+    model:        input.model ?? null,
+    version:      input.version ?? null,
+    budget_text:  input.budget ?? null,
+    location:     input.location ?? null,
+    timeframe:    input.timeline ?? null,
+    financing:    input.financing ?? null,
+    trade_in:     input.trade_in ?? null,
+    message:      requestType === 'dealer_access' ? input.message ?? null : input.notes ?? null,
     status:       'new',
     source:       'web',
     user_id:      userId,
+    metadata:     input.metadata ?? {},
   }
 
   const admin = createAdminClient()
@@ -69,6 +137,7 @@ export async function POST(req: NextRequest) {
     entityType: 'custom_request',
     entityId: data.id,
     payload: {
+      request_type: requestType,
       vehicle_type: vehicleType,
       brand: record.brand,
       model: record.model,
