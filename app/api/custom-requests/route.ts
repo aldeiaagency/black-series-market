@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'crypto'
 import { z } from 'zod'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyN8n } from '@/lib/integrations/n8n'
+
+const CUSTOM_VEHICLE_EMAIL_LIMIT_24H = 3
+const CUSTOM_VEHICLE_IP_LIMIT_1H = 8
 
 const optionalText = (max: number) =>
   z.preprocess((value) => {
@@ -38,6 +42,45 @@ function hasUnsafeText(value: string | undefined) {
 function isValidPhone(value: string | undefined) {
   if (!value) return true
   return /^[+\d\s().-]{6,30}$/.test(value)
+}
+
+function getClientIp(req: NextRequest) {
+  const forwardedFor = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+  return forwardedFor || req.headers.get('x-real-ip')?.trim() || null
+}
+
+function hashIdentifier(value: string) {
+  const salt = process.env.CUSTOM_REQUESTS_RATE_LIMIT_SALT || 'black-series-market'
+  return createHash('sha256').update(`${salt}:${value}`).digest('hex')
+}
+
+async function isCustomVehicleRateLimited(
+  admin: ReturnType<typeof createAdminClient>,
+  email: string,
+  ipHash: string | null,
+) {
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+  const { count: emailCount, error: emailError } = await admin
+    .from('custom_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('request_type', 'custom_vehicle')
+    .eq('email', email)
+    .gte('created_at', oneDayAgo)
+
+  if (!emailError && (emailCount ?? 0) >= CUSTOM_VEHICLE_EMAIL_LIMIT_24H) return true
+
+  if (!ipHash) return false
+
+  const { count: ipCount, error: ipError } = await admin
+    .from('custom_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('request_type', 'custom_vehicle')
+    .eq('metadata->>ip_hash', ipHash)
+    .gte('created_at', oneHourAgo)
+
+  return !ipError && (ipCount ?? 0) >= CUSTOM_VEHICLE_IP_LIMIT_1H
 }
 
 /**
@@ -98,6 +141,14 @@ export async function POST(req: NextRequest) {
     userId = user?.id ?? null
   } catch {}
 
+  const admin = createAdminClient()
+  const clientIp = getClientIp(req)
+  const ipHash = clientIp ? hashIdentifier(clientIp) : null
+
+  if (requestType === 'custom_vehicle' && await isCustomVehicleRateLimited(admin, email, ipHash)) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 })
+  }
+
   const vehicleType = input.vehicle_type ?? null
 
   const record = {
@@ -118,10 +169,13 @@ export async function POST(req: NextRequest) {
     status:       'new',
     source:       'web',
     user_id:      userId,
-    metadata:     input.metadata ?? {},
+    metadata:     {
+      ...(input.metadata ?? {}),
+      ip_hash: ipHash,
+      submitted_at: new Date().toISOString(),
+    },
   }
 
-  const admin = createAdminClient()
   const { data, error } = await admin
     .from('custom_requests')
     .insert(record)
