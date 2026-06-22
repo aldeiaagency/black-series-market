@@ -1,0 +1,206 @@
+{
+  "name": "WF6 — Matcher de Alertas BLM",
+  "nodes": [
+    {
+      "id": "wf6-sticky",
+      "name": "Notas — WF6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [60, 60],
+      "parameters": {
+        "content": "## BLM — 6. Matcher de Alertas\n\nWebhook path: `blm/alert-matcher`\n\nLlamado desde WF5 cuando un vehículo es aprobado.\n\n**Flujo:**\n1. Recibe vehicleId + datos básicos del vehículo\n2. Obtiene detalles completos del vehículo desde Supabase\n3. Carga todas las alertas activas\n4. Filtra las que coinciden (marca, modelo, año, precio, tipo)\n5. Envía email a cada comprador con vehículo matching\n6. Actualiza last_matched_at en la alerta\n\n**Variables necesarias:**\n- `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`\n- `RESEND_API_KEY`, `MAIL_FROM`\n- `MARKET_URL`",
+        "height": 320,
+        "width": 300
+      }
+    },
+    {
+      "id": "wf6-webhook",
+      "name": "Webhook — Alert Matcher",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [400, 300],
+      "webhookId": "blm-alert-matcher",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blm/alert-matcher",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "wf6-extract",
+      "name": "Extraer datos del vehículo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [620, 300],
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst body = raw.body || raw;\nconst data = body.data || body;\n\nconst vehicleId    = data.vehicleId || data.entityId || null;\nconst brand        = (data.brand  || '').toLowerCase().trim();\nconst model        = (data.model  || '').toLowerCase().trim();\nconst year         = parseInt(data.year)  || null;\nconst vehicleTitle = data.vehicle_title   || [data.brand, data.model, data.year].filter(Boolean).join(' ');\nconst vehicleSlug  = data.vehicle_slug    || null;\nconst vehicleType  = data.vehicle_type    || null;\nconst price        = data.price !== undefined ? Number(data.price) : null;\n\nif (!vehicleId) throw new Error('vehicleId ausente en payload');\n\nreturn [{ json: { vehicleId, brand, model, year, vehicleTitle, vehicleSlug, vehicleType, price } }];"
+      }
+    },
+    {
+      "id": "wf6-get-vehicle",
+      "name": "Supabase — Obtener vehículo completo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [840, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/vehicles",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "id",     "value": "=eq.{{ $json.vehicleId }}" },
+            { "name": "select", "value": "id,brand_name,model_name,year,price,vehicle_type,slug" },
+            { "name": "limit",  "value": "1" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wf6-merge-vehicle",
+      "name": "Combinar datos del vehículo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1060, 300],
+      "parameters": {
+        "jsCode": "// Merge data from previous node (extract) + supabase response\nconst extracted = $('Extraer datos del vehículo').first().json;\nconst dbRows    = $input.all();\nconst db        = Array.isArray(dbRows) && dbRows.length > 0 ? dbRows[0].json : {};\n\nconst vehicleId    = extracted.vehicleId;\nconst brand        = (db.brand_name  || extracted.brand  || '').toLowerCase().trim();\nconst model        = (db.model_name  || extracted.model  || '').toLowerCase().trim();\nconst year         = db.year         || extracted.year   || null;\nconst price        = db.price        !== undefined ? Number(db.price) : (extracted.price !== null ? Number(extracted.price) : null);\nconst vehicleType  = db.vehicle_type || extracted.vehicleType || 'car';\nconst vehicleSlug  = db.slug         || extracted.vehicleSlug || null;\nconst vehicleTitle = extracted.vehicleTitle || [db.brand_name, db.model_name, db.year].filter(Boolean).join(' ');\n\nreturn [{ json: { vehicleId, brand, model, year, price, vehicleType, vehicleSlug, vehicleTitle } }];"
+      }
+    },
+    {
+      "id": "wf6-get-alerts",
+      "name": "Supabase — Cargar alertas activas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1280, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/search_alerts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Prefer",        "value": "count=exact" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "is_active", "value": "eq.true" },
+            { "name": "select",    "value": "id,email,phone,vehicle_type,brand,model,budget_max,year_min,km_max,location" },
+            { "name": "limit",     "value": "500" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "wf6-filter",
+      "name": "Filtrar alertas coincidentes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 300],
+      "parameters": {
+        "jsCode": "const vehicle = $('Combinar datos del vehículo').first().json;\nconst alerts  = $input.all().map(i => i.json);\n\nfunction parsePrice(val) {\n  if (!val) return null;\n  // Handle Spanish format: 150.000 or 150000 or '150000€'\n  return parseInt(String(val).replace(/[.\\s]/g, '').replace(/[^0-9]/g, ''), 10) || null;\n}\n\nconst matched = alerts.filter(a => {\n  // vehicle_type: 'any' matches all, otherwise must match\n  if (a.vehicle_type && a.vehicle_type !== 'any' && a.vehicle_type !== vehicle.vehicleType) return false;\n  // brand: must match (case-insensitive) if set\n  if (a.brand && a.brand.toLowerCase().trim() !== vehicle.brand) return false;\n  // model: must match if set\n  if (a.model && a.model.toLowerCase().trim() !== vehicle.model) return false;\n  // budget_max: vehicle price must be <= budget\n  if (a.budget_max && vehicle.price !== null) {\n    const maxBudget = parsePrice(a.budget_max);\n    if (maxBudget && vehicle.price > maxBudget) return false;\n  }\n  // year_min: vehicle year must be >= year_min\n  if (a.year_min && vehicle.year !== null && vehicle.year < a.year_min) return false;\n  return true;\n});\n\nif (matched.length === 0) return [];\n\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nreturn matched.map(a => ({\n  json: {\n    alertId:       a.id,\n    email:         a.email,\n    vehicleId:     vehicle.vehicleId,\n    vehicleTitle:  vehicle.vehicleTitle,\n    vehicleUrl:    vehicle.vehicleSlug ? `${MARKET_URL}/coches/${vehicle.vehicleSlug}` : MARKET_URL,\n    price:         vehicle.price,\n    brand:         vehicle.brand,\n    model:         vehicle.model,\n    year:          vehicle.year,\n  }\n}));"
+      }
+    },
+    {
+      "id": "wf6-prepare-email",
+      "name": "Preparar email de alerta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1720, 300],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst MAIL_FROM  = process.env.MAIL_FROM  || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nconst priceText = d.price ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(d.price) : 'Consultar precio';\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"es\">\n<head><meta charset=\"UTF-8\"><style>\n  body { font-family: Arial, sans-serif; color: #1a1a1a; margin: 0; padding: 0; }\n  .container { max-width: 580px; margin: 0 auto; padding: 32px 24px; }\n  .header { color: #C6A64B; font-size: 22px; font-weight: 700; margin-bottom: 8px; }\n  .subtitle { color: #555; font-size: 14px; margin-bottom: 24px; }\n  .vehicle-card { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 24px; }\n  .vehicle-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }\n  .vehicle-price { color: #C6A64B; font-size: 16px; font-weight: 700; margin-bottom: 16px; }\n  .cta { display: inline-block; background: #C6A64B; color: #0B0B0B; text-decoration: none; padding: 12px 28px; border-radius: 4px; font-weight: 700; font-size: 15px; }\n  .footer { margin-top: 32px; font-size: 12px; color: #888; }\n</style></head>\n<body>\n<div class=\"container\">\n  <div class=\"header\">¡Encontramos un vehículo para ti!</div>\n  <div class=\"subtitle\">Hemos encontrado un vehículo que coincide con tu alerta de búsqueda en Black Label Market.</div>\n  <div class=\"vehicle-card\">\n    <div class=\"vehicle-title\">${d.vehicleTitle}</div>\n    <div class=\"vehicle-price\">${priceText}</div>\n    <a href=\"${d.vehicleUrl}\" class=\"cta\">Ver vehículo →</a>\n  </div>\n  <p>Si ya no te interesa esta búsqueda, puedes <a href=\"${MARKET_URL}/cuenta/alertas\">gestionar tus alertas aquí</a>.</p>\n  <div class=\"footer\">Black Label Market · ${MARKET_URL}</div>\n</div>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from:    MAIL_FROM,\n      to:      [d.email],\n      subject: `¡Encontramos tu ${d.vehicleTitle}! - Black Label Market`,\n      html\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf6-send-email",
+      "name": "Resend — Email al comprador",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1940, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ JSON.stringify($json.emailPayload) }}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "wf6-update-alert",
+      "name": "Supabase — Actualizar last_matched_at",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2160, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/search_alerts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "return=minimal" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "id", "value": "=eq.{{ $('Filtrar alertas coincidentes').item.json.alertId }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={ \"last_matched_at\": \"{{ new Date().toISOString() }}\", \"matched_vehicle_ids\": \"{\\\"{{ $('Filtrar alertas coincidentes').item.json.vehicleId }}\\\"}\" }",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook — Alert Matcher": {
+      "main": [[{ "node": "Extraer datos del vehículo", "type": "main", "index": 0 }]]
+    },
+    "Extraer datos del vehículo": {
+      "main": [[{ "node": "Supabase — Obtener vehículo completo", "type": "main", "index": 0 }]]
+    },
+    "Supabase — Obtener vehículo completo": {
+      "main": [[{ "node": "Combinar datos del vehículo", "type": "main", "index": 0 }]]
+    },
+    "Combinar datos del vehículo": {
+      "main": [[{ "node": "Supabase — Cargar alertas activas", "type": "main", "index": 0 }]]
+    },
+    "Supabase — Cargar alertas activas": {
+      "main": [[{ "node": "Filtrar alertas coincidentes", "type": "main", "index": 0 }]]
+    },
+    "Filtrar alertas coincidentes": {
+      "main": [[{ "node": "Preparar email de alerta", "type": "main", "index": 0 }]]
+    },
+    "Preparar email de alerta": {
+      "main": [[{ "node": "Resend — Email al comprador", "type": "main", "index": 0 }]]
+    },
+    "Resend — Email al comprador": {
+      "main": [[{ "node": "Supabase — Actualizar last_matched_at", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}
