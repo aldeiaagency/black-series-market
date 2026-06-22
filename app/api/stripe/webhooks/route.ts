@@ -135,6 +135,15 @@ async function handleCheckoutCompleted(
         Date.now() + (billingCycle === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000
       ).toISOString(),
     }).eq('id', dealerId)
+
+    // Auto-configure AI assistant for Professional and Elite plans
+    if (planSlug === 'professional' || planSlug === 'elite') {
+      const assistantWebhookUrl = process.env.N8N_ASSISTANT_WEBHOOK_URL
+        ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/assistant'
+      await admin
+        .from('showroom_assistant_config')
+        .upsert({ dealer_id: dealerId, webhook_url: assistantWebhookUrl, enabled: true }, { onConflict: 'dealer_id' })
+    }
   }
 }
 
