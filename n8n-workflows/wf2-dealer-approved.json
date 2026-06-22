@@ -1,0 +1,203 @@
+{
+  "name": "BLM — 2. Aprobación Showroom",
+  "nodes": [
+    {
+      "id": "wf2-node-01-webhook",
+      "name": "Webhook — Dealer Approved",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blm/dealer-approved",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "wf2-node-02-validate",
+      "name": "Validar payload aprobación",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst errors = [];\nconst required = ['application_id', 'dealer_id', 'dealer_name', 'full_name', 'email'];\nfor (const f of required) if (!body[f]) errors.push(f);\n\nif (errors.length) {\n  return [{ json: { ok: false, errors, body } }];\n}\n\nconst hasPassword = Boolean(body.temporary_password);\nreturn [{\n  json: {\n    ok: true,\n    application_id:    body.application_id,\n    dealer_id:         body.dealer_id,\n    dealer_name:       body.dealer_name,\n    full_name:         body.full_name,\n    email:             body.email,\n    temporary_password: body.temporary_password || null,\n    has_password:      hasPassword,\n    login_url:         body.login_url         || 'https://blacklabelmarket.es/login',\n    dashboard_url:     body.dashboard_url     || 'https://blacklabelmarket.es/dashboard',\n    approved_at:       body.approved_at       || new Date().toISOString()\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf2-node-03-if",
+      "name": "Payload válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "check-ok",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "wf2-node-04-respond",
+      "name": "Responder 202 — Aceptado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 200],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM — 2. Aprobación Showroom', dealer_id: $json.dealer_id } }}",
+        "options": { "responseCode": 202 }
+      }
+    },
+    {
+      "id": "wf2-node-reject-respond",
+      "name": "Responder 400 — Payload inválido",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 450],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, errors: $json.errors } }}",
+        "options": { "responseCode": 400 }
+      }
+    },
+    {
+      "id": "wf2-node-05-prep-claude",
+      "name": "Preparar prompt email bienvenida",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 200],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nconst accessInfo = d.has_password\n  ? `Tus credenciales de acceso son:\\n- Email: ${d.email}\\n- Contraseña temporal: ${d.temporary_password}\\n\\nDeberás cambiar la contraseña en tu primer acceso.`\n  : `Accede con el email ${d.email}. Si no recuerdas tu contraseña, usa la opción de recuperación en ${d.login_url || MARKET_URL + '/recuperar'}.`;\n\nconst briefing = `Eres redactor senior de Black Label Market. Escribe un email de bienvenida en español para un concesionario que acaba de ser aprobado en la plataforma.\\n\\nContexto del concesionario:\\n- Nombre showroom: ${d.dealer_name}\\n- Nombre de contacto: ${d.full_name}\\n\\nEl email debe:\\n1. Felicitarles por la aprobación de forma cálida pero profesional\\n2. Explicar en 3 pasos concretos cómo empezar: (a) completar perfil, (b) subir primeros vehículos, (c) activar notificaciones de leads\\n3. Incluir los datos de acceso tal cual aparecen aquí: ${accessInfo}\\n4. URL de acceso: ${d.login_url || MARKET_URL + '/login'}\\n5. URL del panel: ${d.dashboard_url || MARKET_URL + '/dashboard'}\\n6. Mencionar que el equipo está disponible para cualquier duda\\n7. Firma: «El equipo de Black Label Market»\\n\\nTono: premium, conciso, acogedor. Sin párrafos largos. Sin palabras vacías. Devuelve SOLO el HTML del cuerpo del email (sin <html>/<head>/<body> exterior, con <p> y <strong> para estructura).`;\n\nreturn [{\n  json: {\n    ...d,\n    claudeRequest: {\n      model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',\n      max_tokens: 1200,\n      messages: [{ role: 'user', content: briefing }]\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf2-node-06-claude",
+      "name": "Claude — Generar email bienvenida",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 200],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key",          "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version",   "value": "2023-06-01" },
+            { "name": "Content-Type",        "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.claudeRequest) }}"
+      }
+    },
+    {
+      "id": "wf2-node-07-compose",
+      "name": "Componer email final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1440, 200],
+      "parameters": {
+        "jsCode": "const d = $('Preparar prompt email bienvenida').first().json;\nconst claude = $input.first().json;\n\nlet body = '';\nif (Array.isArray(claude.content)) {\n  body = claude.content.map(b => b.text || '').join('\\n').trim();\n} else if (claude.text) {\n  body = claude.text;\n} else {\n  body = `<p>Hola ${d.full_name},</p><p>Tu showroom <strong>${d.dealer_name}</strong> ha sido aprobado en Black Label Market.</p><p>Ya puedes acceder a tu panel en: <a href=\"${d.login_url}\">${d.login_url}</a></p><p>El equipo de Black Label Market</p>`;\n}\n\nconst MAIL_FROM = process.env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'aldeiaceo@gmail.com';\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM,\n      to: [d.email],\n      subject: `Bienvenido a Black Label Market — ${d.dealer_name}`,\n      html: body\n    },\n    slackText: `*✅ Nuevo showroom aprobado*\\n\\n*Showroom:* ${d.dealer_name}\\n*Contacto:* ${d.full_name} (${d.email})\\n*Dealer ID:* ${d.dealer_id}\\n*Email bienvenida:* enviado`,\n    internalEmailPayload: {\n      from: MAIL_FROM,\n      to: [ADMIN_EMAIL],\n      subject: `Dealer aprobado: ${d.dealer_name}`,\n      html: `<h2>Nuevo dealer aprobado</h2><p><strong>${d.dealer_name}</strong> (${d.email}) ha sido aprobado. Dealer ID: ${d.dealer_id}</p>`\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf2-node-08-email",
+      "name": "Email — Bienvenida al dealer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1680, 120],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.emailPayload) }}"
+      }
+    },
+    {
+      "id": "wf2-node-09-slack",
+      "name": "Slack — Dealer aprobado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1680, 280],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ text: $json.slackText }) }}"
+      }
+    },
+    {
+      "id": "wf2-note-01",
+      "name": "Notas — WF2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -180],
+      "parameters": {
+        "content": "## BLM — 2. Aprobación Showroom\n\nTrigger: `N8N_WEBHOOK_DEALER_APPROVED` en Vercel\nWebhook path: `blm/dealer-approved`\n\nPayload esperado desde market (actions.ts):\n`application_id, dealer_id, dealer_name, full_name, email,`\n`temporary_password (null si usuario ya existía), login_url, dashboard_url, approved_at`\n\nRequerido:\n`ANTHROPIC_API_KEY, RESEND_API_KEY, MAIL_FROM, ADMIN_EMAIL, SLACK_WEBHOOK_URL`",
+        "height": 200,
+        "width": 500,
+        "color": 4
+      }
+    }
+  ],
+  "connections": {
+    "Webhook — Dealer Approved": {
+      "main": [[{ "node": "Validar payload aprobación", "type": "main", "index": 0 }]]
+    },
+    "Validar payload aprobación": {
+      "main": [[{ "node": "Payload válido?", "type": "main", "index": 0 }]]
+    },
+    "Payload válido?": {
+      "main": [
+        [{ "node": "Responder 202 — Aceptado",       "type": "main", "index": 0 }],
+        [{ "node": "Responder 400 — Payload inválido","type": "main", "index": 0 }]
+      ]
+    },
+    "Responder 202 — Aceptado": {
+      "main": [[{ "node": "Preparar prompt email bienvenida", "type": "main", "index": 0 }]]
+    },
+    "Preparar prompt email bienvenida": {
+      "main": [[{ "node": "Claude — Generar email bienvenida", "type": "main", "index": 0 }]]
+    },
+    "Claude — Generar email bienvenida": {
+      "main": [[{ "node": "Componer email final", "type": "main", "index": 0 }]]
+    },
+    "Componer email final": {
+      "main": [[
+        { "node": "Email — Bienvenida al dealer", "type": "main", "index": 0 },
+        { "node": "Slack — Dealer aprobado",      "type": "main", "index": 0 }
+      ]]
+    }
+  },
+  "settings": { "executionOrder": "v1", "binaryMode": "separate" },
+  "tags": [
+    { "id": "Loz5j8r0Pb3LipWz", "name": "Black Label Market" },
+    { "id": "DUQcfY17inLRptof", "name": "Showroom" }
+  ]
+}

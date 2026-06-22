@@ -27,7 +27,7 @@ async function approveVehicle(formData: FormData) {
   const { data: updated, error } = await supabase.from('vehicles').update({
     status: 'active',
     published_at: new Date().toISOString(),
-  }).eq('id', id).select('id, brand_name, model_name, year, dealer_id').single()
+  }).eq('id', id).select('id, brand_name, model_name, year, slug, dealer_id').single()
 
   // El trigger de BD bloquea si el dealer supera su tope de vehículos publicados.
   if (error) {
@@ -37,12 +37,25 @@ async function approveVehicle(formData: FormData) {
     redirect(`/admin/vehiculos/${id}?error=approve_failed`)
   }
 
+  let dealerEmail = ''
+  if (updated?.dealer_id) {
+    const { data: dlr } = await supabase.from('dealers').select('email').eq('id', updated.dealer_id).single()
+    dealerEmail = dlr?.email ?? ''
+  }
+
   await notifyN8n('vehicle.approved', {
     entityType: 'vehicle',
     entityId: id,
     dealerId: updated?.dealer_id ?? null,
     vehicleId: id,
-    payload: { brand: updated?.brand_name, model: updated?.model_name, year: updated?.year },
+    payload: {
+      brand: updated?.brand_name,
+      model: updated?.model_name,
+      year: updated?.year,
+      vehicle_title: `${updated?.brand_name ?? ''} ${updated?.model_name ?? ''} ${updated?.year ?? ''}`.trim(),
+      vehicle_slug: updated?.slug ?? null,
+      dealer_email: dealerEmail,
+    },
   })
   redirect(`/admin/vehiculos/${id}`)
 }
@@ -59,14 +72,28 @@ async function rejectVehicle(formData: FormData) {
     status:           'draft',
     rejection_reason: reason || null,
     admin_notes:      notes  || null,
-  }).eq('id', id).select('id, brand_name, model_name, year, dealer_id').single()
+  }).eq('id', id).select('id, brand_name, model_name, year, slug, dealer_id').single()
+
+  let dealerEmail = ''
+  if (updated?.dealer_id) {
+    const { data: dlr } = await supabase.from('dealers').select('email').eq('id', updated.dealer_id).single()
+    dealerEmail = dlr?.email ?? ''
+  }
 
   await notifyN8n('vehicle.rejected', {
     entityType: 'vehicle',
     entityId: id,
     dealerId: updated?.dealer_id ?? null,
     vehicleId: id,
-    payload: { brand: updated?.brand_name, model: updated?.model_name, year: updated?.year, reason: reason || null },
+    payload: {
+      brand: updated?.brand_name,
+      model: updated?.model_name,
+      year: updated?.year,
+      vehicle_title: `${updated?.brand_name ?? ''} ${updated?.model_name ?? ''} ${updated?.year ?? ''}`.trim(),
+      vehicle_slug: updated?.slug ?? null,
+      dealer_email: dealerEmail,
+      rejection_reason: reason || null,
+    },
   })
   redirect(`/admin/vehiculos/${id}`)
 }

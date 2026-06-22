@@ -1,0 +1,150 @@
+{
+  "name": "BLM — 4. Solicitar Más Información Showroom",
+  "nodes": [
+    {
+      "id": "wf4-node-01-webhook",
+      "name": "Webhook — Dealer Pending Info",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blm/dealer-pending-info",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "wf4-node-02-validate",
+      "name": "Validar payload pending info",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst required = ['application_id', 'dealer_name', 'full_name', 'email', 'admin_notes'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    admin_notes:    body.admin_notes,\n    admin_url:      body.admin_url || ''\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf4-node-03-if",
+      "name": "Payload válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [{ "id": "ok", "leftValue": "={{ $json.ok }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } }],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "wf4-node-04-respond",
+      "name": "Responder 202 — Aceptado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 200],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM — 4. Solicitar Más Información', application_id: $json.application_id } }}",
+        "options": { "responseCode": 202 }
+      }
+    },
+    {
+      "id": "wf4-node-respond-bad",
+      "name": "Responder 400 — Inválido",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 420],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, missing: $json.missing } }}",
+        "options": { "responseCode": 400 }
+      }
+    },
+    {
+      "id": "wf4-node-05-prepare",
+      "name": "Preparar email solicitud info",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 200],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst MAIL_FROM   = process.env.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'aldeiaceo@gmail.com';\nconst MARKET_URL  = process.env.MARKET_URL  || 'https://blacklabelmarket.es';\n\nconst notesHtml = d.admin_notes\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n  .replace(/\\n/g, '<br>');\n\nconst emailHtml = `<p>Hola ${d.full_name},</p>\n<p>Hemos revisado la solicitud de alta de <strong>${d.dealer_name}</strong> en Black Label Market y nos gustaría obtener alguna información adicional antes de continuar con el proceso.</p>\n<blockquote style=\"border-left:3px solid #c9a227;padding-left:12px;margin:16px 0;color:#555\">${notesHtml}</blockquote>\n<p>Por favor, responde a este email con la información solicitada o, si lo prefieres, puedes contactarnos directamente.</p>\n<p>Quedamos a tu disposición.<br>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: `Solicitud de alta — necesitamos información adicional`,\n      html: emailHtml\n    },\n    slackText: `*🟡 Solicitud de más info enviada*\\n\\n*Showroom:* ${d.dealer_name}\\n*Contacto:* ${d.full_name} (${d.email})${d.admin_url ? '\\n' + d.admin_url : ''}`\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf4-node-06-email",
+      "name": "Email — Solicitar info al showroom",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 120],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.emailPayload) }}"
+      }
+    },
+    {
+      "id": "wf4-node-07-slack",
+      "name": "Slack — Pending info enviado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ text: $json.slackText }) }}"
+      }
+    },
+    {
+      "id": "wf4-note-01",
+      "name": "Notas — WF4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -180],
+      "parameters": {
+        "content": "## BLM — 4. Solicitar Más Información\n\nTrigger: `N8N_WEBHOOK_DEALER_PENDING_INFO` en Vercel\nWebhook path: `blm/dealer-pending-info`\n\nEste workflow se dispara cuando el admin hace clic en\n'Solicitar más información' en el panel de altas.\n\nEl payload debe incluir las `admin_notes` con la pregunta\no información que el admin necesita del showroom.\n\nRequerido en market actions.ts: añadir llamada a\n`N8N_WEBHOOK_DEALER_PENDING_INFO` en `setApplicationStatus`\ncuando status === 'pending_info'.",
+        "height": 220,
+        "width": 460,
+        "color": 3
+      }
+    }
+  ],
+  "connections": {
+    "Webhook — Dealer Pending Info": { "main": [[{ "node": "Validar payload pending info", "type": "main", "index": 0 }]] },
+    "Validar payload pending info":  { "main": [[{ "node": "Payload válido?",               "type": "main", "index": 0 }]] },
+    "Payload válido?": {
+      "main": [
+        [{ "node": "Responder 202 — Aceptado", "type": "main", "index": 0 }],
+        [{ "node": "Responder 400 — Inválido", "type": "main", "index": 0 }]
+      ]
+    },
+    "Responder 202 — Aceptado": { "main": [[{ "node": "Preparar email solicitud info", "type": "main", "index": 0 }]] },
+    "Preparar email solicitud info": {
+      "main": [[
+        { "node": "Email — Solicitar info al showroom", "type": "main", "index": 0 },
+        { "node": "Slack — Pending info enviado",        "type": "main", "index": 0 }
+      ]]
+    }
+  },
+  "settings": { "executionOrder": "v1", "binaryMode": "separate" },
+  "tags": [
+    { "id": "Loz5j8r0Pb3LipWz", "name": "Black Label Market" },
+    { "id": "DUQcfY17inLRptof", "name": "Showroom" }
+  ]
+}

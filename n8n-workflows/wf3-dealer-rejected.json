@@ -1,0 +1,193 @@
+{
+  "name": "BLM — 3. Rechazo Showroom",
+  "nodes": [
+    {
+      "id": "wf3-node-01-webhook",
+      "name": "Webhook — Dealer Rejected",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blm/dealer-rejected",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "wf3-node-02-validate",
+      "name": "Validar payload rechazo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing, body } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    rejected_at:    body.rejected_at || new Date().toISOString()\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf3-node-03-if",
+      "name": "Payload válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [{ "id": "ok", "leftValue": "={{ $json.ok }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } }],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "wf3-node-04-respond-ok",
+      "name": "Responder 202 — Aceptado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 200],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM — 3. Rechazo Showroom', application_id: $json.application_id } }}",
+        "options": { "responseCode": 202 }
+      }
+    },
+    {
+      "id": "wf3-node-respond-bad",
+      "name": "Responder 400 — Inválido",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 450],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, missing: $json.missing } }}",
+        "options": { "responseCode": 400 }
+      }
+    },
+    {
+      "id": "wf3-node-05-get-notes",
+      "name": "Supabase — Obtener notas de la solicitud",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 200],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL + '/rest/v1/showroom_applications?id=eq.' + $json.application_id + '&select=admin_notes,location_city,location_region' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wf3-node-06-prep-claude",
+      "name": "Preparar prompt email rechazo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 200],
+      "parameters": {
+        "jsCode": "const d = $('Responder 202 — Aceptado').first().json;\nconst supabaseResp = $input.first().json;\n\nlet adminNotes = '';\nlet location = '';\nif (Array.isArray(supabaseResp)) {\n  const row = supabaseResp[0] || {};\n  adminNotes = row.admin_notes || '';\n  location = [row.location_city, row.location_region].filter(Boolean).join(', ');\n}\n\nconst notesContext = adminNotes\n  ? `\\n\\nNotas internas del equipo (NO incluyas esto literalmente, úsalo solo como contexto para redactar):\\n${adminNotes.slice(0, 800)}`\n  : '';\n\nconst briefing = `Eres redactor senior de Black Label Market, marketplace premium de vehículos de alta gama en España.\\nEscribe un email de respuesta a una solicitud de alta de showroom que NO ha sido aprobada.\\n\\nDatos del solicitante:\\n- Showroom: ${d.dealer_name}\\n- Contacto: ${d.full_name}\\n- Email: ${d.email}${location ? '\\n- Ubicación: ' + location : ''}${notesContext}\\n\\nEl email debe:\\n1. Agradecer el interés y el tiempo dedicado a rellenar la solicitud\\n2. Comunicar que la solicitud no encaja con el perfil actual de la plataforma (sin dar razones concretas, de forma educada y profesional)\\n3. Dejar la puerta abierta a futuras colaboraciones cuando el showroom amplíe su actividad\\n4. Ofrecer que pueden volver a solicitar acceso en el futuro\\n5. Firma: «El equipo de Black Label Market»\\n\\nTono: premium, empático, breve. Sin condescendencia. Sin mencionar motivos específicos de rechazo. Devuelve SOLO el HTML del cuerpo (con <p> y <strong>).`;\n\nreturn [{\n  json: {\n    ...d,\n    adminNotes, location,\n    claudeRequest: {\n      model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',\n      max_tokens: 800,\n      messages: [{ role: 'user', content: briefing }]\n    }\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf3-node-07-claude",
+      "name": "Claude — Generar email rechazo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 200],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key",        "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type",      "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.claudeRequest) }}"
+      }
+    },
+    {
+      "id": "wf3-node-08-compose",
+      "name": "Componer email rechazo final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 200],
+      "parameters": {
+        "jsCode": "const d = $('Preparar prompt email rechazo').first().json;\nconst claude = $input.first().json;\n\nlet body = '';\nif (Array.isArray(claude.content)) body = claude.content.map(b => b.text || '').join('\\n').trim();\nelse if (claude.text) body = claude.text;\nelse body = `<p>Hola ${d.full_name},</p><p>Gracias por tu interés en Black Label Market. Tras revisar la solicitud de <strong>${d.dealer_name}</strong>, en este momento no encaja con el perfil actual de la plataforma.</p><p>Quedamos a tu disposición para cualquier consulta futura.</p><p>El equipo de Black Label Market</p>`;\n\nconst MAIL_FROM   = process.env.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'aldeiaceo@gmail.com';\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: 'Respuesta a tu solicitud — Black Label Market',\n      html: body\n    },\n    slackText: `*❌ Solicitud rechazada*\\n\\n*Showroom:* ${d.dealer_name}\\n*Contacto:* ${d.full_name} (${d.email})\\n*Email de rechazo:* enviado`\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf3-node-09-email",
+      "name": "Email — Rechazo al showroom",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1920, 120],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.emailPayload) }}"
+      }
+    },
+    {
+      "id": "wf3-node-10-slack",
+      "name": "Slack — Dealer rechazado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1920, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ text: $json.slackText }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook — Dealer Rejected":   { "main": [[{ "node": "Validar payload rechazo",              "type": "main", "index": 0 }]] },
+    "Validar payload rechazo":     { "main": [[{ "node": "Payload válido?",                       "type": "main", "index": 0 }]] },
+    "Payload válido?": {
+      "main": [
+        [{ "node": "Responder 202 — Aceptado", "type": "main", "index": 0 }],
+        [{ "node": "Responder 400 — Inválido", "type": "main", "index": 0 }]
+      ]
+    },
+    "Responder 202 — Aceptado":    { "main": [[{ "node": "Supabase — Obtener notas de la solicitud", "type": "main", "index": 0 }]] },
+    "Supabase — Obtener notas de la solicitud": { "main": [[{ "node": "Preparar prompt email rechazo", "type": "main", "index": 0 }]] },
+    "Preparar prompt email rechazo": { "main": [[{ "node": "Claude — Generar email rechazo", "type": "main", "index": 0 }]] },
+    "Claude — Generar email rechazo": { "main": [[{ "node": "Componer email rechazo final", "type": "main", "index": 0 }]] },
+    "Componer email rechazo final": {
+      "main": [[
+        { "node": "Email — Rechazo al showroom", "type": "main", "index": 0 },
+        { "node": "Slack — Dealer rechazado",    "type": "main", "index": 0 }
+      ]]
+    }
+  },
+  "settings": { "executionOrder": "v1", "binaryMode": "separate" },
+  "tags": [
+    { "id": "Loz5j8r0Pb3LipWz", "name": "Black Label Market" },
+    { "id": "DUQcfY17inLRptof", "name": "Showroom" }
+  ]
+}

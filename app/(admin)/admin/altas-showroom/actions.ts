@@ -26,10 +26,40 @@ export async function setApplicationStatus(formData: FormData) {
   if (!id || !['new', 'in_review', 'pending_info'].includes(status)) return
 
   const admin = createAdminClient()
-  await admin
-    .from('showroom_applications')
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', id)
+
+  if (status === 'pending_info') {
+    const { data: application } = await admin
+      .from('showroom_applications')
+      .select('dealer_name, full_name, email, admin_notes')
+      .eq('id', id)
+      .single()
+
+    await admin
+      .from('showroom_applications')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    const webhookUrl = process.env.N8N_WEBHOOK_DEALER_PENDING_INFO
+    if (webhookUrl && application) {
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          application_id: id,
+          dealer_name: application.dealer_name,
+          full_name: application.full_name,
+          email: application.email,
+          admin_notes: application.admin_notes ?? '',
+          admin_url: `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom/${id}`,
+        }),
+      }).catch(() => {})
+    }
+  } else {
+    await admin
+      .from('showroom_applications')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+  }
 
   revalidateAll(id)
 }
