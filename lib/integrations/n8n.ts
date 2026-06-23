@@ -154,10 +154,10 @@ export async function notifyShowroomApplicationCreated(
     // Outbox failures must not block the public showroom application flow.
   }
 
-  const webhookUrl = process.env.N8N_WEBHOOK_DEALER_SIGNUP
+  const webhookUrl = (process.env.N8N_WEBHOOK_DEALER_SIGNUP || '').replace(/^﻿/, '')
   if (!webhookUrl) return
 
-  const webhookSecret = process.env.N8N_WEBHOOK_DEALER_SIGNUP_SECRET
+  const webhookSecret = (process.env.N8N_WEBHOOK_DEALER_SIGNUP_SECRET || '').replace(/^﻿/, '')
   if (!webhookSecret) {
     console.warn('N8N_WEBHOOK_DEALER_SIGNUP is configured but N8N_WEBHOOK_DEALER_SIGNUP_SECRET is missing. Skipping webhook.')
     return

@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'persist_failed' }, { status: 500 })
   }
 
-  // Non-blocking: notify n8n WF1 (dealer signup)
-  notifyShowroomApplicationCreated({
+  // Awaited so Vercel doesn't kill the process before the webhook fires
+  await notifyShowroomApplicationCreated({
     dealer_application_id: data.id,
     full_name:     name,
     dealer_name:   company,
