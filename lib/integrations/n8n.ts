@@ -26,8 +26,8 @@ interface NotifyOptions {
 
 // Webhook URL is read from the server environment only — never exposed to the client.
 const WEBHOOK_URL =
-  process.env.N8N_WEBHOOK_URL || process.env.N8N_WEBHOOK_EVENTS || ''
-const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET || ''
+  (process.env.N8N_WEBHOOK_URL || process.env.N8N_WEBHOOK_EVENTS || '').replace(/^﻿/, '')
+const WEBHOOK_SECRET = (process.env.N8N_WEBHOOK_SECRET || '').replace(/^﻿/, '')
 const POST_TIMEOUT_MS = 2500
 const SHOWROOM_APPLICATION_EVENT = 'showroom_application.created'
 

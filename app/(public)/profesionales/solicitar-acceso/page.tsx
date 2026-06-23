@@ -53,23 +53,21 @@ function SolicitarAccesoForm() {
 
     startTransition(async () => {
       try {
-        const res = await fetch('/api/custom-requests', {
+        const res = await fetch('/api/showroom-applications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            request_type: 'dealer_access',
-            name: form.name,
-            email: form.email,
-            phone: form.phone,
+            name:    form.name,
+            email:   form.email,
+            company: form.company,
+            phone:   form.phone,
+            city:    form.city,
+            plan:    form.plan || undefined,
+            volume:  form.volume || undefined,
             message: [
-              `Empresa: ${form.company}`,
-              `Plan de interés: ${form.plan}`,
-              `Volumen: ${form.volume}`,
-              `Ciudad: ${form.city}`,
               isWaitlist ? 'Lista de espera Elite' : '',
               form.message,
-            ].filter(Boolean).join('\n'),
-            metadata: { plan: form.plan, volume: form.volume },
+            ].filter(Boolean).join('\n') || undefined,
           }),
         })
         if (!res.ok) throw new Error('Error al enviar')
