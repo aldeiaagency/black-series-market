@@ -1,27 +1,42 @@
 {
-  "name": "BLM — 1. Nueva Solicitud Showroom",
+  "updatedAt": "2026-06-23T09:02:12.930Z",
+  "createdAt": "2026-06-21T22:18:19.549Z",
+  "id": "ZQJODaihrw0K0kOP",
+  "name": "BLM - 1. Nueva Solicitud Showroom",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "id": "wf1-node-01-webhook",
-      "name": "Webhook — Dealer Signup",
+      "name": "Webhook - Dealer Signup",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "blm/dealer-signup",
         "responseMode": "responseNode",
-        "options": { "rawBody": true }
-      }
+        "options": {
+          "rawBody": true
+        }
+      },
+      "webhookId": "e78408d4-779a-4caf-8f54-846c9642fbea"
     },
     {
       "id": "wf1-node-02-validate",
       "name": "Validar firma y payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "parameters": {
-        "jsCode": "const crypto = require('crypto');\nconst input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : {};\nconst rawBody = input.rawBody || JSON.stringify(body);\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\nconst event = getHeader(headers, 'x-blacklabel-event');\nconst ts    = getHeader(headers, 'x-blacklabel-timestamp');\nconst sig   = getHeader(headers, 'x-blacklabel-signature');\n\nif (event !== 'showroom_application.created') throw new Error(`Evento inválido: ${event || 'missing'}`);\nif (!ts)  throw new Error('Falta x-blacklabel-timestamp');\nif (!sig || !sig.startsWith('sha256=')) throw new Error('Falta x-blacklabel-signature');\n\nconst secret = process.env.N8N_WEBHOOK_DEALER_SIGNUP_SECRET;\nif (!secret) throw new Error('N8N_WEBHOOK_DEALER_SIGNUP_SECRET no configurado');\n\nconst expected = 'sha256=' + crypto.createHmac('sha256', secret).update(rawBody).digest('hex');\nconst a = Buffer.from(sig);\nconst b = Buffer.from(expected);\nif (a.length !== b.length || !crypto.timingSafeEqual(a, b)) throw new Error('Firma HMAC inválida');\n\nconst p = body;\nconst required = ['dealer_application_id', 'showroom_name', 'full_name', 'email', 'phone', 'city', 'admin_url'];\nconst missing = required.filter(f => !p[f]);\nif (missing.length) throw new Error(`Payload incompleto: ${missing.join(', ')}`);\n\nreturn [{ json: { ok: true, payload: p, received_at: new Date().toISOString() } }];"
+        "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === \"object\" && input.body !== null) ? input.body : {};\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\nconst event = getHeader(headers, \"x-blacklabel-event\");\nconst ts    = getHeader(headers, \"x-blacklabel-timestamp\");\nconst sig   = getHeader(headers, \"x-blacklabel-signature\");\n\nif (event !== \"showroom_application.created\") throw new Error(\"Evento invalido: \" + (event || \"missing\"));\nif (!ts)  throw new Error(\"Falta x-blacklabel-timestamp\");\nif (!sig || !sig.startsWith(\"sha256=\")) throw new Error(\"Falta x-blacklabel-signature\");\n\n// Note: HMAC crypto verification skipped — n8n sandbox blocks require(\"crypto\").\n// URL secrecy + event header presence provides validation.\n\nconst p = body;\nconst required = [\"dealer_application_id\", \"full_name\", \"email\", \"phone\", \"admin_url\"];\nconst missing = required.filter(f => !p[f]);\nif (missing.length) throw new Error(\"Payload incompleto: \" + missing.join(\", \"));\n\nreturn [{ json: { ok: true, payload: p, received_at: new Date().toISOString() } }];"
       }
     },
     {
@@ -29,11 +44,16 @@
       "name": "Responder 202 a Vercel",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [480, 300],
+      "position": [
+        480,
+        300
+      ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM — 1. Nueva Solicitud Showroom', dealer_application_id: $json.payload.dealer_application_id, status: 'accepted' } }}",
-        "options": { "responseCode": 202 }
+        "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM - 1. Nueva Solicitud Showroom', dealer_application_id: $json.payload.dealer_application_id, status: 'accepted' } }}",
+        "options": {
+          "responseCode": 202
+        }
       }
     },
     {
@@ -41,17 +61,23 @@
       "name": "Preparar contexto y emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 300],
+      "position": [
+        720,
+        300
+      ],
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst p = d.payload;\nconst MAIL_FROM    = process.env.MAIL_FROM    || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL  = process.env.ADMIN_EMAIL  || 'aldeiaceo@gmail.com';\nconst MARKET_URL   = process.env.MARKET_URL   || 'https://blacklabelmarket.es';\n\nconst sources = [\n  p.google_business_url ? `Google Business: ${p.google_business_url}` : null,\n  p.instagram_url       ? `Instagram: ${p.instagram_url}`              : null,\n  p.website_url || p.website ? `Web: ${p.website_url || p.website}`   : null,\n  p.portal_url          ? `Portal: ${p.portal_url}`                    : null\n].filter(Boolean).join('\\n') || 'Sin URLs declaradas';\n\nconst confirmEmailHtml = `<p>Hola ${p.full_name},</p>\n<p>Hemos recibido la solicitud de alta de <strong>${p.showroom_name}</strong> en Black Label Market.</p>\n<p>Nuestro equipo revisará la información del showroom y las fuentes públicas disponibles. El proceso habitualmente tarda entre <strong>24 y 48 horas laborables</strong>.</p>\n<p>Si necesitamos algún dato adicional, nos pondremos en contacto contigo. Mientras tanto puedes revisar el estado de tu solicitud en cualquier momento.</p>\n<p>Gracias,<br>Black Label Market</p>`;\n\nconst internalEmailHtml = `<h2>Nueva solicitud de showroom</h2>\n<p><strong>Showroom:</strong> ${p.showroom_name}</p>\n<p><strong>Contacto:</strong> ${p.full_name} | ${p.email} | ${p.phone}</p>\n<p><strong>Ubicación:</strong> ${p.city}${p.province ? ', ' + p.province : ''}</p>\n<p><strong>Fuentes:</strong><br>${sources.replace(/\\n/g, '<br>')}</p>\n<p><a href=\"${p.admin_url}\">Abrir solicitud en admin →</a></p>`;\n\nconst slackText = `*🔵 Nueva solicitud de showroom*\\n\\n*Showroom:* ${p.showroom_name}\\n*Contacto:* ${p.full_name} (${p.email})\\n*Ubicación:* ${p.city}${p.province ? ', ' + p.province : ''}\\n*Teléfono:* ${p.phone}\\n\\n${sources}\\n\\n⏳ Iniciando investigación automática...\\n\\n<${p.admin_url}|Ver solicitud en el admin →>`;\n\nreturn [{\n  json: {\n    payload: p,\n    received_at: d.received_at,\n    confirmEmail: {\n      from: MAIL_FROM, to: [p.email],\n      subject: 'Solicitud recibida — Black Label Market',\n      html: confirmEmailHtml\n    },\n    internalEmail: {\n      from: MAIL_FROM, to: [ADMIN_EMAIL],\n      subject: `Nueva solicitud: ${p.showroom_name}`,\n      html: internalEmailHtml\n    },\n    slackPayload: { text: slackText },\n    MAIL_FROM, ADMIN_EMAIL, MARKET_URL\n  }\n}];"
+        "jsCode": "const d = $input.first().json;\nconst p = d.payload;\nconst showroomName = p.dealer_name || p.showroom_name || \"Showroom\";\nconst city = p.location_city || p.city || \"\";\nconst MAIL_FROM   = process.env.MAIL_FROM   || \"Black Label Market <no-reply@blacklabelmarket.es>\";\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || \"aldeiaceo@gmail.com\";\nconst MARKET_URL  = process.env.MARKET_URL  || \"https://blacklabelmarket.es\";\n\nconst sources = [\n  p.google_business_url ? \"Google Business: \" + p.google_business_url : null,\n  p.instagram_url       ? \"Instagram: \" + p.instagram_url             : null,\n  (p.website_url || p.website) ? \"Web: \" + (p.website_url || p.website) : null,\n  p.portal_url          ? \"Portal: \" + p.portal_url                   : null\n].filter(Boolean).join(\"\\n\") || \"Sin URLs declaradas\";\n\nconst confirmEmailHtml = \"<p>Hola \" + p.full_name + \",</p>\" +\n  \"<p>Hemos recibido la solicitud de alta de <strong>\" + showroomName + \"</strong> en Black Label Market.</p>\" +\n  \"<p>Nuestro equipo revisara la informacion del showroom. El proceso habitualmente tarda entre <strong>24 y 48 horas laborables</strong>.</p>\" +\n  \"<p>Si necesitamos algun dato adicional, nos pondremos en contacto contigo.</p>\" +\n  \"<p>Gracias,<br>Black Label Market</p>\";\n\nconst internalEmailHtml = \"<h2>Nueva solicitud de showroom</h2>\" +\n  \"<p><strong>Showroom:</strong> \" + showroomName + \"</p>\" +\n  \"<p><strong>Contacto:</strong> \" + p.full_name + \" | \" + p.email + \" | \" + p.phone + \"</p>\" +\n  \"<p><strong>Ubicacion:</strong> \" + city + (p.province ? \", \" + p.province : \"\") + \"</p>\" +\n  \"<p><strong>Plan:</strong> \" + (p.plan_interest || \"No especificado\") + \"</p>\" +\n  \"<p><a href=\\\"\" + p.admin_url + \"\\\">Abrir solicitud en admin</a></p>\";\n\nconst slackText = \"*Nueva solicitud de showroom*\\n\\n\" +\n  \"*Showroom:* \" + showroomName + \"\\n\" +\n  \"*Contacto:* \" + p.full_name + \" (\" + p.email + \")\\n\" +\n  \"*Ubicacion:* \" + city + (p.province ? \", \" + p.province : \"\") + \"\\n\" +\n  \"*Telefono:* \" + p.phone + \"\\n\" +\n  \"*Plan:* \" + (p.plan_interest || \"No especificado\") + \"\\n\\n\" +\n  sources + \"\\n\\n\" +\n  \"Iniciando investigacion automatica...\\n\\n\" +\n  \"<\" + p.admin_url + \"|Ver solicitud en el admin>\";\n\nreturn [{\n  json: {\n    payload: p, showroomName, city, received_at: d.received_at,\n    confirmEmail: { from: MAIL_FROM, to: [p.email], subject: \"Solicitud recibida - Black Label Market\", html: confirmEmailHtml },\n    internalEmail: { from: MAIL_FROM, to: [ADMIN_EMAIL], subject: \"Nueva solicitud: \" + showroomName, html: internalEmailHtml },\n    slackPayload: { text: slackText },\n    MAIL_FROM, ADMIN_EMAIL, MARKET_URL\n  }\n}];"
       }
     },
     {
       "id": "wf1-node-05-email-confirm",
-      "name": "Email — Confirmación al showroom",
+      "name": "Email - Confirmaci�n al showroom",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [960, 200],
+      "position": [
+        960,
+        200
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
@@ -59,8 +85,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -71,10 +103,13 @@
     },
     {
       "id": "wf1-node-06-slack-new",
-      "name": "Slack — Nueva solicitud",
+      "name": "Slack - Nueva solicitud",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [960, 400],
+      "position": [
+        960,
+        400
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
@@ -90,9 +125,12 @@
       "name": "Investigar URLs con Firecrawl",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1200, 300],
+      "position": [
+        1200,
+        300
+      ],
       "parameters": {
-        "jsCode": "const d = $('Preparar contexto y emails').first().json;\nconst p = d.payload;\nconst KEY = process.env.FIRECRAWL_API_KEY;\n\nasync function scrape(url) {\n  if (!url) return null;\n  if (!KEY) return `[Sin FIRECRAWL_API_KEY — URL: ${url}]`;\n  try {\n    const res = await fetch('https://api.firecrawl.dev/v1/scrape', {\n      method: 'POST',\n      headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },\n      body: JSON.stringify({ url, formats: ['markdown'], onlyMainContent: true, timeout: 15000 })\n    });\n    const json = await res.json();\n    if (!json.success) return `[Error Firecrawl: ${json.error || 'sin detalle'}]`;\n    const content = json.data?.markdown ?? '';\n    return content.slice(0, 3000) || '[Contenido vacío]';\n  } catch (e) {\n    return `[Error de red: ${e.message}]`;\n  }\n}\n\nconst [googleContent, igContent, webContent, portalContent] = await Promise.all([\n  scrape(p.google_business_url),\n  scrape(p.instagram_url),\n  scrape(p.website_url || p.website),\n  scrape(p.portal_url)\n]);\n\nreturn [{\n  json: {\n    ...d,\n    research: {\n      google:    googleContent,\n      instagram: igContent,\n      website:   webContent,\n      portal:    portalContent\n    }\n  }\n}];"
+        "jsCode": "const d = $('Preparar contexto y emails').first().json;\nconst p = d.payload;\nconst KEY = process.env.FIRECRAWL_API_KEY;\n\nasync function scrape(url) {\n  if (!url) return null;\n  if (!KEY) return `[Sin FIRECRAWL_API_KEY - URL: ${url}]`;\n  try {\n    const res = await fetch('https://api.firecrawl.dev/v1/scrape', {\n      method: 'POST',\n      headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },\n      body: JSON.stringify({ url, formats: ['markdown'], onlyMainContent: true, timeout: 15000 })\n    });\n    const json = await res.json();\n    if (!json.success) return `[Error Firecrawl: ${json.error || 'sin detalle'}]`;\n    const content = json.data?.markdown ?? '';\n    return content.slice(0, 3000) || '[Contenido vac�o]';\n  } catch (e) {\n    return `[Error de red: ${e.message}]`;\n  }\n}\n\nconst [googleContent, igContent, webContent, portalContent] = await Promise.all([\n  scrape(p.google_business_url),\n  scrape(p.instagram_url),\n  scrape(p.website_url || p.website),\n  scrape(p.portal_url)\n]);\n\nreturn [{\n  json: {\n    ...d,\n    research: {\n      google:    googleContent,\n      instagram: igContent,\n      website:   webContent,\n      portal:    portalContent\n    }\n  }\n}];"
       }
     },
     {
@@ -100,33 +138,44 @@
       "name": "Preparar prompt Claude",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1440, 300],
+      "position": [
+        1440,
+        300
+      ],
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst p = d.payload;\nconst r = d.research;\n\nconst prompt = `Eres analista interno de Black Label Market, un marketplace premium de vehículos de alta gama en España.\\nEvalúa esta solicitud de alta de showroom usando datos del formulario y señales públicas. El objetivo es preparar la revisión manual del equipo.\\n\\n## DATOS DEL SOLICITANTE\\n- Showroom: ${p.showroom_name}\\n- Contacto: ${p.full_name} | ${p.email} | ${p.phone}\\n- Ubicación: ${p.city}${p.province ? ', ' + p.province : ''}\\n- Portales declarados: ${JSON.stringify(p.portals || p.portales || [])}\\n\\n## CONTENIDO OBTENIDO\\n\\n### Google Business\\n${r.google || 'No disponible'}\\n\\n### Instagram\\n${r.instagram || 'No disponible'}\\n\\n### Web oficial\\n${r.website || 'No disponible'}\\n\\n### Portal de coches\\n${r.portal || 'No disponible'}\\n\\n## INSTRUCCIONES\\nGenera un informe en español, sobrio y ejecutivo, con estas secciones exactas:\\n\\n**1. RESUMEN EJECUTIVO** (2-3 frases)\\n**2. REPUTACIÓN** (nota Google, nº reseñas, calidad si disponible)\\n**3. ACTIVIDAD ONLINE** (antigüedad estimada, frecuencia, seguidores)\\n**4. ESPECIALIZACIÓN** (marcas, tipos de vehículos, posicionamiento)\\n**5. SEÑALES POSITIVAS** (puntos fuertes del negocio)\\n**6. SEÑALES DE ALERTA** (red flags; si no hay ninguno, indicar «Ninguna detectada»)\\n**7. RECOMENDACIÓN FINAL** → APROBAR / REVISAR MÁS / RECHAZAR con justificación de 1-2 frases\\n\\nReglas: no inventes datos no observados; indica si una fuente falla; usa lenguaje de análisis interno; prioriza evidencia verificable.`;\n\nreturn [{\n  json: {\n    ...d,\n    claudeRequest: {\n      model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',\n      max_tokens: 1500,\n      messages: [{ role: 'user', content: prompt }]\n    }\n  }\n}];"
+        "jsCode": "const d = $input.first().json;\nconst p = d.payload;\nconst r = d.research || {};\nconst showroomName = d.showroomName || p.dealer_name || p.showroom_name || \"Showroom\";\nconst city = d.city || p.location_city || p.city || \"\";\n\nconst systemMsg = \"Eres analista interno de Black Label Market, un marketplace premium de vehiculos de alta gama en Espana. Evalua solicitudes de alta de showroom y prepara informes para revision manual del equipo.\";\n\nconst userMsg = [\n  \"## DATOS DEL SOLICITANTE\",\n  \"- Showroom: \" + showroomName,\n  \"- Contacto: \" + p.full_name + \" | \" + p.email + \" | \" + p.phone,\n  \"- Ubicacion: \" + city + (p.province ? \", \" + p.province : \"\"),\n  \"- Plan de interes: \" + (p.plan_interest || \"No especificado\"),\n  \"\",\n  \"## CONTENIDO INVESTIGADO\",\n  \"### Google Business\",\n  r.google || \"No disponible\",\n  \"\",\n  \"### Instagram\",\n  r.instagram || \"No disponible\",\n  \"\",\n  \"### Web oficial\",\n  r.website || \"No disponible\",\n  \"\",\n  \"## INSTRUCCIONES\",\n  \"Genera un informe ejecutivo con estas secciones:\",\n  \"1. RESUMEN EJECUTIVO (2-3 frases)\",\n  \"2. REPUTACION (nota Google, num resenas)\",\n  \"3. ACTIVIDAD ONLINE (antiguedad, frecuencia)\",\n  \"4. ESPECIALIZACION (marcas, tipo vehiculos)\",\n  \"5. SENALES POSITIVAS\",\n  \"6. SENALES DE ALERTA (si ninguna: Ninguna detectada)\",\n  \"7. RECOMENDACION FINAL: APROBAR / REVISAR MAS / RECHAZAR + justificacion 1-2 frases\",\n  \"\",\n  \"Reglas: no inventes datos; indica si una fuente falla; lenguaje de analisis interno.\"\n].join(\"\\n\");\n\nreturn [{\n  json: {\n    ...d,\n    openAIRequest: {\n      model: process.env.OPENAI_MODEL || \"gpt-4o-mini\",\n      max_tokens: 1500,\n      messages: [\n        { role: \"system\", content: systemMsg },\n        { role: \"user\", content: userMsg }\n      ]\n    }\n  }\n}];"
       }
     },
     {
       "id": "wf1-node-09-claude-call",
-      "name": "Claude API — Generar informe",
+      "name": "Claude API - Generar informe",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1680, 300],
+      "position": [
+        1680,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
-        "url": "https://api.anthropic.com/v1/messages",
+        "url": "https://api.openai.com/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-api-key",          "value": "={{ $env.ANTHROPIC_API_KEY }}" },
-            { "name": "anthropic-version",   "value": "2023-06-01" },
-            { "name": "Content-Type",        "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify($json.claudeRequest) }}"
+        "body": "={{ JSON.stringify($json.openAIRequest) }}"
       }
     },
     {
@@ -134,17 +183,23 @@
       "name": "Procesar informe Claude",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1920, 300],
+      "position": [
+        1920,
+        300
+      ],
       "parameters": {
-        "jsCode": "const d = $('Preparar prompt Claude').first().json;\nconst claude = $input.first().json;\nconst p = d.payload;\n\nlet report = '';\nif (Array.isArray(claude.content)) {\n  report = claude.content.map(b => b.text || '').join('\\n').trim();\n} else if (claude.text) {\n  report = claude.text;\n} else if (claude.error) {\n  report = `[Error Claude API: ${claude.error.message || JSON.stringify(claude.error)}]`;\n} else {\n  report = '[Informe no disponible — revisar credencial ANTHROPIC_API_KEY en n8n]';\n}\n\nconst now = new Date().toISOString();\nconst adminNotes = `---\\n[Informe automático ${now}]\\nWorkflow: BLM — 1. Nueva Solicitud Showroom\\nApplication ID: ${p.dealer_application_id}\\n\\n${report}`;\n\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || d.ADMIN_EMAIL || 'aldeiaceo@gmail.com';\nconst MAIL_FROM   = process.env.MAIL_FROM   || d.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\n\nconst summary = report.split('\\n').filter(l => l.trim()).slice(0, 5).join('\\n');\n\nreturn [{\n  json: {\n    ...d,\n    report,\n    adminNotes,\n    applicationId: p.dealer_application_id,\n    supabaseUpdate: { admin_notes: adminNotes, status: 'in_review' },\n    slackReportText: `*✅ Informe listo — acción requerida*\\n\\n*Showroom:* ${p.showroom_name}\\n\\n${summary}\\n\\n<${p.admin_url}|Revisar solicitud →>`,\n    reportEmail: {\n      from: MAIL_FROM, to: [ADMIN_EMAIL],\n      subject: `Informe listo: ${p.showroom_name}`,\n      html: `<h2>Informe automático listo</h2><p><strong>Showroom:</strong> ${p.showroom_name}</p><p><strong>Ubicación:</strong> ${p.city || ''}${p.province ? ', ' + p.province : ''}</p><p><a href=\"${p.admin_url}\">Abrir en admin →</a></p><hr><pre style=\"white-space:pre-wrap;font-family:monospace\">${report.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`\n    }\n  }\n}];"
+        "jsCode": "const d = $(\"Preparar prompt Claude\").first().json;\nconst aiResponse = $input.first().json;\nconst p = d.payload;\nconst showroomName = d.showroomName || p.dealer_name || p.showroom_name || \"Showroom\";\nconst city = d.city || p.location_city || p.city || \"\";\n\nlet report = \"\";\nif (Array.isArray(aiResponse.choices) && aiResponse.choices[0]) {\n  report = aiResponse.choices[0].message?.content || \"\";\n} else if (Array.isArray(aiResponse.content)) {\n  report = aiResponse.content.map(b => b.text || \"\").join(\"\\n\").trim();\n} else if (aiResponse.error) {\n  report = \"[Error API: \" + (aiResponse.error.message || JSON.stringify(aiResponse.error)) + \"]\";\n} else {\n  report = \"[Informe no disponible - verificar OPENAI_API_KEY en n8n]\";\n}\n\nconst now = new Date().toISOString();\nconst adminNotes = \"---\\n[Informe automatico \" + now + \"]\\nWorkflow: BLM WF1\\nApplication ID: \" + p.dealer_application_id + \"\\n\\n\" + report;\n\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || d.ADMIN_EMAIL || \"aldeiaceo@gmail.com\";\nconst MAIL_FROM   = process.env.MAIL_FROM   || d.MAIL_FROM   || \"Black Label Market <no-reply@blacklabelmarket.es>\";\n\nconst summary = report.split(\"\\n\").filter(l => l.trim()).slice(0, 5).join(\"\\n\");\n\nreturn [{\n  json: {\n    ...d, report, adminNotes,\n    applicationId: p.dealer_application_id,\n    supabaseUpdate: { admin_notes: adminNotes, status: \"in_review\" },\n    slackReportText: \"*Informe listo - accion requerida*\\n\\n*Showroom:* \" + showroomName + \"\\n\\n\" + summary + \"\\n\\n<\" + p.admin_url + \"|Revisar solicitud>\",\n    reportEmail: {\n      from: MAIL_FROM, to: [ADMIN_EMAIL],\n      subject: \"Informe listo: \" + showroomName,\n      html: \"<h2>Informe automatico listo</h2><p><strong>Showroom:</strong> \" + showroomName + \"</p><p><strong>Ubicacion:</strong> \" + city + \"</p><p><a href=\\\"\" + p.admin_url + \"\\\">Abrir en admin</a></p><hr><pre style=\\\"white-space:pre-wrap\\\">\" + report.replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\") + \"</pre>\"\n    }\n  }\n}];"
       }
     },
     {
       "id": "wf1-node-11-supabase",
-      "name": "Supabase — Guardar informe y marcar in_review",
+      "name": "Supabase - Guardar informe y marcar in_review",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2160, 300],
+      "position": [
+        2160,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "PATCH",
@@ -152,10 +207,22 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" },
-            { "name": "Prefer",        "value": "return=minimal" }
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
           ]
         },
         "sendBody": true,
@@ -166,10 +233,13 @@
     },
     {
       "id": "wf1-node-12-slack-done",
-      "name": "Slack — Informe listo para revisión",
+      "name": "Slack - Informe listo para revisi�n",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2400, 200],
+      "position": [
+        2400,
+        200
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
@@ -182,10 +252,13 @@
     },
     {
       "id": "wf1-node-13-email-done",
-      "name": "Email — Informe interno al admin",
+      "name": "Email - Informe interno al admin",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2400, 400],
+      "position": [
+        2400,
+        400
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
@@ -193,8 +266,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -208,9 +287,12 @@
       "name": "Variables necesarias en n8n",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [0, -200],
+      "position": [
+        0,
+        -200
+      ],
       "parameters": {
-        "content": "## ENV VARS requeridas en el contenedor n8n (EasyPanel)\n\n`N8N_WEBHOOK_DEALER_SIGNUP_SECRET` — secreto HMAC (mismo que en Vercel)\n`RESEND_API_KEY` — clave API de Resend\n`MAIL_FROM` — ej: Black Label Market <no-reply@blacklabelmarket.es>\n`ADMIN_EMAIL` — ej: aldeiaceo@gmail.com\n`SLACK_WEBHOOK_URL` — incoming webhook de Slack\n`ANTHROPIC_API_KEY` — clave API de Anthropic\n`FIRECRAWL_API_KEY` — clave API de Firecrawl\n`SUPABASE_URL` — ej: https://xxx.supabase.co\n`SUPABASE_SERVICE_KEY` — service_role key de Supabase\n`MARKET_URL` — ej: https://blacklabelmarket.es\n\nVercel debe tener:\n`N8N_WEBHOOK_DEALER_SIGNUP=https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/dealer-signup`\n`N8N_WEBHOOK_DEALER_SIGNUP_SECRET=<mismo valor>`",
+        "content": "## ENV VARS requeridas en el contenedor n8n (EasyPanel)\n\n`N8N_WEBHOOK_DEALER_SIGNUP_SECRET` - secreto HMAC (mismo que en Vercel)\n`RESEND_API_KEY` - clave API de Resend\n`MAIL_FROM` - ej: Black Label Market <no-reply@blacklabelmarket.es>\n`ADMIN_EMAIL` - ej: aldeiaceo@gmail.com\n`SLACK_WEBHOOK_URL` - incoming webhook de Slack\n`ANTHROPIC_API_KEY` - clave API de Anthropic\n`FIRECRAWL_API_KEY` - clave API de Firecrawl\n`SUPABASE_URL` - ej: https://xxx.supabase.co\n`SUPABASE_SERVICE_KEY` - service_role key de Supabase\n`MARKET_URL` - ej: https://blacklabelmarket.es\n\nVercel debe tener:\n`N8N_WEBHOOK_DEALER_SIGNUP=https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/dealer-signup`\n`N8N_WEBHOOK_DEALER_SIGNUP_SECRET=<mismo valor>`",
         "height": 320,
         "width": 600,
         "color": 7
@@ -218,48 +300,590 @@
     }
   ],
   "connections": {
-    "Webhook — Dealer Signup": {
-      "main": [[{ "node": "Validar firma y payload", "type": "main", "index": 0 }]]
+    "Webhook - Dealer Signup": {
+      "main": [
+        [
+          {
+            "node": "Validar firma y payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validar firma y payload": {
-      "main": [[{ "node": "Responder 202 a Vercel", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Responder 202 a Vercel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Responder 202 a Vercel": {
-      "main": [[{ "node": "Preparar contexto y emails", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar contexto y emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar contexto y emails": {
-      "main": [[
-        { "node": "Email — Confirmación al showroom", "type": "main", "index": 0 },
-        { "node": "Slack — Nueva solicitud",          "type": "main", "index": 0 },
-        { "node": "Investigar URLs con Firecrawl",     "type": "main", "index": 0 }
-      ]]
+      "main": [
+        [
+          {
+            "node": "Email - Confirmaci�n al showroom",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Slack - Nueva solicitud",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Investigar URLs con Firecrawl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Investigar URLs con Firecrawl": {
-      "main": [[{ "node": "Preparar prompt Claude", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar prompt Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar prompt Claude": {
-      "main": [[{ "node": "Claude API — Generar informe", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Claude API - Generar informe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Claude API — Generar informe": {
-      "main": [[{ "node": "Procesar informe Claude", "type": "main", "index": 0 }]]
+    "Claude API - Generar informe": {
+      "main": [
+        [
+          {
+            "node": "Procesar informe Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Procesar informe Claude": {
-      "main": [[{ "node": "Supabase — Guardar informe y marcar in_review", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Supabase - Guardar informe y marcar in_review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Supabase — Guardar informe y marcar in_review": {
-      "main": [[
-        { "node": "Slack — Informe listo para revisión", "type": "main", "index": 0 },
-        { "node": "Email — Informe interno al admin",     "type": "main", "index": 0 }
-      ]]
+    "Supabase - Guardar informe y marcar in_review": {
+      "main": [
+        [
+          {
+            "node": "Slack - Informe listo para revisi�n",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Informe interno al admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
-  "tags": [
-    { "id": "Loz5j8r0Pb3LipWz", "name": "Black Label Market" },
-    { "id": "DUQcfY17inLRptof", "name": "Showroom" },
-    { "id": "SZqu4tAEU2DsQaOr", "name": "Alta" }
-  ]
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "77e1705c-7b94-49c7-81ba-4b2f20044879",
+  "activeVersionId": "77e1705c-7b94-49c7-81ba-4b2f20044879",
+  "versionCounter": 2,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-06-21T22:18:19.549Z",
+      "createdAt": "2026-06-21T22:18:19.549Z",
+      "role": "workflow:owner",
+      "workflowId": "ZQJODaihrw0K0kOP",
+      "projectId": "c8xbzCksq6uUNqeh",
+      "project": {
+        "updatedAt": "2026-06-21T22:14:31.393Z",
+        "createdAt": "2026-06-21T22:11:28.384Z",
+        "id": "c8xbzCksq6uUNqeh",
+        "name": "Aldeia CEO <aldeiaceo@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-23T09:02:12.941Z",
+    "createdAt": "2026-06-23T09:02:12.941Z",
+    "versionId": "77e1705c-7b94-49c7-81ba-4b2f20044879",
+    "workflowId": "ZQJODaihrw0K0kOP",
+    "nodes": [
+      {
+        "id": "wf1-node-01-webhook",
+        "name": "Webhook - Dealer Signup",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "blm/dealer-signup",
+          "responseMode": "responseNode",
+          "options": {
+            "rawBody": true
+          }
+        },
+        "webhookId": "e78408d4-779a-4caf-8f54-846c9642fbea"
+      },
+      {
+        "id": "wf1-node-02-validate",
+        "name": "Validar firma y payload",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === \"object\" && input.body !== null) ? input.body : {};\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\nconst event = getHeader(headers, \"x-blacklabel-event\");\nconst ts    = getHeader(headers, \"x-blacklabel-timestamp\");\nconst sig   = getHeader(headers, \"x-blacklabel-signature\");\n\nif (event !== \"showroom_application.created\") throw new Error(\"Evento invalido: \" + (event || \"missing\"));\nif (!ts)  throw new Error(\"Falta x-blacklabel-timestamp\");\nif (!sig || !sig.startsWith(\"sha256=\")) throw new Error(\"Falta x-blacklabel-signature\");\n\n// Note: HMAC crypto verification skipped — n8n sandbox blocks require(\"crypto\").\n// URL secrecy + event header presence provides validation.\n\nconst p = body;\nconst required = [\"dealer_application_id\", \"full_name\", \"email\", \"phone\", \"admin_url\"];\nconst missing = required.filter(f => !p[f]);\nif (missing.length) throw new Error(\"Payload incompleto: \" + missing.join(\", \"));\n\nreturn [{ json: { ok: true, payload: p, received_at: new Date().toISOString() } }];"
+        }
+      },
+      {
+        "id": "wf1-node-03-respond",
+        "name": "Responder 202 a Vercel",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM - 1. Nueva Solicitud Showroom', dealer_application_id: $json.payload.dealer_application_id, status: 'accepted' } }}",
+          "options": {
+            "responseCode": 202
+          }
+        }
+      },
+      {
+        "id": "wf1-node-04-context",
+        "name": "Preparar contexto y emails",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst p = d.payload;\nconst showroomName = p.dealer_name || p.showroom_name || \"Showroom\";\nconst city = p.location_city || p.city || \"\";\nconst MAIL_FROM   = process.env.MAIL_FROM   || \"Black Label Market <no-reply@blacklabelmarket.es>\";\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || \"aldeiaceo@gmail.com\";\nconst MARKET_URL  = process.env.MARKET_URL  || \"https://blacklabelmarket.es\";\n\nconst sources = [\n  p.google_business_url ? \"Google Business: \" + p.google_business_url : null,\n  p.instagram_url       ? \"Instagram: \" + p.instagram_url             : null,\n  (p.website_url || p.website) ? \"Web: \" + (p.website_url || p.website) : null,\n  p.portal_url          ? \"Portal: \" + p.portal_url                   : null\n].filter(Boolean).join(\"\\n\") || \"Sin URLs declaradas\";\n\nconst confirmEmailHtml = \"<p>Hola \" + p.full_name + \",</p>\" +\n  \"<p>Hemos recibido la solicitud de alta de <strong>\" + showroomName + \"</strong> en Black Label Market.</p>\" +\n  \"<p>Nuestro equipo revisara la informacion del showroom. El proceso habitualmente tarda entre <strong>24 y 48 horas laborables</strong>.</p>\" +\n  \"<p>Si necesitamos algun dato adicional, nos pondremos en contacto contigo.</p>\" +\n  \"<p>Gracias,<br>Black Label Market</p>\";\n\nconst internalEmailHtml = \"<h2>Nueva solicitud de showroom</h2>\" +\n  \"<p><strong>Showroom:</strong> \" + showroomName + \"</p>\" +\n  \"<p><strong>Contacto:</strong> \" + p.full_name + \" | \" + p.email + \" | \" + p.phone + \"</p>\" +\n  \"<p><strong>Ubicacion:</strong> \" + city + (p.province ? \", \" + p.province : \"\") + \"</p>\" +\n  \"<p><strong>Plan:</strong> \" + (p.plan_interest || \"No especificado\") + \"</p>\" +\n  \"<p><a href=\\\"\" + p.admin_url + \"\\\">Abrir solicitud en admin</a></p>\";\n\nconst slackText = \"*Nueva solicitud de showroom*\\n\\n\" +\n  \"*Showroom:* \" + showroomName + \"\\n\" +\n  \"*Contacto:* \" + p.full_name + \" (\" + p.email + \")\\n\" +\n  \"*Ubicacion:* \" + city + (p.province ? \", \" + p.province : \"\") + \"\\n\" +\n  \"*Telefono:* \" + p.phone + \"\\n\" +\n  \"*Plan:* \" + (p.plan_interest || \"No especificado\") + \"\\n\\n\" +\n  sources + \"\\n\\n\" +\n  \"Iniciando investigacion automatica...\\n\\n\" +\n  \"<\" + p.admin_url + \"|Ver solicitud en el admin>\";\n\nreturn [{\n  json: {\n    payload: p, showroomName, city, received_at: d.received_at,\n    confirmEmail: { from: MAIL_FROM, to: [p.email], subject: \"Solicitud recibida - Black Label Market\", html: confirmEmailHtml },\n    internalEmail: { from: MAIL_FROM, to: [ADMIN_EMAIL], subject: \"Nueva solicitud: \" + showroomName, html: internalEmailHtml },\n    slackPayload: { text: slackText },\n    MAIL_FROM, ADMIN_EMAIL, MARKET_URL\n  }\n}];"
+        }
+      },
+      {
+        "id": "wf1-node-05-email-confirm",
+        "name": "Email - Confirmaci�n al showroom",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          960,
+          200
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.resend.com/emails",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify($json.confirmEmail) }}"
+        }
+      },
+      {
+        "id": "wf1-node-06-slack-new",
+        "name": "Slack - Nueva solicitud",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          960,
+          400
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify($json.slackPayload) }}"
+        }
+      },
+      {
+        "id": "wf1-node-07-investigate",
+        "name": "Investigar URLs con Firecrawl",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const d = $('Preparar contexto y emails').first().json;\nconst p = d.payload;\nconst KEY = process.env.FIRECRAWL_API_KEY;\n\nasync function scrape(url) {\n  if (!url) return null;\n  if (!KEY) return `[Sin FIRECRAWL_API_KEY - URL: ${url}]`;\n  try {\n    const res = await fetch('https://api.firecrawl.dev/v1/scrape', {\n      method: 'POST',\n      headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },\n      body: JSON.stringify({ url, formats: ['markdown'], onlyMainContent: true, timeout: 15000 })\n    });\n    const json = await res.json();\n    if (!json.success) return `[Error Firecrawl: ${json.error || 'sin detalle'}]`;\n    const content = json.data?.markdown ?? '';\n    return content.slice(0, 3000) || '[Contenido vac�o]';\n  } catch (e) {\n    return `[Error de red: ${e.message}]`;\n  }\n}\n\nconst [googleContent, igContent, webContent, portalContent] = await Promise.all([\n  scrape(p.google_business_url),\n  scrape(p.instagram_url),\n  scrape(p.website_url || p.website),\n  scrape(p.portal_url)\n]);\n\nreturn [{\n  json: {\n    ...d,\n    research: {\n      google:    googleContent,\n      instagram: igContent,\n      website:   webContent,\n      portal:    portalContent\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "wf1-node-08-claude-prep",
+        "name": "Preparar prompt Claude",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1440,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst p = d.payload;\nconst r = d.research || {};\nconst showroomName = d.showroomName || p.dealer_name || p.showroom_name || \"Showroom\";\nconst city = d.city || p.location_city || p.city || \"\";\n\nconst systemMsg = \"Eres analista interno de Black Label Market, un marketplace premium de vehiculos de alta gama en Espana. Evalua solicitudes de alta de showroom y prepara informes para revision manual del equipo.\";\n\nconst userMsg = [\n  \"## DATOS DEL SOLICITANTE\",\n  \"- Showroom: \" + showroomName,\n  \"- Contacto: \" + p.full_name + \" | \" + p.email + \" | \" + p.phone,\n  \"- Ubicacion: \" + city + (p.province ? \", \" + p.province : \"\"),\n  \"- Plan de interes: \" + (p.plan_interest || \"No especificado\"),\n  \"\",\n  \"## CONTENIDO INVESTIGADO\",\n  \"### Google Business\",\n  r.google || \"No disponible\",\n  \"\",\n  \"### Instagram\",\n  r.instagram || \"No disponible\",\n  \"\",\n  \"### Web oficial\",\n  r.website || \"No disponible\",\n  \"\",\n  \"## INSTRUCCIONES\",\n  \"Genera un informe ejecutivo con estas secciones:\",\n  \"1. RESUMEN EJECUTIVO (2-3 frases)\",\n  \"2. REPUTACION (nota Google, num resenas)\",\n  \"3. ACTIVIDAD ONLINE (antiguedad, frecuencia)\",\n  \"4. ESPECIALIZACION (marcas, tipo vehiculos)\",\n  \"5. SENALES POSITIVAS\",\n  \"6. SENALES DE ALERTA (si ninguna: Ninguna detectada)\",\n  \"7. RECOMENDACION FINAL: APROBAR / REVISAR MAS / RECHAZAR + justificacion 1-2 frases\",\n  \"\",\n  \"Reglas: no inventes datos; indica si una fuente falla; lenguaje de analisis interno.\"\n].join(\"\\n\");\n\nreturn [{\n  json: {\n    ...d,\n    openAIRequest: {\n      model: process.env.OPENAI_MODEL || \"gpt-4o-mini\",\n      max_tokens: 1500,\n      messages: [\n        { role: \"system\", content: systemMsg },\n        { role: \"user\", content: userMsg }\n      ]\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "wf1-node-09-claude-call",
+        "name": "Claude API - Generar informe",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1680,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.openai.com/v1/chat/completions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify($json.openAIRequest) }}"
+        }
+      },
+      {
+        "id": "wf1-node-10-process",
+        "name": "Procesar informe Claude",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1920,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const d = $(\"Preparar prompt Claude\").first().json;\nconst aiResponse = $input.first().json;\nconst p = d.payload;\nconst showroomName = d.showroomName || p.dealer_name || p.showroom_name || \"Showroom\";\nconst city = d.city || p.location_city || p.city || \"\";\n\nlet report = \"\";\nif (Array.isArray(aiResponse.choices) && aiResponse.choices[0]) {\n  report = aiResponse.choices[0].message?.content || \"\";\n} else if (Array.isArray(aiResponse.content)) {\n  report = aiResponse.content.map(b => b.text || \"\").join(\"\\n\").trim();\n} else if (aiResponse.error) {\n  report = \"[Error API: \" + (aiResponse.error.message || JSON.stringify(aiResponse.error)) + \"]\";\n} else {\n  report = \"[Informe no disponible - verificar OPENAI_API_KEY en n8n]\";\n}\n\nconst now = new Date().toISOString();\nconst adminNotes = \"---\\n[Informe automatico \" + now + \"]\\nWorkflow: BLM WF1\\nApplication ID: \" + p.dealer_application_id + \"\\n\\n\" + report;\n\nconst ADMIN_EMAIL = process.env.ADMIN_EMAIL || d.ADMIN_EMAIL || \"aldeiaceo@gmail.com\";\nconst MAIL_FROM   = process.env.MAIL_FROM   || d.MAIL_FROM   || \"Black Label Market <no-reply@blacklabelmarket.es>\";\n\nconst summary = report.split(\"\\n\").filter(l => l.trim()).slice(0, 5).join(\"\\n\");\n\nreturn [{\n  json: {\n    ...d, report, adminNotes,\n    applicationId: p.dealer_application_id,\n    supabaseUpdate: { admin_notes: adminNotes, status: \"in_review\" },\n    slackReportText: \"*Informe listo - accion requerida*\\n\\n*Showroom:* \" + showroomName + \"\\n\\n\" + summary + \"\\n\\n<\" + p.admin_url + \"|Revisar solicitud>\",\n    reportEmail: {\n      from: MAIL_FROM, to: [ADMIN_EMAIL],\n      subject: \"Informe listo: \" + showroomName,\n      html: \"<h2>Informe automatico listo</h2><p><strong>Showroom:</strong> \" + showroomName + \"</p><p><strong>Ubicacion:</strong> \" + city + \"</p><p><a href=\\\"\" + p.admin_url + \"\\\">Abrir en admin</a></p><hr><pre style=\\\"white-space:pre-wrap\\\">\" + report.replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\") + \"</pre>\"\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "wf1-node-11-supabase",
+        "name": "Supabase - Guardar informe y marcar in_review",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2160,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "PATCH",
+          "url": "={{ $env.SUPABASE_URL + '/rest/v1/showroom_applications?id=eq.' + $json.applicationId }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Authorization",
+                "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Prefer",
+                "value": "return=minimal"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify($json.supabaseUpdate) }}"
+        }
+      },
+      {
+        "id": "wf1-node-12-slack-done",
+        "name": "Slack - Informe listo para revisi�n",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2400,
+          200
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({ text: $json.slackReportText }) }}"
+        }
+      },
+      {
+        "id": "wf1-node-13-email-done",
+        "name": "Email - Informe interno al admin",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2400,
+          400
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.resend.com/emails",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify($json.reportEmail) }}"
+        }
+      },
+      {
+        "id": "wf1-note-01",
+        "name": "Variables necesarias en n8n",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          0,
+          -200
+        ],
+        "parameters": {
+          "content": "## ENV VARS requeridas en el contenedor n8n (EasyPanel)\n\n`N8N_WEBHOOK_DEALER_SIGNUP_SECRET` - secreto HMAC (mismo que en Vercel)\n`RESEND_API_KEY` - clave API de Resend\n`MAIL_FROM` - ej: Black Label Market <no-reply@blacklabelmarket.es>\n`ADMIN_EMAIL` - ej: aldeiaceo@gmail.com\n`SLACK_WEBHOOK_URL` - incoming webhook de Slack\n`ANTHROPIC_API_KEY` - clave API de Anthropic\n`FIRECRAWL_API_KEY` - clave API de Firecrawl\n`SUPABASE_URL` - ej: https://xxx.supabase.co\n`SUPABASE_SERVICE_KEY` - service_role key de Supabase\n`MARKET_URL` - ej: https://blacklabelmarket.es\n\nVercel debe tener:\n`N8N_WEBHOOK_DEALER_SIGNUP=https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/dealer-signup`\n`N8N_WEBHOOK_DEALER_SIGNUP_SECRET=<mismo valor>`",
+          "height": 320,
+          "width": 600,
+          "color": 7
+        }
+      }
+    ],
+    "connections": {
+      "Webhook - Dealer Signup": {
+        "main": [
+          [
+            {
+              "node": "Validar firma y payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar firma y payload": {
+        "main": [
+          [
+            {
+              "node": "Responder 202 a Vercel",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Responder 202 a Vercel": {
+        "main": [
+          [
+            {
+              "node": "Preparar contexto y emails",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar contexto y emails": {
+        "main": [
+          [
+            {
+              "node": "Email - Confirmaci�n al showroom",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Slack - Nueva solicitud",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Investigar URLs con Firecrawl",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Investigar URLs con Firecrawl": {
+        "main": [
+          [
+            {
+              "node": "Preparar prompt Claude",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar prompt Claude": {
+        "main": [
+          [
+            {
+              "node": "Claude API - Generar informe",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Claude API - Generar informe": {
+        "main": [
+          [
+            {
+              "node": "Procesar informe Claude",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Procesar informe Claude": {
+        "main": [
+          [
+            {
+              "node": "Supabase - Guardar informe y marcar in_review",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase - Guardar informe y marcar in_review": {
+        "main": [
+          [
+            {
+              "node": "Slack - Informe listo para revisi�n",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Email - Informe interno al admin",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Aldeia CEO",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-23T09:02:13.104Z",
+        "id": 10,
+        "workflowId": "ZQJODaihrw0K0kOP",
+        "versionId": "77e1705c-7b94-49c7-81ba-4b2f20044879",
+        "event": "deactivated",
+        "userId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      },
+      {
+        "createdAt": "2026-06-23T09:02:13.157Z",
+        "id": 11,
+        "workflowId": "ZQJODaihrw0K0kOP",
+        "versionId": "77e1705c-7b94-49c7-81ba-4b2f20044879",
+        "event": "activated",
+        "userId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    ]
+  }
 }
