@@ -1,5 +1,5 @@
 # Black Label Market — PENDIENTES
-> Documento único y canónico. Última actualización: **2026-06-23**.
+> Documento único y canónico. Última actualización: **2026-06-26**.
 > Elimina y sustituye: `pendientes-configuracion-externa.md`, `deployment-checklist.md`, `n8n-setup.md`, `backlog-alertas-y-vehiculos-a-la-carta.md`, `backlog-marketplace.md`.
 
 ---
@@ -9,12 +9,18 @@
 - ✅ n8n activo con WF1–WF7 operativos (signup, aprobación, rechazo, más info, eventos, alertas, agente IA)
 - ✅ Todas las variables de entorno de n8n configuradas (OPENAI, FIRECRAWL, SUPABASE, MAIL_FROM, SMTP Hostinger, etc.)
 - ✅ Vercel: `N8N_WEBHOOK_DEALER_APPROVED/REJECTED/PENDING_INFO`, `ASSISTANT_WEBHOOK_SECRET/RESULT`, `NEXT_PUBLIC_APP_URL`
+- ✅ Vercel: `N8N_WEBHOOK_URL` + `N8N_WEBHOOK_SECRET` configurados — el market emite eventos en tiempo real a WF5
 - ✅ Flujo de alta WF1→WF4 conectado de extremo a extremo (solicitud → auditoría → aprobación/rechazo/más info)
 - ✅ Panel admin `/admin/altas-showroom` rediseñado + detalle `/[id]` + sidebar de acciones
 - ✅ Bug email duplicado en aprobación resuelto
 - ✅ Dominio `blacklabelmarket.es` configurado en Vercel (apex canónico, www→apex)
 - ✅ Deploy en producción en `blacklabelmarket.es`
 - ✅ Cuenta Firecrawl: `aldeiatools@gmail.com` / `Joseleotorres3+` · API key en n8n
+- ✅ WF5 pipeline completo: recibe los 6 tipos de evento → los 6 devuelven HTTP 200 → emails salen por Hostinger SMTP
+- ✅ WF5 → WF6 (vehicle.approved): vehicleId se pasa correctamente → Supabase query OK → matcher de alertas operativo
+- ✅ SMTP Hostinger en n8n funcionando (credential recreado, `N8N_ENCRYPTION_KEY` fijada para evitar rotación futura)
+- ✅ Todos los workflows BLM (WF1–WF6) actualizados con la nueva credencial SMTP
+- ✅ WF1 pipeline completo end-to-end: acuse al solicitante + informe interno al admin + Firecrawl + Claude + Supabase (exec #41 success, 250 Ok: queued)
 
 ---
 
@@ -51,32 +57,18 @@ Los dealers no pueden subir fotos de vehículos desde el dashboard. La ruta `/ap
 
 ---
 
-### 🔴 3. N8N_WEBHOOK_URL en Vercel — eventos del market → WF5
-Sin esta variable, cuando el market emite eventos (`vehicle.approved`, `lead.created`, `search_alert.created`, `custom_request.created`) no llegan a n8n y por tanto WF5→WF6 (matcher de alertas) nunca se activa.
-
-**Qué añadir en Vercel:**
-```
-N8N_WEBHOOK_URL=https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/events
-N8N_WEBHOOK_SECRET=<generar con: openssl rand -hex 32>
-```
-
-> Nota: el market ya emite eventos a `integration_events` (tabla) pero la entrega en tiempo real al webhook de n8n depende de estas variables.
+### ✅ 3. N8N_WEBHOOK_URL en Vercel — HECHO (2026-06-25)
+Configurado y desplegado. El market emite eventos en tiempo real a WF5.
 
 ---
 
-### 🟡 4. WF1 — acuse de recibo automático al solicitante
-Cuando alguien envía la solicitud de alta, no recibe ningún email de confirmación automático. Solo hay texto en pantalla diciéndole que mire el spam.
-
-**Qué hacer:** añadir nodo en WF1 (después del webhook de entrada) que envíe email al showroom confirmando recepción de su solicitud + instrucción de whitelist.
+### ✅ 4. WF1 — acuse de recibo automático al solicitante — HECHO (2026-06-26)
+Email de confirmación al solicitante conectado y verificado (exec #41, `250 Ok: queued`). El showroom recibe confirmación inmediata en el mismo email que usó en el formulario.
 
 ---
 
-### 🟡 5. WF1 — notificación interna al equipo
-El admin no recibe aviso cuando llega una solicitud nueva. Todo es manual: hay que entrar a `/admin/altas-showroom` a ver si hay algo.
-
-**Qué hacer:** añadir nodo en WF1 que envíe email/Slack al equipo con resumen de la solicitud + enlace directo al panel de detalle.
-
-Requiere primero resolver el punto 6 si se quiere vía Slack.
+### ✅ 5. WF1 — notificación interna al equipo — HECHO (2026-06-26)
+Email interno al admin (`aldeiaceo@gmail.com`) con resumen de la solicitud y enlace al panel `/admin/altas-showroom/[id]`. Ejecutado en el mismo exec #41.
 
 ---
 
@@ -89,13 +81,8 @@ Variable actualmente con valor `PENDIENTE` en n8n. Necesaria para notificaciones
 
 ---
 
-### 🟡 7. Verificar WF5→WF6 end-to-end (vehicle.approved → matcher → email comprador)
-WF5 está configurado para llamar a WF6 cuando recibe un evento `vehicle.approved`. WF6 (matcher) busca alertas activas y debería enviar email al comprador. Pendiente de probar de extremo a extremo con un vehículo real.
-
-**Qué verificar:**
-- Que `N8N_WEBHOOK_URL` dispara WF5 correctamente (depende del punto 3)
-- Que WF6 encuentra alertas y genera los emails
-- Que el comprador recibe el aviso con enlace al vehículo
+### ✅ 7. WF5→WF6 end-to-end — HECHO (2026-06-25)
+Pipeline verificado: `vehicle.approved` → WF5 (email dealer OK) → WF6 (Supabase query OK, alertas matcher OK). SMTP Hostinger entrega emails con `250 Ok: queued`.
 
 ---
 
@@ -179,12 +166,10 @@ N8N_MCP_URL, N8N_MCP_AUTHORIZATION
 ```
 **Pendientes en Vercel:**
 ```
-N8N_WEBHOOK_URL=https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/events
-N8N_WEBHOOK_SECRET=<generar>
 R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ESSENTIAL, STRIPE_PRICE_PROFESSIONAL, STRIPE_PRICE_ELITE
 ```
-(STRIPE_* y R2_* usan placeholders actualmente)
+(N8N_WEBHOOK_URL + N8N_WEBHOOK_SECRET ya configurados. STRIPE_* y R2_* usan placeholders actualmente)
 
 ---
 
