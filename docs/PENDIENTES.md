@@ -11,7 +11,7 @@
 - [x] **Subida de fotos** — ✅ verificado (2026-06-26): NO usa R2; usa Supabase Storage (bucket `vehicle-images`, público). Probado upload+lectura pública+borrado end-to-end. R2 era una suposición errónea del doc (punto 2 abajo)
 - [x] **CRON_SECRET** en Vercel — ya configurado
 - [x] **DNS: SPF + DKIM + DMARC** en Hostinger para `blacklabelmarket.es` — ✅ verificado (2026-06-26): SPF y DKIM (3 CNAMEs) ya existían; DMARC tenía `p=none`, se le añadió `rua`/`ruf`/`fo` vía API
-- [ ] **Textos legales** en Supabase — páginas `/legal/aviso-legal` y `/legal/privacidad` tienen emails placeholder visibles
+- [x] **Textos legales** — ✅ verificado (2026-06-26): NO están en Supabase, están hardcodeados en `app/(public)/legal/[slug]/page.tsx`. **Sin placeholders**: razón social KAZAWEB S.L.U., NIF B42761254, domicilio, registro mercantil y emails reales (`hola@` y `privacidad@blacklabelmarket.es`) ya rellenos. Único residuo: confirmar que el buzón `privacidad@blacklabelmarket.es` existe (la política de privacidad dirige ahí las solicitudes RGPD)
 
 ### 🟡 Antes del primer showroom real
 - [x] **CUSTOM_REQUESTS_INTERNAL_TOKEN** en Vercel — configurado (2026-06-26)
