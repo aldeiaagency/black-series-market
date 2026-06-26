@@ -8,7 +8,7 @@
 
 ### 🔴 Bloqueantes operativos inmediatos
 - [x] **SMTP Supabase Auth** — configurado vía API (2026-06-26): smtp.hostinger.com:587, hola@blacklabelmarket.es, rate_limit=30/h
-- [ ] **R2 Cloudflare** — dealers no pueden subir fotos (punto 2 abajo)
+- [x] **Subida de fotos** — ✅ verificado (2026-06-26): NO usa R2; usa Supabase Storage (bucket `vehicle-images`, público). Probado upload+lectura pública+borrado end-to-end. R2 era una suposición errónea del doc (punto 2 abajo)
 - [x] **CRON_SECRET** en Vercel — ya configurado
 - [x] **DNS: SPF + DKIM + DMARC** en Hostinger para `blacklabelmarket.es` — ✅ verificado (2026-06-26): SPF y DKIM (3 CNAMEs) ya existían; DMARC tenía `p=none`, se le añadió `rua`/`ruf`/`fo` vía API
 - [ ] **Textos legales** en Supabase — páginas `/legal/aviso-legal` y `/legal/privacidad` tienen emails placeholder visibles
@@ -89,20 +89,15 @@ Configurado vía Supabase Management API:
 
 ---
 
-### 🔴 2. R2 Cloudflare — subida de imágenes de vehículos ⭐ CRÍTICO
-Los dealers no pueden subir fotos de vehículos desde el dashboard. La ruta `/api/upload` existe en el código pero no tiene credenciales de bucket.
+### ✅ 2. Subida de imágenes de vehículos — HECHO (2026-06-26)
 
-**Qué hacer:**
-- Crear cuenta Cloudflare (gratuita) o usar la existente
-- Crear bucket R2 `blm-vehicles`
-- Añadir a Vercel:
-  ```
-  R2_ACCOUNT_ID=
-  R2_ACCESS_KEY_ID=
-  R2_SECRET_ACCESS_KEY=
-  R2_BUCKET_NAME=blm-vehicles
-  R2_PUBLIC_URL=https://...
-  ```
+**R2 NO se usa.** La ruta `/api/upload` (y `/api/gallery`) usa **Supabase Storage** con el bucket `vehicle-images` (vía service role / `createAdminClient`, así que RLS no bloquea). El doc original asumía R2 por error.
+
+Estado verificado contra Supabase:
+- Bucket `vehicle-images` existe y es **público** (creado 2026-05-22). También existe `dealer-logos` (público, actualmente sin uso — los logos van a `vehicle-images/logos/...`).
+- Prueba end-to-end OK: upload con service role → `200`; lectura de la URL pública anónima → `200 image/png`; borrado → OK.
+
+**No hace falta ninguna cuenta ni variable de Cloudflare.** Las `R2_*` que figuraban como pendientes en Vercel son innecesarias.
 
 ---
 
@@ -218,10 +213,10 @@ N8N_MCP_URL, N8N_MCP_AUTHORIZATION
 ```
 **Pendientes en Vercel (necesitan valor real):**
 ```
-R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ESSENTIAL, STRIPE_PRICE_PROFESSIONAL, STRIPE_PRICE_ELITE
 ```
-(STRIPE_* y R2_* tienen placeholders — se activan en Fase B)
+(STRIPE_* tienen placeholders — se activan en Fase B)
+~~R2_*~~ — **no aplica**: la subida de imágenes usa Supabase Storage, no Cloudflare R2.
 
 ---
 
