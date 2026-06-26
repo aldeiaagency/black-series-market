@@ -4,6 +4,36 @@
 
 ---
 
+## Checklist para dejar lista la web (Fase A completa)
+
+### 🔴 Bloqueantes operativos inmediatos
+- [ ] **SMTP Supabase Auth** — emails de confirmación y reset salen con dominio supabase.co (punto 1 abajo)
+- [ ] **R2 Cloudflare** — dealers no pueden subir fotos (punto 2 abajo)
+- [x] **CRON_SECRET** en Vercel — ya configurado
+- [ ] **DNS: SPF + DKIM + DMARC** en Hostinger para `blacklabelmarket.es` — sin esto los emails van a spam
+- [ ] **Textos legales** en Supabase — páginas `/legal/aviso-legal` y `/legal/privacidad` tienen emails placeholder visibles
+
+### 🟡 Antes del primer showroom real
+- [x] **CUSTOM_REQUESTS_INTERNAL_TOKEN** en Vercel — configurado (2026-06-26)
+- [ ] **Redes sociales** en `/admin/configuracion` — footer vacío (Instagram, YouTube, etc.)
+- [ ] **Emails a compradores** en WF5 (punto 8 abajo) — acuse de recibo al crear alerta / enviar solicitud a la carta
+- [ ] **Slack Incoming Webhook** (punto 6 abajo) — opcional si se prefiere recibir avisos por email
+
+### 🟡 Antes de captación pública
+- [ ] **Quitar noindex** (punto 9 abajo) — cuando el catálogo tenga vehículos reales
+- [ ] **GTM** en `/admin/configuracion` — para analytics; Consent Mode v2 ya está montado en el código
+- [ ] **Revisión legal** con asesor RGPD/LSSI antes de publicar
+
+### 🔵 Cuando haya dealers / stock real
+- [x] **IMPORT_API_KEY** en Vercel — configurado (2026-06-26)
+- [ ] **Stripe** completo — Fase B (ver sección más abajo)
+
+### 🔵 Features Elite (Fase C)
+- [x] **HOT_LEAD_ALERT_SECRET** en Vercel — configurado (2026-06-26)
+- [x] **APPOINTMENT_RESULT_SECRET** en Vercel — configurado (2026-06-26)
+
+---
+
 ## Estado actual (lo que ya está hecho)
 
 - ✅ n8n activo con WF1–WF7 operativos (signup, aprobación, rechazo, más info, eventos, alertas, agente IA)
@@ -159,17 +189,20 @@ ASSISTANT_WEBHOOK_SECRET, ASSISTANT_RESULT_SECRET
 ```
 NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
 SUPABASE_ACCESS_TOKEN, NEXT_PUBLIC_APP_URL (=https://blacklabelmarket.es),
+N8N_WEBHOOK_URL, N8N_WEBHOOK_SECRET, N8N_WEBHOOK_EVENTS,
 N8N_WEBHOOK_DEALER_SIGNUP, N8N_WEBHOOK_DEALER_SIGNUP_SECRET,
 N8N_WEBHOOK_DEALER_APPROVED, N8N_WEBHOOK_DEALER_REJECTED, N8N_WEBHOOK_DEALER_PENDING_INFO,
-ASSISTANT_WEBHOOK_SECRET, ASSISTANT_RESULT_SECRET,
+ASSISTANT_WEBHOOK_SECRET, ASSISTANT_RESULT_SECRET, APPOINTMENT_RESULT_SECRET,
+CRON_SECRET, HOT_LEAD_ALERT_SECRET, IMPORT_API_KEY,
+CUSTOM_REQUESTS_INTERNAL_TOKEN, CUSTOM_REQUESTS_RATE_LIMIT_SALT,
 N8N_MCP_URL, N8N_MCP_AUTHORIZATION
 ```
-**Pendientes en Vercel:**
+**Pendientes en Vercel (necesitan valor real):**
 ```
 R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ESSENTIAL, STRIPE_PRICE_PROFESSIONAL, STRIPE_PRICE_ELITE
 ```
-(N8N_WEBHOOK_URL + N8N_WEBHOOK_SECRET ya configurados. STRIPE_* y R2_* usan placeholders actualmente)
+(STRIPE_* y R2_* tienen placeholders — se activan en Fase B)
 
 ---
 
