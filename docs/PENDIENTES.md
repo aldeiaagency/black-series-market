@@ -15,7 +15,7 @@
 
 ### 🟡 Antes del primer showroom real
 - [x] **CUSTOM_REQUESTS_INTERNAL_TOKEN** en Vercel — configurado (2026-06-26)
-- [ ] **Redes sociales** en `/admin/configuracion` — footer vacío (Instagram, YouTube, etc.)
+- [x] **Redes sociales** — ✅ verificado en producción (2026-06-26): NO está vacío. Header (barra menú) y footer muestran los 4 iconos (Instagram `blacklabel_premiumcars`, TikTok `@blacklabelmarket.es`, Facebook `blacklabel.es`, YouTube `@BlackLabelPremium`). Guardados en `platform_config.social_links` + fallback hardcodeado en `/api/platform/social-links`. Editable en `/admin/configuracion`. (LinkedIn: campo disponible, sin URL — añadir si procede)
 - [ ] **Emails a compradores** en WF5 (punto 8 abajo) — acuse de recibo al crear alerta / enviar solicitud a la carta
 - [ ] **Slack Incoming Webhook** (punto 6 abajo) — opcional si se prefiere recibir avisos por email
 
