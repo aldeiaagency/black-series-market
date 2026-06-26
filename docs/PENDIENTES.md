@@ -16,7 +16,7 @@
 ### 🟡 Antes del primer showroom real
 - [x] **CUSTOM_REQUESTS_INTERNAL_TOKEN** en Vercel — configurado (2026-06-26)
 - [x] **Redes sociales** — ✅ verificado en producción (2026-06-26): NO está vacío. Header (barra menú) y footer muestran los 4 iconos (Instagram `blacklabel_premiumcars`, TikTok `@blacklabelmarket.es`, Facebook `blacklabel.es`, YouTube `@BlackLabelPremium`). Guardados en `platform_config.social_links` + fallback hardcodeado en `/api/platform/social-links`. Editable en `/admin/configuracion`. (LinkedIn: campo disponible, sin URL — añadir si procede)
-- [ ] **Emails a compradores** en WF5 (punto 8 abajo) — acuse de recibo al crear alerta / enviar solicitud a la carta
+- [x] **Emails de acuse a compradores** en WF5 (punto 8 abajo) — ✅ alerta + a la carta funcionando y verificados E2E (2026-06-26). Pendiente: aviso "lo hemos encontrado" (necesita evento nuevo) y arreglar `lead.created` (roto, ver punto 8)
 - [ ] **Slack Incoming Webhook** (punto 6 abajo) — opcional si se prefiere recibir avisos por email
 
 ### 🟡 Antes de captación pública
@@ -130,12 +130,17 @@ Pipeline verificado: `vehicle.approved` → WF5 (email dealer OK) → WF6 (Supab
 
 ---
 
-### 🟡 8. Emails a compradores — vehículos a la carta y alertas
-- Acuse de recibo al comprador cuando crea una alerta en "Mis alertas"
-- Acuse de recibo al comprador cuando envía solicitud en "Vehículos a la carta"
-- Aviso "lo hemos encontrado" cuando el equipo marca una solicitud como matched
+### 8. Emails a compradores — vehículos a la carta y alertas
 
-Estos emails deben salir desde WF5 (o un workflow dedicado). Pendiente de construir los nodos correspondientes.
+- [x] **Acuse al crear alerta** (`search_alert.created`) — ✅ HECHO (2026-06-26). El nodo "Alerta - Preparar confirmación" leía `d.user_email`/`d.email` pero el market envía el email en `d.contact.email` → `emailPayload` salía `null` y **no se enviaba nada**. Corregido (lee `d.contact.email` + `d.budget_max`, acentos limpios). Verificado E2E: exec #42 `success`, SMTP `250 2.0.0 Ok: queued`.
+- [x] **Acuse al enviar solicitud a la carta** (`custom_request.created`) — ✅ ya funcionaba (tenía fallback `d.contact?.email`); se limpió el mojibake del texto y se humanizó el plazo (immediate→"Lo antes posible", etc.).
+- [ ] **Aviso "lo hemos encontrado"** cuando el equipo marca una solicitud como matched — ⏳ pendiente: requiere un **evento nuevo** (p.ej. `custom_request.matched`) que el market aún NO emite (no está en `IntegrationEventType` de `lib/integrations/n8n.ts`) + nodo en WF5. Segunda fase.
+
+**Hallazgos colaterales (no eran el objetivo, reportados):**
+- 🔴 **`lead.created` roto**: cuando un comprador contacta a un dealer, WF5 lee `d.buyer_email`/`d.dealer_email`/`d.vehicle_title`, pero el market solo envía `data.contact.{name,email}` + `vehicle_id`/`dealer_id`. Ni el comprador ni el dealer reciben email. Para arreglarlo hace falta que WF5 haga **lookup a Supabase** (título del vehículo, nombre+email del dealer) o que el market enriquezca el payload. Es el feature de notificación de leads — mayor alcance.
+- 🟡 **Mojibake en nodos de dealer/vehículo**: "Lead - Preparar emails", "Vehículo aprobado/rechazado - Preparar email" tienen acentos corruptos (`é`→`�`, `€`→`?`) por una subida previa sin UTF-8. Los emails a dealers salen con caracteres rotos. Limpieza pendiente (mismo método: editar jsCode vía API n8n con UTF-8). Los nombres de nodos también, pero son internos.
+
+> Método para tocar WF5 sin romper acentos: **NO** usar `Invoke-RestMethod`+`ConvertTo-Json` de PowerShell (lento/corrompe UTF-8). Usar **Node** (`fetch` nativo) con el jsCode en ficheros UTF-8. WF5 ID: `mgGKQ9r8wkC3shwz` · API n8n: `https://aldeia-n8n.giuxk6.easypanel.host/api/v1/workflows/{id}` (header `X-N8N-API-KEY`).
 
 ---
 
