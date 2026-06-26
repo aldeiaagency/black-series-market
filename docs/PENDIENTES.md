@@ -7,7 +7,7 @@
 ## Checklist para dejar lista la web (Fase A completa)
 
 ### 🔴 Bloqueantes operativos inmediatos
-- [ ] **SMTP Supabase Auth** — emails de confirmación y reset salen con dominio supabase.co (punto 1 abajo)
+- [x] **SMTP Supabase Auth** — configurado vía API (2026-06-26): smtp.hostinger.com:587, hola@blacklabelmarket.es, rate_limit=30/h
 - [ ] **R2 Cloudflare** — dealers no pueden subir fotos (punto 2 abajo)
 - [x] **CRON_SECRET** en Vercel — ya configurado
 - [ ] **DNS: SPF + DKIM + DMARC** en Hostinger para `blacklabelmarket.es` — sin esto los emails van a spam
@@ -56,17 +56,13 @@
 
 ## FASE A — Para operar con los primeros 20 showrooms
 
-### 🔴 1. SMTP propio en Supabase Auth ⭐ CRÍTICO
-Sin esto los emails de confirmación de cuenta y reset de contraseña salen con dominio `supabase.co`, lo que perjudica la confianza y entregabilidad.
-
-**Qué hacer:**
-- Configurar Hostinger SMTP en Supabase Auth dashboard → Authentication → Email templates → SMTP Settings
-  - Host: `smtp.hostinger.com` · Puerto: `465` (SSL) o `587` (TLS)
-  - Usuario: `hola@blacklabelmarket.es`
-  - Contraseña: la del buzón Hostinger
-- Actualizar `SITE_URL` en Supabase Auth → `https://blacklabelmarket.es`
-- Actualizar las URL de redirección permitidas para incluir `https://blacklabelmarket.es/**`
-- Guía detallada: `docs/configuracion-email-smtp.md`
+### ✅ 1. SMTP propio en Supabase Auth — HECHO (2026-06-26)
+Configurado vía Supabase Management API:
+- Host: `smtp.hostinger.com` · Puerto: `587` (TLS)
+- Usuario/remitente: `hola@blacklabelmarket.es` · Nombre: "Black Label Market"
+- Rate limit subido de 2 → 30 emails/hora
+- `SITE_URL` y `uri_allow_list` ya estaban correctos desde 2026-06-17
+- Test enviado a `aldeiaceo@gmail.com` — debe llegar desde `hola@blacklabelmarket.es`
 
 ---
 
