@@ -19,6 +19,14 @@ header `X-N8N-API-KEY`.
 | `alert-prep.js` | Alerta - Preparar confirmación | `search_alert.created` |
 | `custom-request-prep.js` | Custom Request - Preparar confirmación | `custom_request.created` |
 | `lead-prep.js` | Lead - Preparar emails | `lead.created` |
+| `veh-approved-prep.js` | Vehículo aprobado - Preparar email | `vehicle.approved` |
+| `veh-rejected-prep.js` | Vehículo rechazado - Preparar email | `vehicle.rejected` |
+
+`vehicle.approved`/`vehicle.rejected` los emite la server action de
+`app/(admin)/admin/vehiculos/[id]/page.tsx`, que **sí** incluye `dealer_email`,
+`vehicle_title` y `vehicle_slug` en el payload (no necesitan lookup). La API
+`app/api/admin/vehicles/[id]/reject/route.ts` es una vía alterna que NO manda
+`dealer_email` — si se usa, el email de rechazo no saldría (revisar si está en uso).
 
 El market envía el contacto del comprador en **`data.contact.{name,email,phone}`**
 (no en `data.email`). Ese fue el bug que impedía enviar los acuses de alerta y de lead.
@@ -42,5 +50,7 @@ cuerpo llega como **string** en `$json.data`. Por eso `lead-prep.js` hace
 - `lead.created` desde el **asistente** (Elite) puede venir sin `vehicle_id`: el
   lookup falla y el email al dealer no se construye (degrada con texto genérico).
   Cuando se active el asistente, añadir fallback de lookup por `dealer_id`.
-- Mojibake (`é`→`�`, `€`→`?`) en los nodos de email a **dealers** (Lead/Vehículo
-  aprobado/rechazado) y en algunos **nombres** de nodos: limpieza pendiente.
+- ✅ Mojibake en el **contenido** de los emails: limpiado en todos los nodos
+  (2026-06-26, verificado: ningún `jsCode` contiene `�`). Los **nombres** de
+  algunos nodos aún tienen mojibake, pero son internos y no aparecen en los emails
+  (renombrarlos exigiría reescribir `connections`; sin beneficio para el usuario).
