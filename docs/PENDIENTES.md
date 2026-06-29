@@ -152,18 +152,22 @@ El sitio está invisible para buscadores. Hacerlo cuando el catálogo tenga veh�
 
 ## FASE B — Para captación pública (cuando el market tenga stock)
 
-### Stripe — productos y pagos reales
+### Stripe — productos y pagos
+
+> **Cuenta creada en MODO TEST (2026-06-29): `acct_1TnfYdIhKdMKTEnw`** (email `aldeiatools@gmail.com`, ES/EUR). Flujo verificado E2E: checkout creado OK + webhook valida firma en producción (200) y rechaza inválidas (400). Credenciales y price IDs en memoria/`.env.local`.
 
 | Tarea | Estado |
 |---|---|
-| Crear cuenta Stripe en modo live | 🔴 |
-| Crear producto Essential (197€/mes + IVA) | 🔴 |
-| Crear producto Professional (449€/mes + IVA) | 🔴 |
-| Crear producto Elite (899€/mes + IVA) | 🔴 |
-| Crear add-ons: boost 49€, pack 5×199€, +10v 59€/mes, +25v 99€/mes, feed 99€/mes, diagnóstico 149€ | 🔴 |
-| Configurar webhook Stripe → `/api/stripe/webhooks` | 🔴 |
-| Configurar Stripe Tax (cálculo IVA automático) | 🔴 |
-| Añadir a Vercel: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ESSENTIAL/PROFESSIONAL/ELITE` | 🔴 |
+| Crear cuenta Stripe | ✅ creada en **test** · falta **activar** (KYC: datos KAZAWEB + cuenta bancaria) para modo **live** |
+| Producto Essential (197€/mes) | ✅ creado en test (`price_1Tnfev…U87PufaV`) |
+| Producto Professional (449€/mes) | ✅ creado en test (`price_1Tnfev…pX15UMNs`) — **precio provisional, cerrar definitivo** |
+| Producto Elite (899€/mes) | ✅ creado en test (`price_1Tnfew…EUKa9fg8`) — **precio provisional, cerrar definitivo** |
+| Add-ons: boost, pack 5, +10v, +25v, feed, diagnóstico | 🔴 no creados aún |
+| Webhook Stripe → `/api/stripe/webhooks` | ✅ creado + verificado en test (`we_1Tnfew…`, 5 eventos) |
+| Stripe Tax (cálculo IVA automático) | 🔴 pendiente |
+| Vercel env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_PRICE_{ESSENTIAL,PROFESSIONAL,ELITE}_MONTHLY` | ✅ fijadas (test) + redeploy hecho |
+
+**Para pasar a LIVE (cuando se vaya a cobrar):** activar la cuenta (datos fiscales KAZAWEB + banco), **cerrar precios Pro/Elite/Grupo**, sustituir claves `sk_test/pk_test/whsec` por las `live`, crear add-ons, y (opcional) Stripe Tax para el IVA. Verificación más profunda pendiente: completar un checkout de test con tarjeta `4242…` para confirmar el `checkout.session.completed` → actualización del dealer (requiere un dealer de prueba con `metadata.dealer_id`).
 
 ### Resto Fase B
 
