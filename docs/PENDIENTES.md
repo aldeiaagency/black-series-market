@@ -17,7 +17,7 @@
 - [x] **CUSTOM_REQUESTS_INTERNAL_TOKEN** en Vercel — configurado (2026-06-26)
 - [x] **Redes sociales** — ✅ verificado en producción (2026-06-26): NO está vacío. Header (barra menú) y footer muestran los 4 iconos (Instagram `blacklabel_premiumcars`, TikTok `@blacklabelmarket.es`, Facebook `blacklabel.es`, YouTube `@BlackLabelPremium`). Guardados en `platform_config.social_links` + fallback hardcodeado en `/api/platform/social-links`. Editable en `/admin/configuracion`. (LinkedIn: campo disponible, sin URL — añadir si procede)
 - [x] **Emails de acuse a compradores** en WF5 (punto 8 abajo) — ✅ alerta + a la carta + lead.created funcionando y verificados E2E (2026-06-26). El aviso "lo hemos encontrado" se descartó por diseño (el contacto con el comprador lo hacen los showrooms/plataforma directamente, no un email automático).
-- [ ] **Slack Incoming Webhook** (punto 6 abajo) — opcional si se prefiere recibir avisos por email
+- [x] **Slack Incoming Webhook** (punto 6 abajo) — ✅ HECHO (2026-06-26): `SLACK_WEBHOOK_URL` fijado en n8n; WF1–WF4 (showroom) + WF5 (leads/a la carta) postean a Slack. Verificado E2E.
 
 ### 🟡 Antes de captación pública
 - [ ] **Quitar noindex** (punto 9 abajo) — cuando el catálogo tenga vehículos reales
@@ -116,12 +116,11 @@ Email interno al admin (`aldeiaceo@gmail.com`) con resumen de la solicitud y enl
 
 ---
 
-### 🟡 6. Slack Incoming Webhook (SLACK_WEBHOOK_URL)
-Variable actualmente con valor `PENDIENTE` en n8n. Necesaria para notificaciones internas (punto 5 y otras).
-
-**Qué hacer:**
-- Crear Incoming Webhook en Slack (o Telegram si se prefiere)
-- Actualizar `SLACK_WEBHOOK_URL` en n8n EasyPanel → Entorno → Guardar → Implementar
+### ✅ 6. Slack Incoming Webhook (SLACK_WEBHOOK_URL) — HECHO (2026-06-26)
+- Incoming Webhook creado (app Slack "Black Label Market", canal del usuario).
+- `SLACK_WEBHOOK_URL` fijado en el servicio Swarm `aldeia_n8n` vía `docker service update --env-add` (SSH). ⚠️ **Durabilidad:** persiste en Swarm; si algún día se pulsa **Deploy** en EasyPanel para n8n, hay que re-fijarlo (o mirrorearlo en EasyPanel → n8n → Environment).
+- WF1–WF4 ya tenían nodos Slack (alta/aprobación/rechazo/más-info de showroom) → ahora activos.
+- **Añadidos avisos en WF5** (`Lead - Slack aviso` y `Custom Request - Slack aviso`) para leads de comprador y solicitudes a la carta, en paralelo a los emails. Verificado E2E: exec #48/#49, Slack `ok`.
 
 ---
 
@@ -202,7 +201,7 @@ SUPABASE_URL, SUPABASE_SERVICE_KEY, MARKET_URL, ADMIN_EMAIL,
 N8N_WEBHOOK_DEALER_SIGNUP_SECRET, FIRECRAWL_API_KEY,
 ASSISTANT_WEBHOOK_SECRET, ASSISTANT_RESULT_SECRET
 ```
-**Pendientes en n8n:** `SLACK_WEBHOOK_URL` (actualmente "PENDIENTE")
+**Pendientes en n8n:** ninguna · ✅ `SLACK_WEBHOOK_URL` ya fijado (2026-06-26) — ver punto 6 (durabilidad: re-fijar si se hace Deploy de n8n en EasyPanel)
 
 ### Vercel — configuradas ✅
 ```

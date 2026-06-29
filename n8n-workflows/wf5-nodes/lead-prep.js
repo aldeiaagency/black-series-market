@@ -39,10 +39,17 @@ const dealerHtml = `<p>Has recibido una nueva consulta en Black Label Market.</p
 ${message ? '<p><strong>Mensaje:</strong> ' + message + '</p>' : ''}
 <p><a href="${MARKET_URL}/dashboard/oportunidades">Ver en tu panel →</a></p>`;
 
+const slackPayload = {
+  text: `:inbox_tray: *Nuevo lead* — ${buyerName} sobre *${vehicleTitle}*\n`
+    + `Dealer: ${dealerName}${dealerEmail ? ' · ' + dealerEmail : ''}\n`
+    + `Comprador: ${buyerEmail}${buyerPhone ? ' · ' + buyerPhone : ''}`
+    + `${message ? '\n💬 ' + message : ''}`
+};
+
 return [{
   json: {
     ...ev,
-    buyerName, buyerEmail, dealerName, dealerEmail, vehicleTitle,
+    buyerName, buyerEmail, dealerName, dealerEmail, vehicleTitle, slackPayload,
     buyerEmailPayload: buyerEmail ? {
       from: MAIL_FROM, to: [buyerEmail],
       subject: `Hemos enviado tu consulta — ${vehicleTitle}`,

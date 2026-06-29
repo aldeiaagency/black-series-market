@@ -46,6 +46,14 @@ sola query embebida de PostgREST:
 cuerpo llega como **string** en `$json.data`. Por eso `lead-prep.js` hace
 `JSON.parse(look.data)` antes de leer los campos.
 
+## Avisos a Slack (WF5)
+Los prep de **lead** y **a la carta** generan también un campo `slackPayload` (`{ text }`).
+Dos nodos `httpRequest` ("Lead - Slack aviso" y "Custom Request - Slack aviso"), en
+paralelo a los emails, hacen `POST {{ $env.SLACK_WEBHOOK_URL }}` con
+`body = {{ JSON.stringify($json.slackPayload) }}` y `continueOnFail: true`.
+Mismo patrón que los nodos Slack de WF1–WF4. `SLACK_WEBHOOK_URL` se fija en el
+servicio `aldeia_n8n` (env). Verificado E2E (Slack responde `ok`).
+
 ## Pendiente conocido
 - `lead.created` desde el **asistente** (Elite) puede venir sin `vehicle_id`: el
   lookup falla y el email al dealer no se construye (degrada con texto genérico).

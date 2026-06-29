@@ -18,7 +18,14 @@ const TIMELINE_LABELS = {
 };
 const timelineLabel = TIMELINE_LABELS[timeline] || timeline;
 
+const location = d.location || '';
 const vehicleDesc = [brand, model].filter(Boolean).join(' ') || 'tu vehículo a medida';
+
+const slackPayload = {
+  text: `:memo: *Nueva solicitud a la carta* — ${name} busca *${vehicleDesc}*\n`
+    + [budget ? 'Presupuesto: ' + budget : '', location, timelineLabel ? 'Plazo: ' + timelineLabel : '', email]
+        .filter(Boolean).join(' · ')
+};
 
 const html = `<p>Hola ${name},</p>
 <p>Hemos recibido tu solicitud de <strong>${vehicleDesc}</strong>.</p>
@@ -30,7 +37,7 @@ ${timelineLabel ? '<p><strong>Plazo:</strong> ' + timelineLabel + '</p>' : ''}
 return [{
   json: {
     ...ev,
-    name, email,
+    name, email, slackPayload,
     emailPayload: email ? {
       from: MAIL_FROM, to: [email],
       subject: `Solicitud recibida: ${vehicleDesc} — Black Label Market`,
