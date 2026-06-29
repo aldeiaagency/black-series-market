@@ -124,8 +124,12 @@ Email interno al admin (`aldeiaceo@gmail.com`) con resumen de la solicitud y enl
 
 ---
 
-### ✅ 7. WF5→WF6 end-to-end — HECHO (2026-06-25)
+### ✅ 7. WF5→WF6 end-to-end — HECHO (2026-06-25) · matcher con alerta real VERIFICADO (2026-06-29)
 Pipeline verificado: `vehicle.approved` → WF5 (email dealer OK) → WF6 (Supabase query OK, alertas matcher OK). SMTP Hostinger entrega emails con `250 Ok: queued`.
+
+**2026-06-29 — Matcher probado con una alerta REAL en BD** (lo que faltaba): comprador creó alerta Porsche 911 (año≥2020, ≤300.000€) por la UI → al aprobar un Porsche 911 2021 (139.000€) y disparar `vehicle.approved`: WF5 exec 61 + **WF6 exec 62** → 1 match → **email al comprador `250 OK`** ("¡Encontramos tu Porsche 911 2021!") + `search_alerts.last_matched_at`/`matched_vehicle_ids` actualizados. WF6 carga TODAS las alertas activas y compara marca/modelo/año_min/budget_max; el precio lo toma de la query a Supabase (el payload de `vehicle.approved` no lo trae). El nodo de email se llama "Resend" pero usa SMTP Hostinger. ⚠️ Operativo: al emailear a cada alerta activa que matchee, comprobar las alertas en BD antes de tests para no escribir a terceros.
+
+**Lado comprador + tableros showroom verificados E2E el mismo día**: alerta+acuse, favorito, match+email, lead (`lead.created` exec 63, emails+Slack) y solicitud a la carta (`custom_request.created` exec 64). En el dashboard del showroom: el lead aparece en **Oportunidades/Kanban** (mover Nueva→Contactada persiste) y la solicitud en **A la carta** (badge "Acceso anticipado 24h", contacto del comprador visible). Hallazgos menores a pulir: forms (alerta/lead/a-la-carta) no pre-rellenan nombre/email del usuario logueado; el contador "X nueva" del Kanban no se refresca al mover; `leads.updated_at` no se bumpea al cambiar estado; hay datos basura de QA previo en el board a-la-carta. Detalle en memoria `project_showroom_onboarding_process`.
 
 ---
 
