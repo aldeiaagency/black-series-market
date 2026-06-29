@@ -9,6 +9,20 @@ function temporaryPassword() {
   return `BLM-${randomBytes(10).toString('base64url')}`
 }
 
+// Plan que se concede durante el trial: el que el showroom pidió en la solicitud.
+// `grupo` (multi-sede, contacto manual) y valores no reconocidos caen a 'essential'.
+const TRIAL_PLANS = ['essential', 'professional', 'elite'] as const
+type TrialPlan = (typeof TRIAL_PLANS)[number]
+function resolveTrialPlan(app: { plan_interest?: string | null; message?: string | null }): TrialPlan {
+  let p = (app.plan_interest ?? '').toLowerCase().trim()
+  if (!(TRIAL_PLANS as readonly string[]).includes(p)) {
+    // Solicitudes antiguas guardaban el plan dentro del texto del mensaje.
+    const m = (app.message ?? '').match(/plan de inter[eé]s:\s*([a-zñ]+)/i)
+    p = (m?.[1] ?? '').toLowerCase()
+  }
+  return (TRIAL_PLANS as readonly string[]).includes(p) ? (p as TrialPlan) : 'essential'
+}
+
 async function currentAdminId() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -91,6 +105,8 @@ export async function approveApplication(formData: FormData) {
 
   if (!application || application.status === 'approved') return
 
+  const trialPlan = resolveTrialPlan(application)
+
   // Reuse existing profile if the email was already registered (e.g. as a buyer)
   const { data: existingProfile } = await admin
     .from('profiles')
@@ -160,6 +176,7 @@ export async function approveApplication(formData: FormData) {
         email: application.email,
         website: application.website,
         status: 'trial',
+        subscription_plan: trialPlan,
         vehicle_slots: 0,
         is_verified: true,
       })
@@ -179,6 +196,47 @@ export async function approveApplication(formData: FormData) {
       return
     }
     dealerId = dealer.id
+  }
+
+  // Provisionar organización + membresía owner. El sistema de entitlements/plan-gating
+  // (getDealerAccess.orgId, getOrganizationIdForUser, can(), getEntitlements) depende de
+  // estos registros; sin ellos un dealer aprobado no desbloquea las features de su plan
+  // (kanban, import CSV, etc.). Idempotente: reutiliza si ya existen.
+  const { data: existingOrg } = await admin
+    .from('organizations')
+    .select('id')
+    .eq('dealer_id', dealerId)
+    .maybeSingle()
+
+  let orgId = existingOrg?.id ?? null
+  if (!orgId) {
+    const orgSlug = `${slugify(application.dealer_name)}-${Math.random().toString(36).slice(2, 8)}`
+    const { data: org } = await admin
+      .from('organizations')
+      .insert({
+        dealer_id: dealerId,
+        name: application.dealer_name,
+        slug: orgSlug,
+        status: 'active',
+        is_verified: true,
+      })
+      .select('id')
+      .single()
+    orgId = org?.id ?? null
+  }
+
+  if (orgId) {
+    const { data: existingMember } = await admin
+      .from('organization_members')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (!existingMember) {
+      await admin
+        .from('organization_members')
+        .insert({ organization_id: orgId, user_id: userId, role: 'owner' })
+    }
   }
 
   const reviewedBy = await currentAdminId()

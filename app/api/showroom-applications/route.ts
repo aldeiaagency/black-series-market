@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
       dealer_name:   company,
       phone,
       location_city: city,
+      plan_interest: plan ?? null,
       message:       fullMessage || null,
       status:        'new',
     })
