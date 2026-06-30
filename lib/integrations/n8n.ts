@@ -13,6 +13,7 @@ export type IntegrationEventType =
   | 'vehicle.submitted_for_review'
   | 'vehicle.approved'
   | 'vehicle.rejected'
+  | 'appointment.created'
   | 'showroom_application.created'
 
 interface NotifyOptions {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getOrganizationIdForUser, getEntitlements } from '@/lib/entitlements'
+import { getDealerBookingContext } from '@/lib/assistant-booking'
 import { createHmac } from 'crypto'
 
 const WEBHOOK_SECRET  = process.env.ASSISTANT_WEBHOOK_SECRET ?? ''
@@ -49,6 +50,10 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (!cfg?.enabled || !cfg.webhook_url) return classic()
+
+  // ¿El showroom puede reservar cita? (Elite/Grupo con entitlement + calendario configurado)
+  let bookingEnabled = false
+  try { bookingEnabled = (await getDealerBookingContext(dealer.id as string)).enabled } catch {}
 
   // Build context payload (only public vehicle data)
   const sessionId   = crypto.randomUUID()
@@ -109,6 +114,7 @@ export async function POST(req: NextRequest) {
       dealer_id:       dealer.id,
       opening_message: extData.message ?? extData.opening_message ?? null,
       dealer_whatsapp: (cfg.whatsapp_number as string) || (dealer.whatsapp as string) || null,
+      booking_enabled: bookingEnabled,
     })
   } catch {
     return classic()

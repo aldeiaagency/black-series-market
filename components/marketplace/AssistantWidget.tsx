@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { MessageSquare, Send, Loader2, Info } from 'lucide-react'
+import { MessageSquare, Send, Loader2, Info, Calendar } from 'lucide-react'
 import QualifiedLeadForm from './QualifiedLeadForm'
+import AppointmentBooking from './AppointmentBooking'
 
 interface Msg { role: 'assistant' | 'user'; text: string }
-type Mode = 'init' | 'consent' | 'chat' | 'classic' | 'done'
+type Mode = 'init' | 'consent' | 'chat' | 'classic' | 'done' | 'booking'
 
 interface Props {
   vehicleId:      string
@@ -30,6 +31,7 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
   const [input,      setInput]      = useState('')
   const [loading,    setLoading]    = useState(false)
   const [consent,    setConsent]    = useState(false)
+  const [bookingEnabled, setBookingEnabled] = useState(false)
   const [previewTurn, setPreviewTurn] = useState(0)
   const endRef = useRef<HTMLDivElement>(null)
 
@@ -60,6 +62,7 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
         if (data.mode === 'assistant') {
           setSessionId(data.session_id)
           setWaNumber(data.dealer_whatsapp ?? dealerWhatsapp ?? null)
+          setBookingEnabled(!!data.booking_enabled)
           if (data.opening_message) setMessages([{ role: 'assistant', text: data.opening_message }])
           setMode('consent')
         } else {
@@ -206,9 +209,30 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
     </div>
   )
 
+  // ── Reserva de cita (Elite/Grupo) ─────────────────────────────────────────
+  if (mode === 'booking') return (
+    <AppointmentBooking
+      dealerId={dealerId}
+      vehicleId={vehicleId}
+      vehicleTitle={vehicleTitle}
+      sessionId={sessionId}
+      onBack={() => setMode('chat')}
+    />
+  )
+
   // ── Chat ──────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-3">
+      {bookingEnabled && (
+        <button
+          type="button"
+          onClick={() => setMode('booking')}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-gold border border-gold/30 bg-gold/5 hover:bg-gold/10 transition-colors"
+        >
+          <Calendar className="w-3.5 h-3.5" /> Reservar visita
+        </button>
+      )}
+
       {/* Messages */}
       <div
         className="space-y-2.5 max-h-60 overflow-y-auto pr-1"
