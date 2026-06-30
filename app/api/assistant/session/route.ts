@@ -58,6 +58,9 @@ export async function POST(req: NextRequest) {
 
   const payload = {
     session_id: sessionId,
+    // WF7 validates a top-level dealer_id (same contract as /api/assistant/message).
+    // Without it the workflow responds 400 and the widget falls back to the classic form.
+    dealer_id:  dealer.id,
     event:      'session_start',
     language,
     vehicle: {
