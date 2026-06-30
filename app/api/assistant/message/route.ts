@@ -4,14 +4,16 @@ import { createHmac } from 'crypto'
 
 const WEBHOOK_SECRET = process.env.ASSISTANT_WEBHOOK_SECRET ?? ''
 const TIMEOUT_MS     = 5000
-const DEGRADATION    = NextResponse.json({ type: 'degradation', fallback: true })
+// Factory, not a shared instance: a NextResponse body is consumed once, so a
+// single module-level response returns an empty body on every reuse.
+const degradation = () => NextResponse.json({ type: 'degradation', fallback: true })
 
 export async function POST(req: NextRequest) {
   let body: { session_id?: string; dealer_id?: string; message?: string; event?: string }
-  try { body = await req.json() } catch { return DEGRADATION }
+  try { body = await req.json() } catch { return degradation() }
 
   const { session_id, dealer_id, message, event } = body
-  if (!session_id || !dealer_id) return DEGRADATION
+  if (!session_id || !dealer_id) return degradation()
 
   // Sanitize input — no PII in outgoing logs, reject oversized messages
   const sanitized = (message ?? '').slice(0, 2000).replace(/<[^>]*>/g, '')
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
     .eq('dealer_id', dealer_id)
     .single()
 
-  if (!cfg?.enabled || !cfg.webhook_url) return DEGRADATION
+  if (!cfg?.enabled || !cfg.webhook_url) return degradation()
 
   const forward    = JSON.stringify({ session_id, dealer_id, message: sanitized, event: event || 'message' })
   const sig        = createHmac('sha256', WEBHOOK_SECRET).update(forward).digest('hex')
@@ -40,10 +42,10 @@ export async function POST(req: NextRequest) {
     })
     clearTimeout(timer)
 
-    if (!ext.ok) return DEGRADATION
+    if (!ext.ok) return degradation()
     const data = await ext.json()
     return NextResponse.json(data)
   } catch {
-    return DEGRADATION
+    return degradation()
   }
 }

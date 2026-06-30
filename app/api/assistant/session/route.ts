@@ -5,14 +5,17 @@ import { createHmac } from 'crypto'
 
 const WEBHOOK_SECRET  = process.env.ASSISTANT_WEBHOOK_SECRET ?? ''
 const TIMEOUT_MS      = 5000
-const CLASSIC         = NextResponse.json({ mode: 'classic' })
+// Must be a factory, not a shared instance: a NextResponse body is a one-shot
+// stream. Reusing a single module-level response makes every fallback after the
+// first return an empty body (content-length 0).
+const classic = () => NextResponse.json({ mode: 'classic' })
 
 export async function POST(req: NextRequest) {
   let body: { vehicle_id?: string; language?: string }
-  try { body = await req.json() } catch { return CLASSIC }
+  try { body = await req.json() } catch { return classic() }
 
   const vehicleId = body.vehicle_id
-  if (!vehicleId) return CLASSIC
+  if (!vehicleId) return classic()
 
   const admin = createAdminClient()
 
@@ -24,18 +27,18 @@ export async function POST(req: NextRequest) {
     .eq('status', 'active')
     .single()
 
-  if (!vehicle?.dealer) return CLASSIC
+  if (!vehicle?.dealer) return classic()
   const dealer = vehicle.dealer as Record<string, any>
 
   // Check entitlement server-side
   try {
     const orgId = await getOrganizationIdForUser(dealer.profile_id as string)
-    if (!orgId) return CLASSIC
+    if (!orgId) return classic()
     const ent = await getEntitlements(orgId)
     const feat = ent?.features['lead_qualification_assistant']
-    if (!feat?.included || feat.status !== 'operative') return CLASSIC
+    if (!feat?.included || feat.status !== 'operative') return classic()
   } catch {
-    return CLASSIC
+    return classic()
   }
 
   // Check per-showroom assistant config
@@ -45,7 +48,7 @@ export async function POST(req: NextRequest) {
     .eq('dealer_id', dealer.id)
     .single()
 
-  if (!cfg?.enabled || !cfg.webhook_url) return CLASSIC
+  if (!cfg?.enabled || !cfg.webhook_url) return classic()
 
   // Build context payload (only public vehicle data)
   const sessionId   = crypto.randomUUID()
@@ -94,7 +97,7 @@ export async function POST(req: NextRequest) {
     })
     clearTimeout(timer)
 
-    if (!ext.ok) return CLASSIC
+    if (!ext.ok) return classic()
 
     const extData = await ext.json()
     return NextResponse.json({
@@ -105,6 +108,6 @@ export async function POST(req: NextRequest) {
       dealer_whatsapp: (cfg.whatsapp_number as string) || (dealer.whatsapp as string) || null,
     })
   } catch {
-    return CLASSIC
+    return classic()
   }
 }
