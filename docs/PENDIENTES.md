@@ -37,6 +37,7 @@
 ## Estado actual (lo que ya está hecho)
 
 - ✅ n8n activo con WF1–WF7 operativos (signup, aprobación, rechazo, más info, eventos, alertas, agente IA)
+- ✅ **Asistente IA del comprador (WF7) REPARADO y verificado E2E (2026-06-30).** No funcionaba en prod por 3 bugs: (1) `NextResponse` de fallback declarado a nivel de módulo en `/api/assistant/{session,message}` → body agotado → 200 vacío → widget caía al form clásico [commit f3e083a]; (2) `/api/assistant/session` no enviaba `dealer_id` a nivel raíz → WF7 respondía 400 [commit c0a7724]; (3) nodo OpenAI de WF7 en `contentType: raw` → OpenAI no parseaba el body ("you must provide a model parameter") → pasado a modo JSON. Verificado chat E2E (apertura + turno con respuesta contextual). 🔴 **Gap:** `showroom_assistant_config` está VACÍA → ningún showroom real tiene el asistente activo (todas las fichas usan el form clásico); falta provisión por showroom Pro/Elite (fila con `enabled=true` + `webhook_url`=WF7). Sin paso de onboarding que la cree.
 - ✅ Todas las variables de entorno de n8n configuradas (OPENAI, FIRECRAWL, SUPABASE, MAIL_FROM, SMTP Hostinger, etc.)
 - ✅ Vercel: `N8N_WEBHOOK_DEALER_APPROVED/REJECTED/PENDING_INFO`, `ASSISTANT_WEBHOOK_SECRET/RESULT`, `NEXT_PUBLIC_APP_URL`
 - ✅ Vercel: `N8N_WEBHOOK_URL` + `N8N_WEBHOOK_SECRET` configurados — el market emite eventos en tiempo real a WF5
