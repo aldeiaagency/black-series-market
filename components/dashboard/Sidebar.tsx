@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Car, PlusCircle, User, BarChart2,
-  MessageSquare, CreditCard, LogOut, ExternalLink, FileUp, Users, ClipboardList,
+  MessageSquare, CreditCard, LogOut, ExternalLink, FileUp, Users, ClipboardList, CalendarClock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -19,6 +19,7 @@ const NAV: { label: string; href: string; icon: typeof LayoutDashboard; exact?: 
   { label: 'Importar CSV', href: '/dashboard/importar', icon: FileUp, section: 'importar' },
   { label: 'Oportunidades', href: '/dashboard/oportunidades', icon: MessageSquare, section: 'oportunidades' },
   { label: 'A la carta', href: '/dashboard/solicitudes', icon: ClipboardList, section: 'solicitudes' },
+  { label: 'Citas', href: '/dashboard/citas', icon: CalendarClock, section: 'citas' },
   { label: 'Analíticas', href: '/dashboard/analiticas', icon: BarChart2, section: 'analiticas' },
   { label: 'Equipo', href: '/dashboard/equipo', icon: Users, section: 'equipo' },
   { label: 'Mi perfil', href: '/dashboard/perfil', icon: User, section: 'perfil' },

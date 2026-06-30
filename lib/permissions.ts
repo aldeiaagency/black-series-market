@@ -37,6 +37,7 @@ export type DashboardSection =
   | 'importar'
   | 'oportunidades'
   | 'solicitudes'
+  | 'citas'
   | 'analiticas'
   | 'perfil'
   | 'suscripcion'
@@ -59,7 +60,7 @@ export interface Permissions {
 
 const FULL: DashboardSection[] = [
   'panel', 'inventario', 'publicar', 'importar',
-  'oportunidades', 'solicitudes', 'analiticas', 'perfil', 'suscripcion', 'equipo',
+  'oportunidades', 'solicitudes', 'citas', 'analiticas', 'perfil', 'suscripcion', 'equipo',
 ]
 
 const PERMISSIONS: Record<OrgRole, Permissions> = {
@@ -96,7 +97,7 @@ const PERMISSIONS: Record<OrgRole, Permissions> = {
     canManageTeam: false,
   },
   location_manager: {
-    sections: ['panel', 'inventario', 'publicar', 'importar', 'oportunidades', 'solicitudes', 'analiticas'],
+    sections: ['panel', 'inventario', 'publicar', 'importar', 'oportunidades', 'solicitudes', 'citas', 'analiticas'],
     canEditInventory: true,
     canManageOpportunities: true,
     canEditProfile: false,
