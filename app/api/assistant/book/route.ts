@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
       buyer_email: buyerEmail,
       buyer_phone: buyerPhone,
       message: `Cita solicitada: ${chosen.label} · ${vehicleTitle}`,
-      source_channel: 'assistant',
+      source_channel: 'ficha_assistant',
     })
     .select('id')
     .single()
