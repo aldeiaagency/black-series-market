@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Car, Eye, MessageSquare, TrendingUp, PlusCircle, ArrowRight, UserCheck } from 'lucide-react'
+import { Car, Eye, MessageSquare, TrendingUp, PlusCircle, ArrowRight, UserCheck, CheckCircle2, Circle } from 'lucide-react'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
 import { getEntitlements } from '@/lib/entitlements'
@@ -67,6 +67,12 @@ export default async function DashboardPage() {
     { label: 'En revisión', value: pendingVehicles ?? 0, icon: TrendingUp, color: 'text-amber-400' },
   ]
 
+  // Getting-started steps for new dealers (0 vehicles published)
+  const isNewDealer = (activeVehicles ?? 0) === 0
+  const hasProfile = !!(dealer.description && dealer.phone)
+  const hasPlan = !!(dealer.subscription_plan && dealer.subscription_plan !== 'trial')
+  const isPro = dealer.subscription_plan === 'professional' || dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -79,6 +85,37 @@ export default async function DashboardPage() {
           {activeVehicles ?? 0}/{vehicleLimit} vehículos publicados
         </p>
       </div>
+
+      {/* Getting started — only for dealers with no published vehicles yet */}
+      {isNewDealer && (
+        <div className="mb-8 border border-gold/20 bg-[#0D0C07] p-6">
+          <p className="text-xs text-gold tracking-widest uppercase mb-4">Primeros pasos</p>
+          <div className="space-y-3">
+            {[
+              { done: true,     label: 'Cuenta creada y acceso concedido',                   href: null },
+              { done: hasProfile, label: 'Completa el perfil de tu showroom',                 href: '/dashboard/perfil' },
+              { done: hasPlan,   label: 'Activa tu plan de suscripción',                      href: '/dashboard/suscripcion' },
+              { done: false,     label: 'Publica tu primer vehículo',                         href: '/dashboard/publicar' },
+              { done: false,     label: isPro ? 'Configura el asistente IA (disponible en tu plan)' : 'Mejora a Professional para activar el asistente IA', href: isPro ? '/dashboard/perfil' : '/dashboard/suscripcion' },
+            ].map((step) => (
+              <div key={step.label} className="flex items-center gap-3">
+                {step.done
+                  ? <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  : <Circle className="w-4 h-4 text-bsm-text-muted flex-shrink-0" />}
+                {step.href && !step.done ? (
+                  <Link href={step.href} className="text-sm text-bsm-text-secondary hover:text-gold transition-colors">
+                    {step.label} →
+                  </Link>
+                ) : (
+                  <span className={`text-sm ${step.done ? 'text-bsm-text-muted line-through' : 'text-bsm-text-secondary'}`}>
+                    {step.label}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">

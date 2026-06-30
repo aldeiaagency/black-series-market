@@ -486,9 +486,21 @@ export default function KanbanBoard({ initialLeads, canManage }: {
 
   const byStage = (stage: Stage) => leads.filter(l => l.status === stage)
   const closedLeads = leads.filter(l => l.status === 'discarded')
+  const newCount = leads.filter(l => l.status === 'new').length
 
   return (
     <>
+      {/* Live stats — computed from client state so update on every move */}
+      <p className="text-sm text-bsm-text-muted mb-6">
+        {newCount > 0 && (
+          <span className="text-gold mr-2">{newCount} nueva{newCount !== 1 ? 's' : ''}</span>
+        )}
+        {leads.length} total
+        {!canManage && (
+          <span className="ml-2 text-[11px] border border-bsm-border px-1.5 py-0.5">Solo lectura</span>
+        )}
+      </p>
+
       {/* Active pipeline columns */}
       <div className="flex gap-3 overflow-x-auto pb-4">
         {ACTIVE_STAGES.map(stage => {

@@ -56,23 +56,12 @@ export default async function OportunidadesPage() {
     vehicle:         Array.isArray(l.vehicle) ? l.vehicle[0] ?? null : l.vehicle ?? null,
   }))
 
-  const newCount = leads.filter(l => l.status === 'new').length
-
   // ── Kanban (Professional / Elite) ────────────────────────────────────────────
   if (hasPipeline) {
     return (
       <div className="p-8 min-h-screen">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <h1 className="font-display text-3xl font-light mb-1">Oportunidades</h1>
-            <p className="text-sm text-bsm-text-muted">
-              {newCount > 0 && <span className="text-gold mr-2">{newCount} nueva{newCount !== 1 ? 's' : ''}</span>}
-              {leads.length} total
-              {!canManage && (
-                <span className="ml-2 text-[11px] border border-bsm-border px-1.5 py-0.5">Solo lectura</span>
-              )}
-            </p>
-          </div>
+        <div className="mb-8">
+          <h1 className="font-display text-3xl font-light mb-1">Oportunidades</h1>
         </div>
 
         <KanbanBoard initialLeads={leads} canManage={canManage} />
@@ -103,10 +92,7 @@ export default async function OportunidadesPage() {
     <div className="p-8 max-w-3xl">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-light mb-1">Oportunidades</h1>
-        <p className="text-sm text-bsm-text-muted">
-          {newCount > 0 && <span className="text-gold mr-2">{newCount} nueva{newCount !== 1 ? 's' : ''}</span>}
-          {leads.length} total
-        </p>
+        <p className="text-sm text-bsm-text-muted">{leads.length} total</p>
       </div>
 
       {/* Upsell pipeline */}

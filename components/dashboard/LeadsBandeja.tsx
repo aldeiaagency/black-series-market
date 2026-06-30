@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { X, Mail, Phone, MessageSquare, Trash2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { timeAgo, LEAD_STATUS_LABELS, getLeadStatusColor } from '@/lib/utils'
 import type { LeadStatus } from '@/lib/types'
 
@@ -66,8 +65,11 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
 
   async function updateStatus(leadId: string, newStatus: string) {
     setUpdating(true)
-    const supabase = createClient()
-    await supabase.from('leads').update({ status: newStatus }).eq('id', leadId)
+    await fetch(`/api/leads/${leadId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
     setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l))
     setSelected(prev => prev?.id === leadId ? { ...prev, status: newStatus } : prev)
     setUpdating(false)

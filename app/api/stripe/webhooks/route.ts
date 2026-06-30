@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/server'
-import { provisionPlanBoostCredits } from '@/lib/boosts'
+import { provisionPlanBoostCredits, activateBoost } from '@/lib/boosts'
 import { incrementEliteCounter } from '@/lib/elite-capacity'
 import type Stripe from 'stripe'
 
@@ -74,12 +74,37 @@ async function handleCheckoutCompleted(
   const vehicleId = meta.vehicle_id  // boost purchase
 
   // ── Boost purchase ──
-  if (session.metadata?.type === 'boost' && vehicleId) {
+  if (session.metadata?.type === 'boost' && vehicleId && dealerId) {
+    // Resolve the organization for this dealer
+    const { data: org } = await admin
+      .from('organizations')
+      .select('id')
+      .eq('dealer_id', dealerId)
+      .single()
+
+    if (org) {
+      // Create a pack credit for this paid boost (quantity=1, no expiry)
+      const { data: credit } = await admin
+        .from('boost_credits')
+        .insert({ organization_id: org.id, source: 'pack', quantity: 1, used: 0, expires_at: null })
+        .select('id')
+        .single()
+
+      if (credit) {
+        const result = await activateBoost(vehicleId, org.id)
+        if (!result.success) {
+          // Activation failed (cap full or already boosted): consume credit + direct fallback
+          await admin.from('boost_credits').update({ used: 1 }).eq('id', credit.id)
+          const featuredUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          await admin.from('vehicles').update({ is_featured: true, featured_until: featuredUntil }).eq('id', vehicleId)
+        }
+        return
+      }
+    }
+
+    // Fallback: no org found or credit insert failed
     const featuredUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-    await admin.from('vehicles').update({
-      is_featured: true,
-      featured_until: featuredUntil,
-    }).eq('id', vehicleId)
+    await admin.from('vehicles').update({ is_featured: true, featured_until: featuredUntil }).eq('id', vehicleId)
     return
   }
 
