@@ -1,6 +1,51 @@
 # Black Label Market — PENDIENTES
-> Documento único y canónico. Última actualización: **2026-06-26** (sesión 3).
+> Documento único y canónico. Última actualización: **2026-07-01** (auditoría completa).
 > Elimina y sustituye: `pendientes-configuracion-externa.md`, `deployment-checklist.md`, `n8n-setup.md`, `backlog-alertas-y-vehiculos-a-la-carta.md`, `backlog-marketplace.md`.
+
+---
+
+## 🔍 Auditoría completa 2026-07-01 — Correcciones pendientes
+
+> **Informe completo con `archivo:línea` y fix concreto de cada punto:** [`docs/auditoria-completa-2026-07.md`](auditoria-completa-2026-07.md).
+> 4 auditorías especializadas (bugs, seguridad, UX/accesibilidad, SEO/GEO) sobre el código real. Aquí solo el checklist accionable; el porqué y el snippet de corrección están en el informe. Nada de esto está corregido todavía — pendiente de ejecutar.
+
+### 🔴 Sprint 0 — Antes de aceptar más pagos reales / abrir al público
+Cadena de dinero rota + seguridad explotable.
+- [ ] **BUG-1** — `create-checkout` usa firma legacy → **`subscriptions` nunca se rellena** ni se activa Elite. Resolver `organization_id` y usar la firma nueva de `createCheckoutSession`. `app/api/stripe/create-checkout/route.ts` + `lib/stripe.ts`
+- [ ] **BUG-2** — El boost pagado **no pone `is_featured=true`** (solo `featured_until`) → no destaca. `lib/boosts.ts:130-134`
+- [ ] **BUG-3** — Fallback de boost destaca **saltándose el cupo** `max_boosted_share` cuando la activación falla por cupo lleno. `app/api/stripe/webhooks/route.ts:94-108`
+- [ ] **BUG-7** — Webhook Stripe **sin idempotencia** real (el comentario la promete pero no existe) → boosts/créditos duplicados en reenvíos. Tabla `processed_stripe_events` con unique. `app/api/stripe/webhooks/route.ts`
+- [ ] **SEC-1** 🔴 — **Server Actions de admin sin verificar rol** → cualquier usuario autenticado puede aprobar showrooms/vehículos. Añadir `requireAdmin()` como 1ª línea de cada acción. `app/(admin)/admin/altas-showroom/actions.ts` + `app/(admin)/admin/vehiculos/[id]/page.tsx`
+- [ ] **SEC-2** 🔴 — **Webhooks entrantes fail-open**: HMAC solo se comprueba si el secreto está en el entorno. Hacerlo obligatorio (fail-closed). `app/api/webhooks/{appointment-result,assistant-result,hot-lead-alert}/route.ts`
+- [ ] **SEC-3** 🔴 — **Mass-assignment en vehículos**: dealer se autopublica activo/destacado saltando moderación y el boost de €49. Allowlist de columnas + forzar `status='pending_review'`. `app/api/vehicles/route.ts` + `[id]/route.ts`
+- [ ] **SEC-4** — **Falsificación de leads/citas**: `dealer_id`/`vehicle_id` arbitrarios sin validar pertenencia, sin rate-limit. `app/api/leads/route.ts` + webhooks
+- [ ] **SEC-5** — **Inyección de operadores PostgREST** en el buscador (`.or()` con input crudo) → expone borradores/no-activos. `lib/vehicle-query.ts:85`
+- [ ] **SEO-1/SEO-2** — (solo si se levanta el gate noindex) `/sobre-nosotros` y `/coches/berlinas` en el sitemap+footer pueden ser 404. Auditar 1:1 rutas del sitemap. `app/sitemap.ts`
+
+### 🟡 Sprint 1 — Calidad y confianza
+- [ ] **BUG-5** — `incrementEliteCounter` importado pero **nunca llamado** → capacidad Elite por provincia no se limita. `app/api/stripe/webhooks/route.ts`
+- [ ] **BUG-6** — 3 escrituras basura `admin.rpc as never` que corrompen `used`/`current_elite_showrooms`. `lib/boosts.ts:81,180` + `lib/elite-capacity.ts:87`
+- [ ] **BUG-8** — Sin cron que expire boosts ni resetee `is_featured` → el orden prioriza boosts caducados.
+- [ ] **BUG-9** — Doble-reserva en `assistant/book` (check+insert sin constraint único). Índice único parcial + 409.
+- [ ] **SEC-6** — Import por API key global sin scoping (`IMPORT_API_KEY` acepta cualquier `dealer_slug`, sin plan-gating). `app/api/vehicles/import/route.ts`
+- [ ] **SEC-7** — Upload confía `file.type`/extensión del cliente, sin magic bytes. `app/api/upload/route.ts`
+- [ ] **SEC-8** — Contraseña temporal devuelta en el JSON de respuesta + sufijo fijo `7a`. Invitación por email. `app/api/team/members/route.ts`
+- [ ] **A1** 🎨 — **Contraste AA falla en el texto gris más usado** (`bsm-text-muted` 4.02:1). Subir a `#A0A0A0` + reemplazar literales `#808080/#737373`. `tailwind.config.ts:41`
+- [ ] **A2/A3** — Modales sin `role="dialog"`/focus-trap/Escape (hook `useModalA11y` compartido). `LeadsBandeja.tsx`, `KanbanBoard.tsx`, `SearchAlertModal.tsx`, `VehicleGallery.tsx`
+- [ ] **B1** — Header con **gradiente marrón** que rompe la identidad "negro premium" → gradiente negro + acento dorado. `Header.tsx:125-129`
+- [ ] **B3** — Tablas de admin/dashboard rotas en móvil (8 col con scroll) → patrón card apilada. `admin/dealers/page.tsx`
+- [ ] **B2** — Hero con 3 CTAs dorados compitiendo → 1 primario + secundarios. `app/(public)/page.tsx:112-129`
+
+### 🟢 Sprint 2 — Pulido premium + SEO
+- [ ] **BUG-bajos** — orden de membresía owner>admin (no `created_at`); `DELETE` de miembro borra auth global; TOCTOU en `maxUsers`; consumo de crédito no atómico.
+- [ ] **A4-A7** — Labels/errores accesibles en formularios; foco visible en galería; radios con check no-cromático.
+- [ ] **A8-A12** — `aria-label` en iconos header, `aria-expanded` hamburguesa, jerarquía h1→h3, `prefers-reduced-motion`, placeholder de imagen legible.
+- [ ] **B4-B11** — Tipografía de cuerpo más grande; autoguardado wizard publicar; kanban usable en móvil; **unificar los 3 dorados** (`#C6A64B`/`#C9A84C`/`#BFA14A`) y tokens de borde; loading/skeletons; "precio a consultar" con jerarquía; breadcrumb legible; unificar `ContactForm`/`QualifiedLeadForm`.
+- [ ] **SEO-3/4/5/6** — `mileageFromOdometer` con guarda de null; OG de fichas con `url`+dimensiones; respuesta directa citable (GEO) + `FAQPage` en landings de categoría/marca.
+- [ ] **SEO-7/8/9** — `priority={activeIndex===0}` en galería; breadcrumb con nivel categoría + marca→`/marcas/[slug]`; silo horizontal entre categorías.
+- [ ] **SEO-10/11/12** — fecha visible derivada de `dateModified`; título de dealer con ciudad; enlaces al split `/marcas/[brand]/coches|motos`.
+- [ ] **SEC-9/10/11** — Cabeceras de seguridad (CSP/HSTS/X-Frame-Options) en `next.config.js`; validar/rate-limit `/api/track`; no devolver errores crudos de PostgREST.
+- [ ] **SEO-backlog** — cerrar en `seo-geo-backlog.md` P01, P02, P03, P04, O2-07/P07 (ya implementadas, marcadas pendientes por error).
 
 ---
 
