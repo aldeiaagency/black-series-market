@@ -41,3 +41,6 @@ next-env.d.ts
 
 # local claude context (no versionar)
 CLAUDE.local.md
+
+# credenciales privadas locales (nunca versionar)
+CREDENTIALS.local.md

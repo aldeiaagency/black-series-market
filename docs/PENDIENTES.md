@@ -92,7 +92,7 @@ Cadena de dinero rota + seguridad explotable.
 - ✅ Bug email duplicado en aprobación resuelto
 - ✅ Dominio `blacklabelmarket.es` configurado en Vercel (apex canónico, www→apex)
 - ✅ Deploy en producción en `blacklabelmarket.es`
-- ✅ Cuenta Firecrawl: `aldeiatools@gmail.com` / `Joseleotorres3+` · API key en n8n
+- ✅ Cuenta Firecrawl: operativa · credenciales en `CREDENTIALS.local.md` (privado, no versionado) · API key en n8n
 - ✅ WF5 pipeline completo: recibe los 6 tipos de evento → los 6 devuelven HTTP 200 → emails salen por Hostinger SMTP
 - ✅ WF5 → WF6 (vehicle.approved): vehicleId se pasa correctamente → Supabase query OK → matcher de alertas operativo
 - ✅ SMTP Hostinger en n8n funcionando (credential recreado, `N8N_ENCRYPTION_KEY` fijada para evitar rotación futura)
