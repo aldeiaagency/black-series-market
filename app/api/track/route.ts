@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
       dealer_id:   dealer_id   || null,
     })
 
+    // Vista de vehículo: incrementar el contador de forma ATÓMICA (RPC SECURITY DEFINER).
+    // Sustituye al read-modify-write que se hacía en el render de la ficha.
+    if (event_type === 'vehicle_view' && vehicle_id) {
+      await supabase.rpc('increment_vehicle_views', { p_id: vehicle_id })
+    }
+
     return NextResponse.json({ ok: true })
   } catch {
     // Silently fail — analytics must never break the UX

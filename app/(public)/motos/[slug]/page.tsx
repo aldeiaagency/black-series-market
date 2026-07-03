@@ -1,9 +1,13 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
 import VehicleDetailContent from '@/components/marketplace/VehicleDetailContent'
+import ViewTracker from '@/components/marketplace/ViewTracker'
 import { resolveContactMode } from '@/lib/contact-mode'
 import { FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/utils'
 import type { Metadata } from 'next'
+
+// ISR: la ficha ya no escribe en el render (el tracking va por beacon) → cacheable en CDN.
+export const revalidate = 300
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -13,7 +17,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data } = await supabase
     .from('vehicles')
     .select('brand_name, model_name, year, version, images, mileage_km, fuel_type, power_hp, displacement_cc, location_province, price, price_on_request')
@@ -42,7 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function MotoDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const { data: vehicle } = await supabase
     .from('vehicles')
@@ -54,15 +58,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
   // draft/pending_review/expired → 404; sold/paused → visible with adapted CTAs
   if (!vehicle || ['draft', 'pending_review', 'expired'].includes(vehicle.status)) notFound()
 
-  // Track view (non-blocking)
-  supabase.from('analytics_events').insert({
-    vehicle_id: vehicle.id,
-    dealer_id: vehicle.dealer_id,
-    event_type: 'vehicle_view',
-  }).then(() => {})
-
-  supabase.from('vehicles').update({ views: vehicle.views + 1 }).eq('id', vehicle.id).then(() => {})
-
+  // La vista se registra desde el cliente (ViewTracker → /api/track) para no escribir en el render.
   const contactMode = vehicle.dealer?.profile_id
     ? await resolveContactMode(vehicle.dealer.profile_id)
     : 'classic'
@@ -157,6 +153,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   return (
     <>
+      <ViewTracker vehicleId={vehicle.id} dealerId={vehicle.dealer_id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <VehicleDetailContent
