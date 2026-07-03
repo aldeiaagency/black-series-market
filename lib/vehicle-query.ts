@@ -82,7 +82,15 @@ export async function applyVehicleFilters(
   }
 
   if (params.search) {
-    query = query.or(`brand_name.ilike.%${params.search}%,model_name.ilike.%${params.search}%`)
+    // Saneado: quitar caracteres que romperían/inyectarían el filtro .or() de PostgREST
+    // (comas, paréntesis, comodines) y acotar longitud.
+    const s = params.search.replace(/[,()*%\\]/g, ' ').trim().slice(0, 60)
+    if (s) {
+      // Indexa marca, modelo, versión/acabado Y título → "GT3", "Weissach", "Black Series" encuentran.
+      query = query.or(
+        `brand_name.ilike.%${s}%,model_name.ilike.%${s}%,version.ilike.%${s}%,title.ilike.%${s}%`
+      )
+    }
   }
 
   return { query }

@@ -84,7 +84,7 @@ export default function Header() {
   }, [])
 
   async function checkDealer(userId: string, supabase: ReturnType<typeof createClient>) {
-    const { data } = await supabase.from('dealers').select('id').eq('profile_id', userId).single()
+    const { data } = await supabase.from('dealers').select('id').eq('profile_id', userId).maybeSingle()
     setIsDealer(!!data)
   }
 
