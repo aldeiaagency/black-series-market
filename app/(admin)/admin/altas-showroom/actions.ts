@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { randomBytes } from 'crypto'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { slugify } from '@/lib/utils'
+import { assertAdmin } from '@/lib/admin-auth'
 
 function temporaryPassword() {
   return `BLM-${randomBytes(10).toString('base64url')}`
@@ -35,6 +36,7 @@ function revalidateAll(id: string) {
 }
 
 export async function setApplicationStatus(formData: FormData) {
+  await assertAdmin()
   const id = formData.get('id') as string
   const status = formData.get('status') as string
   if (!id || !['new', 'in_review', 'pending_info'].includes(status)) return
@@ -79,6 +81,7 @@ export async function setApplicationStatus(formData: FormData) {
 }
 
 export async function saveNotes(formData: FormData) {
+  await assertAdmin()
   const id = formData.get('id') as string
   const adminNotes = formData.get('admin_notes') as string
   if (!id) return
@@ -93,6 +96,7 @@ export async function saveNotes(formData: FormData) {
 }
 
 export async function approveApplication(formData: FormData) {
+  await assertAdmin()
   const id = formData.get('id') as string
   if (!id) return
 
@@ -275,6 +279,7 @@ export async function approveApplication(formData: FormData) {
 }
 
 export async function rejectApplication(formData: FormData) {
+  await assertAdmin()
   const id = formData.get('id') as string
   if (!id) return
 

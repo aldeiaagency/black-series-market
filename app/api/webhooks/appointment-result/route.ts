@@ -19,7 +19,11 @@ export async function POST(req: NextRequest) {
   const raw = await req.text()
   const sig = req.headers.get('x-bsm-signature') ?? ''
 
-  if (APPT_SECRET && !verifyHmac(raw, sig)) {
+  // Fail-closed: sin secreto configurado NO se acepta nada (antes se procesaba sin verificar).
+  if (!APPT_SECRET) {
+    return NextResponse.json({ ok: false, error: 'server_misconfigured' }, { status: 503 })
+  }
+  if (!sig || !verifyHmac(raw, sig)) {
     return NextResponse.json({ ok: false, error: 'invalid_signature' }, { status: 401 })
   }
 
