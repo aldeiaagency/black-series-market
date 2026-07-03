@@ -26,12 +26,16 @@ Los 2 CRÍTICOS de RLS están cerrados en la BD de producción (aplicado vía Ma
 
 Pendiente del punto 7 del gate (barrer RLS del resto de tablas): ejecutar `supabase/migrations/_rls-audit.sql` en Supabase y revisar organizations/subscriptions/boosts/plans.
 
-## Acciones manuales tuyas (no puedo hacerlas yo)
+## Estado de ejecución (2026-07-03)
 
-- [ ] **Rotar** la clave de los scripts eliminados si era `service_role` (el historial de git la conserva). En Supabase → Settings → API → regenerar. Actualizar la env donde se use.
-- [ ] Aplicar `057` en Supabase tras las 2 verificaciones.
-- [ ] Desplegar el código: `vercel --prod --yes`.
-- [ ] Confirmar que los 3 secretos de webhook (`HOT_LEAD_ALERT_SECRET`, `ASSISTANT_RESULT_SECRET`, `APPOINTMENT_RESULT_SECRET`) están en Vercel (si no, con fail-closed los webhooks devolverán 503).
+Hecho por Claude con los accesos:
+- [x] Migraciones **057 + 058 aplicadas** en Supabase (producción) y **verificadas** con test real (auto-admin y auto-Elite bloqueados; edición de perfil intacta).
+- [x] **Código desplegado** a producción (`vercel --prod`, aliased a blacklabelmarket.es). Smoke test: home 200, `/coches` 200, webhook sin firma **401** (fail-closed vivo).
+- [x] Secretos de webhook confirmados en Vercel (el 401 lo prueba; si faltara, sería 503).
+
+Pendiente (tuyo — no lo hago yo por riesgo):
+- [ ] **ROTAR** la clave de los scripts eliminados si era `service_role` (el historial de git la conserva). Supabase → Settings → API → regenerar `service_role`, y actualizar en: `.env.local`, Vercel (`SUPABASE_SERVICE_ROLE_KEY`) y **n8n** (`SUPABASE_SERVICE_KEY`). Ojo de no dejar ningún sitio sin actualizar o romperá escrituras.
+- [ ] Ejecutar `supabase/migrations/_rls-audit.sql` en Supabase y revisar RLS de organizations/subscriptions/boosts/plans (punto 7).
 
 ## Recomendado en el mismo sprint (defense-in-depth, ALTA — no bloqueante)
 
