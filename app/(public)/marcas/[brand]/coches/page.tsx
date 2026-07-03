@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
+
+// ISR: catálogo público → cache CDN, revalida cada 5 min.
+export const revalidate = 300
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -13,7 +16,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { brand } = await params
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data } = await supabase.from('brands').select('name').eq('slug', brand).single()
   if (!data) return {}
   const { count } = await supabase
@@ -32,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BrandCochesPage({ params }: PageProps) {
   const { brand } = await params
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const { data: brandData } = await supabase
     .from('brands')

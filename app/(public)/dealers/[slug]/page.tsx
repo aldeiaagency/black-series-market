@@ -2,7 +2,10 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Phone, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle, Mail, ExternalLink, MapPin } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
+
+// ISR: catálogo público → cache CDN, revalida cada 5 min.
+export const revalidate = 300
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import SocialLinks from '@/components/social/SocialLinks'
 import ShareButton from '@/components/social/ShareButton'
@@ -21,7 +24,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data } = await supabase
     .from('dealers')
     .select('name, description, location_city, cover_url, logo_url')
@@ -72,7 +75,7 @@ const WaIcon = () => (
 export default async function DealerPage({ params, searchParams }: PageProps) {
   const { slug } = await params
   const { tipo } = await searchParams
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const { data: dealer } = await supabase
     .from('dealers')

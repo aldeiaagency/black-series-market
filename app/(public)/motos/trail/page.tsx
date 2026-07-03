@@ -1,4 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
+
+// ISR: catálogo público → cache CDN, revalida cada 5 min.
+export const revalidate = 300
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -6,7 +9,7 @@ import type { Metadata } from 'next'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { count } = await supabase
     .from('vehicles')
     .select('*', { count: 'exact', head: true })
@@ -22,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MotosTrailPage() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data: vehicles, count } = await supabase
     .from('vehicles')
     .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })

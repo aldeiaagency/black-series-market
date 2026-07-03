@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
+
+// ISR: catálogo público → cache CDN, revalida cada 5 min.
+export const revalidate = 300
 import Link from 'next/link'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -57,7 +60,7 @@ const MOTO_BRAND_SLUGS = new Set([
 ])
 
 export default async function MarcasPage() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const { data: brands } = await supabase
     .from('brands')

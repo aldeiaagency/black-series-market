@@ -1,7 +1,10 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
+
+// ISR: catálogo público → cache CDN, revalida cada 5 min.
+export const revalidate = 300
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import VehicleFilters from '@/components/marketplace/VehicleFilters'
 import SortSelector from '@/components/marketplace/SortSelector'
@@ -40,7 +43,7 @@ interface PageProps {
 }
 
 async function MotoList({ params }: { params: Record<string, string> }) {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   let query = supabase
     .from('vehicles')
     .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
@@ -111,7 +114,7 @@ async function MotoList({ params }: { params: Record<string, string> }) {
 
 export default async function MotosPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const [{ count }, { data: itemListVehicles }] = await Promise.all([
     supabase
       .from('vehicles')

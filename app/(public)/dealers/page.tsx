@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
+
+// ISR: catálogo público → cache CDN, revalida cada 5 min.
+export const revalidate = 300
 import DealerCard from '@/components/marketplace/DealerCard'
 import { MapPin, Car, Bike, CheckCircle } from 'lucide-react'
 
@@ -33,7 +36,7 @@ function buildUrl(current: { tipo?: string; zona?: string }, override: { tipo?: 
 
 export default async function DealersPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   // 1. Comunidades únicas de dealers activos (dinámico, no hardcoded)
   const { data: zoneData } = await supabase
