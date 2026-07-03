@@ -9,6 +9,13 @@ import type { Metadata } from 'next'
 // ISR: la ficha ya no escribe en el render (el tracking va por beacon) → cacheable en CDN.
 export const revalidate = 300
 
+// Prerenderiza las motos activas (ISR). Las nuevas se generan on-demand y se cachean.
+export async function generateStaticParams() {
+  const { data } = await createPublicClient()
+    .from('vehicles').select('slug').eq('status', 'active').eq('vehicle_type', 'motorcycle').limit(1000)
+  return (data ?? []).map((v: { slug: string }) => ({ slug: v.slug }))
+}
+
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 interface PageProps {
