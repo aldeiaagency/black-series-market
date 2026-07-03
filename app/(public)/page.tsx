@@ -66,7 +66,6 @@ export default async function HomePage() {
               width={1365}
               height={716}
               priority
-              quality={100}
               className="w-full h-auto block"
               sizes="(max-width: 1280px) 56vw, 860px"
             />
@@ -136,7 +135,7 @@ export default async function HomePage() {
               alt="Porsche GT3 RS negro mate y Ducati Panigale V4 Corsa tricolor en showroom oscuro premium"
               width={1365}
               height={716}
-              quality={100}
+              priority
               className="w-full h-auto block"
               sizes="100vw"
             />
