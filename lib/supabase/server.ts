@@ -31,3 +31,18 @@ export function createAdminClient() {
     { auth: { persistSession: false } }
   )
 }
+
+/**
+ * Cliente público de SOLO LECTURA con la anon key y SIN cookies.
+ * Úsalo en páginas públicas (catálogo, fichas, marcas, dealers) que solo leen datos públicos:
+ * al no llamar a `cookies()`, la página puede cachearse con ISR (`export const revalidate = N`)
+ * en el CDN, en vez de renderizarse dinámicamente en cada request. RLS sigue aplicando (anon
+ * solo ve lo público: vehículos/dealers activos). No usar para datos por-usuario.
+ */
+export function createPublicClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false } }
+  )
+}

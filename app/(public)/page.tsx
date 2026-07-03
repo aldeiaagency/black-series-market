@@ -2,10 +2,13 @@
 import Image from 'next/image'
 import { ArrowRight, Shield, Star, Zap, Diamond, BadgeCheck, CarFront, Search } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import DealerCard from '@/components/marketplace/DealerCard'
 import SearchBar from '@/components/marketplace/SearchBar'
+
+// ISR: la home solo lee catálogo público → se cachea en CDN y se revalida cada 5 min.
+export const revalidate = 300
 
 const BRANDS_SHOWCASE = [
   'Ferrari', 'Lamborghini', 'McLaren', 'Bugatti', 'Porsche', 'Bentley',
@@ -20,7 +23,7 @@ const PILLARS: { label: string; icon: LucideIcon }[] = [
 ]
 
 export default async function HomePage() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const [{ data: featuredVehicles }, { data: newVehicles }, { data: featuredDealers }] =
     await Promise.all([
