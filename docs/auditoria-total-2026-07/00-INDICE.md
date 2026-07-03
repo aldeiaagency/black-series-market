@@ -10,7 +10,7 @@
 | # | Capa | Agente | Informe | Estado |
 |---|---|---|---|---|
 | 01 | Seguridad e infra (authz, RLS por tabla, webhooks, secretos, rate-limit, source maps, SSL/headers) | hecho en hilo principal | `01-seguridad.md` | HECHO — 11 hallazgos (**4 CRÍTICOS**, 4 alto, 3 medio) |
-| 02 | Código y arquitectura | Code Reviewer | `02-codigo-arquitectura.md` | EN CURSO (relanzado) |
+| 02 | Código y arquitectura | hecho en hilo principal | `02-codigo-arquitectura.md` | HECHO — 9 hallazgos (4 alto · 3 medio · 2 bajo) |
 | 03 | API (endpoints, validación, cross-tenant, idempotencia) | API Tester | `03-api.md` | HECHO — 19 hallazgos (0 crít · 4 alto · 8 medio · 7 bajo) |
 | 04 | Rendimiento y cache | Performance Benchmarker | `04-rendimiento-cache.md` | HECHO — 13 hallazgos (0 bloq · 4 alto · 7 medio · 2 bajo) |
 | 05 | UX y accesibilidad | Accessibility Auditor | `05-ux-accesibilidad.md` | HECHO — 24 hallazgos (3 crít · 7 serio · 8 mod · 6 menor) · WCAG AA NO CONFORMA |

@@ -19,7 +19,36 @@ La base es **mejor de lo que estos titulares sugieren**: aislamiento multi-tenan
 de dashboard, datos estructurados SEO ricos, buen control de CLS, source maps no expuestos, SSL y CSRF
 de server actions configurados. El riesgo está concentrado y es corregible.
 
-## Conteo unificado (6 capas, normalizado a Crítico/Alto/Medio/Bajo)
+## Estado de remediación (aplicado en producción 2026-07-03)
+
+Los CRÍTICOS y los riesgos de exposición pública ya están cerrados en producción (migraciones aplicadas vía Management API y verificadas con test real; código desplegado en blacklabelmarket.es):
+
+- ✅ Auto-promoción a admin — BLOQUEADA (trigger, 058).
+- ✅ Auto-concesión de Elite/verificado a dealers — BLOQUEADA (trigger, 058).
+- ✅ Exposición de emails de todos (RGPD) — cerrada (057).
+- ✅ Manipulación pública de catálogo/precios (`brands`/`models`/`subscription_plans`/`analytics_events` sin RLS) — cerrada (059, verificada: anon DELETE afecta 0 filas).
+- ✅ Webhooks fail-closed — desplegado y verificado (sin firma → 401).
+- ✅ `assertAdmin()` en actions de altas-showroom — desplegado.
+- ⚠️ Rotar `service_role` (confirmado en historial de git) — pendiente del operador (toca .env.local + Vercel + n8n).
+
+## Qué falta para el 100% (post-gate)
+
+**Antes de tráfico público de compradores (2ª ola):**
+1. Buscador: indexar `version`/`title` (`07`).
+2. `vehicles` mass-assignment: trigger de moderación (`status='active'` solo admin; `is_featured` solo con boost) — requiere decisión de producto (¿dealer auto-publica o modera?).
+3. Rendimiento: ISR/cache en catálogo y ficha + hero sin `quality=100` + AVIF (`04`).
+4. Rate limit en `leads`, `search-alerts`, `assistant/*`, altas (`03`).
+5. Accesibilidad crítica: labels de formularios, kanban por teclado, foco en modales (`05`).
+6. Coordinación del `noindex`: desacoplar `layout.tsx`/`robots.ts` + sanear sitemap (`06`).
+
+**Antes de monetizar (no bloquea white-glove, sí cobrar):**
+7. Boost pagado que sí ponga `is_featured` (`02`).
+8. Atomicidad de boosts (transacción/RPC) (`02`).
+9. Cadena Stripe: `subscriptions` que se rellene + idempotencia webhook (`02`/`03`).
+
+**Calidad/proceso (3ª ola):** resto de accesibilidad y SEO fino, onboarding automático del showroom + activación del asistente IA (`07`), reconciliar la deriva migraciones↔producción (`02`), E2E autenticado por rol (pendiente).
+
+## Conteo unificado (7 capas + barrido, normalizado a Crítico/Alto/Medio/Bajo)
 
 | Capa | Crít | Alto | Medio | Bajo | Total |
 |------|------|------|-------|------|-------|
@@ -29,8 +58,9 @@ de server actions configurados. El riesgo está concentrado y es corregible.
 | 05 UX/accesibilidad | 3 | 7 | 8 | 6 | 24 |
 | 06 SEO/GEO | 0 | 5 | 6 | 8 | 19 |
 | 07 Funcional por rol | 0 | 4 | 3 | 1 | 8 |
-| **Total** | **6** | **29** | **35** | **24** | **94** |
-| 02 Código/arquitectura | — | — | — | — | pendiente |
+| 02 Código/arquitectura | 0 | 4 | 3 | 2 | 9 |
+| Barrido RLS (059) | 0 | 1 | 0 | 0 | 1 |
+| **Total** | **6** | **34** | **38** | **26** | **104** |
 
 ## GATE — bloqueantes absolutos (antes de que NINGÚN dealer/comprador real entre)
 
