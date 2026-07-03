@@ -26,6 +26,7 @@ export default async function AdminVehiculosPage({ searchParams }: PageProps) {
 
   async function approveVehicle(id: string) {
     'use server'
+    const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
     const { createAdminClient } = await import('@/lib/supabase/server')
     const supabase = await createAdminClient()
     await supabase.from('vehicles').update({

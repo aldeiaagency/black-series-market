@@ -20,6 +20,7 @@ interface PageProps {
 
 async function approveVehicle(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const id = formData.get('vehicleId') as string
   const { createAdminClient } = await import('@/lib/supabase/server')
   const { notifyN8n } = await import('@/lib/integrations/n8n')
@@ -62,6 +63,7 @@ async function approveVehicle(formData: FormData) {
 
 async function rejectVehicle(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const id     = formData.get('vehicleId') as string
   const reason = formData.get('rejection_reason') as string
   const notes  = formData.get('admin_notes') as string
@@ -100,6 +102,7 @@ async function rejectVehicle(formData: FormData) {
 
 async function editVehicle(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const id          = formData.get('vehicleId') as string
   const priceRaw    = formData.get('price') as string
   const yearRaw     = formData.get('year') as string

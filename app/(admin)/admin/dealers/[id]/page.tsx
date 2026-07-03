@@ -11,6 +11,7 @@ interface PageProps {
 
 async function approveDealerAccess(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const dealerId   = formData.get('dealerId') as string
   const dealerName = formData.get('dealerName') as string
   const email      = formData.get('email') as string
@@ -36,6 +37,7 @@ async function approveDealerAccess(formData: FormData) {
 
 async function setDealerStatus(dealerId: string, status: string) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const supabase = await createAdminClient()
   await supabase.from('dealers').update({ status }).eq('id', dealerId)
   revalidatePath(`/admin/dealers/${dealerId}`)
@@ -44,6 +46,7 @@ async function setDealerStatus(dealerId: string, status: string) {
 
 async function setDealerPlan(dealerId: string, plan: string) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const supabase = await createAdminClient()
   const slots = plan === 'elite' ? 100 : plan === 'professional' ? 50 : plan === 'essential' ? 15 : 5
   await supabase.from('dealers').update({ subscription_plan: plan, vehicle_slots: slots }).eq('id', dealerId)
@@ -67,6 +70,7 @@ async function setDealerPlan(dealerId: string, plan: string) {
 
 async function setDealerFeatured(dealerId: string, featured: boolean) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const supabase = await createAdminClient()
   await supabase.from('dealers').update({ is_featured: featured }).eq('id', dealerId)
   revalidatePath(`/admin/dealers/${dealerId}`)
@@ -75,6 +79,7 @@ async function setDealerFeatured(dealerId: string, featured: boolean) {
 
 async function saveAdminNotes(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const dealerId = formData.get('dealerId') as string
   const notes    = formData.get('admin_notes') as string
   const supabase = await createAdminClient()
@@ -84,6 +89,7 @@ async function saveAdminNotes(formData: FormData) {
 
 async function setVerification(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const dealerId    = formData.get('dealerId') as string
   const isVerified  = formData.get('is_verified') === 'true'
   const supabase    = await createAdminClient()
@@ -94,6 +100,7 @@ async function setVerification(formData: FormData) {
 
 async function saveProfile(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const dealerId = formData.get('dealerId') as string
   const supabase = await createAdminClient()
   await supabase.from('dealers').update({

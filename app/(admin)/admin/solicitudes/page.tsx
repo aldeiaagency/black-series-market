@@ -32,6 +32,7 @@ const TIMEFRAME_LABEL: Record<string, string> = {
 
 async function updateStatus(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const id = formData.get('id') as string
   const status = formData.get('status') as string
   if (!id || !STATUS_FLOW.includes(status as ReqStatus)) return
@@ -45,6 +46,7 @@ async function updateStatus(formData: FormData) {
 
 async function deleteRequest(formData: FormData) {
   'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const id = formData.get('id') as string
   if (!id) return
   const { createAdminClient } = await import('@/lib/supabase/server')
