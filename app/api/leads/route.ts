@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyN8n } from '@/lib/integrations/n8n'
+import { isCountRateLimited } from '@/lib/rate-limit'
 
 /**
  * POST /api/leads
@@ -27,6 +28,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'invalid_lead' }, { status: 400 })
   }
 
+  const admin = createAdminClient()
+
+  // Rate limit por email (evita spam de leads + email-bombing vía n8n).
+  if (await isCountRateLimited(admin, 'leads', 'buyer_email', buyerEmail, 5, 60 * 60 * 1000)) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 })
+  }
+
+  // Validar pertenencia: el dealer debe existir y, si hay vehículo, ser suyo.
+  // Evita atribuir leads a un dealer_id arbitrario y disparar emails a terceros.
+  const { data: dealer } = await admin.from('dealers').select('id').eq('id', dealerId).maybeSingle()
+  if (!dealer) {
+    return NextResponse.json({ ok: false, error: 'invalid_lead' }, { status: 400 })
+  }
+  if (vehicleId) {
+    const { data: veh } = await admin
+      .from('vehicles').select('id').eq('id', vehicleId).eq('dealer_id', dealerId).maybeSingle()
+    if (!veh) {
+      return NextResponse.json({ ok: false, error: 'vehicle_dealer_mismatch' }, { status: 400 })
+    }
+  }
+
   // Optional session — attach buyer profile when logged in.
   let buyerProfileId: string | null = null
   try {
@@ -35,7 +57,6 @@ export async function POST(req: NextRequest) {
     buyerProfileId = user?.id ?? null
   } catch {}
 
-  const admin = createAdminClient()
   const { data, error } = await admin
     .from('leads')
     .insert({

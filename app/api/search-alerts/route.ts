@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyN8n } from '@/lib/integrations/n8n'
+import { isCountRateLimited } from '@/lib/rate-limit'
 
 /**
  * POST /api/search-alerts
@@ -19,6 +20,13 @@ export async function POST(req: NextRequest) {
   const email = String(body.email || '').trim()
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ ok: false, error: 'invalid_email' }, { status: 400 })
+  }
+
+  const admin = createAdminClient()
+
+  // Rate limit por email (evita spam de alertas + email relay vía n8n).
+  if (await isCountRateLimited(admin, 'search_alerts', 'email', email, 5, 60 * 60 * 1000)) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 })
   }
 
   // Optional session — tie the alert to the user when logged in so it shows in /cuenta/alertas.
@@ -48,7 +56,6 @@ export async function POST(req: NextRequest) {
     source:       userId ? 'web_account' : 'web_anonymous',
   }
 
-  const admin = createAdminClient()
   const { data, error } = await admin
     .from('search_alerts')
     .insert(record)
