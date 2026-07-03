@@ -4,11 +4,11 @@ Tracker. Marca: [ ] pendiente · [~] en curso · [x] hecho. Orden pensado para d
 listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bloque.
 Última actualización: 2026-07-03.
 
-## BLOQUE A — Seguridad al 100% (terminar la capa)
-- [ ] A1 · `assertAdmin()` en las 13 acciones inline de admin (vehiculos/page, vehiculos/[id]/page, solicitudes/page, dealers/[id]/page)
-- [ ] A2 · Rate limit + saneo en `assistant/{session,message,book}` y en `register-dealer`/`showroom-applications` (unificar el duplicado)
-- [ ] A3 · SEC-6 import API key por-dealer/scoping · SEC-7 upload magic bytes · SEC-8 contraseña temporal fuera del JSON (invitación)
-- [ ] A4 · Cabeceras de seguridad en `next.config` (CSP/HSTS/X-Frame/X-Content-Type/Referrer/Permissions) · cap de `limit`/`offset` en `/api/vehicles` · no devolver `error.message` crudo · validar/limitar `/api/track`
+## BLOQUE A — Seguridad al 100% (terminar la capa) — HECHO + DESPLEGADO + VERIFICADO
+- [x] A1 · `assertAdmin()` en las 13 acciones inline de admin
+- [x] A2 · Circuit breaker en altas (`showroom-applications` + `register-dealer`) protege Firecrawl. `assistant/*` diferido (inerte hoy; rate limit por IP necesita store de edge)
+- [x] A3 · SEC-7 upload magic bytes HECHO. SEC-6 (import key por-dealer) y SEC-8 (invitación equipo por email) DIFERIDOS: son feature-work (tabla de keys / flujo de invitación), MEDIA, sin uso en white-glove hoy
+- [x] A4 · Cabeceras de seguridad (HSTS/X-Frame/nosniff/Referrer/Permissions) VERIFICADAS en prod · cap `limit`/`offset` (999999→60) VERIFICADO · error genérico sin fuga. CSP estricta diferida (necesita allowlist de Stripe/GTM/Supabase para no romper). `/api/track` (BAJO, pulición analytics) diferido
 
 ## BLOQUE B — Cadena de dinero (correctness)
 - [ ] B1 · `activateBoost`/`cancel` ponen `is_featured` (hoy el boost pagado no destaca)
