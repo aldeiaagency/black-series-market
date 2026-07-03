@@ -57,8 +57,9 @@ export async function GET(request: NextRequest) {
       .gt('featured_until', new Date().toISOString())
   }
 
-  const limit = parseInt(searchParams.get('limit') || '24')
-  const offset = parseInt(searchParams.get('offset') || '0')
+  // Cota dura: evita respuestas gigantes / DoS por ?limit=1000000.
+  const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '24') || 24, 1), 60)
+  const offset = Math.max(parseInt(searchParams.get('offset') || '0') || 0, 0)
 
   query = query
     .order('is_featured', { ascending: false })
@@ -67,6 +68,9 @@ export async function GET(request: NextRequest) {
 
   const { data, count, error } = await query
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('GET /api/vehicles error', error)
+    return NextResponse.json({ error: 'No se pudieron cargar los vehículos.' }, { status: 500 })
+  }
   return NextResponse.json({ data, count, limit, offset })
 }

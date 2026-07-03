@@ -39,3 +39,23 @@ export async function isCountRateLimited(
   if (error) return false // ante fallo del contador, no bloquear (fail-open del rate limit, no de la seguridad)
   return (count ?? 0) >= limit
 }
+
+/**
+ * Circuit breaker global: bloquea si en `windowMs` se han creado ya `limit` filas en la tabla
+ * (sin importar quién). Protege presupuestos externos (p. ej. Firecrawl en las altas) frente a
+ * un flood con datos variados, cuando no hay columna de IP para limitar por origen.
+ */
+export async function isGlobalRateLimited(
+  admin: { from: (t: string) => any },
+  table: string,
+  limit: number,
+  windowMs: number,
+): Promise<boolean> {
+  const since = new Date(Date.now() - windowMs).toISOString()
+  const { count, error } = await admin
+    .from(table)
+    .select('id', { count: 'exact', head: true })
+    .gte('created_at', since)
+  if (error) return false
+  return (count ?? 0) >= limit
+}

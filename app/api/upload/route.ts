@@ -26,6 +26,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'El archivo supera el límite de 10 MB.' }, { status: 400 })
   }
 
+  // SEC-7: validar los magic bytes reales del archivo (no fiarse del file.type del cliente).
+  const head = new Uint8Array(await file.slice(0, 12).arrayBuffer())
+  const isJpeg = head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff
+  const isPng  = head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47
+  const isWebp = head[0] === 0x52 && head[1] === 0x49 && head[2] === 0x46 && head[3] === 0x46 &&
+                 head[8] === 0x57 && head[9] === 0x45 && head[10] === 0x42 && head[11] === 0x50
+  if (!isJpeg && !isPng && !isWebp) {
+    return NextResponse.json({ error: 'El archivo no es una imagen válida (JPG, PNG o WebP).' }, { status: 400 })
+  }
+
   const type    = req.nextUrl.searchParams.get('type')
   const isLogo  = type === 'logo'
   const isCover = type === 'cover'

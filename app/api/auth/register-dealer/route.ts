@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyShowroomApplicationCreated } from '@/lib/integrations/n8n'
+import { isGlobalRateLimited } from '@/lib/rate-limit'
 
 function clean(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
@@ -30,6 +31,11 @@ export async function POST(request: Request) {
     }
 
     const admin = createAdminClient()
+
+    // Circuit breaker: protege el presupuesto de Firecrawl (WF1 audita cada alta) ante floods.
+    if (await isGlobalRateLimited(admin, 'showroom_applications', 30, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiadas solicitudes. Inténtalo más tarde.' }, { status: 429 })
+    }
 
     const [{ data: existingByEmail }, { data: existingByName }] = await Promise.all([
       admin.from('dealers').select('id').eq('email', email).maybeSingle(),

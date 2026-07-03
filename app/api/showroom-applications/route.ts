@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyShowroomApplicationCreated } from '@/lib/integrations/n8n'
+import { isGlobalRateLimited } from '@/lib/rate-limit'
 
 const schema = z.object({
   name:    z.string().trim().min(2).max(120),
@@ -34,6 +35,12 @@ export async function POST(req: NextRequest) {
   ].filter(Boolean).join('\n')
 
   const admin = createAdminClient()
+
+  // Circuit breaker: protege el presupuesto de Firecrawl (WF1 audita cada alta nueva) ante un
+  // flood con emails variados. 30 altas/hora es holgado para el volumen real.
+  if (await isGlobalRateLimited(admin, 'showroom_applications', 30, 60 * 60 * 1000)) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 })
+  }
 
   // Idempotency: avoid duplicate submissions
   const { count } = await admin
