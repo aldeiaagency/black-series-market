@@ -282,7 +282,8 @@ export default function Header() {
           <button
             className="lg:hidden p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Abrir menú"
+            aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
