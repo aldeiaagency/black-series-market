@@ -16,15 +16,15 @@ listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bl
 - [ ] B3 · `create-checkout` firma nueva con `organization_id`+`billing_cycle` (rellenar `subscriptions`)
 - [ ] B4 · Idempotencia webhook Stripe (`processed_stripe_events`) · `incrementEliteCounter` · fix cupo boost fallback
 
-## BLOQUE C — Rendimiento y cache
-- [ ] C1 · Cliente Supabase sin cookies para lecturas públicas + ISR (`revalidate`) en catálogo/ficha/categorías/marcas/dealers + invalidación
-- [ ] C2 · Sacar el tracking del render de la ficha (beacon/`after`) + `views` con RPC atómico
-- [ ] C3 · `next.config` images (AVIF + `minimumCacheTTL`) · hero sin `quality=100` + `priority` en móvil
-- [ ] C4 · `gtm_id` cacheado · `select` explícito en listados · `count` único · VehicleCard server component · Header sin fetch cliente
+## BLOQUE C — Rendimiento y cache — MAYORÍA HECHO + DESPLEGADO + VERIFICADO
+- [x] C1 · `createPublicClient` (sin cookies) + ISR en home + 23 páginas de catálogo. Categorías/marcas/home cachean (HIT verificado); `/coches`,`/motos` siguen dinámicas por sus filtros (searchParams) pero con cliente rápido
+- [x] C2 · Tracking de ficha por beacon (`ViewTracker` → `/api/track`) + RPC atómico `increment_vehicle_views` (061) + ISR/prerender en fichas (HIT verificado)
+- [x] C3 · images AVIF + minimumCacheTTL · hero sin quality=100 + priority móvil (VERIFICADO)
+- [~] C4 · PENDIENTE (menor): `gtm_id` cacheado · `select` explícito en listados · `count` único · VehicleCard server · Header sin fetch cliente. Optimizaciones finas, no bloqueantes
 
-## BLOQUE D — Accesibilidad y UX
-- [ ] D1 · Tokens de color: subir grises a AA + unificar los 3 dorados (`tailwind.config` + reemplazos)
-- [ ] D2 · Formularios: labels asociadas + `aria-invalid`/`aria-describedby` + `role="alert"` (ContactForm, QualifiedLeadForm, login, registro, SearchAlertModal, wizard)
+## BLOQUE D — Accesibilidad y UX (EN CURSO)
+- [x] D1 · Tokens de color: grises a AA (#9E9E9E) + dorado unificado (#C6A64B). 31 archivos, DESPLEGADO+VERIFICADO
+- [~] D2 · Formularios: ContactForm HECHO (labels/aria + BONUS: ruteado por /api/leads, antes insertaba directo saltándose rate limit + n8n). QualifiedLeadForm ya usa /api/leads (falta labels). Pendientes: SearchAlertModal, login, registro, wizard
 - [ ] D3 · Hook `useModalA11y` (role=dialog, focus-trap, Escape, retorno de foco) en modales + galería
 - [ ] D4 · Kanban operable por teclado · flechas de galería visibles a foco · radios `focus-visible`
 - [ ] D5 · `aria-label` iconos header · `aria-expanded` hamburguesa · jerarquía h1→h3 · `prefers-reduced-motion` · tipografía de cuerpo · tablas admin en móvil (card) · autoguardado wizard
