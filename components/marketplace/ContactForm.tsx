@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/client'
 import { CheckCircle } from 'lucide-react'
 
 const schema = z.object({
@@ -35,14 +34,15 @@ export default function ContactForm({ vehicleId, dealerId, vehicleTitle }: Conta
 
   async function onSubmit(data: FormData) {
     setError(null)
-    const supabase = createClient()
-    const { error: err } = await supabase.from('leads').insert({
-      vehicle_id: vehicleId,
-      dealer_id: dealerId,
-      ...data,
+    // Vía el endpoint endurecido /api/leads: rate limit, validación de pertenencia y evento n8n
+    // (antes se insertaba directo por el cliente, saltándose todo eso).
+    const res = await fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vehicle_id: vehicleId, dealer_id: dealerId, ...data }),
     })
-    if (err) {
-      setError('Error al enviar. Inténtalo de nuevo.')
+    if (!res.ok) {
+      setError(res.status === 429 ? 'Demasiados envíos. Espera un momento e inténtalo de nuevo.' : 'Error al enviar. Inténtalo de nuevo.')
       return
     }
     setSubmitted(true)
@@ -63,42 +63,56 @@ export default function ContactForm({ vehicleId, dealerId, vehicleTitle }: Conta
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       <div>
+        <label htmlFor="cf-name" className="sr-only">Tu nombre</label>
         <input
           {...register('buyer_name')}
+          id="cf-name"
           placeholder="Tu nombre"
+          aria-invalid={!!errors.buyer_name}
+          aria-describedby={errors.buyer_name ? 'cf-name-err' : undefined}
           className="input-base"
         />
         {errors.buyer_name && (
-          <p className="text-xs text-red-400 mt-1">{errors.buyer_name.message}</p>
+          <p id="cf-name-err" role="alert" className="text-xs text-red-400 mt-1">{errors.buyer_name.message}</p>
         )}
       </div>
       <div>
+        <label htmlFor="cf-email" className="sr-only">Tu email</label>
         <input
           {...register('buyer_email')}
+          id="cf-email"
           type="email"
           placeholder="Tu email"
+          aria-invalid={!!errors.buyer_email}
+          aria-describedby={errors.buyer_email ? 'cf-email-err' : undefined}
           className="input-base"
         />
         {errors.buyer_email && (
-          <p className="text-xs text-red-400 mt-1">{errors.buyer_email.message}</p>
+          <p id="cf-email-err" role="alert" className="text-xs text-red-400 mt-1">{errors.buyer_email.message}</p>
         )}
       </div>
       <div>
+        <label htmlFor="cf-phone" className="sr-only">Teléfono (opcional)</label>
         <input
           {...register('buyer_phone')}
+          id="cf-phone"
           type="tel"
           placeholder="Teléfono (opcional)"
           className="input-base"
         />
       </div>
       <div>
+        <label htmlFor="cf-message" className="sr-only">Mensaje</label>
         <textarea
           {...register('message')}
+          id="cf-message"
           rows={4}
+          aria-invalid={!!errors.message}
+          aria-describedby={errors.message ? 'cf-message-err' : undefined}
           className="input-base resize-none"
         />
         {errors.message && (
-          <p className="text-xs text-red-400 mt-1">{errors.message.message}</p>
+          <p id="cf-message-err" role="alert" className="text-xs text-red-400 mt-1">{errors.message.message}</p>
         )}
       </div>
       {error && <p className="text-xs text-red-400">{error}</p>}
