@@ -50,7 +50,7 @@ export default function SocialLinks({
   const hasAny = website || SOCIAL_NETWORKS.some((k) => socialMap[k])
   if (!hasAny) return null
 
-  const baseClass = `p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors duration-150 ${iconClassName}`
+  const baseClass = `p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors duration-150 ${iconClassName}`
 
   return (
     <div className={`flex items-center gap-1 ${className}`}>

@@ -134,7 +134,7 @@ export default function ActiveFiltersBar({ className = '' }: ActiveFiltersBarPro
       ))}
       <button
         onClick={clearAll}
-        className="text-xs text-[#808080] hover:text-[#9A9A9A] transition-colors underline underline-offset-2"
+        className="text-xs text-[#9E9E9E] hover:text-[#9A9A9A] transition-colors underline underline-offset-2"
       >
         Limpiar todos
       </button>

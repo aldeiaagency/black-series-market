@@ -32,7 +32,7 @@ const STAGE_COLORS: Record<Stage, { card: string; header: string; badge: string 
   negotiating: { card: 'border-purple-400/30 bg-purple-400/5',   header: 'text-purple-400',    badge: 'border-purple-400/30 text-purple-400' },
   appointment: { card: 'border-violet-400/30 bg-violet-400/5',   header: 'text-violet-400',    badge: 'border-violet-400/30 text-violet-400' },
   reserved:    { card: 'border-emerald-400/30 bg-emerald-400/5', header: 'text-emerald-400',   badge: 'border-emerald-400/30 text-emerald-400' },
-  closed:      { card: 'border-[#BFA14A]/30 bg-[#BFA14A]/5',    header: 'text-[#BFA14A]',     badge: 'border-[#BFA14A]/30 text-[#BFA14A]' },
+  closed:      { card: 'border-[#C6A64B]/30 bg-[#C6A64B]/5',    header: 'text-[#C6A64B]',     badge: 'border-[#C6A64B]/30 text-[#C6A64B]' },
   lost:        { card: 'border-red-400/20 bg-red-400/5',         header: 'text-red-400/70',    badge: 'border-red-400/30 text-red-400/70' },
   discarded:   { card: 'border-[#2A2A2A] bg-[#111]/60',         header: 'text-[#555]',        badge: 'border-[#333] text-[#555]' },
 }
@@ -84,7 +84,7 @@ function ScoreBadge({ score }: { score: Score }) {
   const map = {
     hot:  { icon: '🔥', cls: 'text-orange-400 border-orange-400/30 bg-orange-400/5' },
     warm: { icon: '🟡', cls: 'text-amber-400 border-amber-400/30 bg-amber-400/5'   },
-    cold: { icon: '⚪', cls: 'text-[#737373] border-[#2A2A2A]'                      },
+    cold: { icon: '⚪', cls: 'text-[#9E9E9E] border-[#2A2A2A]'                      },
   }
   const { icon, cls } = map[score]
   return (
@@ -207,7 +207,7 @@ function LeadModal({
               {lead.buyer_name ?? 'Comprador anónimo'}
             </h2>
             {lead.vehicle?.brand_name && (
-              <p className="text-sm text-[#BFA14A]/80 mt-0.5">
+              <p className="text-sm text-[#C6A64B]/80 mt-0.5">
                 {lead.vehicle.brand_name} {lead.vehicle.model_name} {lead.vehicle.year}
               </p>
             )}
@@ -298,10 +298,10 @@ function LeadModal({
                   <p className="text-xs text-bsm-text-muted italic leading-relaxed pt-1">{q.summary}</p>
                 )}
                 {q.next_action && (
-                  <p className="text-xs text-[#BFA14A] leading-relaxed">→ {q.next_action}</p>
+                  <p className="text-xs text-[#C6A64B] leading-relaxed">→ {q.next_action}</p>
                 )}
                 {q.qualification_partial && (
-                  <span className="text-[10px] text-[#737373] border border-[#2A2A2A] px-2 py-0.5 inline-block">
+                  <span className="text-[10px] text-[#9E9E9E] border border-[#2A2A2A] px-2 py-0.5 inline-block">
                     Cualificación parcial
                   </span>
                 )}
@@ -414,7 +414,7 @@ function LeadCard({
 
       {/* Vehicle */}
       {lead.vehicle?.brand_name && (
-        <p className="text-[10px] text-[#BFA14A]/80 truncate">
+        <p className="text-[10px] text-[#C6A64B]/80 truncate">
           {lead.vehicle.brand_name} {lead.vehicle.model_name} {lead.vehicle.year}
         </p>
       )}

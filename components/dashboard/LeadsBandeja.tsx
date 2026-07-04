@@ -105,7 +105,7 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
                     {timeAgo(lead.created_at)}
                     {lead.vehicle?.brand_name && (
                       <span className="ml-1">
-                        · <span className="text-[#BFA14A]/80">{lead.vehicle.brand_name} {lead.vehicle.model_name}</span>
+                        · <span className="text-[#C6A64B]/80">{lead.vehicle.brand_name} {lead.vehicle.model_name}</span>
                       </span>
                     )}
                   </p>
@@ -151,7 +151,7 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
               {selected.vehicle && (
                 <div>
                   <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-1">Vehículo de interés</p>
-                  <p className="text-sm text-[#BFA14A] font-medium">
+                  <p className="text-sm text-[#C6A64B] font-medium">
                     {selected.vehicle.brand_name} {selected.vehicle.model_name}
                     {selected.vehicle.year && <span className="text-bsm-text-muted font-normal"> · {selected.vehicle.year}</span>}
                   </p>

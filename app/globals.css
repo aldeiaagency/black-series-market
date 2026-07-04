@@ -27,7 +27,7 @@
   }
 
   ::selection {
-    background-color: rgba(201, 168, 76, 0.25);
+    background-color: rgba(198, 166, 75, 0.25);
     color: #F0F0EC;
   }
 
@@ -46,7 +46,7 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #C9A84C;
+    background: #C6A64B;
   }
 
   input[type='number']::-webkit-inner-spin-button,
@@ -57,7 +57,7 @@
   /* Filter rail — persistent, gold-tinted scrollbar so overflow is always evident */
   .filter-scroll {
     scrollbar-width: thin;                                  /* Firefox */
-    scrollbar-color: rgba(201, 168, 76, 0.35) transparent;  /* thumb / track */
+    scrollbar-color: rgba(198, 166, 75, 0.35) transparent;  /* thumb / track */
     scrollbar-gutter: stable;
   }
   .filter-scroll::-webkit-scrollbar {
@@ -67,11 +67,11 @@
     background: transparent;
   }
   .filter-scroll::-webkit-scrollbar-thumb {
-    background: rgba(201, 168, 76, 0.30);
+    background: rgba(198, 166, 75, 0.30);
     border-radius: 4px;
   }
   .filter-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(201, 168, 76, 0.55);
+    background: rgba(198, 166, 75, 0.55);
   }
 }
 
@@ -87,7 +87,7 @@
     left: 0;
     width: 40px;
     height: 1px;
-    background: linear-gradient(90deg, #C9A84C, transparent);
+    background: linear-gradient(90deg, #C6A64B, transparent);
   }
 
   .vehicle-card {

@@ -54,7 +54,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <div className="mb-6 inline-block">
               <Logo width={152} variant="footer" />
-              <p className="mt-1 text-[10px] text-[#808080] tracking-[0.15em] uppercase text-center">
+              <p className="mt-1 text-[10px] text-[#9E9E9E] tracking-[0.15em] uppercase text-center">
                 by{' '}
                 <a
                   href="https://blackseriesagency.es"
@@ -83,7 +83,7 @@ export default function Footer() {
 
           {/* Explorar */}
           <div>
-            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
+            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#9E9E9E] mb-5">
               Explorar
             </h4>
             <ul className="space-y-3">
@@ -102,7 +102,7 @@ export default function Footer() {
 
           {/* Profesionales */}
           <div>
-            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
+            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#9E9E9E] mb-5">
               Profesionales
             </h4>
             <ul className="space-y-3">
@@ -121,7 +121,7 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#808080] mb-5">
+            <h4 className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#9E9E9E] mb-5">
               Legal
             </h4>
             <ul className="space-y-3">
@@ -148,7 +148,7 @@ export default function Footer() {
 
         {/* Brands */}
         <div className="border-t border-[#141414] pt-10 mb-10">
-          <p className="text-[10px] text-[#737373] uppercase tracking-[0.3em] mb-5 text-center">
+          <p className="text-[10px] text-[#9E9E9E] uppercase tracking-[0.3em] mb-5 text-center">
             Marcas disponibles
           </p>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
@@ -156,7 +156,7 @@ export default function Footer() {
               <Link
                 key={brand}
                 href={`/marcas/${brand.toLowerCase().replace(/\s/g, '-')}`}
-                className="text-[13px] text-[#808080] hover:text-[#C9C9C9] transition-colors duration-150"
+                className="text-[13px] text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors duration-150"
               >
                 {brand}
               </Link>
@@ -175,14 +175,14 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[11px] text-[#737373]">
+          <p className="text-[11px] text-[#9E9E9E]">
             © {new Date().getFullYear()} Black Label Market. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-4">
             <CookieSettingsButton
-              className="text-[11px] text-[#737373] hover:text-[#8A8A8A] transition-colors underline-offset-2 hover:underline"
+              className="text-[11px] text-[#9E9E9E] hover:text-[#8A8A8A] transition-colors underline-offset-2 hover:underline"
             />
-            <p className="text-[11px] text-[#737373]">
+            <p className="text-[11px] text-[#9E9E9E]">
               Operado por <span className="text-[#8A8A8A]">KAZAWEB, S.L.U.</span> · NIF B42761254
             </p>
           </div>

@@ -93,7 +93,7 @@ export default function PoliticaDeCookiesPage() {
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-sm font-medium text-bsm-text-primary">Analítica</h3>
-              <span className="text-[9px] tracking-widest uppercase text-[#737373] border border-[#2A2A2A] px-1.5 py-0.5 leading-none">
+              <span className="text-[9px] tracking-widest uppercase text-[#9E9E9E] border border-[#2A2A2A] px-1.5 py-0.5 leading-none">
                 Requiere consentimiento
               </span>
             </div>
@@ -108,7 +108,7 @@ export default function PoliticaDeCookiesPage() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-sm font-medium text-bsm-text-primary">Marketing</h3>
-              <span className="text-[9px] tracking-widest uppercase text-[#737373] border border-[#2A2A2A] px-1.5 py-0.5 leading-none">
+              <span className="text-[9px] tracking-widest uppercase text-[#9E9E9E] border border-[#2A2A2A] px-1.5 py-0.5 leading-none">
                 Actualmente no en uso
               </span>
             </div>

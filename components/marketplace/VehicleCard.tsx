@@ -175,17 +175,17 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           {/* Specs row: year · km · power · (moto: cc · carnet | car: cambio · combustible) */}
           <div className="flex flex-wrap items-center gap-y-1 mb-3 text-[12px] text-[#8A8A8A]">
             <span className="flex items-center gap-1.5">
-              <Calendar className="w-3 h-3 text-[#737373]" />
+              <Calendar className="w-3 h-3 text-[#9E9E9E]" />
               {vehicle.year}
             </span>
-            <span className="text-[#737373] mx-2 select-none" aria-hidden="true">·</span>
+            <span className="text-[#9E9E9E] mx-2 select-none" aria-hidden="true">·</span>
             <span className="flex items-center gap-1.5">
-              <Gauge className="w-3 h-3 text-[#737373]" />
+              <Gauge className="w-3 h-3 text-[#9E9E9E]" />
               {formatMileage(vehicle.mileage_km)}
             </span>
             {vehicle.power_hp && (
               <>
-                <span className="text-[#737373] mx-2 select-none" aria-hidden="true">·</span>
+                <span className="text-[#9E9E9E] mx-2 select-none" aria-hidden="true">·</span>
                 <span className="text-[13px] font-medium text-[#C6A64B]/80">
                   {vehicle.power_hp} CV
                 </span>
@@ -195,16 +195,16 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <>
                 {vehicle.displacement_cc && (
                   <>
-                    <span className="hidden sm:inline text-[#737373] mx-2 select-none" aria-hidden="true">·</span>
-                    <span className="hidden sm:inline text-[#808080]">
+                    <span className="hidden sm:inline text-[#9E9E9E] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden sm:inline text-[#9E9E9E]">
                       {vehicle.displacement_cc} cc
                     </span>
                   </>
                 )}
                 {vehicle.license_type && (
                   <>
-                    <span className="hidden md:inline text-[#737373] mx-2 select-none" aria-hidden="true">·</span>
-                    <span className="hidden md:inline text-[#808080]">
+                    <span className="hidden md:inline text-[#9E9E9E] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden md:inline text-[#9E9E9E]">
                       Carnet {vehicle.license_type}
                     </span>
                   </>
@@ -214,16 +214,16 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
               <>
                 {vehicle.transmission && (
                   <>
-                    <span className="hidden sm:inline text-[#737373] mx-2 select-none" aria-hidden="true">·</span>
-                    <span className="hidden sm:inline text-[#808080]">
+                    <span className="hidden sm:inline text-[#9E9E9E] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden sm:inline text-[#9E9E9E]">
                       {TRANSMISSION_LABELS[vehicle.transmission]}
                     </span>
                   </>
                 )}
                 {vehicle.fuel_type && (
                   <>
-                    <span className="hidden md:inline text-[#737373] mx-2 select-none" aria-hidden="true">·</span>
-                    <span className="hidden md:inline text-[#808080]">
+                    <span className="hidden md:inline text-[#9E9E9E] mx-2 select-none" aria-hidden="true">·</span>
+                    <span className="hidden md:inline text-[#9E9E9E]">
                       {FUEL_LABELS[vehicle.fuel_type]}
                     </span>
                   </>
@@ -234,7 +234,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
 
           {/* Location */}
           {location && (
-            <div className="flex items-center gap-1 mb-2.5 text-[11px] text-[#737373]">
+            <div className="flex items-center gap-1 mb-2.5 text-[11px] text-[#9E9E9E]">
               <MapPin className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{location}</span>
             </div>

@@ -63,7 +63,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
             {city && (
               <>
                 <span className="text-[#3A3A3A] mx-1.5 select-none">·</span>
-                <span className="text-[11px] text-[#737373] group-hover/dealer:text-[#C6A64B]/60">{city}</span>
+                <span className="text-[11px] text-[#9E9E9E] group-hover/dealer:text-[#C6A64B]/60">{city}</span>
               </>
             )}
           </p>

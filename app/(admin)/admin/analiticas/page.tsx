@@ -591,7 +591,7 @@ export default async function AdminAnaliticasPage() {
       </section>
 
       {/* ── Nota sobre schema ─────────────────────────────────────────────── */}
-      <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 text-[11px] text-[#737373] leading-relaxed">
+      <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-4 text-[11px] text-[#9E9E9E] leading-relaxed">
         <strong className="text-[#9A9A9A]">Nota técnica:</strong> La tabla <code>analytics_events</code> no tiene columna <code>metadata</code> ni <code>user_id</code>.
         Para añadir &quot;filtros más usados&quot; y segmentación por usuario autenticado, ejecuta la migración propuesta:
         <code className="ml-1 text-gold/60">supabase/migrations/005_analytics_metadata.sql</code>

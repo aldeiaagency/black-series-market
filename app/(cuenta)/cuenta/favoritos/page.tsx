@@ -92,7 +92,7 @@ export default async function CuentaFavoritosPage() {
                 <input type="hidden" name="vehicleId" value={v.id} />
                 <button
                   type="submit"
-                  className="w-7 h-7 flex items-center justify-center bg-[#0A0A0A]/90 border border-[#2A2A2A] text-[#808080] hover:text-red-400 hover:border-red-400/30 transition-colors"
+                  className="w-7 h-7 flex items-center justify-center bg-[#0A0A0A]/90 border border-[#2A2A2A] text-[#9E9E9E] hover:text-red-400 hover:border-red-400/30 transition-colors"
                   title="Quitar de guardados"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

@@ -613,7 +613,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
           {searchParams.get('search') && (
             <button
               onClick={() => { setSearchDraft(''); updateParam('search', null) }}
-              className="flex items-center gap-1 text-xs text-[#808080] hover:text-[#9A9A9A] transition-colors mt-2"
+              className="flex items-center gap-1 text-xs text-[#9E9E9E] hover:text-[#9A9A9A] transition-colors mt-2"
             >
               <X className="w-3 h-3" />
               Quitar búsqueda
@@ -653,7 +653,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                     )}
                   </label>
                   {hasExamples && isExpanded && (
-                    <p className="mt-1.5 ml-6 text-[10px] text-[#737373] leading-relaxed">
+                    <p className="mt-1.5 ml-6 text-[10px] text-[#9E9E9E] leading-relaxed">
                       <span className="text-[#555] mr-1">Ej:</span>
                       {(cat as { examples: string }).examples}
                     </p>
@@ -821,7 +821,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
             if (provincias.length <= 1) return null
             return (
               <div className="mt-3">
-                <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-2">
+                <p className="text-[10px] text-[#9E9E9E] uppercase tracking-widest mb-2">
                   Provincia (opcional)
                 </p>
                 <div className="space-y-1.5">
@@ -897,7 +897,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                         >i</button>
                       </label>
                       {isExpanded && (
-                        <p className="mt-1.5 ml-6 text-[10px] text-[#737373] leading-relaxed">
+                        <p className="mt-1.5 ml-6 text-[10px] text-[#9E9E9E] leading-relaxed">
                           <span className="text-[#555] mr-1">Ej:</span>{style.examples}
                         </p>
                       )}
@@ -1053,7 +1053,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
         {activeFilterCount > 0 && (
           <button
             onClick={clearAll}
-            className="flex items-center gap-2 text-sm text-[#808080] hover:text-[#9A9A9A] transition-colors mt-4"
+            className="flex items-center gap-2 text-sm text-[#9E9E9E] hover:text-[#9A9A9A] transition-colors mt-4"
           >
             <X className="w-4 h-4" />
             Borrar todos los filtros

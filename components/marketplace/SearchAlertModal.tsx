@@ -95,7 +95,7 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
           <button
             aria-label="Cerrar"
             onClick={onClose}
-            className="text-[#808080] hover:text-[#C9C9C9] transition-colors"
+            className="text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

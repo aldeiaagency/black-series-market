@@ -109,7 +109,7 @@ export default async function CuentaAlertasPage() {
                     )}
                   </div>
                   {/* Details */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#808080]">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#9E9E9E]">
                     {alert.timeline && (
                       <span>Plazo: {TIMELINE_LABELS[alert.timeline] || alert.timeline}</span>
                     )}

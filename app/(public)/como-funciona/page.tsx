@@ -227,7 +227,7 @@ export default function ComoFuncionaPage() {
           <ul className="space-y-3">
             {NOT_BL.map((item) => (
               <li key={item} className="flex items-start gap-3">
-                <X className="w-4 h-4 text-[#737373] flex-shrink-0 mt-0.5" />
+                <X className="w-4 h-4 text-[#9E9E9E] flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-[#8A8A8A]">{item}</span>
               </li>
             ))}

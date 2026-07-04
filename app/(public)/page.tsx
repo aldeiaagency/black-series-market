@@ -190,7 +190,7 @@ export default async function HomePage() {
       {/* BRANDS */}
       <section className="border-t border-b border-[#141414] py-14">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
-          <p className="text-[10px] text-[#737373] uppercase tracking-[0.35em] text-center mb-8">
+          <p className="text-[10px] text-[#9E9E9E] uppercase tracking-[0.35em] text-center mb-8">
             Marcas populares
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
@@ -198,7 +198,7 @@ export default async function HomePage() {
               <Link
                 key={brand}
                 href={`/coches?marca=${brand.toLowerCase().replace(/ /g, '-')}`}
-                className="text-[13px] text-[#808080] hover:text-[#C9C9C9] transition-colors duration-150 tracking-wide"
+                className="text-[13px] text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors duration-150 tracking-wide"
               >
                 {brand}
               </Link>
@@ -357,7 +357,7 @@ export default async function HomePage() {
           <h3 className="text-[13px] font-medium text-[#C9C9C9] mb-3 leading-snug">
             {item.title}
           </h3>
-          <p className="text-[12px] text-[#808080] leading-relaxed">
+          <p className="text-[12px] text-[#9E9E9E] leading-relaxed">
             {item.desc}
           </p>
         </div>
@@ -436,7 +436,7 @@ export default async function HomePage() {
 
         <div className="relative z-10 h-full flex flex-col justify-end p-5 md:p-7 lg:p-8">
           <div className="w-full max-w-lg border border-[#1E1E1E] bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
-            <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
+            <p className="text-[10px] text-[#9E9E9E] uppercase tracking-widest mb-4">
               ¿Buscas algo muy concreto?
             </p>
 
@@ -479,7 +479,7 @@ export default async function HomePage() {
 
         <div className="relative z-10 h-full flex flex-col justify-end p-5 md:p-7 lg:p-8">
           <div className="w-full max-w-lg border border-[#1E1E1E] bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
-            <p className="text-[10px] text-[#737373] uppercase tracking-widest mb-4">
+            <p className="text-[10px] text-[#9E9E9E] uppercase tracking-widest mb-4">
               Qué queremos publicar
             </p>
 

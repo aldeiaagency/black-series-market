@@ -26,7 +26,7 @@ const config: Config = {
         silver: {
           DEFAULT: '#C9C9C9',
           muted: '#A8A8A8',
-          dark: '#757575',
+          dark: '#9E9E9E', // subido de #757575 para pasar contraste AA (4.5:1) sobre fondos oscuros
         },
         surface: {
           DEFAULT: '#111111',
@@ -38,7 +38,7 @@ const config: Config = {
           'border-light': '#1E1E1E',
           'text-primary': '#F4F1EA',
           'text-secondary': '#9A9A9A',
-          'text-muted': '#8A8A8A',
+          'text-muted': '#979797', // subido de #8A8A8A para pasar AA sobre superficies elevadas
         },
       },
       fontFamily: {
@@ -46,7 +46,7 @@ const config: Config = {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
-        'gradient-gold': 'linear-gradient(135deg, #C9A84C 0%, #E8C97D 50%, #A88A3A 100%)',
+        'gradient-gold': 'linear-gradient(135deg, #C6A64B 0%, #E8C97D 50%, #A88A3A 100%)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -73,8 +73,8 @@ const config: Config = {
         },
       },
       boxShadow: {
-        gold: '0 0 24px rgba(201, 168, 76, 0.12)',
-        'gold-sm': '0 0 10px rgba(201, 168, 76, 0.08)',
+        gold: '0 0 24px rgba(198, 166, 75, 0.12)',
+        'gold-sm': '0 0 10px rgba(198, 166, 75, 0.08)',
         card: '0 4px 24px rgba(0, 0, 0, 0.5)',
         'card-hover': '0 8px 48px rgba(0, 0, 0, 0.7)',
       },

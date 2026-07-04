@@ -99,8 +99,8 @@ export default function SolicitudesBoard({ requests, isElite }: Props) {
             <button
               key={req.id}
               onClick={() => setSelected(req)}
-              className={`w-full text-left border bg-surface p-5 hover:border-[#BFA14A]/40 transition-colors ${
-                isNew && isElite ? 'border-[#BFA14A]/30' : 'border-bsm-border'
+              className={`w-full text-left border bg-surface p-5 hover:border-[#C6A64B]/40 transition-colors ${
+                isNew && isElite ? 'border-[#C6A64B]/30' : 'border-bsm-border'
               }`}
             >
               {/* Row 1: badges + age */}
@@ -122,7 +122,7 @@ export default function SolicitudesBoard({ requests, isElite }: Props) {
                     </span>
                   )}
                   {isNew && isElite && (
-                    <span className="text-[10px] border border-[#BFA14A]/40 bg-[#BFA14A]/5 px-2 py-0.5 text-[#BFA14A]">
+                    <span className="text-[10px] border border-[#C6A64B]/40 bg-[#C6A64B]/5 px-2 py-0.5 text-[#C6A64B]">
                       Exclusivo · menos de 24h
                     </span>
                   )}
@@ -231,7 +231,7 @@ function RequestModal({
                   <span className="text-xs text-bsm-text-muted">Email</span>
                   <a
                     href={`mailto:${req.email}`}
-                    className="text-sm text-bsm-text-secondary hover:text-[#BFA14A] flex items-center gap-1.5 transition-colors"
+                    className="text-sm text-bsm-text-secondary hover:text-[#C6A64B] flex items-center gap-1.5 transition-colors"
                     onClick={e => e.stopPropagation()}
                   >
                     <Mail className="w-3 h-3" />
@@ -243,7 +243,7 @@ function RequestModal({
                     <span className="text-xs text-bsm-text-muted">Teléfono</span>
                     <a
                       href={`tel:${req.phone}`}
-                      className="text-sm text-bsm-text-secondary hover:text-[#BFA14A] flex items-center gap-1.5 transition-colors"
+                      className="text-sm text-bsm-text-secondary hover:text-[#C6A64B] flex items-center gap-1.5 transition-colors"
                       onClick={e => e.stopPropagation()}
                     >
                       <Phone className="w-3 h-3" />
@@ -332,7 +332,7 @@ function RequestModal({
 
             {isNew && isElite && (
               <div className="border-t border-bsm-border pt-4">
-                <span className="text-[10px] border border-[#BFA14A]/40 bg-[#BFA14A]/5 px-3 py-1.5 text-[#BFA14A]">
+                <span className="text-[10px] border border-[#C6A64B]/40 bg-[#C6A64B]/5 px-3 py-1.5 text-[#C6A64B]">
                   Acceso exclusivo · menos de 24h
                 </span>
               </div>
@@ -343,7 +343,7 @@ function RequestModal({
           <div className="border-t border-bsm-border p-6 flex-shrink-0">
             <a
               href={`mailto:hola@blacklabelmarket.es?subject=${mailSubject}&body=${mailBody}`}
-              className="block w-full text-center text-sm border border-[#BFA14A]/40 px-6 py-3 text-[#BFA14A] hover:bg-[#BFA14A]/5 transition-colors"
+              className="block w-full text-center text-sm border border-[#C6A64B]/40 px-6 py-3 text-[#C6A64B] hover:bg-[#C6A64B]/5 transition-colors"
             >
               Tengo este vehículo →
             </a>

@@ -21,7 +21,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
           <Bell className="w-4 h-4 text-[#C6A64B] flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-[#C9C9C9]">¿No encuentras el vehículo que buscas?</p>
-            <p className="text-[11px] text-[#808080]">Cuéntanos qué buscas y te avisamos si aparece algo.</p>
+            <p className="text-[11px] text-[#9E9E9E]">Cuéntanos qué buscas y te avisamos si aparece algo.</p>
           </div>
           <button
             onClick={() => setModalOpen(true)}
@@ -56,7 +56,7 @@ export default function SearchAlertCTA({ vehicleType, compact = false }: SearchA
           </div>
         </div>
 
-        <div className="text-[11px] text-[#737373] mb-5 italic">
+        <div className="text-[11px] text-[#9E9E9E] mb-5 italic">
           Ejemplo: Porsche 911 manual, hasta 90.000 €, nacional, menos de 80.000 km.
         </div>
 

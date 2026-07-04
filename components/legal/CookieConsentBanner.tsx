@@ -143,7 +143,7 @@ export default function CookieConsentBanner() {
               <h2 className="text-sm font-medium text-[#E8E4DA] tracking-wide">Configuración de cookies</h2>
               <button
                 onClick={() => setView(getStoredConsent() ? 'hidden' : 'banner')}
-                className="text-[#808080] hover:text-[#C9C9C9] transition-colors"
+                className="text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors"
                 aria-label="Cerrar"
               >
                 <X className="w-5 h-5" />

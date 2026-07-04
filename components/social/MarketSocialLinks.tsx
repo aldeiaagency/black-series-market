@@ -39,7 +39,7 @@ export default function MarketSocialLinks({
             rel="noopener noreferrer"
             aria-label={`${label} de Black Label Market`}
             title={`${label} de Black Label Market`}
-            className={`p-1.5 text-[#808080] hover:text-[#C9C9C9] transition-colors duration-150 ${iconClassName}`}
+            className={`p-1.5 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors duration-150 ${iconClassName}`}
           >
             <Icon className="w-3.5 h-3.5" />
           </a>

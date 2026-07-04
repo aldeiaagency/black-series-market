@@ -77,14 +77,14 @@ export default async function SolicitudesPage() {
             <p className="text-sm text-bsm-text-muted">
               {requests.length} solicitud{requests.length !== 1 ? 'es' : ''} activa{requests.length !== 1 ? 's' : ''}
               {isElite && exclusiveCount > 0 && (
-                <span className="ml-2 text-[#BFA14A]">
+                <span className="ml-2 text-[#C6A64B]">
                   · {exclusiveCount} en ventana exclusiva
                 </span>
               )}
             </p>
           </div>
           {isElite ? (
-            <span className="text-[10px] text-[#BFA14A] border border-[#BFA14A]/30 bg-[#BFA14A]/5 px-3 py-1.5 uppercase tracking-widest flex-shrink-0">
+            <span className="text-[10px] text-[#C6A64B] border border-[#C6A64B]/30 bg-[#C6A64B]/5 px-3 py-1.5 uppercase tracking-widest flex-shrink-0">
               Acceso anticipado · 24 h
             </span>
           ) : (
@@ -97,7 +97,7 @@ export default async function SolicitudesPage() {
         {/* Banner upsell Elite (solo para Professional) */}
         {!isElite && (
           <div className="border border-bsm-border bg-surface p-4 flex items-center gap-3">
-            <div className="w-0.5 h-10 bg-[#BFA14A]/40 flex-shrink-0" />
+            <div className="w-0.5 h-10 bg-[#C6A64B]/40 flex-shrink-0" />
             <p className="text-xs text-bsm-text-muted leading-relaxed">
               Con el plan <span className="text-bsm-text-secondary">Elite</span> ves las solicitudes{' '}
               <span className="text-bsm-text-secondary">24 horas antes</span> que el resto del market

@@ -151,7 +151,7 @@ export default function Header() {
                     'flex items-center gap-1 px-3.5 py-2 text-[13px] tracking-[0.06em] transition-colors duration-150',
                     pathname.startsWith(item.href) && item.href !== '/'
                       ? 'text-[#C9C9C9]'
-                      : 'text-[#757575] hover:text-[#C9C9C9]'
+                      : 'text-[#9E9E9E] hover:text-[#C9C9C9]'
                   )}
                 >
                   {item.label}
@@ -168,7 +168,7 @@ export default function Header() {
                           'block px-4 py-2.5 text-[13px] transition-colors duration-150',
                           child.label === 'Ver todas'
                             ? 'text-[#C9C9C9] border-t border-[#1E1E1E] mt-1 pt-3'
-                            : 'text-[#757575] hover:text-[#C9C9C9] hover:bg-[#141414]'
+                            : 'text-[#9E9E9E] hover:text-[#C9C9C9] hover:bg-[#141414]'
                         )}
                       >
                         {child.label}
@@ -183,17 +183,17 @@ export default function Header() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
             <MarketSocialLinks className="mr-1 border-r border-[#2A2A2A] pr-2" />
-            <Link href="/buscar" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Buscar">
+            <Link href="/buscar" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Buscar">
               <Search className="w-4 h-4" />
             </Link>
 
             {/* Bell — logged-in → /cuenta/alertas, anonymous → modal */}
             {user ? (
-              <Link href="/cuenta/alertas" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Alertas de búsqueda">
+              <Link href="/cuenta/alertas" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Alertas de búsqueda">
                 <Bell className="w-4 h-4" />
               </Link>
             ) : (
-              <button onClick={() => setAlertModalOpen(true)} className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Crear alerta de búsqueda">
+              <button onClick={() => setAlertModalOpen(true)} className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Crear alerta de búsqueda">
                 <Bell className="w-4 h-4" />
               </button>
             )}
@@ -201,7 +201,7 @@ export default function Header() {
             {user ? (
               <>
                 {/* Heart → cuenta/favoritos */}
-                <Link href="/cuenta/favoritos" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Guardados">
+                <Link href="/cuenta/favoritos" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Guardados">
                   <Heart className="w-4 h-4" />
                 </Link>
 
@@ -222,7 +222,7 @@ export default function Header() {
                       shadow-[0_8px_32px_rgba(0,0,0,0.7)] animate-fade-in">
                       {/* Email */}
                       <div className="px-4 py-3 border-b border-[#1A1A1A]">
-                        <p className="text-[11px] text-[#808080] truncate">{user.email}</p>
+                        <p className="text-[11px] text-[#9E9E9E] truncate">{user.email}</p>
                       </div>
                       {/* Links */}
                       <div className="py-1">
@@ -247,7 +247,7 @@ export default function Header() {
                       <div className="border-t border-[#1A1A1A] py-1">
                         <button
                           onClick={handleSignOut}
-                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#808080] hover:text-red-400 hover:bg-[#141414] transition-colors"
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[13px] text-[#9E9E9E] hover:text-red-400 hover:bg-[#141414] transition-colors"
                         >
                           <LogOut className="w-3.5 h-3.5" />
                           Cerrar sesión
@@ -259,10 +259,10 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/mis-favoritos" className="p-2 text-[#808080] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+                <Link href="/mis-favoritos" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
                   <Heart className="w-4 h-4" />
                 </Link>
-                <Link href="/login" className="px-4 py-2 text-[13px] text-[#757575] hover:text-[#C9C9C9] tracking-wide transition-colors">
+                <Link href="/login" className="px-4 py-2 text-[13px] text-[#9E9E9E] hover:text-[#C9C9C9] tracking-wide transition-colors">
                   Acceder
                 </Link>
                 <Link
@@ -280,7 +280,7 @@ export default function Header() {
 
           {/* Mobile toggle */}
           <button
-            className="lg:hidden p-2 text-[#757575] hover:text-[#C9C9C9] transition-colors"
+            className="lg:hidden p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Abrir menú"
           >
@@ -307,7 +307,7 @@ export default function Header() {
                       <Link
                         key={child.label}
                         href={child.href}
-                        className="block py-2 text-[13px] text-[#808080] hover:text-[#C6A64B]"
+                        className="block py-2 text-[13px] text-[#9E9E9E] hover:text-[#C6A64B]"
                       >
                         {child.label}
                       </Link>
@@ -333,7 +333,7 @@ export default function Header() {
                       Mi panel
                     </Link>
                   )}
-                  <button onClick={handleSignOut} className="w-full text-sm text-[#808080] hover:text-red-400 transition-colors py-2">
+                  <button onClick={handleSignOut} className="w-full text-sm text-[#9E9E9E] hover:text-red-400 transition-colors py-2">
                     Cerrar sesión
                   </button>
                 </>

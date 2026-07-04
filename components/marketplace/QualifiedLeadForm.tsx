@@ -118,7 +118,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
         <p className="text-xs text-bsm-text-muted max-w-[240px]">
           El vendedor recibirá tu consulta y podrá responderte directamente.
         </p>
-        <p className="text-[10px] text-[#808080] mt-3 max-w-[220px] leading-relaxed italic">
+        <p className="text-[10px] text-[#9E9E9E] mt-3 max-w-[220px] leading-relaxed italic">
           Esta consulta no implica reserva ni confirma disponibilidad de la unidad.
         </p>
       </div>

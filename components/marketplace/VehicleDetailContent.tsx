@@ -44,7 +44,7 @@ function SummaryCell({ label, value }: { label: string; value: string | null | u
       <div className="text-[11px] text-bsm-text-muted uppercase tracking-widest mb-1.5">{label}</div>
       {value
         ? <div className="text-sm font-medium text-bsm-text-primary">{value}</div>
-        : <div className="text-xs text-[#808080] italic">Consultar con el vendedor</div>
+        : <div className="text-xs text-[#9E9E9E] italic">Consultar con el vendedor</div>
       }
     </div>
   )
@@ -76,7 +76,7 @@ function HistoryRow({
       </div>
       {value
         ? <span className="text-sm text-bsm-text-primary font-medium">{value}</span>
-        : <span className="text-xs text-[#808080] italic">Consultar con el vendedor</span>
+        : <span className="text-xs text-[#9E9E9E] italic">Consultar con el vendedor</span>
       }
     </div>
   )
@@ -269,7 +269,7 @@ export default function VehicleDetailContent({
                 text-[#9A9A9A] border border-[#2A2A2A] self-start sm:self-auto flex-shrink-0">
                 Vendido
               </span>
-              <p className="text-xs text-[#808080]">Esta unidad ya no está disponible.</p>
+              <p className="text-xs text-[#9E9E9E]">Esta unidad ya no está disponible.</p>
               <Link href={backHref} className="text-xs text-[#C6A64B] hover:text-[#D4B560] transition-colors sm:ml-auto whitespace-nowrap flex-shrink-0">
                 Ver unidades disponibles →
               </Link>
@@ -343,7 +343,7 @@ export default function VehicleDetailContent({
               </div>
             ) : (
               <div className="border border-bsm-border px-5 py-4">
-                <p className="text-sm text-[#808080] italic">
+                <p className="text-sm text-[#9E9E9E] italic">
                   Equipamiento pendiente de confirmar. Solicita información al vendedor.
                 </p>
               </div>
@@ -361,8 +361,8 @@ export default function VehicleDetailContent({
               <HistoryRow icon={Clock}       label="ITV válida hasta"        value={vehicle.itv_valid_until ? fmtDate(vehicle.itv_valid_until) : null} />
             </div>
             <div className="flex items-start gap-2 p-4 bg-[#0D0D0D] border border-[#1A1A1A]">
-              <AlertCircle className="w-4 h-4 text-[#808080] flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#808080] leading-relaxed">
+              <AlertCircle className="w-4 h-4 text-[#9E9E9E] flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[#9E9E9E] leading-relaxed">
                 La información documental debe confirmarse con el vendedor antes de formalizar cualquier operación.
               </p>
             </div>
@@ -382,15 +382,15 @@ export default function VehicleDetailContent({
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-5 py-3.5 border-b border-bsm-border last:border-0">
                   <span className="text-sm text-bsm-text-muted">{label}</span>
-                  <span className={`text-sm font-medium ${value ? 'text-emerald-400' : 'text-[#808080] italic text-xs'}`}>
+                  <span className={`text-sm font-medium ${value ? 'text-emerald-400' : 'text-[#9E9E9E] italic text-xs'}`}>
                     {value || 'Consultar con el vendedor'}
                   </span>
                 </div>
               ))}
             </div>
             <div className="flex items-start gap-2 p-4 bg-[#0D0D0D] border border-[#1A1A1A]">
-              <AlertCircle className="w-4 h-4 text-[#808080] flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#808080] leading-relaxed">
+              <AlertCircle className="w-4 h-4 text-[#9E9E9E] flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[#9E9E9E] leading-relaxed">
                 Las condiciones finales dependen del vendedor responsable de la unidad.
                 Solicita información para confirmar disponibilidad, documentación y condiciones actualizadas.
               </p>
@@ -457,8 +457,8 @@ export default function VehicleDetailContent({
 
           {/* Marketplace disclaimer */}
           <div className="flex items-start gap-3 p-5 border border-[#1A1A1A] bg-[#0A0A0A]">
-            <AlertCircle className="w-4 h-4 text-[#737373] flex-shrink-0 mt-0.5" />
-            <p className="text-[11px] text-[#737373] leading-relaxed">
+            <AlertCircle className="w-4 h-4 text-[#9E9E9E] flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] text-[#9E9E9E] leading-relaxed">
               Información proporcionada por el vendedor profesional. Black Label Market recomienda confirmar disponibilidad, historial, documentación, garantía y condiciones antes de formalizar cualquier operación. Black Label Market actúa como plataforma de publicación y contacto; la operación comercial se realiza directamente entre comprador y vendedor.
             </p>
           </div>

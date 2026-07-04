@@ -58,7 +58,7 @@ const STATUS_STYLE: Record<string, string> = {
   paused:         'text-[#C6A64B] border-[#C6A64B]/30',
   sold:           'text-[#9A9A9A] border-[#3A3A3A]',
   pending_review: 'text-blue-400 border-blue-400/30',
-  draft:          'text-[#737373] border-[#2A2A2A]',
+  draft:          'text-[#9E9E9E] border-[#2A2A2A]',
 }
 
 // ── Upgrade gating block ──────────────────────────────────────────────────────
@@ -398,7 +398,7 @@ export default async function AnaliticasPage({
                     : 'border-bsm-border bg-surface'
               }`}>
                 <AlertCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
-                  ins.type === 'good' ? 'text-emerald-400' : ins.type === 'warn' ? 'text-[#C6A64B]' : 'text-[#737373]'
+                  ins.type === 'good' ? 'text-emerald-400' : ins.type === 'warn' ? 'text-[#C6A64B]' : 'text-[#9E9E9E]'
                 }`} />
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-bsm-text-primary mb-0.5">{ins.vehicleName}</p>

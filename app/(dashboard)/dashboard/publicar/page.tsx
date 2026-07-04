@@ -452,7 +452,7 @@ export default function PublicarPage() {
                     <div key={b}>
                       <p className="text-[11px] font-medium text-bsm-text-secondary">{b}</p>
                       {MOTO_BODY_TYPE_EXAMPLES[b] && (
-                        <p className="text-[10px] text-[#737373] leading-relaxed">
+                        <p className="text-[10px] text-[#9E9E9E] leading-relaxed">
                           <span className="text-[#555] mr-1">Ej:</span>{MOTO_BODY_TYPE_EXAMPLES[b]}
                         </p>
                       )}
@@ -465,7 +465,7 @@ export default function PublicarPage() {
                 {bodyTypes.map((b) => <option key={b} value={b}>{b}</option>)}
               </select>
               {form.vehicle_type === 'motorcycle' && form.body_type && MOTO_BODY_TYPE_EXAMPLES[form.body_type] && (
-                <p className="mt-1.5 text-[11px] text-[#737373] leading-relaxed">
+                <p className="mt-1.5 text-[11px] text-[#9E9E9E] leading-relaxed">
                   <span className="text-[#555] mr-1">Ej:</span>{MOTO_BODY_TYPE_EXAMPLES[form.body_type]}
                 </p>
               )}
@@ -488,7 +488,7 @@ export default function PublicarPage() {
                     {CAR_CATEGORIES_PUBLIC.map((cat) => (
                       <div key={cat.value}>
                         <p className="text-[11px] font-medium text-bsm-text-secondary">{cat.label}</p>
-                        <p className="text-[10px] text-[#737373] leading-relaxed">
+                        <p className="text-[10px] text-[#9E9E9E] leading-relaxed">
                           <span className="text-[#555] mr-1">Ej:</span>{cat.examples}
                         </p>
                       </div>
@@ -506,7 +506,7 @@ export default function PublicarPage() {
                   ))}
                 </select>
                 {form.category && (
-                  <p className="mt-1.5 text-[11px] text-[#737373] leading-relaxed">
+                  <p className="mt-1.5 text-[11px] text-[#9E9E9E] leading-relaxed">
                     <span className="text-[#555] mr-1">Ej:</span>
                     {CAR_CATEGORIES_PUBLIC.find((c) => c.value === form.category)?.examples}
                   </p>

@@ -100,13 +100,13 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
         {/* Bottom bar — location + vehicle count */}
         <div className="px-4 py-3.5 border-t border-[#1A1A1A] flex flex-col items-center gap-1">
           {location && (
-            <div className="flex items-center gap-1 text-[11px] text-[#808080]">
+            <div className="flex items-center gap-1 text-[11px] text-[#9E9E9E]">
               <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
               <span className="truncate">{location}</span>
             </div>
           )}
           {dealer.vehicle_count !== undefined && (
-            <div className="text-[11px] text-[#737373]">
+            <div className="text-[11px] text-[#9E9E9E]">
               {dealer.vehicle_count} {dealer.vehicle_count === 1 ? 'vehículo' : 'vehículos'}
             </div>
           )}

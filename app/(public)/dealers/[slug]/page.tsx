@@ -221,7 +221,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/20 to-transparent" />
           <nav aria-label="breadcrumb" className="absolute top-6 left-6 lg:left-12">
-            <ol className="flex items-center gap-1.5 text-xs text-[#808080]">
+            <ol className="flex items-center gap-1.5 text-xs text-[#9E9E9E]">
               <li><Link href="/" className="hover:text-[#C9C9C9] transition-colors">Inicio</Link></li>
               <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
               <li><Link href="/dealers" className="hover:text-[#C9C9C9] transition-colors">Showrooms</Link></li>
@@ -265,13 +265,13 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     <div className="flex flex-wrap items-center gap-5 text-sm text-bsm-text-secondary">
                       {totalActive > 0 && (
                         <span className="flex items-center gap-1.5">
-                          {cars.length > 0 && <Car className="w-4 h-4 text-[#737373]" />}
-                          {motos.length > 0 && <Bike className="w-4 h-4 text-[#737373]" />}
+                          {cars.length > 0 && <Car className="w-4 h-4 text-[#9E9E9E]" />}
+                          {motos.length > 0 && <Bike className="w-4 h-4 text-[#9E9E9E]" />}
                           {totalActive} unidad{totalActive !== 1 ? 'es' : ''} activa{totalActive !== 1 ? 's' : ''}
                         </span>
                       )}
                       {dealer.years_in_business && (
-                        <span className="text-[#808080]">{dealer.years_in_business} años en el sector</span>
+                        <span className="text-[#9E9E9E]">{dealer.years_in_business} años en el sector</span>
                       )}
                     </div>
                   </div>
@@ -368,7 +368,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                       {fullAddress && (
                         <div>
                           <div className="flex items-start gap-2 text-sm text-bsm-text-secondary leading-relaxed">
-                            <MapPin className="w-3.5 h-3.5 text-[#737373] flex-shrink-0 mt-0.5" />
+                            <MapPin className="w-3.5 h-3.5 text-[#9E9E9E] flex-shrink-0 mt-0.5" />
                             <span>{fullAddress}</span>
                           </div>
                           {mapsUrl && (
@@ -386,18 +386,18 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                       )}
                       {dealer.phone && (
                         <div className="flex items-center gap-2 text-sm text-bsm-text-secondary">
-                          <Phone className="w-3.5 h-3.5 text-[#737373] flex-shrink-0" />
+                          <Phone className="w-3.5 h-3.5 text-[#9E9E9E] flex-shrink-0" />
                           <span>{dealer.phone}</span>
                         </div>
                       )}
                       {dealer.email && (
                         <div className="flex items-center gap-2 text-sm text-bsm-text-secondary min-w-0">
-                          <Mail className="w-3.5 h-3.5 text-[#737373] flex-shrink-0" />
+                          <Mail className="w-3.5 h-3.5 text-[#9E9E9E] flex-shrink-0" />
                           <span className="truncate">{dealer.email}</span>
                         </div>
                       )}
                       {attentionNote && (
-                        <p className="text-xs text-[#737373] italic pl-5">{attentionNote}</p>
+                        <p className="text-xs text-[#9E9E9E] italic pl-5">{attentionNote}</p>
                       )}
                     </div>
                   )}
@@ -405,7 +405,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                   {/* Social links */}
                   {hasSocial && (
                     <div className="flex items-center gap-2 pb-5 border-b border-[#1A1A1A] mb-5">
-                      <span className="text-xs text-[#737373] whitespace-nowrap">Síguenos en</span>
+                      <span className="text-xs text-[#9E9E9E] whitespace-nowrap">Síguenos en</span>
                       <SocialLinks
                         website={dealer.website}
                         instagram={dealer.instagram}
@@ -422,7 +422,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     title={dealer.name}
                     text={`Mira el showroom ${dealer.name} en Black Label Market`}
                     label="Compartir showroom"
-                    className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 text-sm border border-[#2A2A2A] text-[#808080] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors"
+                    className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 text-sm border border-[#2A2A2A] text-[#9E9E9E] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors"
                   />
                 </div>
               </div>
@@ -512,7 +512,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
               </p>
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-3.5 h-3.5 text-[#8A8A8A] flex-shrink-0 mt-0.5" />
-                <p className="text-[11px] text-[#737373] leading-relaxed">
+                <p className="text-[11px] text-[#9E9E9E] leading-relaxed">
                   Aun así, te recomendamos confirmar siempre los detalles del vehículo directamente con el vendedor:
                   estado, historial, garantía, documentación y condiciones de compra.
                 </p>

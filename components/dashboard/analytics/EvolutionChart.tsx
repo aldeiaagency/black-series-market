@@ -53,20 +53,20 @@ export default function EvolutionChart({ data }: Props) {
         <XAxis
           dataKey="date"
           tickFormatter={fmtTick}
-          tick={{ fill: '#737373', fontSize: 10 }}
+          tick={{ fill: '#9E9E9E', fontSize: 10 }}
           axisLine={{ stroke: '#2A2A2A' }}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
           allowDecimals={false}
-          tick={{ fill: '#737373', fontSize: 10 }}
+          tick={{ fill: '#9E9E9E', fontSize: 10 }}
           axisLine={false}
           tickLine={false}
         />
         <Tooltip content={<CustomTooltip />} />
         <Legend
-          wrapperStyle={{ fontSize: 11, color: '#737373', paddingTop: 8 }}
+          wrapperStyle={{ fontSize: 11, color: '#9E9E9E', paddingTop: 8 }}
           formatter={(value) => <span className="text-bsm-text-muted capitalize">{value}</span>}
         />
         <Line
