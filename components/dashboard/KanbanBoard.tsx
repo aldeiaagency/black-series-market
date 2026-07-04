@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { ChevronDown, ChevronRight, Phone, MessageCircle, Mail, X, Trash2 } from 'lucide-react'
+import { useModalA11y } from '@/lib/hooks/useModalA11y'
 
 // ── Pipeline definition ────────────────────────────────────────────────────────
 
@@ -182,11 +183,7 @@ function LeadModal({
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  const dialogRef = useModalA11y(true, onClose) // focus-trap + Escape + retorno de foco
 
   const q = lead.qualification
   const qualRows = [
@@ -199,7 +196,7 @@ function LeadModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative bg-[#0D0D0D] border border-bsm-border w-full max-w-lg max-h-[88vh] overflow-y-auto shadow-2xl">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Detalle del lead" className="relative bg-[#0D0D0D] border border-bsm-border w-full max-w-lg max-h-[88vh] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="flex items-start justify-between p-6 border-b border-bsm-border sticky top-0 bg-[#0D0D0D] z-10">
           <div>
@@ -401,8 +398,12 @@ function LeadCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver lead de ${lead.buyer_name ?? 'comprador anónimo'}`}
       onClick={onOpen}
-      className={`border p-3 cursor-pointer hover:brightness-110 transition-all ${card} ${isPending ? 'opacity-50' : ''} ${isGray ? 'opacity-55' : ''}`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() } }}
+      className={`border p-3 cursor-pointer hover:brightness-110 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A64B] ${card} ${isPending ? 'opacity-50' : ''} ${isGray ? 'opacity-55' : ''}`}
     >
       {/* Name + score */}
       <div className="flex items-start justify-between gap-1.5 mb-0.5">

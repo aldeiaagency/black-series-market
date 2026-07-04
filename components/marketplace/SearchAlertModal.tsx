@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Bell, CheckCircle } from 'lucide-react'
+import { useModalA11y } from '@/lib/hooks/useModalA11y'
 
 const schema = z.object({
   vehicle_type: z.enum(['car', 'motorcycle', 'any']),
@@ -30,6 +31,7 @@ interface Props {
 export default function SearchAlertModal({ open, onClose, defaultVehicleType }: Props) {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const dialogRef = useModalA11y(open, onClose)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -81,6 +83,7 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-lg bg-[#0D0D0D] border border-[#1E1E1E] shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
