@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq('status', 'active'),
     supabase
       .from('brands')
-      .select('slug, name, updated_at')
+      .select('slug, name, created_at')
       .eq('is_active', true),
   ])
 
@@ -114,7 +114,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((b) => brandsWithStock.has(norm(b.name)))
     .map((b) => ({
       url: `${BASE_URL}/marcas/${b.slug}`,
-      lastModified: new Date(b.updated_at || new Date()),
+      lastModified: new Date(b.created_at || new Date()),
       changeFrequency: 'weekly',
       priority: 0.5,
     }))
