@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight, ZoomIn, Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useModalA11y } from '@/lib/hooks/useModalA11y'
 import type { VehicleImage } from '@/lib/types'
 
 // ---------------------------------------------------------------------------
@@ -120,6 +121,13 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [videoModalOpen, setVideoModalOpen] = useState(false)
   const [failedItems, setFailedItems] = useState<Set<number>>(new Set())
+
+  // A11y de modales: focus-trap + Escape + retorno de foco. onClose estable para no
+  // re-enfocar en cada render (el lightbox re-renderiza al navegar prev/next).
+  const closeLightbox = useCallback(() => setLightboxOpen(false), [])
+  const closeVideoModal = useCallback(() => setVideoModalOpen(false), [])
+  const lightboxRef = useModalA11y(lightboxOpen, closeLightbox)
+  const videoModalRef = useModalA11y(videoModalOpen, closeVideoModal)
 
   const videoId = videoUrl ? extractYouTubeId(videoUrl) : null
   const items = buildMediaItems(images, videoId)
@@ -321,6 +329,7 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
       {/* ------------------------------------------------------------------ */}
       {lightboxOpen && activeItem?.kind === 'image' && (
         <div
+          ref={lightboxRef}
           role="dialog"
           aria-label={`Galería de imágenes: ${title}`}
           aria-modal="true"
@@ -385,6 +394,7 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
       {/* ------------------------------------------------------------------ */}
       {videoModalOpen && (
         <div
+          ref={videoModalRef}
           role="dialog"
           aria-label={`Vídeo: ${title}`}
           aria-modal="true"
