@@ -130,36 +130,48 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
 
       {/* Nombre */}
       <div>
+        <label htmlFor="qlf-name" className="sr-only">Tu nombre</label>
         <input
           {...register('buyer_name')}
+          id="qlf-name"
           placeholder="Tu nombre"
+          aria-invalid={!!errors.buyer_name}
+          aria-describedby={errors.buyer_name ? 'qlf-name-err' : undefined}
           className="input-base"
         />
-        {errors.buyer_name && <p className="text-xs text-red-400 mt-1">{errors.buyer_name.message}</p>}
+        {errors.buyer_name && <p id="qlf-name-err" role="alert" className="text-xs text-red-400 mt-1">{errors.buyer_name.message}</p>}
       </div>
 
       {/* Email */}
       <div>
+        <label htmlFor="qlf-email" className="sr-only">Tu email</label>
         <input
           {...register('buyer_email')}
+          id="qlf-email"
           type="email"
           placeholder="Tu email"
+          aria-invalid={!!errors.buyer_email}
+          aria-describedby={errors.buyer_email ? 'qlf-email-err' : undefined}
           className="input-base"
         />
-        {errors.buyer_email && <p className="text-xs text-red-400 mt-1">{errors.buyer_email.message}</p>}
+        {errors.buyer_email && <p id="qlf-email-err" role="alert" className="text-xs text-red-400 mt-1">{errors.buyer_email.message}</p>}
       </div>
 
       {/* Teléfono */}
+      <label htmlFor="qlf-phone" className="sr-only">Teléfono (opcional)</label>
       <input
         {...register('buyer_phone')}
+        id="qlf-phone"
         type="tel"
         placeholder="Teléfono (opcional)"
         className="input-base"
       />
 
       {/* Mensaje */}
+      <label htmlFor="qlf-message" className="sr-only">Mensaje</label>
       <textarea
         {...register('message')}
+        id="qlf-message"
         rows={3}
         placeholder="Hola, me interesa este vehículo. Me gustaría recibir más información."
         className="input-base resize-none"

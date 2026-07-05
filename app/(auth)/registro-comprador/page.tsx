@@ -115,27 +115,32 @@ export default function RegistroCompradorPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="label-base">Nombre</label>
+              <label className="label-base" htmlFor="reg-buyer-name">Nombre</label>
               <input
+                id="reg-buyer-name"
                 value={form.full_name}
                 onChange={(e) => update('full_name', e.target.value)}
                 placeholder="Tu nombre"
                 className="input-base"
+                autoComplete="name"
                 required
               />
             </div>
             <div>
-              <label className="label-base">Email</label>
+              <label className="label-base" htmlFor="reg-buyer-email">Email</label>
               <input
+                id="reg-buyer-email"
                 type="email"
                 value={form.email}
                 onChange={(e) => update('email', e.target.value)}
                 placeholder="tu@email.com"
                 className="input-base"
+                autoComplete="email"
                 required
               />
             </div>
             <PasswordInput
+              id="reg-buyer-password"
               value={form.password}
               onChange={(v) => update('password', v)}
               autoComplete="new-password"
@@ -146,7 +151,7 @@ export default function RegistroCompradorPage() {
             />
 
             {error && (
-              <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
+              <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
                 {error}
               </p>
             )}

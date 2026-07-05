@@ -32,7 +32,7 @@ export default function LoginPage() {
       .from('dealers')
       .select('id')
       .eq('profile_id', data.user.id)
-      .single()
+      .maybeSingle()
 
     router.push(dealer ? '/dashboard' : '/')
     router.refresh()
@@ -53,18 +53,22 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="label-base">Email</label>
+              <label className="label-base" htmlFor="login-email">Email</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@email.com"
                 className="input-base"
+                autoComplete="email"
+                aria-invalid={!!error}
                 required
               />
             </div>
             <div>
               <PasswordInput
+                id="login-password"
                 value={password}
                 onChange={setPassword}
                 autoComplete="current-password"
@@ -78,7 +82,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
+              <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
                 {error}
               </p>
             )}

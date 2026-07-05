@@ -105,23 +105,27 @@ export default function RegistroPage() {
 
               <form onSubmit={goToStep2} className="space-y-4">
                 <div>
-                  <label className="label-base">Nombre completo</label>
+                  <label className="label-base" htmlFor="reg-full-name">Nombre completo</label>
                   <input
+                    id="reg-full-name"
                     value={form.full_name}
                     onChange={(e) => update('full_name', e.target.value)}
                     placeholder="Tu nombre y apellidos"
                     className="input-base"
+                    autoComplete="name"
                     required
                   />
                 </div>
                 <div>
-                  <label className="label-base">Email de contacto</label>
+                  <label className="label-base" htmlFor="reg-email">Email de contacto</label>
                   <input
+                    id="reg-email"
                     type="email"
                     value={form.email}
                     onChange={(e) => update('email', e.target.value)}
                     placeholder="tu@email.com"
                     className="input-base"
+                    autoComplete="email"
                     required
                   />
                 </div>
@@ -152,8 +156,9 @@ export default function RegistroPage() {
                 {/* Basic info */}
                 <div className="space-y-4">
                   <div>
-                    <label className="label-base">Nombre del showroom</label>
+                    <label className="label-base" htmlFor="reg-dealer-name">Nombre del showroom</label>
                     <input
+                      id="reg-dealer-name"
                       value={form.dealer_name}
                       onChange={(e) => update('dealer_name', e.target.value)}
                       placeholder="Elite Motors Madrid"
@@ -163,33 +168,39 @@ export default function RegistroPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="label-base">Ciudad</label>
+                      <label className="label-base" htmlFor="reg-city">Ciudad</label>
                       <input
+                        id="reg-city"
                         value={form.location_city}
                         onChange={(e) => update('location_city', e.target.value)}
                         placeholder="Madrid"
                         className="input-base"
+                        autoComplete="address-level2"
                         required
                       />
                     </div>
                     <div>
-                      <label className="label-base">Provincia</label>
+                      <label className="label-base" htmlFor="reg-region">Provincia</label>
                       <input
+                        id="reg-region"
                         value={form.location_region}
                         onChange={(e) => update('location_region', e.target.value)}
                         placeholder="Madrid"
                         className="input-base"
+                        autoComplete="address-level1"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="label-base">Teléfono de contacto</label>
+                    <label className="label-base" htmlFor="reg-phone">Teléfono de contacto</label>
                     <input
+                      id="reg-phone"
                       type="tel"
                       value={form.phone}
                       onChange={(e) => update('phone', e.target.value)}
                       placeholder="+34 600 000 000"
                       className="input-base"
+                      autoComplete="tel"
                       required
                     />
                   </div>
@@ -202,8 +213,9 @@ export default function RegistroPage() {
                   </p>
                   <div className="space-y-4">
                     <div>
-                      <label className="label-base">Google Business</label>
+                      <label className="label-base" htmlFor="reg-gbusiness">Google Business</label>
                       <input
+                        id="reg-gbusiness"
                         type="url"
                         value={form.google_business_url}
                         onChange={(e) => update('google_business_url', e.target.value)}
@@ -212,8 +224,9 @@ export default function RegistroPage() {
                       />
                     </div>
                     <div>
-                      <label className="label-base">Instagram</label>
+                      <label className="label-base" htmlFor="reg-instagram">Instagram</label>
                       <input
+                        id="reg-instagram"
                         type="url"
                         value={form.instagram_url}
                         onChange={(e) => update('instagram_url', e.target.value)}
@@ -222,8 +235,9 @@ export default function RegistroPage() {
                       />
                     </div>
                     <div>
-                      <label className="label-base">Web oficial</label>
+                      <label className="label-base" htmlFor="reg-website">Web oficial</label>
                       <input
+                        id="reg-website"
                         type="url"
                         value={form.website}
                         onChange={(e) => update('website', e.target.value)}
@@ -245,7 +259,8 @@ export default function RegistroPage() {
                         key={p}
                         type="button"
                         onClick={() => togglePortal(p)}
-                        className={`text-xs px-3 py-1.5 border transition-colors ${
+                        aria-pressed={form.portales.includes(p)}
+                        className={`text-xs px-3 py-1.5 border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
                           form.portales.includes(p)
                             ? 'border-gold text-gold bg-gold/5'
                             : 'border-bsm-border text-bsm-text-muted hover:border-bsm-border-light'
@@ -257,8 +272,9 @@ export default function RegistroPage() {
                   </div>
                   {form.portales.length > 0 && (
                     <div>
-                      <label className="label-base">URL de tu perfil en el portal</label>
+                      <label className="label-base" htmlFor="reg-portal-url">URL de tu perfil en el portal</label>
                       <input
+                        id="reg-portal-url"
                         type="url"
                         value={form.portal_url}
                         onChange={(e) => update('portal_url', e.target.value)}
@@ -270,7 +286,7 @@ export default function RegistroPage() {
                 </div>
 
                 {error && (
-                  <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
+                  <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
                     {error}
                   </p>
                 )}

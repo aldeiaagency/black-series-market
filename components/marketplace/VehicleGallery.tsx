@@ -173,11 +173,15 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
 
         {/* Primary viewer */}
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={activeItem?.kind === 'video' ? 'Reproducir vídeo' : 'Ampliar imagen'}
           className={cn(
-            'relative aspect-[16/9] bg-surface overflow-hidden group',
+            'relative aspect-[16/9] bg-surface overflow-hidden group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold',
             activeItem?.kind === 'image' ? 'cursor-zoom-in' : 'cursor-pointer',
           )}
           onClick={handleMainClick}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleMainClick() } }}
         >
           {activeItem?.kind === 'image' ? (
             // ---- Image slot ----
@@ -226,7 +230,7 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
 
           {/* Navigation arrows */}
           {items.length > 1 && (
-            <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity pointer-events-none">
               <button
                 aria-label="Anterior"
                 onClick={(e) => { e.stopPropagation(); prev() }}
