@@ -17,7 +17,8 @@ const BOOST_DURATION_DAYS = 7
  */
 export async function activateBoost(
   vehicleId: string,
-  organizationId: string
+  organizationId: string,
+  opts: { bypassCap?: boolean } = {}
 ): Promise<BoostResult> {
   const admin = createAdminClient()
 
@@ -32,29 +33,33 @@ export async function activateBoost(
     return { success: false, error: 'El vehículo debe estar activo y aprobado para activar un boost.' }
   }
 
-  // 2. Check global boost cap (max_boosted_share of active results)
-  const { count: totalActive } = await admin
-    .from('vehicles')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'active')
+  // 2. Cupo global de destacados (max_boosted_share de los resultados activos).
+  // Los boosts PAGADOS (checkout) lo omiten (bypassCap): el cliente pagó, no se le rechaza;
+  // el cupo existe para limitar los destacados gratis de crédito de plan.
+  if (!opts.bypassCap) {
+    const { count: totalActive } = await admin
+      .from('vehicles')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'active')
 
-  const { count: currentBoosted } = await admin
-    .from('boost_activations')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'active')
-    .gte('ends_at', new Date().toISOString())
+    const { count: currentBoosted } = await admin
+      .from('boost_activations')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'active')
+      .gte('ends_at', new Date().toISOString())
 
-  const { data: capConfig } = await admin
-    .from('platform_config')
-    .select('value')
-    .eq('key', 'boost_config')
-    .single()
+    const { data: capConfig } = await admin
+      .from('platform_config')
+      .select('value')
+      .eq('key', 'boost_config')
+      .single()
 
-  const maxShare: number = capConfig?.value?.max_boosted_share ?? 0.10
-  const maxBoosted = Math.floor((totalActive ?? 0) * maxShare)
+    const maxShare: number = capConfig?.value?.max_boosted_share ?? 0.10
+    const maxBoosted = Math.floor((totalActive ?? 0) * maxShare)
 
-  if ((currentBoosted ?? 0) >= maxBoosted) {
-    return { success: false, error: 'El cupo de vehículos destacados simultáneos está lleno. Puedes programar el boost para cuando haya disponibilidad.' }
+    if ((currentBoosted ?? 0) >= maxBoosted) {
+      return { success: false, error: 'El cupo de vehículos destacados simultáneos está lleno. Puedes programar el boost para cuando haya disponibilidad.' }
+    }
   }
 
   // 3. Check if vehicle already has an active boost
@@ -71,21 +76,9 @@ export async function activateBoost(
     return { success: false, error: 'Este vehículo ya tiene un boost activo.' }
   }
 
-  // 4. Find available credit (plan cycle first, then pack credits FIFO by created_at)
+  // 4. Elegir crédito disponible (primero el del ciclo de plan, luego packs FIFO por created_at).
   const now = new Date().toISOString()
 
-  const { data: credit } = await admin
-    .from('boost_credits')
-    .select('id, source, quantity, used, expires_at')
-    .eq('organization_id', organizationId)
-    .lt('used', admin.rpc as never)  // used < quantity — handled below
-    .or(`expires_at.is.null,expires_at.gt.${now}`)
-    .order('source')  // 'pack' < 'plan' < 'welcome' alphabetically; adjust if needed
-    .order('created_at')
-    .limit(1)
-    .single()
-
-  // Simpler query without rpc comparison:
   const { data: credits } = await admin
     .from('boost_credits')
     .select('id, source, quantity, used, expires_at')
@@ -100,7 +93,17 @@ export async function activateBoost(
     return { success: false, error: 'No tienes créditos de boost disponibles. Puedes comprar un pack de boosts desde el dashboard.' }
   }
 
-  // 5. Create activation + consume credit (in a transaction via service role)
+  // 5. Consumo atómico del crédito ANTES de crear la activación. El guard `used < quantity`
+  // vive en la BD (RPC consume_boost_credit), así que dos boosts concurrentes no pueden gastar
+  // el mismo crédito (elimina el boost gratis por carrera del read-modify-write anterior).
+  const { data: consumed, error: consumeError } = await admin
+    .rpc('consume_boost_credit', { p_credit_id: availableCredit.id })
+
+  if (consumeError || !consumed) {
+    return { success: false, error: 'No tienes créditos de boost disponibles. Puedes comprar un pack de boosts desde el dashboard.' }
+  }
+
+  // 6. Crear la activación. Si falla, se reembolsa el crédito consumido (compensación).
   const startsAt = new Date()
   const endsAt = new Date(startsAt.getTime() + BOOST_DURATION_DAYS * 24 * 60 * 60 * 1000)
 
@@ -118,19 +121,17 @@ export async function activateBoost(
     .single()
 
   if (activationError || !activation) {
+    await admin.rpc('refund_boost_credit', { p_credit_id: availableCredit.id })
     return { success: false, error: 'Error al crear el boost. Inténtalo de nuevo.' }
   }
 
-  // Increment used counter on the credit
-  await admin
-    .from('boost_credits')
-    .update({ used: availableCredit.used + 1 })
-    .eq('id', availableCredit.id)
-
-  // Mirror on vehicles.featured_until for backward compatibility
+  // 7. Reflejar el destacado en la fila del vehículo. is_featured=true habilita el badge
+  // "Destacado" y el ranking en el catálogo, que exige is_featured AND featured_until>now
+  // (VehicleCard.showFeatured y el .order de GET /api/vehicles). Sin esto el boost pagado
+  // no destacaba. El sweep de expiración (cron expire-boosts) lo revierte al vencer.
   await admin
     .from('vehicles')
-    .update({ featured_until: endsAt.toISOString() })
+    .update({ is_featured: true, featured_until: endsAt.toISOString() })
     .eq('id', vehicleId)
 
   return {
@@ -155,7 +156,7 @@ export async function cancelBoostOnVehicle(vehicleId: string) {
 
   await admin
     .from('vehicles')
-    .update({ featured_until: null })
+    .update({ is_featured: false, featured_until: null })
     .eq('id', vehicleId)
 }
 
@@ -174,13 +175,7 @@ export async function provisionPlanBoostCredits(
 
   const admin = createAdminClient()
 
-  // Mark previous plan-cycle credits as fully used (prevent accumulation)
-  await admin
-    .from('boost_credits')
-    .update({ used: admin.rpc as never })  // will handle below
-    .eq('organization_id', organizationId)
-    .eq('source', 'plan')
-
+  // Agota los créditos de ciclo de plan anteriores (no se acumulan entre ciclos, §5).
   const { data: prevCredits } = await admin
     .from('boost_credits')
     .select('id, quantity')

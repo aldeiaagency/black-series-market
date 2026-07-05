@@ -10,11 +10,11 @@ listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bl
 - [x] A3 · SEC-7 upload magic bytes HECHO. SEC-6 (import key por-dealer) y SEC-8 (invitación equipo por email) DIFERIDOS: son feature-work (tabla de keys / flujo de invitación), MEDIA, sin uso en white-glove hoy
 - [x] A4 · Cabeceras de seguridad (HSTS/X-Frame/nosniff/Referrer/Permissions) VERIFICADAS en prod · cap `limit`/`offset` (999999→60) VERIFICADO · error genérico sin fuga. CSP estricta diferida (necesita allowlist de Stripe/GTM/Supabase para no romper). `/api/track` (BAJO, pulición analytics) diferido
 
-## BLOQUE B — Cadena de dinero (correctness)
-- [ ] B1 · `activateBoost`/`cancel` ponen `is_featured` (hoy el boost pagado no destaca)
-- [ ] B2 · Consumo de crédito atómico + eliminar `admin.rpc as never` (código muerto) + comprobar errores
-- [ ] B3 · `create-checkout` firma nueva con `organization_id`+`billing_cycle` (rellenar `subscriptions`)
-- [ ] B4 · Idempotencia webhook Stripe (`processed_stripe_events`) · `incrementEliteCounter` · fix cupo boost fallback
+## BLOQUE B — Cadena de dinero (correctness) — HECHO (desplegado + build ok)
+- [x] B1 · `activateBoost` pone `is_featured=true` (+`featured_until`); `cancel` lo pone false. Nuevo cron diario `expire-boosts` (`/api/cron/expire-boosts`, vercel.json) revierte `is_featured`+`featured_until` y cierra activaciones al vencer (no existía). Badge/filtro ya eran correctos por `featured_until>now`; esto arregla también el `.order('is_featured')`.
+- [x] B2 · Consumo de crédito ATÓMICO vía RPC `consume_boost_credit` (guard `used<quantity` en BD) + `refund_boost_credit` de compensación si falla la activación (consume-first → dirección segura: nunca boost gratis por carrera). Eliminado el `admin.rpc as never` muerto en `boosts.ts` (x2) y en `elite-capacity.ts`. **Migración 062** aplicada+verificada.
+- [x] B3 · `create-checkout` resuelve la organización y usa la API de objeto con `organization_id`+`billing_cycle` → el webhook ya rellena `subscriptions` y respeta el ciclo (mensual/anual).
+- [x] B4 · Idempotencia del webhook: tabla `processed_stripe_events` (**migración 063**) + guard insert-before-process (23505 → ya procesado, corta reintentos de Stripe). `incrementEliteCounter` corregido (dead code + `maybeSingle`) y CABLEADO en el path Elite (best-effort por provincia, no-op si no hay regla). Fallback de cupo: boost pagado con `bypassCap` → pasa por la activación trazable normal; el fallback directo solo salta en casos límite (vehículo no activo / ya destacado).
 
 ## BLOQUE C — Rendimiento y cache — MAYORÍA HECHO + DESPLEGADO + VERIFICADO
 - [x] C1 · `createPublicClient` (sin cookies) + ISR en home + 23 páginas de catálogo. Categorías/marcas/home cachean (HIT verificado); `/coches`,`/motos` siguen dinámicas por sus filtros (searchParams) pero con cliente rápido
@@ -41,4 +41,5 @@ listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bl
 - [ ] F1-escritura · E2E de escritura por rol (publicar vehículo, kanban, lead, alerta, admin aprobar/rechazar). Verificado ESTÁTICAMENTE en F0 (patrones correctos). El E2E en vivo dispararía n8n → emails a dealers/leads reales; requiere datos de prueba aislados o aprobación (regla producción del CLAUDE.md).
 
 ## Registro de deploys/migraciones
-- Migraciones aplicadas: 057-060. Próximas: 061 (idempotencia Stripe), 062 (RPC boost atómico / views), etc.
+- Migraciones aplicadas + verificadas en prod: 057-061, **062** (consume/refund boost credit), **063** (processed_stripe_events).
+- Deploys por bloque con `vercel --prod`. Último lote pendiente de deploy: B (boosts/webhook/checkout/elite) + cron expire-boosts.

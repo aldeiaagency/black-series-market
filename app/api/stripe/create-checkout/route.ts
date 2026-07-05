@@ -27,6 +27,14 @@ export async function POST(request: NextRequest) {
 
     if (!dealer) return NextResponse.redirect(new URL('/registro', request.url))
 
+    // La organización del dealer: el webhook la necesita en metadata para rellenar
+    // `subscriptions` (sin esto la tabla quedaba vacía y el plan no se materializaba).
+    const { data: org } = await admin
+      .from('organizations')
+      .select('id')
+      .eq('dealer_id', dealer.id)
+      .maybeSingle()
+
     let customerId = dealer.stripe_customer_id
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -46,12 +54,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Precio no configurado para este plan y ciclo' }, { status: 400 })
     }
 
-    const session = await createCheckoutSession(
+    const session = await createCheckoutSession({
       customerId,
       priceId,
-      dealer.id,
-      plan
-    )
+      organizationId: org?.id ?? '',
+      dealerId: dealer.id,
+      plan,
+      billingCycle,
+    })
 
     return NextResponse.redirect(session.url!, 303)
   } catch (error) {

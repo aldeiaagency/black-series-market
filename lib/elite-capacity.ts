@@ -82,22 +82,16 @@ export async function checkEliteAvailability(
 export async function incrementEliteCounter(provinceCode: string, category = '*') {
   const admin = createAdminClient()
 
-  await admin
-    .from('elite_capacity_rules')
-    .update({ current_elite_showrooms: admin.rpc as never })
-    .eq('geographic_scope_type', 'province')
-    .eq('geographic_scope_id', provinceCode)
-    .eq('category', category)
-
-  // Using raw update with increment via RPC if available; otherwise do a read-modify-write
+  // Localiza la regla de la provincia (categoría específica o '*') y sube el contador.
   const { data: rule } = await admin
     .from('elite_capacity_rules')
     .select('id, current_elite_showrooms, max_elite_showrooms, max_elite_share')
     .eq('geographic_scope_type', 'province')
     .eq('geographic_scope_id', provinceCode)
     .in('category', [category, '*'])
+    .order('category', { ascending: false }) // categoría específica gana sobre '*'
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!rule) return
 

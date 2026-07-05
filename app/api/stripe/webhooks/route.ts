@@ -25,6 +25,20 @@ export async function POST(request: NextRequest) {
 
   const admin = createAdminClient()
 
+  // Idempotencia: registra el evento antes de procesarlo. Stripe reintenta los webhooks;
+  // sin esto, invoice.paid re-provisionaría créditos de boost y un checkout de boost podría
+  // activarse dos veces. Un unique-violation (23505) significa "ya procesado" → 200 sin repetir.
+  const { error: dupErr } = await admin
+    .from('processed_stripe_events')
+    .insert({ event_id: event.id, type: event.type })
+  if (dupErr) {
+    if (dupErr.code === '23505') {
+      return NextResponse.json({ received: true, duplicate: true })
+    }
+    // Otro error (p. ej. tabla inaccesible): log y seguimos (mejor procesar que perder el evento).
+    console.error('[stripe-webhook] idempotency insert error:', dupErr.message)
+  }
+
   try {
     switch (event.type) {
       case 'checkout.session.completed':
@@ -53,7 +67,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (err) {
     console.error(`[stripe-webhook] ${event.type} failed:`, err)
-    // Return 200 so Stripe doesn't retry endlessly — log for investigation
+    // El procesamiento falló: quita el registro de idempotencia para no dejar el evento
+    // marcado como procesado (así solo quedan los procesados con éxito y un reintento podría
+    // reprocesarlo). Se devuelve 200 igualmente (diseño: no provocar tormenta de reintentos).
+    await admin.from('processed_stripe_events').delete().eq('event_id', event.id)
     return NextResponse.json({ received: true, error: 'handler_error' })
   }
 
@@ -91,9 +108,11 @@ async function handleCheckoutCompleted(
         .single()
 
       if (credit) {
-        const result = await activateBoost(vehicleId, org.id)
+        // Boost pagado: se salta el cupo (bypassCap). Así la vía normal crea la activación
+        // trazable + consume el crédito + destaca. El fallback solo salta en casos límite
+        // (vehículo no activo o ya destacado), donde el cliente pagó pero no cabe activación.
+        const result = await activateBoost(vehicleId, org.id, { bypassCap: true })
         if (!result.success) {
-          // Activation failed (cap full or already boosted): consume credit + direct fallback
           await admin.from('boost_credits').update({ used: 1 }).eq('id', credit.id)
           const featuredUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           await admin.from('vehicles').update({ is_featured: true, featured_until: featuredUntil }).eq('id', vehicleId)
@@ -143,6 +162,18 @@ async function handleCheckoutCompleted(
         .from('organizations')
         .update({ is_featured: true, featured_since: new Date().toISOString() })
         .eq('id', organizationId)
+
+      // Sube el contador de capacidad Elite de la provincia del showroom. Estaba importado
+      // pero nunca se llamaba. Best-effort: incrementEliteCounter hace no-op si no hay regla
+      // para esa provincia, así que un desajuste de formato no rompe el alta.
+      if (dealerId) {
+        const { data: d } = await admin
+          .from('dealers')
+          .select('location_region')
+          .eq('id', dealerId)
+          .maybeSingle()
+        if (d?.location_region) await incrementEliteCounter(d.location_region)
+      }
     }
   }
 
