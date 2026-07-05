@@ -22,12 +22,12 @@ listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bl
 - [x] C3 · images AVIF + minimumCacheTTL · hero sin quality=100 + priority móvil (VERIFICADO)
 - [~] C4 · PENDIENTE (menor): `gtm_id` cacheado · `select` explícito en listados · `count` único · VehicleCard server · Header sin fetch cliente. Optimizaciones finas, no bloqueantes
 
-## BLOQUE D — Accesibilidad y UX (EN CURSO)
+## BLOQUE D — Accesibilidad y UX — CRÍTICOS + ALTO VALOR HECHOS
 - [x] D1 · Tokens de color: grises a AA (#9E9E9E) + dorado unificado (#C6A64B). 31 archivos, DESPLEGADO+VERIFICADO
-- [~] D2 · Formularios: ContactForm HECHO (labels/aria + BONUS: ruteado por /api/leads, antes insertaba directo saltándose rate limit + n8n). QualifiedLeadForm ya usa /api/leads (falta labels). Pendientes: SearchAlertModal, login, registro, wizard
-- [x] D3 · Hook `useModalA11y` (role=dialog, focus-trap, Escape, retorno de foco) creado + aplicado a SearchAlertModal y LeadModal del kanban. Pendiente: galería, otros modales
-- [x] D4 · Kanban operable por teclado (tarjeta role=button + Enter/Espacio + focus-visible) HECHO. Pendiente: flechas de galería a foco, radios focus-visible
-- [~] D5 · `prefers-reduced-motion` (globals.css) + `aria-expanded` hamburguesa HECHO. Pendiente (menor): jerarquía h, tipografía de cuerpo, tablas admin móvil, autoguardado wizard, labels login/registro/QualifiedLeadForm
+- [x] D2 · Formularios con label/aria asociados: ContactForm (+ruteo `/api/leads`), QualifiedLeadForm, login, registro (10 campos), registro-comprador. `sr-only`/`htmlFor` + `aria-invalid`/`aria-describedby` + `role=alert`. Pendiente (menor): wizard de publicación
+- [x] D3 · Hook `useModalA11y` (role=dialog, focus-trap, Escape, retorno de foco) en SearchAlertModal y LeadModal del kanban. Pendiente (menor): lightbox de galería
+- [x] D4 · Teclado: kanban (tarjeta role=button + Enter/Espacio), galería (visor principal role=button + flechas visibles al foco), radios/chips focus-visible. HECHO
+- [x] D5 · `prefers-reduced-motion` + `aria-expanded` hamburguesa. Pendiente (menor, no bloqueante): jerarquía h, tipografía cuerpo, tablas admin en móvil, autoguardado wizard
 
 ## BLOQUE E — SEO/GEO (preparar el flip de noindex)
 - [ ] E1 · Desacoplar `noindex` a un único punto para flip coordinado + `robots` coherente
@@ -35,7 +35,8 @@ listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bl
 - [ ] E3 · Canonical marca-tipo (canibalización) · enlazado interno a `/marcas/[slug]` · thin pages
 - [ ] E4 · Metadata contacto/home canonical · FAQ/schema · respuestas citables GEO
 
-## BLOQUE F — QA funcional profundo por rol
+## BLOQUE F — QA funcional profundo por rol (EN CURSO)
+- [x] F0 · Revisión estática de vías de escritura del showroom. **HALLAZGO CRÍTICO + FIX**: mass-assignment en `POST`/`PATCH /api/vehicles` — usan el admin client (service_role), que se salta el trigger `guard_vehicles_moderation` (060). Un dealer, con un POST/PATCH manipulado (fuera del asistente), podía auto-activarse (saltar moderación), autoasignarse `is_featured`/`featured_until` (boost gratis), `is_editors_pick`/`is_exclusive` (sellos de confianza falsos) e inflar `views`. Cerrado con `lib/vehicle-write.ts` → `sanitizeVehiclePayload` (strip de campos de sistema + clamp de status a draft|pending_review) aplicado a ambas rutas. Verificados seguros: import CSV (`/api/vehicles/import`, lista blanca + cliente authenticated) y `updateVehicleStatus` (cliente authenticated → trigger coacciona). Aprobación de admin (assertAdmin + admin client) intacta.
 - [ ] F1 · E2E de escritura por rol (publicar vehículo completo, kanban, lead, alerta, admin aprobar/rechazar) con cuentas de prueba + evidencia
 
 ## Registro de deploys/migraciones

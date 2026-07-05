@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions } from '@/lib/permissions'
+import { sanitizeVehiclePayload } from '@/lib/vehicle-write'
 
 // Crear un vehículo (dueño o miembro con permiso de inventario). El dealer_id se fuerza
 // al showroom del usuario, nunca se confía en el del payload.
@@ -19,12 +20,14 @@ export async function POST(request: NextRequest) {
   let payload: Record<string, unknown>
   try { payload = await request.json() } catch { return NextResponse.json({ error: 'Datos inválidos.' }, { status: 400 }) }
 
-  // Seguridad: el dealer_id lo decide el servidor, no el cliente.
-  payload.dealer_id = access.dealerId
-  delete payload.id
+  // Seguridad: quita campos reservados al sistema (moderación/destacado/sellos/contador) y
+  // fuerza status a draft|pending_review. El admin client se salta el trigger 060, así que el
+  // saneo va aquí. El dealer_id lo decide el servidor, no el cliente.
+  const clean = sanitizeVehiclePayload(payload)
+  clean.dealer_id = access.dealerId
 
   const admin = createAdminClient()
-  const { data, error } = await admin.from('vehicles').insert(payload).select('id').single()
+  const { data, error } = await admin.from('vehicles').insert(clean).select('id').single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ id: data.id })
 }

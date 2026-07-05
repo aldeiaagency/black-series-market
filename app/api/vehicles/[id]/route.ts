@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions } from '@/lib/permissions'
+import { sanitizeVehiclePayload } from '@/lib/vehicle-write'
 
 // Acceso al vehículo restringido al showroom del usuario (dueño o miembro).
 async function resolve(userId: string, vehicleId: string) {
@@ -50,11 +51,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   let payload: Record<string, unknown>
   try { payload = await req.json() } catch { return NextResponse.json({ error: 'Datos inválidos.' }, { status: 400 }) }
 
+  // Seguridad: mismo saneo que en el alta (el admin client se salta el trigger 060).
+  // Impide auto-activarse, autoasignarse destacado/sellos o inflar vistas al editar.
+  const clean = sanitizeVehiclePayload(payload)
   // El dealer_id no se puede reasignar desde el cliente.
-  payload.dealer_id = r.access.dealerId
-  delete payload.id
+  clean.dealer_id = r.access.dealerId
 
-  const { error } = await r.admin.from('vehicles').update(payload).eq('id', id)
+  const { error } = await r.admin.from('vehicles').update(clean).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
