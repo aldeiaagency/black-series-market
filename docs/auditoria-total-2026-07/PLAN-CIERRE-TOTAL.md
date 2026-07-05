@@ -29,11 +29,11 @@ listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bl
 - [x] D4 · Teclado: kanban (tarjeta role=button + Enter/Espacio), galería (visor principal role=button + flechas visibles al foco), radios/chips focus-visible. HECHO
 - [x] D5 · `prefers-reduced-motion` + `aria-expanded` hamburguesa. Pendiente (menor, no bloqueante): jerarquía h, tipografía cuerpo, tablas admin en móvil, autoguardado wizard
 
-## BLOQUE E — SEO/GEO (preparar el flip de noindex)
-- [ ] E1 · Desacoplar `noindex` a un único punto para flip coordinado + `robots` coherente
-- [ ] E2 · Sitemap sin `/precios` (301) · guard de vacío en `/marcas/[brand]` · `lastModified` real
-- [ ] E3 · Canonical marca-tipo (canibalización) · enlazado interno a `/marcas/[slug]` · thin pages
-- [ ] E4 · Metadata contacto/home canonical · FAQ/schema · respuestas citables GEO
+## BLOQUE E — SEO/GEO (preparar el flip de noindex) — noindex SIGUE ACTIVO
+- [x] E1 · Flag ÚNICO `SITE_INDEXABLE` (`lib/seo.ts`, env `NEXT_PUBLIC_SITE_INDEXABLE`) que controla A LA VEZ la metadata `robots` (layout.tsx) y el `robots.txt` (robots.ts). Lanzar = una sola env var en Vercel, sin tocar código ni riesgo de dejar uno incoherente. Hoy false → noindex + disallow total.
+- [x] E2 · Sitemap: quitado `/precios` (301→`/profesionales/precios`, ya se lista el destino) · guard de stock real en `/marcas/[slug]` y `/marcas/[brand]/{coches,motos}` (antes listaba ~785 marcas, casi todas vacías y auto-noindex → conflicto sitemap/noindex) · `lastModified` de vehículos/dealers/marcas ya usa `updated_at`.
+- [x] E3 · Ya en código: las páginas marca-tipo (`/marcas/[brand]/{coches,motos}`) tienen `alternates.canonical` propio + `robots:index:false` cuando `count===0` (thin). Mi guard de sitemap (E2) las excluye si no hay stock. Canibalización controlada por self-canonical (enfoque estándar). Enlazado interno adicional = mejora menor, no bloqueante.
+- [~] E4 · Home ya emite JSON-LD Organization + WebSite (layout.tsx). PENDIENTE (menor, sin efecto con noindex): canonical en contacto/home + FAQ schema + respuestas GEO — requiere contenido Q&A real (no inventar claims); mejor con input del dueño.
 
 ## BLOQUE F — QA funcional profundo por rol (EN CURSO)
 - [x] F0 · Revisión estática de vías de escritura del showroom. **HALLAZGO CRÍTICO + FIX**: mass-assignment en `POST`/`PATCH /api/vehicles` — usan el admin client (service_role), que se salta el trigger `guard_vehicles_moderation` (060). Un dealer, con un POST/PATCH manipulado (fuera del asistente), podía auto-activarse (saltar moderación), autoasignarse `is_featured`/`featured_until` (boost gratis), `is_editors_pick`/`is_exclusive` (sellos de confianza falsos) e inflar `views`. Cerrado con `lib/vehicle-write.ts` → `sanitizeVehiclePayload` (strip de campos de sistema + clamp de status a draft|pending_review) aplicado a ambas rutas. Verificados seguros: import CSV (`/api/vehicles/import`, lista blanca + cliente authenticated) y `updateVehicleStatus` (cliente authenticated → trigger coacciona). Aprobación de admin (assertAdmin + admin client) intacta.

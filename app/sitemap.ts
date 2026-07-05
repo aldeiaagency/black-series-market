@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ] = await Promise.all([
     supabase
       .from('vehicles')
-      .select('slug, vehicle_type, updated_at')
+      .select('slug, vehicle_type, brand_name, updated_at')
       .eq('status', 'active'),
     supabase
       .from('dealers')
@@ -22,9 +22,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq('status', 'active'),
     supabase
       .from('brands')
-      .select('slug, updated_at')
+      .select('slug, name, updated_at')
       .eq('is_active', true),
   ])
+
+  // Solo indexamos páginas de marca con stock real: sin este guard el sitemap listaría
+  // cientos de marcas vacías (que además se auto-noindexan) → conflicto sitemap/noindex.
+  const norm = (s: string | null | undefined) => (s || '').toLowerCase().trim()
+  const brandsWithStock = new Set((vehicles || []).map((v) => norm(v.brand_name)))
+  const brandTypeWithStock = new Set((vehicles || []).map((v) => `${norm(v.brand_name)}:${v.vehicle_type}`))
+  const slugToName = new Map((brands || []).map((b) => [b.slug, norm(b.name)]))
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE_URL,              lastModified: new Date(), changeFrequency: 'daily',   priority: 1 },
@@ -32,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/motos`,   lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.9 },
     { url: `${BASE_URL}/marcas`,  lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${BASE_URL}/dealers`, lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
-    { url: `${BASE_URL}/precios`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/profesionales/precios`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/contacto`,lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE_URL}/vehiculos-a-la-carta`,                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/como-funciona`,                        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
@@ -71,18 +78,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const TOP_MOTO_BRANDS = ['ducati', 'bmw', 'mv-agusta', 'triumph', 'harley-davidson', 'ktm', 'aprilia']
 
   const brandTypeRoutes: MetadataRoute.Sitemap = [
-    ...TOP_CAR_BRANDS.map((b) => ({
-      url: `${BASE_URL}/marcas/${b}/coches`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    })),
-    ...TOP_MOTO_BRANDS.map((b) => ({
-      url: `${BASE_URL}/marcas/${b}/motos`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    })),
+    ...TOP_CAR_BRANDS
+      .filter((b) => brandTypeWithStock.has(`${slugToName.get(b)}:car`))
+      .map((b) => ({
+        url: `${BASE_URL}/marcas/${b}/coches`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      })),
+    ...TOP_MOTO_BRANDS
+      .filter((b) => brandTypeWithStock.has(`${slugToName.get(b)}:motorcycle`))
+      .map((b) => ({
+        url: `${BASE_URL}/marcas/${b}/motos`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      })),
   ]
 
   const vehicleRoutes: MetadataRoute.Sitemap = (vehicles || []).map((v) => ({
@@ -99,12 +110,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  const brandRoutes: MetadataRoute.Sitemap = (brands || []).map((b) => ({
-    url: `${BASE_URL}/marcas/${b.slug}`,
-    lastModified: new Date(b.updated_at || new Date()),
-    changeFrequency: 'weekly',
-    priority: 0.5,
-  }))
+  const brandRoutes: MetadataRoute.Sitemap = (brands || [])
+    .filter((b) => brandsWithStock.has(norm(b.name)))
+    .map((b) => ({
+      url: `${BASE_URL}/marcas/${b.slug}`,
+      lastModified: new Date(b.updated_at || new Date()),
+      changeFrequency: 'weekly',
+      priority: 0.5,
+    }))
 
   const commercialGuideRoutes: MetadataRoute.Sitemap = commercialGuides.map((guide) => ({
     url: `${BASE_URL}/guias/${guide.slug}`,

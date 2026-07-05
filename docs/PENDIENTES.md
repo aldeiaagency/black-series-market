@@ -7,7 +7,10 @@
 ## 🔍 Auditoría completa 2026-07-01 — Correcciones pendientes
 
 > **Informe completo con `archivo:línea` y fix concreto de cada punto:** [`docs/auditoria-completa-2026-07.md`](auditoria-completa-2026-07.md).
-> 4 auditorías especializadas (bugs, seguridad, UX/accesibilidad, SEO/GEO) sobre el código real. Aquí solo el checklist accionable; el porqué y el snippet de corrección están en el informe. Nada de esto está corregido todavía — pendiente de ejecutar.
+> 4 auditorías especializadas (bugs, seguridad, UX/accesibilidad, SEO/GEO) sobre el código real. Aquí solo el checklist accionable; el porqué y el snippet de corrección están en el informe.
+>
+> **⚠️ ACTUALIZACIÓN 2026-07 (cierre total):** gran parte de este checklist YA está corregido, desplegado y verificado. Fuente detallada y estado por bloque: [`docs/auditoria-total-2026-07/PLAN-CIERRE-TOTAL.md`](auditoria-total-2026-07/PLAN-CIERRE-TOTAL.md).
+> Resumen de lo cerrado: **Sprint 0** — SEC-1 (assertAdmin), SEC-2 (webhooks fail-closed), **SEC-3 (mass-assignment vehículos → `sanitizeVehiclePayload`)**, SEC-4 (leads validados+rate-limit), BUG-1 (create-checkout→subscriptions), BUG-2 (boost `is_featured`), BUG-3 (fallback cupo→`bypassCap`), BUG-7 (idempotencia webhook, tabla `processed_stripe_events`). **Sprint 1** — BUG-5 (incrementEliteCounter cableado), BUG-6 (`admin.rpc as never` x3 eliminados), BUG-8 (cron `expire-boosts`), SEC-7 (magic bytes), A1 (contraste AA), A2/A3 (modales `useModalA11y`), B1 (header dorado). **Migraciones aplicadas en prod:** 057-063. **Pendientes reales:** SEC-5 (inyección PostgREST buscador — verificar), BUG-9 (doble reserva assistant), SEC-6/8, y el resto de 🟢 Sprint 2 (pulido). El `noindex` **sigue activo** a propósito.
 
 ### 🔴 Sprint 0 — Antes de aceptar más pagos reales / abrir al público
 Cadena de dinero rota + seguridad explotable.

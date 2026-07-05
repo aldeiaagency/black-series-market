@@ -1,27 +1,20 @@
 import { MetadataRoute } from 'next'
+import { SITE_INDEXABLE } from '@/lib/seo'
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
-// G01 GATE — pre-lanzamiento: disallow todo.
-// Cuando estés listo para lanzar: cambia la regla de '*' por las dos reglas del bloque comentado de abajo
-// y quita robots: { index: false } de app/layout.tsx.
+// Gate G01 — el robots.txt lo controla el flag ÚNICO SITE_INDEXABLE (lib/seo.ts), el mismo
+// que el noindex de la metadata en app/layout.tsx. Mientras sea false: disallow total.
+// Para lanzar: NEXT_PUBLIC_SITE_INDEXABLE=true en Vercel (un solo cambio activa ambos).
 export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: [
-      {
-        userAgent: '*',
-        disallow: ['/'],
-      },
-    ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+  if (!SITE_INDEXABLE) {
+    return {
+      rules: [{ userAgent: '*', disallow: ['/'] }],
+      sitemap: `${BASE_URL}/sitemap.xml`,
+    }
   }
-}
 
-/*
-// ── POST-LANZAMIENTO (G01) ──────────────────────────────────────────────────
-// Sustituir el bloque anterior por este cuando se quite el noindex global:
-
-export default function robots(): MetadataRoute.Robots {
+  // ── POST-LANZAMIENTO ──
   return {
     rules: [
       {
@@ -48,5 +41,3 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: `${BASE_URL}/sitemap.xml`,
   }
 }
-// ────────────────────────────────────────────────────────────────────────────
-*/

@@ -5,6 +5,7 @@ import './globals.css'
 import { ComparatorProvider } from '@/lib/comparator-context'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner'
 import { createAdminClient } from '@/lib/supabase/server'
+import { rootRobotsMeta } from '@/lib/seo'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -40,7 +41,8 @@ export const metadata: Metadata = {
     title: 'Black Label Market | Coches y motos premium en España',
     description: 'Coches y motos premium, deportivos, clásicos y unidades especiales. Concesionarios y especialistas verificados.',
   },
-  robots: { index: false, follow: false },
+  // Gate G01: controlado por el flag único SITE_INDEXABLE (lib/seo.ts). Hoy = noindex.
+  robots: rootRobotsMeta,
 }
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
