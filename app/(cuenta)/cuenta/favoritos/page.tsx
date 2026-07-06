@@ -87,13 +87,14 @@ export default async function CuentaFavoritosPage() {
           {vehicles.map((v: any) => (
             <div key={v.id} className="relative group">
               <VehicleCard vehicle={v} />
-              {/* Remove button — overlays top-right corner on hover */}
-              <form action={removeSaved} className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Remove button — siempre visible en táctil; en desktop se revela al hover/foco */}
+              <form action={removeSaved} className="absolute top-2 right-2 z-20 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                 <input type="hidden" name="vehicleId" value={v.id} />
                 <button
                   type="submit"
-                  className="w-7 h-7 flex items-center justify-center bg-[#0A0A0A]/90 border border-[#2A2A2A] text-[#9E9E9E] hover:text-red-400 hover:border-red-400/30 transition-colors"
+                  className="w-7 h-7 flex items-center justify-center bg-[#0A0A0A]/90 border border-[#2A2A2A] text-[#9E9E9E] hover:text-red-400 hover:border-red-400/30 focus-visible:opacity-100 focus-visible:text-red-400 transition-colors"
                   title="Quitar de guardados"
+                  aria-label="Quitar de guardados"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

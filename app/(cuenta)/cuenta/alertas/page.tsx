@@ -1,6 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Heart, Bell, Trash2 } from 'lucide-react'
+import { Heart, Bell, Trash2, Pause, Play } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -29,6 +29,19 @@ async function deleteAlert(formData: FormData) {
   revalidatePath('/cuenta/alertas')
 }
 
+async function toggleAlert(formData: FormData) {
+  'use server'
+  const alertId = formData.get('alertId') as string
+  const nextActive = formData.get('nextActive') === 'true'
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  // Pausar/reactivar: el matcher (WF6) solo procesa alertas activas, así que esto detiene
+  // o reanuda los avisos sin perder los criterios de búsqueda.
+  await supabase.from('search_alerts').update({ is_active: nextActive }).eq('id', alertId).eq('user_id', user.id)
+  revalidatePath('/cuenta/alertas')
+}
+
 export default async function CuentaAlertasPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,10 +51,11 @@ export default async function CuentaAlertasPage() {
     .from('search_alerts')
     .select('*')
     .eq('user_id', user.id)
-    .eq('is_active', true)
+    .order('is_active', { ascending: false })
     .order('created_at', { ascending: false })
 
-  const activeAlerts = alerts || []
+  const allAlerts = alerts || []
+  const activeCount = allAlerts.filter((a: any) => a.is_active).length
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
@@ -73,21 +87,26 @@ export default async function CuentaAlertasPage() {
         >
           <Bell className="w-3.5 h-3.5" />
           Alertas
-          {activeAlerts.length > 0 && (
-            <span className="text-xs bg-gold/15 text-gold px-1.5 py-0.5 rounded-sm">{activeAlerts.length}</span>
+          {activeCount > 0 && (
+            <span className="text-xs bg-gold/15 text-gold px-1.5 py-0.5 rounded-sm">{activeCount}</span>
           )}
         </Link>
       </div>
 
       {/* Content */}
-      {activeAlerts.length > 0 ? (
+      {allAlerts.length > 0 ? (
         <div className="space-y-4 max-w-2xl">
-          {activeAlerts.map((alert: any) => (
-            <div key={alert.id} className="bg-surface border border-bsm-border p-5">
+          {allAlerts.map((alert: any) => (
+            <div key={alert.id} className={`bg-surface border border-bsm-border p-5 transition-opacity ${!alert.is_active ? 'opacity-60' : ''}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   {/* Summary line */}
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
+                    {!alert.is_active && (
+                      <span className="text-[10px] uppercase tracking-wider text-[#9E9E9E] border border-bsm-border px-1.5 py-0.5">
+                        Pausada
+                      </span>
+                    )}
                     <span className="text-sm font-medium text-bsm-text-primary">
                       {TYPE_LABELS[alert.vehicle_type] || alert.vehicle_type}
                     </span>
@@ -121,17 +140,32 @@ export default async function CuentaAlertasPage() {
                   </div>
                 </div>
 
-                {/* Delete */}
-                <form action={deleteAlert}>
-                  <input type="hidden" name="alertId" value={alert.id} />
-                  <button
-                    type="submit"
-                    className="p-2 text-[#8A8A8A] hover:text-red-400 transition-colors flex-shrink-0"
-                    title="Eliminar alerta"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </form>
+                {/* Acciones: pausar/reactivar + eliminar */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <form action={toggleAlert}>
+                    <input type="hidden" name="alertId" value={alert.id} />
+                    <input type="hidden" name="nextActive" value={(!alert.is_active).toString()} />
+                    <button
+                      type="submit"
+                      className="p-2 text-[#8A8A8A] hover:text-gold transition-colors"
+                      title={alert.is_active ? 'Pausar alerta' : 'Reactivar alerta'}
+                      aria-label={alert.is_active ? 'Pausar alerta' : 'Reactivar alerta'}
+                    >
+                      {alert.is_active ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    </button>
+                  </form>
+                  <form action={deleteAlert}>
+                    <input type="hidden" name="alertId" value={alert.id} />
+                    <button
+                      type="submit"
+                      className="p-2 text-[#8A8A8A] hover:text-red-400 transition-colors"
+                      title="Eliminar alerta"
+                      aria-label="Eliminar alerta"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           ))}

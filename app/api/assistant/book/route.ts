@@ -119,7 +119,16 @@ export async function POST(req: NextRequest) {
     })
     .select('id')
     .single()
-  if (apptErr || !appt) return NextResponse.json({ ok: false, error: 'appointment_failed' }, { status: 500 })
+  if (apptErr || !appt) {
+    // El índice único parcial (dealer_id, starts_at sobre proposed|confirmed) cierra la carrera
+    // check-then-insert: si otra reserva tomó el hueco entre medias, el insert falla con
+    // unique_violation (23505). Compensamos el lead recién creado y devolvemos 409.
+    await admin.from('leads').delete().eq('id', lead.id)
+    if ((apptErr as { code?: string } | null)?.code === '23505') {
+      return NextResponse.json({ ok: false, error: 'slot_unavailable' }, { status: 409 })
+    }
+    return NextResponse.json({ ok: false, error: 'appointment_failed' }, { status: 500 })
+  }
 
   // 3) Avanzar el lead + evento.
   await Promise.all([

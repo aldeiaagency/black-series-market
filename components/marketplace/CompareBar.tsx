@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { X, GitCompareArrows } from 'lucide-react'
 import { useComparator } from '@/hooks/useComparator'
 
@@ -10,10 +11,28 @@ const MAX = 3
 export default function CompareBar() {
   const { selected, remove, clear, mounted } = useComparator()
   const [visible, setVisible] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     setVisible(mounted && selected.length > 0)
   }, [mounted, selected.length])
+
+  // En /comparar la tabla se pinta del ?ids= de la URL. Sincronización DIRIGIDA POR ACCIÓN:
+  // al quitar/limpiar en la barra estando en /comparar, actualizamos también la URL para que la
+  // tabla cambie al instante. Es por acción (no un effect sobre el estado) para no sobrescribir
+  // un enlace compartido /comparar?ids=… abierto por alguien con otra selección local.
+  function handleRemove(id: string) {
+    remove(id)
+    if (pathname === '/comparar') {
+      const ids = selected.filter(v => v.id !== id).map(v => v.id).join(',')
+      router.replace(ids ? `/comparar?ids=${ids}` : '/comparar')
+    }
+  }
+  function handleClear() {
+    clear()
+    if (pathname === '/comparar') router.replace('/comparar')
+  }
 
   if (!visible) return null
 
@@ -51,7 +70,7 @@ export default function CompareBar() {
                 <div className="text-[11px] text-[#C9C9C9] truncate leading-tight">{v.model_name}</div>
               </div>
               <button
-                onClick={() => remove(v.id)}
+                onClick={() => handleRemove(v.id)}
                 className="text-[#555] hover:text-[#C9C9C9] transition-colors shrink-0 ml-1"
                 aria-label={`Quitar ${v.brand_name} ${v.model_name}`}
               >
@@ -79,7 +98,7 @@ export default function CompareBar() {
             </span>
           )}
           <button
-            onClick={clear}
+            onClick={handleClear}
             className="text-xs text-[#666] hover:text-[#C9C9C9] transition-colors flex items-center gap-1"
           >
             <X className="w-3 h-3" />

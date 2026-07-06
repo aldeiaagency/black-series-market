@@ -16,6 +16,9 @@ import { brandSlugsForType } from '@/lib/brand-types'
 
 const STEPS = ['Tipo y marca', 'Especificaciones', 'Equipamiento', 'Imágenes', 'Precio y publicar']
 
+// Borrador autoguardado del alta nueva (no aplica al editar un vehículo existente).
+const DRAFT_KEY = 'blm_publish_draft'
+
 const MOTO_BODY_TYPE_EXAMPLES: Record<string, string> = {
   'Superbike':            'Ducati Panigale V4, BMW M1000RR, Honda CBR1000RR-R, Aprilia RSV4 Factory, Kawasaki Ninja H2',
   'Deportiva':            'Yamaha R6, Honda CBR600RR, Kawasaki ZX-6R, Triumph Daytona 765 Moto2',
@@ -53,6 +56,7 @@ export default function PublicarPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const editId = searchParams.get('edit')
+  const [draftLoaded, setDraftLoaded] = useState(false)
 
   const [form, setForm] = useState<any>({
     vehicle_type: 'car',
@@ -163,6 +167,25 @@ export default function PublicarPage() {
     }
     load()
   }, [router, editId])
+
+  // Autoguardado (solo alta nueva): restaura el borrador al montar y lo guarda en cada cambio,
+  // para no perder el formulario si el dealer recarga o navega. Se limpia al guardar/publicar.
+  useEffect(() => {
+    if (editId) { setDraftLoaded(true); return }
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY)
+      if (raw) {
+        const d = JSON.parse(raw)
+        if (d && typeof d === 'object') setForm((f: any) => ({ ...f, ...d }))
+      }
+    } catch {}
+    setDraftLoaded(true)
+  }, [editId])
+
+  useEffect(() => {
+    if (!draftLoaded || editId) return
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(form)) } catch {}
+  }, [form, draftLoaded, editId])
 
   useEffect(() => {
     async function loadBrands() {
@@ -281,6 +304,7 @@ export default function PublicarPage() {
       }).catch(() => {})
     }
 
+    try { localStorage.removeItem(DRAFT_KEY) } catch {}
     setSaved(true)
     setTimeout(() => router.push('/dashboard/inventario'), 1500)
   }

@@ -41,5 +41,13 @@ listo para usuarios reales. Se ejecuta bloque a bloque, con commit+deploy por bl
 - [ ] F1-escritura · E2E de escritura por rol (publicar vehículo, kanban, lead, alerta, admin aprobar/rechazar). Verificado ESTÁTICAMENTE en F0 (patrones correctos). El E2E en vivo dispararía n8n → emails a dealers/leads reales; requiere datos de prueba aislados o aprobación (regla producción del CLAUDE.md).
 
 ## Registro de deploys/migraciones
-- Migraciones aplicadas + verificadas en prod: 057-061, **062** (consume/refund boost credit), **063** (processed_stripe_events).
-- Deploys por bloque con `vercel --prod`. Último lote pendiente de deploy: B (boosts/webhook/checkout/elite) + cron expire-boosts.
+- Migraciones aplicadas + verificadas en prod: 057-061, **062** (consume/refund boost credit), **063** (processed_stripe_events), **064** (índice único parcial anti doble-reserva de citas, BUG-9).
+- Deploys por bloque con `vercel --prod`.
+
+## Pulido post-cierre (lote UX/correctness)
+- [x] Alertas: pausar/reactivar (`is_active`) en `/cuenta/alertas`, no solo borrar (el matcher WF6 respeta activas).
+- [x] Favoritos: botón "quitar" usable en móvil/teclado (antes `opacity-0 group-hover` → invisible en táctil). El refresco ya funcionaba (server action + `revalidatePath`).
+- [x] Comparador: `CompareBar` sincroniza el `?ids=` de la URL con la selección cuando estás en `/comparar` (quitar/limpiar en la barra ya actualiza la tabla).
+- [x] Wizard publicar: autoguardado de borrador en localStorage (restaura al montar, guarda al cambiar, limpia al publicar/guardar). Solo alta nueva, no edición.
+- [x] BUG-9: índice único parcial `uniq_appointment_dealer_slot` (mig 064) + captura de `23505` → 409 `slot_unavailable` + compensación del lead huérfano en `/api/assistant/book`.
+- [~] DIFERIDO (decisión de diseño / bajo valor): subir tipografía de cuerpo global (el tamaño pequeño es intencional del diseño premium; cambiarlo globalmente es riesgo de layout) y tablas de admin en patrón card para móvil (uso desktop del dueño).
