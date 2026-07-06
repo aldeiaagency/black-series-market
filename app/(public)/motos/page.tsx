@@ -13,6 +13,32 @@ import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import { applyVehicleFilters } from '@/lib/vehicle-query'
 import Pagination from '@/components/marketplace/Pagination'
+import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
+
+// FAQ de la landing de motos (solo en la vista sin filtros). Respuestas factuales basadas en
+// los datos reales de la ficha (carnet, electrónica, financiación, cobertura).
+const MOTOS_FAQ: FaqItem[] = [
+  {
+    q: '¿Qué tipo de motos encuentro en Black Label Market?',
+    a: 'Motos premium y de interés: superbikes y deportivas, nakeds e hypernakeds, trail y maxitrail, custom y cruiser, clásicas y neo-retro, sport touring, maxiscooters premium y ediciones especiales o de colección. Todas de concesionarios y especialistas verificados en España.',
+  },
+  {
+    q: '¿Qué carnet necesito para cada moto?',
+    a: 'Cuando aplica, la ficha indica el carnet requerido (AM, A1, A2 o A). Así puedes filtrar y ver de un vistazo qué motos puedes conducir según tu permiso. Ante cualquier duda sobre convalidaciones o restricciones, confírmalo con el vendedor.',
+  },
+  {
+    q: '¿Puedo ver el equipamiento electrónico y las ayudas a la conducción?',
+    a: 'Sí. La ficha detalla el equipamiento electrónico relevante: ABS, control de tracción, modos de conducción, suspensión electrónica y si incluye maletas, entre otros. Es la información clave para comparar motos de gama alta.',
+  },
+  {
+    q: '¿Hay financiación o entrega de mi moto como parte de pago?',
+    a: 'Depende de cada profesional. En la ficha se indica si el vendedor ofrece financiación y si acepta tu moto como parte de pago. Lo gestiona el propio profesional; Black Label no gestiona financiación directamente.',
+  },
+  {
+    q: '¿Puedo comprar la moto desde cualquier provincia de España?',
+    a: 'Sí. El catálogo es nacional y puedes filtrar por provincia. Algunos profesionales ofrecen transporte del vehículo a otras zonas de España; cuando es así, se indica en la ficha.',
+  },
+]
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   featured:     [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
@@ -145,6 +171,7 @@ export default async function MotosPage({ searchParams }: PageProps) {
   }
 
   return (
+    <>
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <div className="mb-8">
@@ -172,5 +199,9 @@ export default async function MotosPage({ searchParams }: PageProps) {
         <MotoList params={params} />
       </Suspense>
     </div>
+    {Object.keys(params).length === 0 && (
+      <FaqSection items={MOTOS_FAQ} heading="Preguntas frecuentes sobre comprar una moto premium" eyebrow="Comprar una moto" />
+    )}
+    </>
   )
 }

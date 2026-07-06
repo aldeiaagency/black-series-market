@@ -13,6 +13,33 @@ import SearchAlertCTA from '@/components/marketplace/SearchAlertCTA'
 import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import { applyVehicleFilters } from '@/lib/vehicle-query'
 import Pagination from '@/components/marketplace/Pagination'
+import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
+
+// FAQ de la landing de coches (solo se muestra en la vista sin filtros, para no duplicar
+// el schema en cada combinación de filtros). Respuestas factuales basadas en los datos reales
+// de la ficha (estado, historial, financiación, IVA, contacto).
+const COCHES_FAQ: FaqItem[] = [
+  {
+    q: '¿Qué tipo de coches encuentro en Black Label Market?',
+    a: 'Coches premium y de interés: deportivos y GT, superdeportivos, berlinas y SUV de gama alta, clásicos y youngtimers, y unidades especiales por su versión, configuración o historia. Todos publicados por concesionarios, compraventas y especialistas verificados de España.',
+  },
+  {
+    q: '¿Cómo sé en qué estado está el coche y qué historial tiene?',
+    a: 'La ficha de cada vehículo detalla el estado, el año, el kilometraje, el número de propietarios anteriores, la validez de la ITV y si cuenta con historial de mantenimiento o informe de un solo dueño. Aun así, recomendamos siempre confirmar el estado, el historial y la documentación directamente con el vendedor antes de cerrar la compra.',
+  },
+  {
+    q: '¿Puedo financiar el coche o entregar el mío como parte de pago?',
+    a: 'Depende de cada profesional. En la ficha se indica si el vendedor ofrece financiación y si acepta la entrega de tu vehículo como parte de pago. La financiación la gestiona el propio profesional o sus colaboradores; Black Label no gestiona financiación directamente.',
+  },
+  {
+    q: '¿Los precios incluyen IVA? ¿Hay coches con IVA deducible?',
+    a: 'El precio mostrado es el que fija el vendedor. Algunas unidades están marcadas como "IVA deducible" (venta a empresa), lo que se indica en la ficha. Para el detalle fiscal exacto de cada operación, confírmalo con el profesional.',
+  },
+  {
+    q: '¿Puedo reservar o comprar el coche directamente online?',
+    a: 'Black Label Market conecta directamente al comprador con el vendedor: desde la ficha contactas con el profesional para resolver dudas, negociar y cerrar la operación con él. La plataforma no procesa el pago del vehículo ni actúa como intermediaria en la compraventa.',
+  },
+]
 
 const SORT_MAP: Record<string, { col: string; asc: boolean }[]> = {
   featured:     [{ col: 'is_featured', asc: false }, { col: 'published_at', asc: false }],
@@ -145,6 +172,7 @@ export default async function CochesPage({ searchParams }: PageProps) {
   }
 
   return (
+    <>
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <div className="mb-8">
@@ -174,6 +202,10 @@ export default async function CochesPage({ searchParams }: PageProps) {
         <VehicleList params={params} />
       </Suspense>
     </div>
+    {Object.keys(params).length === 0 && (
+      <FaqSection items={COCHES_FAQ} heading="Preguntas frecuentes sobre comprar un coche premium" eyebrow="Comprar un coche" />
+    )}
+    </>
   )
 }
 

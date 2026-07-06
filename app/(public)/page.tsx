@@ -6,6 +6,47 @@ import { createPublicClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import DealerCard from '@/components/marketplace/DealerCard'
 import SearchBar from '@/components/marketplace/SearchBar'
+import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
+
+// Preguntas frecuentes de la home. Objetivo doble: (1) resolver las dudas iniciales del
+// comprador y (2) posicionar (SEO/GEO) con respuestas citables — definición del servicio,
+// consulta "dónde comprar…", coste, confianza, contacto y cobertura nacional.
+const HOME_FAQ: FaqItem[] = [
+  {
+    q: '¿Qué es Black Label Market?',
+    a: 'Black Label Market es un marketplace de coches y motos premium en España: deportivos, clásicos, SUV de gama alta, motos premium y unidades especiales. A diferencia de un portal masivo de anuncios, solo admite profesionales verificados (concesionarios, compraventas y especialistas que superan una revisión previa) y publica únicamente vehículos con información real, imágenes propias y disponibilidad confirmada.',
+  },
+  {
+    q: '¿Dónde puedo comprar un coche o una moto premium de segunda mano en España?',
+    a: 'En Black Label Market. Reúne en un solo sitio deportivos, clásicos, SUV premium y motos de gama alta de concesionarios y especialistas verificados de toda España. Puedes filtrar por marca, modelo, versión, año, kilometraje, precio y provincia, y contactar directamente con el vendedor desde la ficha del vehículo.',
+  },
+  {
+    q: '¿Comprar tiene algún coste para mí?',
+    a: 'No. Para el comprador es totalmente gratuito: explorar el catálogo, guardar favoritos, comparar vehículos, crear alertas de búsqueda y contactar con los vendedores no cuesta nada. La plataforma se sostiene con los profesionales que publican su inventario.',
+  },
+  {
+    q: '¿Los vendedores son de fiar? ¿Qué significa que un profesional esté verificado?',
+    a: 'Antes de dejar publicar, revisamos la reputación online, la especialización y la calidad de presentación de cada concesionario, compraventa o especialista. El distintivo "verificado" indica que ha superado ese proceso. Black Label no es intermediario en la compraventa: facilita el contacto directo entre comprador y vendedor.',
+  },
+  {
+    q: '¿Puedo contactar directamente con el vendedor?',
+    a: 'Sí. Desde cada ficha de vehículo o desde el perfil del profesional puedes contactar directamente con el vendedor para resolver dudas, pedir más información o concertar una visita. No intervenimos en la operación.',
+  },
+  {
+    q: '¿Y si no encuentro la unidad que busco?',
+    a: 'Puedes usar el servicio "Vehículos a la carta": nos dices marca, modelo, versión, presupuesto y preferencias, y si aparece una oportunidad compatible dentro de nuestra red de profesionales, te avisamos. También puedes crear una alerta de búsqueda y recibir aviso cuando se publique un vehículo que encaje.',
+  },
+  {
+    q: '¿Puedo comprar desde cualquier punto de España?',
+    a: 'Sí. El catálogo es de ámbito nacional y puedes filtrar por provincia para encontrar vehículos cerca de ti. Algunos profesionales ofrecen transporte nacional del vehículo; cuando es así, se indica en la ficha.',
+  },
+  {
+    q: 'Soy concesionario o compraventa, ¿cómo publico mi stock?',
+    a: 'El acceso profesional es bajo solicitud y con revisión previa de reputación. Si te aceptamos, podrás publicar tu inventario, gestionar tus oportunidades y contar con tu propio perfil de showroom. Puedes solicitar acceso desde el registro profesional y consultar los planes en la página de precios para profesionales.',
+  },
+]
+
+
 
 // ISR: la home solo lee catálogo público → se cachea en CDN y se revalida cada 5 min.
 export const revalidate = 300
@@ -559,6 +600,9 @@ export default async function HomePage() {
     </div>
   </div>
 </section>
+
+      {/* FAQ — dudas del comprador + posicionamiento GEO */}
+      <FaqSection items={HOME_FAQ} heading="Preguntas frecuentes" eyebrow="Antes de empezar" />
 
     </>
   )
