@@ -95,6 +95,8 @@
 
 ## Diagnóstico Anti-Fuga Express + capa nurture (transversal market→agencia)
 
+> **Qué artefacto es (aclaración 2026-07-07):** el "Diagnóstico Anti-Fuga Express" **es el Black Audit** ofrecido dentro del market (decisión B1 del core: Express y Black Audit son el mismo diagnóstico; "Anti-Fuga Express" es su nombre comercial aquí). NO confundir con el **informe pre-visita** de la agencia, que es otro artefacto (imán frío, gratis, solo señales públicas). Fuente única de la relación entre ambos: `black-series-core/agency/comercial/mapa_diagnosticos.md`.
+
 - **En qué consiste:** mini-auditoría consultiva (sin implementación) que detecta **3 "fugas"** de oportunidades del showroom + recomendaciones prioritarias. Es la **puerta a Black Series Agency** (la implantación se factura en la agencia, nunca en la cuota del market). Tesis "Anti-Fuga".
 - **Por plan:** Elite → **incluido de serie (1/semestre)**, no se vende como add-on · Professional → **add-on 149 €** + 1 sugerencia contextual · Essential → **add-on 149 €** disponible.
 - **Regla de la capa nurture (de §12 de los docs):** **máximo 1 recomendación de agencia visible a la vez**, disparada por una **señal real**, **discreta y honesta** (NO encubierta), value-first.
