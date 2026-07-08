@@ -1,7 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, Phone } from 'lucide-react'
+import { Mail, MessageCircle } from 'lucide-react'
+
+// Botón de WhatsApp solo se muestra si hay número dado de alta (agency/comercial/whatsapp_business_diseno.md).
+// Prellena el texto para que el chatbot enrute a la Intención 2 (derivación market) sin disparar el pitch de agencia.
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
+const WHATSAPP_URL = WHATSAPP_NUMBER
+  ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Vengo desde Black Label Market')}`
+  : null
 
 export default function ContactoPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
@@ -40,6 +47,7 @@ export default function ContactoPage() {
         <div className="space-y-8">
           {[
             { icon: Mail, label: 'Email', value: 'hola@blacklabelmarket.es', href: 'mailto:hola@blacklabelmarket.es' },
+            ...(WHATSAPP_URL ? [{ icon: MessageCircle, label: 'WhatsApp', value: 'Respuesta inmediata', href: WHATSAPP_URL }] : []),
           ].map(({ icon: Icon, label, value, href }) => (
             <div key={label}>
               <div className="flex items-center gap-3 mb-2">
@@ -47,7 +55,11 @@ export default function ContactoPage() {
                 <span className="text-xs uppercase tracking-widest text-bsm-text-muted">{label}</span>
               </div>
               {href ? (
-                <a href={href} className="text-bsm-text-primary hover:text-gold transition-colors">
+                <a
+                  href={href}
+                  {...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  className="text-bsm-text-primary hover:text-gold transition-colors"
+                >
                   {value}
                 </a>
               ) : (
