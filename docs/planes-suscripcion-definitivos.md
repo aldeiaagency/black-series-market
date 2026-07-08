@@ -38,7 +38,7 @@
 **Texto del icono ℹ️ "Panel de oportunidades":**
 > "Bandeja con los contactos que generan tus vehículos: quién te ha contactado, sobre qué vehículo y cuándo, con estados para hacerles seguimiento. En Essential es una bandeja; en los planes superiores se convierte en un pipeline visual."
 
-**Add-ons disponibles en Essential:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +10 vehículos (59 €/mes, máx. 2 bloques) · Diagnóstico Anti-Fuga Express (149 €) · Sincronización automática de stock (feed). *(Ver tabla cerrada en la sección "Add-ons — definitivo" más abajo.)*
+**Add-ons disponibles en Essential:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +10 vehículos (59 €/mes, máx. 2 bloques) · Diagnóstico Anti-Fuga (149 €) · Sincronización automática de stock (feed). *(Ver tabla cerrada en la sección "Add-ons — definitivo" más abajo.)*
 
 **Cambios respecto a los docs previos:** precio 179 € → **197 € + IVA** · **vehículos a la carta eliminado** de Essential · founding y anual eliminados (global).
 
@@ -58,12 +58,12 @@
 | **Analítica** | **Avanzada · 180 días**: básica + rendimiento por vehículo + funnel visita→contacto + evolución temporal (ℹ️) |
 | **Vehículos a la carta** | **Acceso al tablón general** |
 | **Agente en la ficha** | **Agente de cualificación** (cualifica el lead: qué busca, presupuesto, plazo → al pipeline) (ℹ️) · plan-gated, `future` hasta activar por showroom |
-| **Capa nurture → agencia** | **1 sugerencia contextual única** (basada en una señal real) + **Diagnóstico Anti-Fuga Express como add-on 149 €** (puente a la agencia) |
+| **Capa nurture → agencia** | **1 sugerencia contextual única** (basada en una señal real) + **Diagnóstico Anti-Fuga como add-on 149 €** (puente a la agencia) |
 | **Boosts incluidos** | 1/mes |
 | **Usuarios / Sedes** | 3 / 1 |
 | **Showroom destacado / prioridad listados** | No |
 
-**Add-ons disponibles en Professional:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +10 vehículos (59 €/mes) · Diagnóstico Anti-Fuga Express (149 €) · Sincronización automática de stock (feed). *(Ver tabla cerrada abajo.)*
+**Add-ons disponibles en Professional:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +10 vehículos (59 €/mes) · Diagnóstico Anti-Fuga (149 €) · Sincronización automática de stock (feed). *(Ver tabla cerrada abajo.)*
 
 ---
 
@@ -84,7 +84,7 @@
 | **Showroom destacado / prioridad listados** | Etiqueta "Destacado" + bloque superior + rotación equitativa (ℹ️) | operativo |
 | **Vehículos a la carta** | Tablón general + **ventana exclusiva de 24 h** antes de la apertura general | ventana = `future` |
 | **Agente en la ficha** | Cualificación **+ reserva de cita** (Google Calendar, OAuth por showroom; Outlook posterior) (ℹ️) | `future` |
-| **Diagnóstico Anti-Fuga Express** | **Incluido de serie · 1 al semestre** | servicio de agencia |
+| **Diagnóstico Anti-Fuga** | **Incluido de serie · 1 al semestre** | servicio de agencia |
 | **Boosts incluidos** | 3/mes | operativo |
 
 > Los ítems `future` están **incluidos en el plan** pero se activan/anuncian **cuando estén operativos** (principio v2: no prometer públicamente lo que no funciona). El "destacado" no es comprable como add-on (exclusivo Elite).
@@ -93,9 +93,9 @@
 
 ---
 
-## Diagnóstico Anti-Fuga Express + capa nurture (transversal market→agencia)
+## Diagnóstico Anti-Fuga + capa nurture (transversal market→agencia)
 
-> **Qué artefacto es (aclaración 2026-07-07):** el "Diagnóstico Anti-Fuga Express" **es el Black Audit** ofrecido dentro del market (decisión B1 del core: Express y Black Audit son el mismo diagnóstico; "Anti-Fuga Express" es su nombre comercial aquí). NO confundir con el **informe pre-visita** de la agencia, que es otro artefacto (imán frío, gratis, solo señales públicas). Fuente única de la relación entre ambos: `black-series-core/agency/comercial/mapa_diagnosticos.md`.
+> **Qué artefacto es (aclaración 2026-07-07, nombre confirmado 2026-07-08):** el "Diagnóstico Anti-Fuga" **es el Black Audit** ofrecido dentro del market (decisión B1 del core: son el mismo diagnóstico; "Diagnóstico Anti-Fuga" — antes "Anti-Fuga Express" — es su nombre comercial aquí). NO confundir con el **informe pre-visita** de la agencia, que es otro artefacto (imán frío, gratis, solo señales públicas). Fuente única de la relación entre ambos: `black-series-core/agency/comercial/mapa_diagnosticos.md`.
 
 - **En qué consiste:** mini-auditoría consultiva (sin implementación) que detecta **3 "fugas"** de oportunidades del showroom + recomendaciones prioritarias. Es la **puerta a Black Series Agency** (la implantación se factura en la agencia, nunca en la cuota del market). Tesis "Anti-Fuga".
 - **Por plan:** Elite → **incluido de serie (1/semestre)**, no se vende como add-on · Professional → **add-on 149 €** + 1 sugerencia contextual · Essential → **add-on 149 €** disponible.
@@ -126,7 +126,7 @@
 | Pack 5 boosts | 199 € + IVA | Puntual (caduca a 6 meses) | Essential, Professional, Elite |
 | Bloque +10 vehículos | 59 €/mes + IVA | Recurrente (máx. 2 bloques en Essential) | Essential, Professional |
 | Bloque +25 vehículos | 99 €/mes + IVA | Recurrente | Elite |
-| Diagnóstico Anti-Fuga Express | 149 € + IVA | Puntual | Essential, Professional *(Elite ya lo tiene incluido de serie, no se ofrece como add-on)* |
+| Diagnóstico Anti-Fuga | 149 € + IVA | Puntual | Essential, Professional *(Elite ya lo tiene incluido de serie, no se ofrece como add-on)* |
 | Sincronización automática de stock (feed) | 99 €/mes + IVA (+150 € setup si el feed no es estándar) | Recurrente | Essential, Professional *(Elite ya lo tiene incluido de serie, no se ofrece como add-on)* |
 
 **Add-ons descartados / ya no aplican:**

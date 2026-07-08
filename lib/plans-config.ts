@@ -144,7 +144,7 @@ export const PLAN_FEATURES: Record<PlanDef['slug'], PlanFeatureRow[]> = {
       info: 'Tu showroom aparece con etiqueta "Destacado" y en posición preferente (bloque superior) en los listados, por delante de Essential y Professional. Rotación equitativa entre los Elite.',
     },
     {
-      label: 'Diagnóstico Anti-Fuga Express',
+      label: 'Diagnóstico Anti-Fuga',
       kind: 'included',
       info: 'Mini-auditoría que detecta 3 fugas de oportunidades de tu showroom y te da recomendaciones priorizadas. Incluido de serie, una vez al semestre.',
     },
@@ -289,7 +289,7 @@ export const ADDONS: AddonDef[] = [
   },
   {
     slug: 'diagnostico_antifuga',
-    name: 'Diagnóstico Anti-Fuga Express',
+    name: 'Diagnóstico Anti-Fuga',
     price: '149 €',
     unit: 'puntual',
     desc: 'Mini-auditoría que detecta 3 fugas de oportunidades de tu showroom con recomendaciones priorizadas. En Elite va incluido de serie (1 al semestre).',
