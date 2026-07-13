@@ -13,26 +13,26 @@
 > Resumen de lo cerrado: **Sprint 0** — SEC-1 (assertAdmin), SEC-2 (webhooks fail-closed), **SEC-3 (mass-assignment vehículos → `sanitizeVehiclePayload`)**, SEC-4 (leads validados+rate-limit), BUG-1 (create-checkout→subscriptions), BUG-2 (boost `is_featured`), BUG-3 (fallback cupo→`bypassCap`), BUG-7 (idempotencia webhook, tabla `processed_stripe_events`). **Sprint 1** — BUG-5 (incrementEliteCounter cableado), BUG-6 (`admin.rpc as never` x3 eliminados), BUG-8 (cron `expire-boosts`), SEC-7 (magic bytes), A1 (contraste AA), A2/A3 (modales `useModalA11y`), B1 (header dorado). **Migraciones aplicadas en prod:** 057-063. **Verificado también cerrado:** SEC-5 (el buscador ya sanea `,()*%\` + cap 60 en el `.or()` de PostgREST, y el cliente anónimo tiene RLS a `active`). **Pendientes reales:** BUG-9 (doble reserva en assistant/book — falta constraint único + 409; feature dormant), SEC-6/8 (feature-work diferido), F1-escritura E2E en vivo (dispara n8n → requiere aprobación/datos aislados), E4 (FAQ/GEO — requiere contenido real), y el resto de 🟢 Sprint 2 (pulido). El `noindex` **sigue activo** a propósito.
 
 ### 🔴 Sprint 0 — Antes de aceptar más pagos reales / abrir al público
-Cadena de dinero rota + seguridad explotable.
-- [ ] **BUG-1** — `create-checkout` usa firma legacy → **`subscriptions` nunca se rellena** ni se activa Elite. Resolver `organization_id` y usar la firma nueva de `createCheckoutSession`. `app/api/stripe/create-checkout/route.ts` + `lib/stripe.ts`
-- [ ] **BUG-2** — El boost pagado **no pone `is_featured=true`** (solo `featured_until`) → no destaca. `lib/boosts.ts:130-134`
-- [ ] **BUG-3** — Fallback de boost destaca **saltándose el cupo** `max_boosted_share` cuando la activación falla por cupo lleno. `app/api/stripe/webhooks/route.ts:94-108`
-- [ ] **BUG-7** — Webhook Stripe **sin idempotencia** real (el comentario la promete pero no existe) → boosts/créditos duplicados en reenvíos. Tabla `processed_stripe_events` con unique. `app/api/stripe/webhooks/route.ts`
-- [ ] **SEC-1** 🔴 — **Server Actions de admin sin verificar rol** → cualquier usuario autenticado puede aprobar showrooms/vehículos. Añadir `requireAdmin()` como 1ª línea de cada acción. `app/(admin)/admin/altas-showroom/actions.ts` + `app/(admin)/admin/vehiculos/[id]/page.tsx`
-- [ ] **SEC-2** 🔴 — **Webhooks entrantes fail-open**: HMAC solo se comprueba si el secreto está en el entorno. Hacerlo obligatorio (fail-closed). `app/api/webhooks/{appointment-result,assistant-result,hot-lead-alert}/route.ts`
-- [ ] **SEC-3** 🔴 — **Mass-assignment en vehículos**: dealer se autopublica activo/destacado saltando moderación y el boost de €49. Allowlist de columnas + forzar `status='pending_review'`. `app/api/vehicles/route.ts` + `[id]/route.ts`
-- [ ] **SEC-4** — **Falsificación de leads/citas**: `dealer_id`/`vehicle_id` arbitrarios sin validar pertenencia, sin rate-limit. `app/api/leads/route.ts` + webhooks
-- [ ] **SEC-5** — **Inyección de operadores PostgREST** en el buscador (`.or()` con input crudo) → expone borradores/no-activos. `lib/vehicle-query.ts:85`
-- [ ] **SEO-1/SEO-2** — (solo si se levanta el gate noindex) `/sobre-nosotros` y `/coches/berlinas` en el sitemap+footer pueden ser 404. Auditar 1:1 rutas del sitemap. `app/sitemap.ts`
+Cadena de dinero rota + seguridad explotable. **CERRADO (ver nota 2026-07 arriba) — checkboxes actualizadas 2026-07-09, desfasadas respecto al resumen desde su cierre real.**
+- [x] **BUG-1** — `create-checkout` usa firma legacy → **`subscriptions` nunca se rellena** ni se activa Elite. Resolver `organization_id` y usar la firma nueva de `createCheckoutSession`. `app/api/stripe/create-checkout/route.ts` + `lib/stripe.ts`
+- [x] **BUG-2** — El boost pagado **no pone `is_featured=true`** (solo `featured_until`) → no destaca. `lib/boosts.ts:130-134`
+- [x] **BUG-3** — Fallback de boost destaca **saltándose el cupo** `max_boosted_share` cuando la activación falla por cupo lleno. `app/api/stripe/webhooks/route.ts:94-108`
+- [x] **BUG-7** — Webhook Stripe **sin idempotencia** real (el comentario la promete pero no existe) → boosts/créditos duplicados en reenvíos. Tabla `processed_stripe_events` con unique. `app/api/stripe/webhooks/route.ts`
+- [x] **SEC-1** 🔴 — **Server Actions de admin sin verificar rol** → cualquier usuario autenticado puede aprobar showrooms/vehículos. Añadir `requireAdmin()` como 1ª línea de cada acción. `app/(admin)/admin/altas-showroom/actions.ts` + `app/(admin)/admin/vehiculos/[id]/page.tsx`
+- [x] **SEC-2** 🔴 — **Webhooks entrantes fail-open**: HMAC solo se comprueba si el secreto está en el entorno. Hacerlo obligatorio (fail-closed). `app/api/webhooks/{appointment-result,assistant-result,hot-lead-alert}/route.ts`
+- [x] **SEC-3** 🔴 — **Mass-assignment en vehículos**: dealer se autopublica activo/destacado saltando moderación y el boost de €49. Allowlist de columnas + forzar `status='pending_review'`. `app/api/vehicles/route.ts` + `[id]/route.ts`
+- [x] **SEC-4** — **Falsificación de leads/citas**: `dealer_id`/`vehicle_id` arbitrarios sin validar pertenencia, sin rate-limit. `app/api/leads/route.ts` + webhooks
+- [x] **SEC-5** — **Inyección de operadores PostgREST** en el buscador (`.or()` con input crudo) → expone borradores/no-activos. `lib/vehicle-query.ts:85`
+- [ ] **SEO-1/SEO-2** — (solo si se levanta el gate noindex) `/sobre-nosotros` y `/coches/berlinas` en el sitemap+footer pueden ser 404. Auditar 1:1 rutas del sitemap. `app/sitemap.ts` — condicional, no aplica mientras `noindex` siga activo.
 
 ### 🟡 Sprint 1 — Calidad y confianza
-- [ ] **BUG-5** — `incrementEliteCounter` importado pero **nunca llamado** → capacidad Elite por provincia no se limita. `app/api/stripe/webhooks/route.ts`
-- [ ] **BUG-6** — 3 escrituras basura `admin.rpc as never` que corrompen `used`/`current_elite_showrooms`. `lib/boosts.ts:81,180` + `lib/elite-capacity.ts:87`
-- [ ] **BUG-8** — Sin cron que expire boosts ni resetee `is_featured` → el orden prioriza boosts caducados.
-- [ ] **BUG-9** — Doble-reserva en `assistant/book` (check+insert sin constraint único). Índice único parcial + 409.
-- [ ] **SEC-6** — Import por API key global sin scoping (`IMPORT_API_KEY` acepta cualquier `dealer_slug`, sin plan-gating). `app/api/vehicles/import/route.ts`
-- [ ] **SEC-7** — Upload confía `file.type`/extensión del cliente, sin magic bytes. `app/api/upload/route.ts`
-- [ ] **SEC-8** — Contraseña temporal devuelta en el JSON de respuesta + sufijo fijo `7a`. Invitación por email. `app/api/team/members/route.ts`
+- [x] **BUG-5** — `incrementEliteCounter` importado pero **nunca llamado** → capacidad Elite por provincia no se limita. `app/api/stripe/webhooks/route.ts`
+- [x] **BUG-6** — 3 escrituras basura `admin.rpc as never` que corrompen `used`/`current_elite_showrooms`. `lib/boosts.ts:81,180` + `lib/elite-capacity.ts:87`
+- [x] **BUG-8** — Sin cron que expire boosts ni resetee `is_featured` → el orden prioriza boosts caducados.
+- [ ] **BUG-9** — Doble-reserva en `assistant/book` (check+insert sin constraint único). Índice único parcial + 409. Pendiente real — feature dormant, no bloqueante.
+- [ ] **SEC-6** — Import por API key global sin scoping (`IMPORT_API_KEY` acepta cualquier `dealer_slug`, sin plan-gating). `app/api/vehicles/import/route.ts` — diferido.
+- [x] **SEC-7** — Upload confía `file.type`/extensión del cliente, sin magic bytes. `app/api/upload/route.ts`
+- [ ] **SEC-8** — Contraseña temporal devuelta en el JSON de respuesta + sufijo fijo `7a`. Invitación por email. `app/api/team/members/route.ts` — diferido.
 - [ ] **A1** 🎨 — **Contraste AA falla en el texto gris más usado** (`bsm-text-muted` 4.02:1). Subir a `#A0A0A0` + reemplazar literales `#808080/#737373`. `tailwind.config.ts:41`
 - [ ] **A2/A3** — Modales sin `role="dialog"`/focus-trap/Escape (hook `useModalA11y` compartido). `LeadsBandeja.tsx`, `KanbanBoard.tsx`, `SearchAlertModal.tsx`, `VehicleGallery.tsx`
 - [ ] **B1** — Header con **gradiente marrón** que rompe la identidad "negro premium" → gradiente negro + acento dorado. `Header.tsx:125-129`
