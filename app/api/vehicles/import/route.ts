@@ -23,6 +23,13 @@ interface ImportRow {
   vin?: string
   /** URLs públicas (feed del dealer) — se descargan y alojan en nuestro Storage, nunca se hotlinkean. */
   image_urls?: string[]
+  /**
+   * Señal de solo-degradación: fuerza pending_review en esta fila aunque la petición use
+   * FEED_SYNC_API_KEY (autoApprove=true). Nunca hace lo contrario (no puede convertir una fila
+   * en auto-aprobada si la petición no lo era). La usa el paso de reescritura IA del sync de feed
+   * cuando no tiene datos suficientes para redactar la ficha con criterio.
+   */
+  needs_review?: boolean
 }
 
 interface RowError { row: number; message: string }
@@ -200,7 +207,10 @@ async function runImport(
       vin:             r.vin?.toString().trim() || null,
       // autoApprove SOLO es true cuando la petición vino autenticada con FEED_SYNC_API_KEY —
       // nunca por un valor que el llamante pueda fijar en el body (ver runImport/POST).
-      status:          autoApprove ? 'active' : 'pending_review',
+      // needs_review es la única forma en que una fila puede DEGRADAR su propio status (nunca
+      // escalarlo): permite que el paso de reescritura IA del sync mande a moderación una ficha
+      // concreta con datos insuficientes sin tener que partir el lote en dos peticiones/claves.
+      status:          (autoApprove && !r.needs_review) ? 'active' : 'pending_review',
     }).select('id').single()
 
     if (error || !inserted_row) {
