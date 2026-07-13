@@ -177,7 +177,9 @@ async function runImport(
 
     const slug = generateSlug(r.brand_name.trim(), r.model_name.trim(), year)
 
-    const { data: inserted_row, error } = await supabase.from('vehicles').insert({
+    // Cliente admin: dealerId ya se validó (ownership por sesión, o slug por API key de confianza)
+    // antes de llegar aquí — el insert en sí no depende de RLS de usuario final.
+    const { data: inserted_row, error } = await admin.from('vehicles').insert({
       dealer_id:       dealerId,
       slug,
       vehicle_type:    toVehicleType(r.vehicle_type?.toString()),
@@ -210,7 +212,7 @@ async function runImport(
     if (r.image_urls?.length) {
       const images = await importImagesForVehicle(admin, dealerId, inserted_row.id, r.image_urls)
       if (images.length) {
-        await supabase.from('vehicles').update({ images }).eq('id', inserted_row.id)
+        await admin.from('vehicles').update({ images }).eq('id', inserted_row.id)
       }
     }
   }
