@@ -1,3 +1,2 @@
-[project]
 # Supabase project ref — visible en: Dashboard → Project Settings → General → Reference ID
-id = "iylppoaitwnmbwjaubuy"
+project_id = "iylppoaitwnmbwjaubuy"
