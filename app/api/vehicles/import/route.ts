@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganizationIdForUser, can } from '@/lib/entitlements'
 
@@ -21,6 +21,8 @@ interface ImportRow {
   body_type?: string
   description?: string
   vin?: string
+  /** URLs públicas (feed del dealer) — se descargan y alojan en nuestro Storage, nunca se hotlinkean. */
+  image_urls?: string[]
 }
 
 interface RowError { row: number; message: string }
@@ -87,15 +89,71 @@ function generateSlug(brand: string, model: string, year: number): string {
   return `${base}-${Math.random().toString(36).slice(2, 7)}`
 }
 
+// ── Image handling (feed → nuestro Storage, nunca hotlink) ─────────────────────
+
+const IMAGE_BUCKET = 'vehicle-images'
+const MAX_IMAGES_PER_VEHICLE = 12
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024 // 10 MB, mismo límite que /api/upload
+
+function detectImageExt(bytes: Uint8Array): 'jpg' | 'png' | 'webp' | null {
+  // SEC-7: mismos magic bytes que /api/upload — nunca fiarse del Content-Type que declare la URL externa.
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'jpg'
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'png'
+  if (
+    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+    bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50
+  ) return 'webp'
+  return null
+}
+
+async function importImagesForVehicle(
+  admin: ReturnType<typeof createAdminClient>,
+  dealerId: string,
+  vehicleId: string,
+  urls: string[],
+): Promise<{ url: string; order: number }[]> {
+  const results: { url: string; order: number }[] = []
+  const capped = urls.slice(0, MAX_IMAGES_PER_VEHICLE)
+
+  for (let i = 0; i < capped.length; i++) {
+    try {
+      const res = await fetch(capped[i], { signal: AbortSignal.timeout(15000) })
+      if (!res.ok) continue
+      const buf = new Uint8Array(await res.arrayBuffer())
+      if (buf.byteLength > MAX_IMAGE_BYTES || buf.byteLength === 0) continue
+      const ext = detectImageExt(buf.slice(0, 12))
+      if (!ext) continue // no es una imagen válida (JPG/PNG/WebP) pese a lo que diga la URL
+
+      const path = `${dealerId}/${vehicleId}/${i}-${Date.now()}.${ext}`
+      const contentType = ext === 'jpg' ? 'image/jpeg' : ext === 'png' ? 'image/png' : 'image/webp'
+      const { error: uploadError } = await admin.storage.from(IMAGE_BUCKET).upload(path, buf, {
+        contentType,
+        upsert: true,
+      })
+      if (uploadError) continue
+
+      const { data: { publicUrl } } = admin.storage.from(IMAGE_BUCKET).getPublicUrl(path)
+      results.push({ url: publicUrl, order: i })
+    } catch {
+      // Imagen individual fallida (timeout, URL caída, etc.) — no bloquea el resto del vehículo.
+      continue
+    }
+  }
+
+  return results
+}
+
 // ── Core import logic (shared between API key and session auth) ────────────────
 
 async function runImport(
   rows: ImportRow[],
   dealerId: string,
   supabase: Awaited<ReturnType<typeof createClient>>,
+  autoApprove: boolean,
 ): Promise<{ inserted: number; errors: RowError[] }> {
   const errors: RowError[] = []
   let inserted = 0
+  const admin = createAdminClient()
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
@@ -119,7 +177,7 @@ async function runImport(
 
     const slug = generateSlug(r.brand_name.trim(), r.model_name.trim(), year)
 
-    const { error } = await supabase.from('vehicles').insert({
+    const { data: inserted_row, error } = await supabase.from('vehicles').insert({
       dealer_id:       dealerId,
       slug,
       vehicle_type:    toVehicleType(r.vehicle_type?.toString()),
@@ -138,13 +196,22 @@ async function runImport(
       body_type:       r.body_type?.toString().trim() || null,
       description:     r.description?.toString().trim() || null,
       vin:             r.vin?.toString().trim() || null,
-      status:          'pending_review',
-    })
+      // autoApprove SOLO es true cuando la petición vino autenticada con FEED_SYNC_API_KEY —
+      // nunca por un valor que el llamante pueda fijar en el body (ver runImport/POST).
+      status:          autoApprove ? 'active' : 'pending_review',
+    }).select('id').single()
 
-    if (error) {
-      errors.push({ row: rowNum, message: error.message })
-    } else {
-      inserted++
+    if (error || !inserted_row) {
+      errors.push({ row: rowNum, message: error?.message || 'Error al insertar' })
+      continue
+    }
+    inserted++
+
+    if (r.image_urls?.length) {
+      const images = await importImagesForVehicle(admin, dealerId, inserted_row.id, r.image_urls)
+      if (images.length) {
+        await supabase.from('vehicles').update({ images }).eq('id', inserted_row.id)
+      }
     }
   }
 
@@ -161,15 +228,25 @@ export async function POST(req: NextRequest) {
 
   const supabase = await createClient()
   let dealerId: string | null = null
+  let autoApprove = false
 
   // Auth method 1 — API key (for n8n / external automation)
   const authHeader = req.headers.get('authorization') ?? ''
   if (authHeader.startsWith('Bearer ')) {
     const token = authHeader.slice(7)
-    const envKey = process.env.IMPORT_API_KEY
-    if (!envKey || token !== envKey) {
+    const importKey = process.env.IMPORT_API_KEY
+    const feedSyncKey = process.env.FEED_SYNC_API_KEY
+
+    // Dos niveles de confianza con la MISMA forma de auth, para no reabrir SEC-3:
+    // - IMPORT_API_KEY: uso general (white-glove manual) → siempre pending_review.
+    // - FEED_SYNC_API_KEY: exclusivo del workflow de sincronización de feed → único caso con auto-aprobación.
+    //   autoApprove nunca se lee del body — solo se activa si el token coincide con esta clave concreta.
+    if (feedSyncKey && token === feedSyncKey) {
+      autoApprove = true
+    } else if (!importKey || token !== importKey) {
       return NextResponse.json({ error: 'Clave de API no válida.' }, { status: 401 })
     }
+
     // Caller must provide dealer_slug to identify the target dealer
     const slug = body.dealer_slug as string | undefined
     if (!slug) {
@@ -179,7 +256,7 @@ export async function POST(req: NextRequest) {
     if (!dealer) return NextResponse.json({ error: 'Showroom no encontrado.' }, { status: 404 })
     dealerId = dealer.id
   } else {
-    // Auth method 2 — Supabase session (dashboard upload)
+    // Auth method 2 — Supabase session (dashboard upload). Siempre pending_review: input directo del dealer.
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Sesión no válida. Inicia sesión de nuevo.' }, { status: 401 })
     const { data: dealer } = await supabase.from('dealers').select('id').eq('profile_id', user.id).single()
@@ -199,6 +276,6 @@ export async function POST(req: NextRequest) {
   }
 
   if (!dealerId) return NextResponse.json({ error: 'No se pudo identificar el showroom.' }, { status: 403 })
-  const result = await runImport(body.rows as ImportRow[], dealerId, supabase)
+  const result = await runImport(body.rows as ImportRow[], dealerId, supabase, autoApprove)
   return NextResponse.json(result, { status: 200 })
 }
