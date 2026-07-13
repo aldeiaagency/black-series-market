@@ -16,6 +16,9 @@ const schema = z.object({
   // Logo capturado en la investigación pre-visita (skill informe-previsita) — opcional, se copia
   // al perfil del dealer en la aprobación (ver approveApplication).
   logo_url: z.string().trim().url().max(500).optional(),
+  // Descripción del showroom redactada por la misma investigación, solo con datos observados
+  // (nunca inventados) — se copia a dealers.description en la aprobación.
+  profile_description: z.string().trim().max(2000).optional(),
 }).strict()
 
 export async function POST(req: NextRequest) {
@@ -29,7 +32,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 })
   }
 
-  const { name, email, company, phone, city, plan, volume, message, logo_url } = parsed.data
+  const { name, email, company, phone, city, plan, volume, message, logo_url, profile_description } = parsed.data
 
   const fullMessage = [
     plan    ? `Plan de interés: ${plan}` : null,
@@ -67,6 +70,7 @@ export async function POST(req: NextRequest) {
       plan_interest: plan ?? null,
       message:       fullMessage || null,
       logo_url:      logo_url ?? null,
+      profile_description: profile_description ?? null,
       status:        'new',
     })
     .select('id')

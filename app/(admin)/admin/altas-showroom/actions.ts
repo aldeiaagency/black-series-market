@@ -180,6 +180,7 @@ export async function approveApplication(formData: FormData) {
         email: application.email,
         website: application.website,
         logo_url: application.logo_url || null,
+        description: application.profile_description || null,
         status: 'trial',
         subscription_plan: trialPlan,
         vehicle_slots: 0,
