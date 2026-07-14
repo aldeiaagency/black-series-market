@@ -230,10 +230,10 @@ El sitio está invisible para buscadores. Hacerlo cuando el catálogo tenga veh�
 | Página `/precios` actualizada con precios reales (Essential/Professional/Elite) | 🔴 |
 | Integración checkout Stripe en el flujo de suscripción | 🔴 |
 | Plan Grupo: cerrar definición + construir en código (derivado de Elite) | 🔴 |
-| Banner en dashboard dealer: "Trial activo hasta [fecha]" | 🔴 |
-| Verificar que vehículos con `status: 'trial'` son visibles en el market (RLS) | 🟡 |
-| WF drip trial: emails días 3/10/21/28 | 🔴 |
-| WF conversión: email día ~28 con resumen rendimiento + CTA a elegir plan | 🔴 |
+| Banner en dashboard dealer: "Trial activo hasta [fecha]" | ✅ HECHO (2026-07-14) — migraciones 067/068/069, workflow n8n `BLM - 8. Trial drip y conversión`. Detalle y checklist de verificación en `docs/ciclo-vida-trial-verificacion.md` |
+| Dealers `status='trial'` visibles en perfil/listado/vehículos (RLS) — antes solo se veían al pasar a `active` (primer vehículo), dejando al fundador sin nada que enseñar durante todo el onboarding | ✅ HECHO (2026-07-14) — migración `067_trial_dealers_public_visibility.sql`. De paso se cerró un hueco real: un dealer `suspended` seguía teniendo sus vehículos públicamente visibles (RLS nunca comprobaba el dealer) |
+| WF drip trial: emails días 3/10/21/28 | ✅ HECHO y probado E2E las 4 etapas (2026-07-14) — `BLM - 8. Trial drip y conversión`, n8n |
+| WF conversión: email día ~28 con resumen rendimiento + CTA a elegir plan | ✅ HECHO — misma etapa 4 del workflow anterior, con datos reales vía RPC `trial_dealer_stats` |
 
 ---
 
