@@ -289,6 +289,23 @@ export async function approveApplication(formData: FormData) {
     }).catch(() => {})
   }
 
+  // WF-P3 (agencia): email pidiendo stock/fotos + tarea interna de seguimiento a +7 días.
+  // Antes había que dispararlo a mano (webhook propio bsa/fundador-onboarding); se engancha
+  // aquí para que la aprobación deje encadenado también el paso de onboarding de stock.
+  const { data: dealerForOnboarding } = await admin.from('dealers').select('slug').eq('id', dealerId).single()
+  const fundadorWebhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
+    ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
+  fetch(fundadorWebhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      nombre: application.dealer_name,
+      email: application.email,
+      telefono: application.phone,
+      dealer_slug: dealerForOnboarding?.slug ?? '',
+    }),
+  }).catch(() => {})
+
   revalidateAll(id)
   revalidatePath('/admin/dealers')
 }
