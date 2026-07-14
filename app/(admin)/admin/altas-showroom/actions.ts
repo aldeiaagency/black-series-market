@@ -185,6 +185,7 @@ export async function approveApplication(formData: FormData) {
         subscription_plan: trialPlan,
         vehicle_slots: 0,
         is_verified: true,
+        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       })
       .select('id')
       .single()

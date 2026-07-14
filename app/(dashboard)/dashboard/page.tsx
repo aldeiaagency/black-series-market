@@ -70,7 +70,7 @@ export default async function DashboardPage() {
   // Getting-started steps for new dealers (0 vehicles published)
   const isNewDealer = (activeVehicles ?? 0) === 0
   const hasProfile = !!(dealer.description && dealer.phone)
-  const hasPlan = !!(dealer.subscription_plan && dealer.subscription_plan !== 'trial')
+  const hasPlan = dealer.status === 'active'
   const isPro = dealer.subscription_plan === 'professional' || dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
 
   return (
@@ -85,6 +85,24 @@ export default async function DashboardPage() {
           {activeVehicles ?? 0}/{vehicleLimit} vehículos publicados
         </p>
       </div>
+
+      {/* Trial banner — visible mientras el dealer no haya pasado a plan de pago */}
+      {dealer.status === 'trial' && (
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border border-gold/30 bg-[#0D0C07] px-6 py-4">
+          <p className="text-sm text-bsm-text-secondary">
+            <span className="text-gold">Prueba activa</span>
+            {dealer.trial_ends_at ? (
+              <> hasta el {new Date(dealer.trial_ends_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.</>
+            ) : (
+              <>. Tu showroom ya es visible en el market.</>
+            )}
+            {' '}Tu perfil y tu stock ya son públicos — sin coste durante el programa fundador.
+          </p>
+          <Link href="/dashboard/suscripcion" className="shrink-0 text-xs uppercase tracking-widest text-gold hover:underline">
+            Ver planes →
+          </Link>
+        </div>
+      )}
 
       {/* Getting started — only for dealers with no published vehicles yet */}
       {isNewDealer && (
