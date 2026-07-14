@@ -64,6 +64,8 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   // draft/pending_review/expired → 404; sold/paused → visible with adapted CTAs
   if (!vehicle || ['draft', 'pending_review', 'expired'].includes(vehicle.status)) notFound()
+  // Dealer suspendido o pendiente de aprobación: sus vehículos no deben quedar visibles.
+  if (!vehicle.dealer || !['trial', 'active'].includes(vehicle.dealer.status)) notFound()
 
   // La vista se registra desde el cliente (ViewTracker → /api/track) para no escribir en el render.
   const contactMode = vehicle.dealer?.profile_id

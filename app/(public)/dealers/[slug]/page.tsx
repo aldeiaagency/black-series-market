@@ -81,7 +81,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
     .from('dealers')
     .select('*')
     .eq('slug', slug)
-    .eq('status', 'active')
+    .in('status', ['trial', 'active'])
     .single()
 
   if (!dealer) notFound()

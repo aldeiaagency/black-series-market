@@ -38,11 +38,11 @@ export default async function DealersPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = createPublicClient()
 
-  // 1. Comunidades únicas de dealers activos (dinámico, no hardcoded)
+  // 1. Comunidades únicas de dealers activos/trial (dinámico, no hardcoded)
   const { data: zoneData } = await supabase
     .from('dealers')
     .select('location_region')
-    .eq('status', 'active')
+    .in('status', ['trial', 'active'])
     .not('location_region', 'is', null)
 
   const zonesSet = new Set<string>()
@@ -68,7 +68,7 @@ export default async function DealersPage({ searchParams }: PageProps) {
   let query = supabase
     .from('dealers')
     .select('*, vehicles(status, vehicle_type)')
-    .eq('status', 'active')
+    .in('status', ['trial', 'active'])
     .order('is_featured', { ascending: false })
     .order('subscription_plan', { ascending: false })
     .order('name', { ascending: true })
