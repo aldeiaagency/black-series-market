@@ -39,6 +39,7 @@ export default function AdminConfiguracionPage() {
     fetch('/api/admin/config')
       .then((r) => r.json())
       .then((cfg) => {
+        if (cfg.email) setEmail((e) => ({ ...e, ...cfg.email }))
         if (cfg.seo) setSeo((s) => ({ ...s, ...cfg.seo }))
         if (cfg.social_links) setSocialLinks((s) => ({ ...s, ...cfg.social_links }))
       })
