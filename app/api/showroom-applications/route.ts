@@ -4,6 +4,11 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { notifyShowroomApplicationCreated } from '@/lib/integrations/n8n'
 import { isGlobalRateLimited } from '@/lib/rate-limit'
 
+// Mismas listas cerradas que /dashboard/perfil (dealers.certifications / dealers.services) —
+// la investigación pre-visita solo puede marcar estos valores, nunca texto libre.
+const SPECIALTY_VALUES = ['sport', 'classic', 'premium', 'motorcycle', 'import', 'suv', 'supercar', 'custom'] as const
+const SERVICE_VALUES = ['financing', 'trade_in', 'warranty', 'transport_nat', 'transport_intl', 'own_workshop', 'detailing', 'home_delivery'] as const
+
 const schema = z.object({
   name:    z.string().trim().min(2).max(120),
   email:   z.string().trim().email().max(180),
@@ -25,6 +30,18 @@ const schema = z.object({
   // Origen de la solicitud: 'visita_agencia' (checklist de visita, reputación ya auditada por
   // la skill informe-previsita) salta la auditoría online de WF1; por defecto 'market_directo'.
   source: z.enum(['market_directo', 'visita_agencia']).optional(),
+  // Todo lo siguiente: capturado por la investigación pre-visita SOLO con evidencia pública
+  // (Google Business Profile, web propia) — nunca inventado. Se copia a dealers en la aprobación.
+  address: z.string().trim().max(300).optional(),
+  years_in_business: z.number().int().min(0).max(200).optional(),
+  instagram_url: z.string().trim().url().max(300).optional(),
+  facebook_url: z.string().trim().url().max(300).optional(),
+  youtube_url: z.string().trim().url().max(300).optional(),
+  tiktok_url: z.string().trim().url().max(300).optional(),
+  linkedin_url: z.string().trim().url().max(300).optional(),
+  // Inferidas con evidencia observable (p. ej. taller propio → own_workshop), no autodeclaradas.
+  specialties: z.array(z.enum(SPECIALTY_VALUES)).max(8).optional(),
+  services: z.array(z.enum(SERVICE_VALUES)).max(8).optional(),
 }).strict()
 
 export async function POST(req: NextRequest) {
@@ -38,7 +55,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 })
   }
 
-  const { name, email, company, phone, city, plan, volume, message, logo_url, profile_description, source, website } = parsed.data
+  const {
+    name, email, company, phone, city, plan, volume, message, logo_url, profile_description, source, website,
+    address, years_in_business, instagram_url, facebook_url, youtube_url, tiktok_url, linkedin_url, specialties, services,
+  } = parsed.data
 
   const fullMessage = [
     plan    ? `Plan de interés: ${plan}` : null,
@@ -79,6 +99,15 @@ export async function POST(req: NextRequest) {
       profile_description: profile_description ?? null,
       website:       website ?? null,
       source:        source ?? 'market_directo',
+      address:            address ?? null,
+      years_in_business:  years_in_business ?? null,
+      instagram_url:      instagram_url ?? null,
+      facebook_url:       facebook_url ?? null,
+      youtube_url:        youtube_url ?? null,
+      tiktok_url:         tiktok_url ?? null,
+      linkedin_url:       linkedin_url ?? null,
+      specialties:        specialties ?? null,
+      services:           services ?? null,
       status:        'new',
     })
     .select('id')
