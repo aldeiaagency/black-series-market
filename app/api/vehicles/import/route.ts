@@ -150,6 +150,41 @@ async function importImagesForVehicle(
   return results
 }
 
+// ── Mejora de descripciones por IA (solo import manual/CSV — el path de feed-sync ya tiene su
+// propio paso de reescritura IA antes de llegar aquí, no se duplica el coste). Nunca bloquea el
+// import: si el webhook falla o tarda, las filas siguen con la descripción que traían (o vacía).
+const AI_ENHANCE_WEBHOOK = 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/mejorar-vehiculos-csv'
+const AI_ENHANCE_TIMEOUT_MS = 20000
+const AI_ENHANCE_MIN_DESCRIPTION_LENGTH = 40
+
+async function enhanceDescriptionsWithAI(rows: ImportRow[]): Promise<ImportRow[]> {
+  const candidates = rows
+    .map((r, index) => ({ r, index }))
+    .filter(({ r }) => r.brand_name && r.model_name && (!r.description || r.description.toString().trim().length < AI_ENHANCE_MIN_DESCRIPTION_LENGTH))
+
+  if (!candidates.length) return rows
+
+  try {
+    const res = await fetch(AI_ENHANCE_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rows: candidates.map(({ r, index }) => ({ index, ...r })) }),
+      signal: AbortSignal.timeout(AI_ENHANCE_TIMEOUT_MS),
+    })
+    if (!res.ok) return rows
+    const data = await res.json().catch(() => null) as { descriptions?: { index: number; description: string }[] } | null
+    if (!data?.descriptions?.length) return rows
+
+    const next = [...rows]
+    for (const { index, description } of data.descriptions) {
+      if (next[index] && description) next[index] = { ...next[index], description }
+    }
+    return next
+  } catch {
+    return rows
+  }
+}
+
 // ── Core import logic (shared between API key and session auth) ────────────────
 
 async function runImport(
@@ -161,6 +196,12 @@ async function runImport(
   const errors: RowError[] = []
   let inserted = 0
   const admin = createAdminClient()
+
+  // El path de feed-sync (autoApprove) ya reescribe descripciones con IA antes de llamar a este
+  // endpoint — no se repite aquí. Solo se aplica al import manual (dashboard CSV o IMPORT_API_KEY).
+  if (!autoApprove) {
+    rows = await enhanceDescriptionsWithAI(rows)
+  }
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
