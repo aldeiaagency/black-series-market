@@ -280,41 +280,52 @@ export async function approveApplication(formData: FormData) {
     })
     .eq('id', id)
 
-  const webhookUrl = process.env.N8N_WEBHOOK_DEALER_APPROVED
-  if (webhookUrl) {
-    fetch(webhookUrl, {
+  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`
+  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
+
+  // Un solo email de bienvenida por alta — nunca los dos. WF2 (bienvenida genérica, autoservicio)
+  // y WF-P3 (bienvenida fundador, white-glove) pedían cosas contradictorias sobre el stock cuando
+  // se disparaban ambos para la misma alta. Se separan por origen: visita_agencia → WF-P3 (lleva
+  // credenciales); market_directo → WF2 (self-serve, sin promesa de onboarding asistido).
+  if (application.source === 'visita_agencia') {
+    // WF-P3: bienvenida de fundador (credenciales + qué hemos completado ya + una sola vía de stock).
+    const { data: dealerForOnboarding } = await admin.from('dealers').select('slug').eq('id', dealerId).single()
+    const fundadorWebhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
+      ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
+    fetch(fundadorWebhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        application_id: id,
-        dealer_id: dealerId,
-        dealer_name: application.dealer_name,
-        full_name: application.full_name,
+        nombre: application.dealer_name,
         email: application.email,
+        telefono: application.phone,
+        dealer_slug: dealerForOnboarding?.slug ?? '',
         temporary_password: password,
-        login_url: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
-        dashboard_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-        approved_at: new Date().toISOString(),
+        login_url: loginUrl,
+        dashboard_url: dashboardUrl,
       }),
     }).catch(() => {})
+  } else {
+    // WF2: bienvenida genérica autoservicio (altas directas del market, no fundador).
+    const webhookUrl = process.env.N8N_WEBHOOK_DEALER_APPROVED
+    if (webhookUrl) {
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          application_id: id,
+          dealer_id: dealerId,
+          dealer_name: application.dealer_name,
+          full_name: application.full_name,
+          email: application.email,
+          temporary_password: password,
+          login_url: loginUrl,
+          dashboard_url: dashboardUrl,
+          approved_at: new Date().toISOString(),
+        }),
+      }).catch(() => {})
+    }
   }
-
-  // WF-P3 (agencia): email pidiendo stock/fotos + tarea interna de seguimiento a +7 días.
-  // Antes había que dispararlo a mano (webhook propio bsa/fundador-onboarding); se engancha
-  // aquí para que la aprobación deje encadenado también el paso de onboarding de stock.
-  const { data: dealerForOnboarding } = await admin.from('dealers').select('slug').eq('id', dealerId).single()
-  const fundadorWebhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
-    ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
-  fetch(fundadorWebhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      nombre: application.dealer_name,
-      email: application.email,
-      telefono: application.phone,
-      dealer_slug: dealerForOnboarding?.slug ?? '',
-    }),
-  }).catch(() => {})
 
   revalidateAll(id)
   revalidatePath('/admin/dealers')
