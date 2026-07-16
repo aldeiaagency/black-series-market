@@ -19,6 +19,9 @@ const schema = z.object({
   // Descripción del showroom redactada por la misma investigación, solo con datos observados
   // (nunca inventados) — se copia a dealers.description en la aprobación.
   profile_description: z.string().trim().max(2000).optional(),
+  // Origen de la solicitud: 'visita_agencia' (checklist de visita, reputación ya auditada por
+  // la skill informe-previsita) salta la auditoría online de WF1; por defecto 'market_directo'.
+  source: z.enum(['market_directo', 'visita_agencia']).optional(),
 }).strict()
 
 export async function POST(req: NextRequest) {
@@ -32,7 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 })
   }
 
-  const { name, email, company, phone, city, plan, volume, message, logo_url, profile_description } = parsed.data
+  const { name, email, company, phone, city, plan, volume, message, logo_url, profile_description, source } = parsed.data
 
   const fullMessage = [
     plan    ? `Plan de interés: ${plan}` : null,
@@ -71,6 +74,7 @@ export async function POST(req: NextRequest) {
       message:       fullMessage || null,
       logo_url:      logo_url ?? null,
       profile_description: profile_description ?? null,
+      source:        source ?? 'market_directo',
       status:        'new',
     })
     .select('id')
@@ -90,6 +94,7 @@ export async function POST(req: NextRequest) {
     location_city: city,
     plan_interest: plan ?? null,
     message:       fullMessage || null,
+    source:        source ?? 'market_directo',
     admin_url:     `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom/${data.id}`,
   }).catch(() => {})
 
