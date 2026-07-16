@@ -13,6 +13,9 @@ const schema = z.object({
   plan:    z.string().trim().max(40).optional(),
   volume:  z.string().trim().max(80).optional(),
   message: z.string().trim().max(1200).optional(),
+  // Web propia del showroom, capturada en la investigación pre-visita — opcional, se copia
+  // a dealers.website en la aprobación (approveApplication ya lee application.website).
+  website: z.string().trim().url().max(300).optional(),
   // Logo capturado en la investigación pre-visita (skill informe-previsita) — opcional, se copia
   // al perfil del dealer en la aprobación (ver approveApplication).
   logo_url: z.string().trim().url().max(500).optional(),
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 })
   }
 
-  const { name, email, company, phone, city, plan, volume, message, logo_url, profile_description, source } = parsed.data
+  const { name, email, company, phone, city, plan, volume, message, logo_url, profile_description, source, website } = parsed.data
 
   const fullMessage = [
     plan    ? `Plan de interés: ${plan}` : null,
@@ -74,6 +77,7 @@ export async function POST(req: NextRequest) {
       message:       fullMessage || null,
       logo_url:      logo_url ?? null,
       profile_description: profile_description ?? null,
+      website:       website ?? null,
       source:        source ?? 'market_directo',
       status:        'new',
     })
