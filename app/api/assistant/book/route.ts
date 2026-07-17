@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerBookingContext, getBusyRanges } from '@/lib/assistant-booking'
 import { computeSlots } from '@/lib/booking'
 import { notifyN8n } from '@/lib/integrations/n8n'
+import { createEvent } from '@/lib/google-calendar'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -130,7 +131,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'appointment_failed' }, { status: 500 })
   }
 
-  // 3) Avanzar el lead + evento.
+  // 3) Si el dealer tiene Google Calendar conectado, crear el evento real ahí.
+  // createEvent nunca lanza — un fallo de Google se traga: la cita ya guardada en
+  // nuestra BD nunca se convierte en un error de cara al comprador.
+  let googleEvent: { id: string; meetingUrl: string | null; htmlLink: string } | null = null
+  if (ctx.provider === 'google_calendar') {
+    googleEvent = await createEvent(admin, dealerId, {
+      summary: `Visita · ${vehicleTitle} · ${buyerName}`,
+      description: [`Cita reservada desde el agente IA de Black Label Market.`, ctx.settings.instructions || ''].filter(Boolean).join('\n'),
+      startIso: startDate.toISOString(),
+      endIso: endDate.toISOString(),
+      attendeeEmail: buyerEmail,
+      attendeeName: buyerName,
+    })
+    if (googleEvent) {
+      await admin.from('appointments')
+        .update({ external_event_id: googleEvent.id, meeting_url: googleEvent.meetingUrl })
+        .eq('id', appt.id)
+    }
+  }
+
+  // 4) Avanzar el lead + evento.
   await Promise.all([
     admin.from('leads').update({ status: 'appointment' }).eq('id', lead.id),
     admin.from('lead_events').insert({
@@ -139,11 +160,12 @@ export async function POST(req: NextRequest) {
     }),
   ])
 
-  // 4) Notificación (emails + Slack) vía n8n.
+  // 5) Notificación (emails + Slack) vía n8n.
   const title = `Visita · ${vehicleTitle} · Black Label Market`
   const details = [`Cita para ver ${vehicleTitle} en ${ctx.dealer.name}.`, ctx.settings.instructions || '']
     .filter(Boolean).join('\n')
-  const location = ctx.settings.mode === 'video' ? 'Videollamada' : (ctx.settings.location_text || ctx.dealer.name)
+  const location = googleEvent?.meetingUrl
+    || (ctx.settings.mode === 'video' ? 'Videollamada' : (ctx.settings.location_text || ctx.dealer.name))
   const links = calendarLinks(title, startDate, endDate, details, location)
 
   await notifyN8n('appointment.created', {
@@ -161,11 +183,18 @@ export async function POST(req: NextRequest) {
         mode: ctx.settings.mode,
         location_text: location,
         instructions: ctx.settings.instructions || null,
+        meeting_url: googleEvent?.meetingUrl ?? null,
       },
       vehicle: vehicle ? { title: vehicleTitle, slug: vehicle.slug } : null,
       calendar_links: links,
     },
   })
 
-  return NextResponse.json({ ok: true, appointment_id: appt.id, label: chosen.label, calendar_links: links })
+  return NextResponse.json({
+    ok: true,
+    appointment_id: appt.id,
+    label: chosen.label,
+    calendar_links: links,
+    meeting_url: googleEvent?.meetingUrl ?? null,
+  })
 }

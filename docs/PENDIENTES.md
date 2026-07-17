@@ -243,7 +243,7 @@ Las tablas y endpoints ya están construidos. Solo falta conectar con servicios 
 
 | Feature | Qué falta |
 |---|---|
-| **Reserva de citas** (tablas `appointments` ✅) | Google Calendar OAuth + workflow n8n de propuesta/confirmación + emails |
+| **Reserva de citas** (tablas `appointments` ✅) | Fase B (horario manual) operativa. Fase A (Google Calendar OAuth real) construida y desplegada — falta que el dueño del producto cree el proyecto Google Cloud + OAuth client (`GOOGLE_OAUTH_CLIENT_ID/SECRET`) y la verificación manual con un dealer piloto antes de subir `calendar_integration` a operative. Detalle en `docs/agente-cita-fase-A-google-calendar.md` |
 | **Lead scoring** (campos `lead_score` en `leads` ✅) | Prompt de scoring + workflow n8n que puntúe y cree alertas |
 | **Feed/DMS automático** (feature flag ✅) | Conector feed/DMS + job recurrente de sincronización |
 | **Ventana exclusiva 24h a la carta** (feature flag ✅) | Matcher/temporizador 24h + aviso automático al showroom |
