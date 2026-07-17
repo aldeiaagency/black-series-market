@@ -3,10 +3,11 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { DEALER_STATUS_LABELS, VEHICLE_STATUS_LABELS, getVehicleStatusColor, formatPrice, formatNumber, timeAgo } from '@/lib/utils'
 import Link from 'next/link'
-import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe, CheckCircle, Clock, Shield, StickyNote } from 'lucide-react'
+import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe, CheckCircle, Clock, Shield, StickyNote, Trash2, AlertTriangle } from 'lucide-react'
 
 interface PageProps {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 async function approveDealerAccess(formData: FormData) {
@@ -98,6 +99,28 @@ async function setVerification(formData: FormData) {
   redirect(`/admin/dealers/${dealerId}`)
 }
 
+async function deleteDealer(formData: FormData) {
+  'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
+  const dealerId     = formData.get('dealerId') as string
+  const profileId    = formData.get('profileId') as string
+  const expectedName = (formData.get('expectedName') as string || '').trim()
+  const confirmName  = (formData.get('confirmName') as string || '').trim()
+
+  if (!dealerId || !profileId || !expectedName || confirmName !== expectedName) {
+    redirect(`/admin/dealers/${dealerId}?deleteError=1`)
+  }
+
+  const supabase = await createAdminClient()
+  // Borra el usuario de auth — el resto (profiles, dealers, vehicles, leads, galería,
+  // analytics, organización...) cae en cascada por las FK ON DELETE CASCADE del esquema.
+  // No hay vuelta atrás: borra también su historial como comprador si lo tuviera.
+  const { error } = await supabase.auth.admin.deleteUser(profileId)
+  if (error) redirect(`/admin/dealers/${dealerId}?deleteError=1`)
+
+  redirect('/admin/dealers')
+}
+
 async function saveProfile(formData: FormData) {
   'use server'
   const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
@@ -116,8 +139,9 @@ async function saveProfile(formData: FormData) {
   redirect(`/admin/dealers/${dealerId}`)
 }
 
-export default async function AdminDealerDetailPage({ params }: PageProps) {
+export default async function AdminDealerDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params
+  const { deleteError } = await searchParams
   // createAdminClient bypasses RLS for cross-showroom data access
   const supabase = await createAdminClient()
 
@@ -617,6 +641,44 @@ export default async function AdminDealerDetailPage({ params }: PageProps) {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Danger zone — borrado permanente */}
+      <div className="mt-8 border border-red-500/30 bg-red-500/5">
+        <div className="p-5 border-b border-red-500/20 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-400" />
+          <h2 className="font-medium text-sm text-red-400">Zona de peligro</h2>
+        </div>
+        <div className="p-5">
+          {deleteError && (
+            <p className="text-xs text-red-400 mb-4">
+              El nombre escrito no coincide (o faltó algún dato) — no se ha borrado nada. Inténtalo de nuevo.
+            </p>
+          )}
+          <p className="text-xs text-bsm-text-muted mb-4 max-w-2xl">
+            Elimina permanentemente esta cuenta: usuario, perfil, showroom, vehículos, contactos, galería y estadísticas
+            asociadas. <strong className="text-red-400">No se puede deshacer.</strong> Úsalo solo para dar de baja
+            cuentas de prueba o showrooms que se van definitivamente — no para pausar una cuenta (usa el estado
+            &quot;Suspendido&quot; arriba para eso).
+          </p>
+          <form action={deleteDealer} className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <input type="hidden" name="dealerId" value={id} />
+            <input type="hidden" name="profileId" value={dealer.profile_id} />
+            <input type="hidden" name="expectedName" value={dealer.name || ''} />
+            <div>
+              <label className="text-[10px] text-bsm-text-muted uppercase tracking-wide">
+                Escribe &quot;{dealer.name}&quot; para confirmar
+              </label>
+              <input type="text" name="confirmName" required autoComplete="off"
+                className="mt-1 w-full sm:w-72 bg-surface-elevated border border-red-500/30 text-xs text-bsm-text-secondary px-2.5 py-1.5 focus:outline-none focus:border-red-400 transition-colors" />
+            </div>
+            <button type="submit"
+              className="flex items-center gap-2 px-4 py-2 mt-1 sm:mt-5 bg-red-500/10 border border-red-500/40 text-red-400 text-xs font-medium hover:bg-red-500/20 transition-colors">
+              <Trash2 className="w-3.5 h-3.5" />
+              Eliminar showroom definitivamente
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
