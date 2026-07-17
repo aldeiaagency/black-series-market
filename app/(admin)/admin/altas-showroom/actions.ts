@@ -5,6 +5,7 @@ import { randomBytes } from 'crypto'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { slugify } from '@/lib/utils'
 import { assertAdmin } from '@/lib/admin-auth'
+import { provisionDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
 
 function temporaryPassword() {
   return `BLM-${randomBytes(10).toString('base64url')}`
@@ -256,16 +257,12 @@ export async function approveApplication(formData: FormData) {
     }
   }
 
-  // Auto-provisionar el asistente IA para planes Professional/Elite. La misma lógica ya existe
-  // en el webhook de Stripe (handleCheckoutCompleted) pero SOLO se dispara en el alta de pago;
-  // los fundadores del programa entran por esta vía (aprobación directa, sin Stripe) y nunca la
-  // atravesaban — por eso `showroom_assistant_config` seguía vacía para todo dealer real. Idempotente.
+  // Auto-provisionar el asistente IA (workflow dedicado clonado por dealer, ver
+  // lib/integrations/n8n-assistant-provisioning.ts) para planes Professional/Elite. Mismo helper
+  // se llama desde el webhook de Stripe (handleCheckoutCompleted) y desde setDealerPlan — los
+  // fundadores del programa entran por esta vía (aprobación directa, sin Stripe).
   if (trialPlan === 'professional' || trialPlan === 'elite') {
-    const assistantWebhookUrl = process.env.N8N_ASSISTANT_WEBHOOK_URL
-      ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/assistant'
-    await admin
-      .from('showroom_assistant_config')
-      .upsert({ dealer_id: dealerId, webhook_url: assistantWebhookUrl, enabled: true }, { onConflict: 'dealer_id' })
+    await provisionDealerAssistant(admin, { dealerId, dealerName: application.dealer_name })
   }
 
   const reviewedBy = await currentAdminId()

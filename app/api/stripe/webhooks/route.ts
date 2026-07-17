@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/server'
 import { provisionPlanBoostCredits, activateBoost } from '@/lib/boosts'
 import { incrementEliteCounter } from '@/lib/elite-capacity'
+import { provisionDealerAssistant, deactivateDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
 import type Stripe from 'stripe'
 
 // Idempotency: processed event IDs stored in platform_config key 'processed_stripe_events'
@@ -192,13 +193,11 @@ async function handleCheckoutCompleted(
       ).toISOString(),
     }).eq('id', dealerId)
 
-    // Auto-configure AI assistant for Professional and Elite plans
+    // Auto-configure AI assistant (workflow dedicado por dealer) for Professional and Elite plans.
+    // Mismo helper que approveApplication/setDealerPlan — ver lib/integrations/n8n-assistant-provisioning.ts.
     if (planSlug === 'professional' || planSlug === 'elite') {
-      const assistantWebhookUrl = process.env.N8N_ASSISTANT_WEBHOOK_URL
-        ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/assistant'
-      await admin
-        .from('showroom_assistant_config')
-        .upsert({ dealer_id: dealerId, webhook_url: assistantWebhookUrl, enabled: true }, { onConflict: 'dealer_id' })
+      const { data: d } = await admin.from('dealers').select('name').eq('id', dealerId).maybeSingle()
+      await provisionDealerAssistant(admin, { dealerId, dealerName: d?.name || 'Showroom' })
     }
   }
 }
@@ -268,13 +267,16 @@ async function handleSubscriptionDeleted(
   }
 
   // Legacy
-  await admin.from('dealers').update({
+  const { data: canceledDealer } = await admin.from('dealers').update({
     subscription_plan: null,
     stripe_subscription_id: null,
     status: 'trial',
     vehicle_slots: 5,
     is_featured: false,
-  }).eq('stripe_subscription_id', sub.id)
+  }).eq('stripe_subscription_id', sub.id).select('id').maybeSingle()
+
+  // Sale de professional/elite → desactiva su asistente dedicado (nunca lo borra).
+  if (canceledDealer?.id) await deactivateDealerAssistant(admin, canceledDealer.id)
 }
 
 async function handleInvoicePaid(
