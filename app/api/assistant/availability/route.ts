@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDealerBookingContext, getBookedStarts } from '@/lib/assistant-booking'
+import { getDealerBookingContext, getBusyRanges } from '@/lib/assistant-booking'
 import { computeSlots } from '@/lib/booking'
 
 /**
@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ available: false })
   }
 
-  const booked = await getBookedStarts(dealerId)
-  const slots = computeSlots(ctx.rules, booked)
+  const busy = await getBusyRanges(dealerId, ctx)
+  const slots = computeSlots(ctx.rules, busy)
 
   return NextResponse.json({
     available: slots.length > 0,

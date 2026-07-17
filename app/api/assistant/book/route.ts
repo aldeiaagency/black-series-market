@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { getDealerBookingContext, getBookedStarts } from '@/lib/assistant-booking'
+import { getDealerBookingContext, getBusyRanges } from '@/lib/assistant-booking'
 import { computeSlots } from '@/lib/booking'
 import { notifyN8n } from '@/lib/integrations/n8n'
 
@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
   }
 
   // El hueco solicitado debe seguir disponible (evita horas inventadas y solapes).
-  const booked = await getBookedStarts(dealerId)
-  const slots = computeSlots(ctx.rules, booked)
+  const busy = await getBusyRanges(dealerId, ctx)
+  const slots = computeSlots(ctx.rules, busy)
   const chosen = slots.find(s => new Date(s.start).getTime() === startDate.getTime())
   if (!chosen) return NextResponse.json({ ok: false, error: 'slot_unavailable' }, { status: 409 })
 
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
       dealer_id: dealerId,
       starts_at: startDate.toISOString(),
       status: 'confirmed',
-      provider: 'manual',
+      provider: ctx.provider ?? 'manual',
       location_text: ctx.settings.mode !== 'video' ? ctx.settings.location_text : null,
       workflow_ref: sessionId,
       metadata: { source: 'assistant_booking', mode: ctx.settings.mode, slot_label: chosen.label, session_id: sessionId },
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
     admin.from('leads').update({ status: 'appointment' }).eq('id', lead.id),
     admin.from('lead_events').insert({
       lead_id: lead.id, dealer_id: dealerId, type: 'appointment_confirmed',
-      payload: { appointment_id: appt.id, starts_at: startDate.toISOString(), provider: 'manual', source: 'assistant_booking' },
+      payload: { appointment_id: appt.id, starts_at: startDate.toISOString(), provider: ctx.provider ?? 'manual', source: 'assistant_booking' },
     }),
   ])
 

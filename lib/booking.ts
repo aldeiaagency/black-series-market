@@ -38,6 +38,9 @@ export interface Slot {
   day: string
 }
 
+/** Rango de tiempo ocupado (ISO). Fase A lo alimenta tanto de citas internas como de freeBusy de Google. */
+export interface BusyRange { start: string; end: string }
+
 export const DEFAULT_RULES: AvailabilityRules = {
   timezone: 'Europe/Madrid',
   slot_minutes: 45,
@@ -134,10 +137,12 @@ function labelFor(date: Date, tz: string): string {
 
 /**
  * Devuelve los huecos disponibles desde `now`, dentro de la ventana de reserva,
- * excluyendo festivos, huecos ya reservados y los que no cumplan la antelación.
+ * excluyendo festivos, los que no cumplan la antelación, y cualquiera que solape
+ * con un rango ocupado (citas internas ya confirmadas y, en Fase A, los bloques
+ * reales del Google Calendar conectado — ambos llegan mezclados en `busyRanges`).
  */
-export function computeSlots(rules: AvailabilityRules, bookedStartsIso: string[], now: Date = new Date(), limit = 60): Slot[] {
-  const booked = new Set(bookedStartsIso.map(s => new Date(s).getTime()))
+export function computeSlots(rules: AvailabilityRules, busyRanges: BusyRange[], now: Date = new Date(), limit = 60): Slot[] {
+  const busy = busyRanges.map(r => ({ start: new Date(r.start).getTime(), end: new Date(r.end).getTime() }))
   const minStart = now.getTime() + rules.min_hours_notice * 3600_000
   const slots: Slot[] = []
 
@@ -155,7 +160,9 @@ export function computeSlots(rules: AvailabilityRules, bookedStartsIso: string[]
         const dt = wallTimeToUtc(y, mo, d, Math.floor(t / 60), t % 60, rules.timezone)
         const ms = dt.getTime()
         if (ms < minStart) continue
-        if (booked.has(ms)) continue
+        const slotEndMs = ms + rules.slot_minutes * 60_000
+        const overlaps = busy.some(b => ms < b.end && slotEndMs > b.start)
+        if (overlaps) continue
         slots.push({ start: dt.toISOString(), label: labelFor(dt, rules.timezone), day: ymd })
         if (slots.length >= limit) break
       }
