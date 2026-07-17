@@ -1,5 +1,5 @@
 import 'server-only'
-import { randomBytes, randomUUID, createCipheriv, createDecipheriv } from 'crypto'
+import { randomBytes, randomUUID, createCipheriv, createDecipheriv, createHmac, timingSafeEqual } from 'crypto'
 import type { createAdminClient } from '@/lib/supabase/server'
 
 // Integración real con Google Calendar (Fase A). Sin librería googleapis — solo 3 llamadas REST
@@ -91,6 +91,34 @@ export async function fetchPrimaryCalendar(accessToken: string): Promise<{ id: s
 
 export async function revokeGoogleToken(token: string): Promise<void> {
   await fetchWithTimeout(`${GOOGLE_REVOKE_URL}?token=${encodeURIComponent(token)}`, { method: 'POST' }).catch(() => {})
+}
+
+// ── Firma del `state` de OAuth (CSRF + transporte del dealerId) ────────────────
+
+export function signOAuthState(dealerId: string): string {
+  const secret = process.env.GOOGLE_OAUTH_STATE_SECRET
+  if (!secret) throw new Error('GOOGLE_OAUTH_STATE_SECRET no configurada')
+  const payloadB64 = Buffer.from(JSON.stringify({ dealerId, ts: Date.now() })).toString('base64url')
+  const sig = createHmac('sha256', secret).update(payloadB64).digest('base64url')
+  return `${payloadB64}.${sig}`
+}
+
+export function verifyOAuthState(state: string, maxAgeMs = 10 * 60_000): { dealerId: string } | null {
+  const secret = process.env.GOOGLE_OAUTH_STATE_SECRET
+  if (!secret) return null
+  const [payloadB64, sig] = state.split('.')
+  if (!payloadB64 || !sig) return null
+  const expected = createHmac('sha256', secret).update(payloadB64).digest('base64url')
+  const sigBuf = Buffer.from(sig, 'base64url')
+  const expBuf = Buffer.from(expected, 'base64url')
+  if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) return null
+  try {
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')) as { dealerId: string; ts: number }
+    if (!payload.dealerId || Date.now() - payload.ts > maxAgeMs) return null
+    return { dealerId: payload.dealerId }
+  } catch {
+    return null
+  }
 }
 
 // ── Conexión activa por dealer ──────────────────────────────────────────────

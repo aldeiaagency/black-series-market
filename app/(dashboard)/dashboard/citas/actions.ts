@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
+import { revokeGoogleToken, decryptToken } from '@/lib/google-calendar'
 import type { Weekday, TimeRange } from '@/lib/booking'
 
 export interface CalendarConfigInput {
@@ -53,16 +54,20 @@ export async function saveCalendarConfig(input: CalendarConfigInput): Promise<{ 
   }
   const status = input.enabled ? 'connected' : 'disconnected'
 
+  // Fila 'manual' — independiente de una posible fila 'google_calendar' del mismo dealer
+  // (UNIQUE(dealer_id, provider) permite ambas a la vez). Filtrar por provider aquí evita
+  // que este guardado rutinario del horario toque o "desconecte" sin querer Google.
   const { data: existing } = await admin
     .from('showroom_calendar_connections')
     .select('id')
     .eq('dealer_id', access.dealerId)
+    .eq('provider', 'manual')
     .maybeSingle()
 
   if (existing) {
     const { error } = await admin
       .from('showroom_calendar_connections')
-      .update({ provider: 'manual', status, availability_rules, booking_settings, updated_at: new Date().toISOString() })
+      .update({ status, availability_rules, booking_settings, updated_at: new Date().toISOString() })
       .eq('id', existing.id)
     if (error) return { ok: false, error: 'save_failed' }
   } else {
@@ -71,6 +76,44 @@ export async function saveCalendarConfig(input: CalendarConfigInput): Promise<{ 
       .insert({ dealer_id: access.dealerId, provider: 'manual', status, availability_rules, booking_settings, connected_at: input.enabled ? new Date().toISOString() : null })
     if (error) return { ok: false, error: 'save_failed' }
   }
+
+  revalidatePath('/dashboard/citas')
+  return { ok: true }
+}
+
+/** Desconecta el Google Calendar del dealer (revoca en Google, best-effort) y limpia los tokens. */
+export async function disconnectGoogleCalendar(): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const access = await getDealerAccess(user.id)
+  if (!access) return { ok: false, error: 'no_access' }
+
+  const admin = createAdminClient()
+  const { data: conn } = await admin
+    .from('showroom_calendar_connections')
+    .select('id, access_token')
+    .eq('dealer_id', access.dealerId)
+    .eq('provider', 'google_calendar')
+    .maybeSingle()
+  if (!conn) return { ok: false, error: 'not_connected' }
+
+  if (conn.access_token) {
+    try { await revokeGoogleToken(decryptToken(conn.access_token as string)) } catch {}
+  }
+
+  const { error } = await admin
+    .from('showroom_calendar_connections')
+    .update({
+      status: 'disconnected',
+      access_token: null,
+      refresh_token: null,
+      token_expires_at: null,
+      disconnected_at: new Date().toISOString(),
+    })
+    .eq('id', conn.id)
+  if (error) return { ok: false, error: 'save_failed' }
 
   revalidatePath('/dashboard/citas')
   return { ok: true }

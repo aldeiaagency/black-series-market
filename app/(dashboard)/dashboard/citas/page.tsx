@@ -5,7 +5,12 @@ import { getDealerAccess } from '@/lib/dealer-access'
 import { normalizeRules, normalizeSettings, DEFAULT_RULES } from '@/lib/booking'
 import CitasConfig from './CitasConfig'
 
-export default async function CitasPage() {
+interface Props {
+  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string }>
+}
+
+export default async function CitasPage({ searchParams }: Props) {
+  const { calendar_connected, calendar_error } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -42,15 +47,32 @@ export default async function CitasPage() {
     )
   }
 
-  const { data: conn } = await admin
+  const { data: conns } = await admin
     .from('showroom_calendar_connections')
-    .select('status, availability_rules, booking_settings')
+    .select('provider, status, availability_rules, booking_settings, external_account_email, error_message')
     .eq('dealer_id', access.dealerId)
-    .maybeSingle()
+    .in('provider', ['manual', 'google_calendar'])
 
-  const rules = normalizeRules(conn?.availability_rules ?? DEFAULT_RULES)
-  const settings = normalizeSettings(conn?.booking_settings ?? {})
-  const enabled = conn?.status === 'connected'
+  const manualConn = conns?.find(c => c.provider === 'manual')
+  const googleConn = conns?.find(c => c.provider === 'google_calendar')
 
-  return <CitasConfig initial={{ enabled, rules, settings }} />
+  const rules = normalizeRules(manualConn?.availability_rules ?? DEFAULT_RULES)
+  const settings = normalizeSettings(manualConn?.booking_settings ?? {})
+  const enabled = manualConn?.status === 'connected'
+
+  const google = {
+    configured: !!process.env.GOOGLE_OAUTH_CLIENT_ID,
+    status: (googleConn?.status ?? null) as 'connected' | 'disconnected' | 'error' | 'pending' | null,
+    email: googleConn?.external_account_email ?? null,
+    errorMessage: googleConn?.error_message ?? null,
+  }
+
+  return (
+    <CitasConfig
+      initial={{ enabled, rules, settings }}
+      google={google}
+      connectedFlag={calendar_connected === '1'}
+      errorFlag={calendar_error ?? null}
+    />
+  )
 }
