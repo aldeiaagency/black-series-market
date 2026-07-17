@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { DEALER_STATUS_LABELS, VEHICLE_STATUS_LABELS, getVehicleStatusColor, formatPrice, formatNumber, timeAgo } from '@/lib/utils'
 import Link from 'next/link'
-import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe, CheckCircle, Clock, Shield, StickyNote, Trash2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe, CheckCircle, Clock, Shield, StickyNote, Trash2, AlertTriangle, Bot } from 'lucide-react'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -152,6 +152,12 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
     .single()
 
   if (!dealer) notFound()
+
+  const { data: assistantConfig } = await supabase
+    .from('showroom_assistant_config')
+    .select('enabled, n8n_workflow_id')
+    .eq('dealer_id', id)
+    .maybeSingle()
 
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -369,6 +375,28 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
             <div className="mt-4 pt-4 border-t border-bsm-border text-xs text-bsm-text-muted">
               Vehículos publicados: <span className="text-bsm-text-primary">{activeCount ?? 0} / {dealer.vehicle_slots ?? '—'}</span>
             </div>
+          </div>
+
+          {/* Asistente IA — solo lectura */}
+          <div className="bg-surface border border-bsm-border p-5">
+            <h3 className="text-xs font-medium mb-3 uppercase tracking-wide text-bsm-text-muted">Asistente de cualificación</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`badge text-[10px] ${assistantConfig?.enabled ? 'badge-active' : 'badge-muted'}`}>
+                {assistantConfig?.enabled ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+            {assistantConfig?.n8n_workflow_id ? (
+              <a
+                href={`https://aldeia-n8n.giuxk6.easypanel.host/workflow/${assistantConfig.n8n_workflow_id}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-gold hover:text-gold-light"
+              >
+                <Bot className="w-3.5 h-3.5" />
+                Ver workflow dedicado en n8n
+              </a>
+            ) : (
+              <p className="text-xs text-bsm-text-muted">Usando el agente compartido (sin workflow propio todavía).</p>
+            )}
           </div>
 
           {/* Featured + Verified */}
