@@ -246,12 +246,13 @@ async function runImport(
       body_type:       r.body_type?.toString().trim() || null,
       description:     r.description?.toString().trim() || null,
       vin:             r.vin?.toString().trim() || null,
-      // autoApprove SOLO es true cuando la petición vino autenticada con FEED_SYNC_API_KEY —
-      // nunca por un valor que el llamante pueda fijar en el body (ver runImport/POST).
-      // needs_review es la única forma en que una fila puede DEGRADAR su propio status (nunca
-      // escalarlo): permite que el paso de reescritura IA del sync mande a moderación una ficha
-      // concreta con datos insuficientes sin tener que partir el lote en dos peticiones/claves.
-      status:          (autoApprove && !r.needs_review) ? 'active' : 'pending_review',
+      // Decisión 2026-07-17: se retira la moderación previa a publicación para cualquier vía de
+      // import (manual, IMPORT_API_KEY o FEED_SYNC_API_KEY) — el catálogo cerrado de marcas/modelos
+      // y, en el futuro, un agente de auditoría post-publicación asumen ese control. needs_review
+      // sigue siendo la única señal automática (no humana) que degrada una fila a pending_review:
+      // la usa el paso de reescritura IA cuando no tiene confianza suficiente en los datos de esa
+      // fila concreta (feed-sync hoy; el import manual podría marcarla en el futuro).
+      status:          r.needs_review ? 'pending_review' : 'active',
     }).select('id').single()
 
     if (error || !inserted_row) {
