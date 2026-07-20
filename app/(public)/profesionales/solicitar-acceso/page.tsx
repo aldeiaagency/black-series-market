@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useTransition, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { CURRENT_PROFESSIONAL_TERMS_VERSION } from '@/lib/legal'
 
 const PLANS = [
   { value: 'essential',    label: 'Essential — 197 €/mes' },
@@ -38,6 +39,7 @@ function SolicitarAccesoForm() {
     city: '',
     message: '',
   })
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -50,6 +52,11 @@ function SolicitarAccesoForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!termsAccepted) {
+      setError('Debes aceptar las Condiciones para Profesionales para continuar.')
+      return
+    }
 
     startTransition(async () => {
       try {
@@ -68,6 +75,8 @@ function SolicitarAccesoForm() {
               isWaitlist ? 'Lista de espera Elite' : '',
               form.message,
             ].filter(Boolean).join('\n') || undefined,
+            terms_accepted: true,
+            terms_version: CURRENT_PROFESSIONAL_TERMS_VERSION,
           }),
         })
         if (!res.ok) throw new Error('Error al enviar')
@@ -258,18 +267,31 @@ function SolicitarAccesoForm() {
           <p className="text-sm text-red-400">{error}</p>
         )}
 
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            required
+            className="mt-0.5 accent-gold w-4 h-4 shrink-0"
+          />
+          <span className="text-xs text-bsm-text-muted leading-relaxed">
+            He leído y acepto las{' '}
+            <Link href="/legal/condiciones-profesionales" target="_blank" className="text-gold hover:underline">
+              Condiciones para Profesionales
+            </Link>
+            {' '}y la{' '}
+            <Link href="/legal/privacidad" target="_blank" className="text-gold hover:underline">política de privacidad</Link>.
+          </span>
+        </label>
+
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || !termsAccepted}
           className="btn-gold w-full justify-center"
         >
           {pending ? 'Enviando…' : 'Enviar solicitud'}
         </button>
-
-        <p className="text-xs text-bsm-text-muted text-center">
-          Al enviar aceptas nuestra{' '}
-          <Link href="/legal/privacidad" className="text-gold hover:underline">política de privacidad</Link>.
-        </p>
       </form>
     </div>
   )

@@ -42,6 +42,11 @@ const schema = z.object({
   // Inferidas con evidencia observable (p. ej. taller propio → own_workshop), no autodeclaradas.
   specialties: z.array(z.enum(SPECIALTY_VALUES)).max(8).optional(),
   services: z.array(z.enum(SERVICE_VALUES)).max(8).optional(),
+  // Aceptación de /legal/condiciones-profesionales (checkbox en el formulario público). Opcional
+  // aquí a propósito: las altas con source='visita_agencia' (watcher, sin checkbox) no lo mandan
+  // y se resuelven en el primer acceso al dashboard (ver app/(auth)/aceptar-condiciones).
+  terms_accepted: z.literal(true).optional(),
+  terms_version: z.string().trim().max(20).optional(),
 }).strict()
 
 export async function POST(req: NextRequest) {
@@ -58,6 +63,7 @@ export async function POST(req: NextRequest) {
   const {
     name, email, company, phone, city, plan, volume, message, logo_url, profile_description, source, website,
     address, years_in_business, instagram_url, facebook_url, youtube_url, tiktok_url, linkedin_url, specialties, services,
+    terms_accepted, terms_version,
   } = parsed.data
 
   const fullMessage = [
@@ -108,6 +114,8 @@ export async function POST(req: NextRequest) {
       linkedin_url:       linkedin_url ?? null,
       specialties:        specialties ?? null,
       services:           services ?? null,
+      terms_accepted_version: terms_accepted ? (terms_version ?? null) : null,
+      terms_accepted_at:      terms_accepted ? new Date().toISOString() : null,
       status:        'new',
     })
     .select('id')

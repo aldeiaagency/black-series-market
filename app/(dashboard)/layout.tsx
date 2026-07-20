@@ -17,12 +17,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const admin = createAdminClient()
   const { data: dealer } = await admin
     .from('dealers')
-    .select('id, name, slug, status, subscription_plan, vehicle_slots')
+    .select('id, name, slug, status, subscription_plan, vehicle_slots, terms_accepted_at')
     .eq('id', access.dealerId)
     .single()
 
   if (!dealer) redirect('/registro')
   if (dealer.status === 'pending') redirect('/solicitud-enviada')
+  if (!dealer.terms_accepted_at) redirect('/aceptar-condiciones')
 
   const perms = getPermissions(access.role)
 

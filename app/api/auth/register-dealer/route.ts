@@ -21,9 +21,15 @@ export async function POST(request: Request) {
     const instagramUrl         = clean(body.instagram_url)
     const portales: string[]   = Array.isArray(body.portales) ? body.portales.filter((p: unknown) => typeof p === 'string') : []
     const portalUrl            = clean(body.portal_url)
+    const termsAccepted        = body.terms_accepted === true
+    const termsVersion         = clean(body.terms_version)
 
     if (!fullName || !email || !dealerName || !locationCity || !phone) {
       return NextResponse.json({ error: 'Faltan datos obligatorios para crear la solicitud.' }, { status: 400 })
+    }
+
+    if (!termsAccepted) {
+      return NextResponse.json({ error: 'Debes aceptar las Condiciones para Profesionales para continuar.' }, { status: 400 })
     }
 
     if (!website && !googleBusinessUrl && !instagramUrl) {
@@ -71,6 +77,8 @@ export async function POST(request: Request) {
         instagram_url:        instagramUrl    || null,
         portales:             portales.length > 0 ? portales : null,
         portal_url:           portalUrl       || null,
+        terms_accepted_version: termsVersion  || null,
+        terms_accepted_at:    new Date().toISOString(),
         status:               'new',
       })
       .select('id, created_at, status')

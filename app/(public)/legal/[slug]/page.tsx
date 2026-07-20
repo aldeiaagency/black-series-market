@@ -650,6 +650,8 @@ El usuario puede modificar el orden de presentación mediante los filtros y opci
   'condiciones-profesionales': {
     title: 'Condiciones para profesionales',
     content: `
+**Versión:** 20 de julio de 2026
+
 **Objeto**
 
 Estas Condiciones para Profesionales regulan el acceso y uso de Black Label Market por parte de concesionarios, compraventas, showrooms, especialistas y otros profesionales del sector que soliciten publicar vehículos o utilizar servicios profesionales de la plataforma.
@@ -680,6 +682,8 @@ En cumplimiento del artículo 30 del Reglamento (UE) 2022/2065, de Servicios Dig
 - Email y teléfono de contacto.
 
 El profesional deberá mantener estos datos actualizados en todo momento. Si se detecta que los datos proporcionados son falsos, están desactualizados o el profesional se niega a proporcionarlos o a actualizarlos cuando se le requiera, Black Label Market podrá suspender el acceso a la plataforma hasta que la situación sea subsanada.
+
+Al solicitar el acceso profesional, el solicitante autocertifica que ofrecerá únicamente vehículos y servicios conformes con la normativa aplicable de la Unión Europea y de España.
 
 **Obligaciones del profesional**
 
@@ -768,11 +772,15 @@ Black Label Market no será responsable de incumplimientos del profesional frent
 
 El profesional mantendrá indemne a Black Label Market frente a reclamaciones, daños, sanciones, costes o responsabilidades derivados de la información publicada, la comercialización de vehículos, el uso de datos personales, el incumplimiento de garantías, la falta de disponibilidad, defectos ocultos, documentación irregular o cualquier incumplimiento legal o contractual imputable al profesional.
 
+**Aceptación**
+
+El acceso profesional a Black Label Market requiere la aceptación expresa de estas Condiciones (mediante casilla de confirmación en el alta, o en el primer acceso al panel profesional si el alta se gestionó de otra forma). Se conserva un registro de la versión aceptada y la fecha de aceptación.
+
 **Modificación de estas Condiciones**
 
 Black Label Market podrá actualizar estas Condiciones para Profesionales por cambios legales, técnicos, comerciales, operativos o de funcionamiento de la plataforma.
 
-La versión vigente será la publicada en la plataforma en cada momento. Cuando los cambios sean relevantes para profesionales registrados, se procurará informar por medios razonables.
+La versión vigente será la publicada en la plataforma en cada momento. Cuando los cambios sean relevantes para profesionales registrados, se procurará informar por medios razonables y, si el cambio es sustancial, se podrá solicitar una nueva aceptación.
 
 **Legislación aplicable y jurisdicción**
 

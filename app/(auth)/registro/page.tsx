@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/brand/Logo'
+import { CURRENT_PROFESSIONAL_TERMS_VERSION } from '@/lib/legal'
 
 const PORTALES = ['Coches.net', 'Mobile.de', 'Autoscout24', 'Wallapop', 'Motorflash', 'Otros']
 
@@ -26,6 +27,7 @@ export default function RegistroPage() {
     portales: [] as string[],
     portal_url: '',
   })
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   function update(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -53,12 +55,21 @@ export default function RegistroPage() {
       return
     }
 
+    if (!termsAccepted) {
+      setError('Debes aceptar las Condiciones para Profesionales para continuar.')
+      return
+    }
+
     setLoading(true)
 
     const response = await fetch('/api/auth/register-dealer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        terms_accepted: true,
+        terms_version: CURRENT_PROFESSIONAL_TERMS_VERSION,
+      }),
     })
 
     const result = await response.json()
@@ -291,23 +302,37 @@ export default function RegistroPage() {
                   </p>
                 )}
 
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    required
+                    className="mt-0.5 accent-gold w-4 h-4 shrink-0"
+                  />
+                  <span className="text-xs text-bsm-text-secondary leading-relaxed">
+                    He leído y acepto las{' '}
+                    <Link href="/legal/condiciones-profesionales" target="_blank" className="text-gold hover:underline">
+                      Condiciones para Profesionales
+                    </Link>
+                    , el{' '}
+                    <Link href="/legal/terminos" target="_blank" className="text-gold hover:underline">aviso de términos de uso</Link>
+                    {' '}y la{' '}
+                    <Link href="/legal/privacidad" target="_blank" className="text-gold hover:underline">política de privacidad</Link>.
+                  </span>
+                </label>
+
                 <div className="flex gap-3 pt-1">
                   <button type="button" onClick={() => setStep(1)} className="btn-outline flex-1 justify-center">
                     Atrás
                   </button>
-                  <button type="submit" disabled={loading} className="btn-gold flex-1 justify-center">
+                  <button type="submit" disabled={loading || !termsAccepted} className="btn-gold flex-1 justify-center">
                     {loading ? 'Enviando solicitud...' : 'Solicitar alta'}
                   </button>
                 </div>
 
                 <p className="text-[10px] text-bsm-text-muted text-center leading-relaxed">
                   El envío no crea una cuenta ni implica aceptación automática. Revisamos cada showroom antes de habilitar el acceso.
-                </p>
-                <p className="text-[10px] text-bsm-text-muted text-center">
-                  Al registrarte aceptas nuestros{' '}
-                  <Link href="/legal/terminos" className="text-gold">términos de uso</Link>
-                  {' '}y{' '}
-                  <Link href="/legal/privacidad" className="text-gold">política de privacidad</Link>.
                 </p>
               </form>
             </>

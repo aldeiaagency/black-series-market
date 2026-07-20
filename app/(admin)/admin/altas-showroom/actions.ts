@@ -192,6 +192,11 @@ export async function approveApplication(formData: FormData) {
         linkedin_url: application.linkedin_url || null,
         certifications: application.specialties || null,
         services: application.services || null,
+        // Aceptación de /legal/condiciones-profesionales — si vino del formulario público con
+        // checkbox, se copia aquí. Si es NULL (alta gestionada por la agencia, sin checkbox),
+        // el layout del dashboard pedirá aceptarlas en el primer acceso.
+        terms_accepted_version: application.terms_accepted_version || null,
+        terms_accepted_at: application.terms_accepted_at || null,
         status: 'trial',
         subscription_plan: trialPlan,
         vehicle_slots: 0,
