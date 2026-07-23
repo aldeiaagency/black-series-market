@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push*)"
+    ],
+    "deny": [
+      "Bash(rm*)",
+      "Bash(del*)",
+      "Bash(*--force*)",
+      "Bash(git reset --hard*)"
+    ]
+  }
+}
