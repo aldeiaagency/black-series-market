@@ -1,10 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
+import { stripe, PLAN_PRICES } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/server'
 import { provisionPlanBoostCredits, activateBoost } from '@/lib/boosts'
 import { incrementEliteCounter } from '@/lib/elite-capacity'
 import { provisionDealerAssistant, deactivateDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
+import { pauseExcessActiveVehicles } from '@/lib/plan-transitions'
 import type Stripe from 'stripe'
+
+const PLAN_SLOTS: Record<string, number> = {
+  essential: 15,
+  professional: 50,
+  elite: 100,
+}
+
+interface StripePlanRow {
+  id: string
+  slug: string
+  stripe_monthly_price_id: string | null
+  stripe_annual_price_id: string | null
+  plan_limits: { key: string; value_number: number | null }[]
+}
+
+async function resolvePlanFromStripePrice(
+  admin: ReturnType<typeof createAdminClient>,
+  priceId: string | null | undefined,
+): Promise<StripePlanRow | null> {
+  if (!priceId) return null
+
+  const { data } = await admin
+    .from('plans')
+    .select('id, slug, stripe_monthly_price_id, stripe_annual_price_id, plan_limits(key, value_number)')
+    .in('slug', ['essential', 'professional', 'elite'])
+
+  const plans = (data ?? []) as unknown as StripePlanRow[]
+  const byDatabase = plans.find(
+    (plan) =>
+      plan.stripe_monthly_price_id === priceId ||
+      plan.stripe_annual_price_id === priceId,
+  )
+  if (byDatabase) return byDatabase
+
+  // Fallback para entornos donde los Price IDs viven en Vercel pero todavía no
+  // se han materializado en plans.stripe_*_price_id.
+  const envSlug = Object.entries(PLAN_PRICES).find(([, cycles]) =>
+    Object.values(cycles).includes(priceId),
+  )?.[0]
+
+  return plans.find((plan) => plan.slug === envSlug) ?? null
+}
+
+function activeVehicleLimit(plan: StripePlanRow | null): number | null {
+  const value = plan?.plan_limits.find((limit) => limit.key === 'max_active_vehicles')?.value_number
+  return value == null ? null : Number(value)
+}
 
 // Idempotency: processed event IDs stored in platform_config key 'processed_stripe_events'
 // For production, a dedicated events table is preferable; this is lightweight enough for current scale.
@@ -157,13 +205,18 @@ async function handleCheckoutCompleted(
         updated_at: new Date().toISOString(),
       }, { onConflict: 'stripe_subscription_id' })
 
-    // Materialize is_featured for Elite
-    if (planSlug === 'elite') {
-      await admin
-        .from('organizations')
-        .update({ is_featured: true, featured_since: new Date().toISOString() })
-        .eq('id', organizationId)
+    // Materializa el destacado en organización y dealer. La página pública de
+    // showrooms lee dealers.is_featured, por lo que ambas columnas deben viajar juntas.
+    const isElite = planSlug === 'elite'
+    await admin
+      .from('organizations')
+      .update({
+        is_featured: isElite,
+        featured_since: isElite ? new Date().toISOString() : null,
+      })
+      .eq('id', organizationId)
 
+    if (isElite) {
       // Sube el contador de capacidad Elite de la provincia del showroom. Estaba importado
       // pero nunca se llamaba. Best-effort: incrementEliteCounter hace no-op si no hay regla
       // para esa provincia, así que un desajuste de formato no rompe el alta.
@@ -179,7 +232,6 @@ async function handleCheckoutCompleted(
   }
 
   // ── Legacy: sync dealers table ──
-  const PLAN_SLOTS: Record<string, number> = { essential: 15, professional: 50, elite: 100 }
   if (dealerId) {
     await admin.from('dealers').update({
       subscription_plan: planSlug as 'essential' | 'professional' | 'elite',
@@ -187,6 +239,7 @@ async function handleCheckoutCompleted(
       stripe_customer_id: session.customer as string,
       status: 'active',
       vehicle_slots: PLAN_SLOTS[planSlug] ?? 15,
+      is_featured: planSlug === 'elite',
       subscription_start_at: new Date().toISOString(),
       subscription_end_at: new Date(
         Date.now() + (billingCycle === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000
@@ -207,6 +260,27 @@ async function handleSubscriptionUpdated(
   sub: Stripe.Subscription
 ) {
   const status = mapStripeStatus(sub.status)
+  const { data: currentSubscription } = await admin
+    .from('subscriptions')
+    .select('id, organization_id, plan_id')
+    .eq('stripe_subscription_id', sub.id)
+    .maybeSingle()
+
+  const stripePriceId = sub.items.data[0]?.price?.id
+  const newPlan = await resolvePlanFromStripePrice(admin, stripePriceId)
+
+  let previousLimit: number | null = null
+  if (currentSubscription?.plan_id) {
+    const { data: previousLimitRow } = await admin
+      .from('plan_limits')
+      .select('value_number')
+      .eq('plan_id', currentSubscription.plan_id)
+      .eq('key', 'max_active_vehicles')
+      .maybeSingle()
+    previousLimit = previousLimitRow?.value_number == null
+      ? null
+      : Number(previousLimitRow.value_number)
+  }
 
   // Update new subscriptions table
   await admin
@@ -217,15 +291,62 @@ async function handleSubscriptionUpdated(
       current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
       cancel_at_period_end: sub.cancel_at_period_end,
       canceled_at: sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null,
+      ...(newPlan ? { plan_id: newPlan.id } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', sub.id)
 
-  // Legacy dealers sync
-  await admin
-    .from('dealers')
-    .update({ status: status === 'active' ? 'active' : 'suspended' })
-    .eq('stripe_subscription_id', sub.id)
+  let dealerId: string | null = null
+  if (currentSubscription?.organization_id) {
+    const { data: org } = await admin
+      .from('organizations')
+      .select('dealer_id')
+      .eq('id', currentSubscription.organization_id)
+      .maybeSingle()
+    dealerId = org?.dealer_id ?? null
+  }
+
+  const newLimit = activeVehicleLimit(newPlan)
+  const isElite = newPlan?.slug === 'elite'
+  const dealerUpdate = {
+    status: status === 'active' ? 'active' as const : 'suspended' as const,
+    ...(newPlan ? {
+      subscription_plan: newPlan.slug as 'essential' | 'professional' | 'elite',
+      vehicle_slots: newLimit ?? PLAN_SLOTS[newPlan.slug] ?? 15,
+      is_featured: isElite,
+    } : {}),
+  }
+
+  if (dealerId) {
+    await admin.from('dealers').update(dealerUpdate).eq('id', dealerId)
+  } else {
+    const { data: dealer } = await admin
+      .from('dealers')
+      .update(dealerUpdate)
+      .eq('stripe_subscription_id', sub.id)
+      .select('id')
+      .maybeSingle()
+    dealerId = dealer?.id ?? null
+  }
+
+  if (newPlan && currentSubscription?.organization_id) {
+    await admin
+      .from('organizations')
+      .update({
+        is_featured: isElite,
+        featured_since: isElite ? new Date().toISOString() : null,
+      })
+      .eq('id', currentSubscription.organization_id)
+  }
+
+  if (
+    dealerId &&
+    newLimit != null &&
+    previousLimit != null &&
+    newLimit < previousLimit
+  ) {
+    await pauseExcessActiveVehicles(admin, dealerId, newLimit)
+  }
 }
 
 async function handleSubscriptionDeleted(
@@ -242,7 +363,8 @@ async function handleSubscriptionDeleted(
     })
     .eq('stripe_subscription_id', sub.id)
 
-  // Revoke is_featured on organization
+  // Revoca el destacado materializado. La actualización legacy de abajo hace
+  // lo mismo en dealers.is_featured.
   const { data: subscription } = await admin
     .from('subscriptions')
     .select('organization_id')
@@ -255,8 +377,6 @@ async function handleSubscriptionDeleted(
       .update({ is_featured: false })
       .eq('id', subscription.organization_id)
 
-    // §5: downgrade cancels — archive vehicles that exceed plan (set to paused)
-    // Handled by a DB trigger / cron in production; here we log intent
     await admin.from('audit_log').insert({
       organization_id: subscription.organization_id,
       action: 'subscription_canceled',
@@ -274,6 +394,10 @@ async function handleSubscriptionDeleted(
     vehicle_slots: 5,
     is_featured: false,
   }).eq('stripe_subscription_id', sub.id).select('id').maybeSingle()
+
+  if (canceledDealer?.id) {
+    await pauseExcessActiveVehicles(admin, canceledDealer.id, 5)
+  }
 
   // Sale de professional/elite → desactiva su asistente dedicado (nunca lo borra).
   if (canceledDealer?.id) await deactivateDealerAssistant(admin, canceledDealer.id)

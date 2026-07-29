@@ -5,6 +5,7 @@ import { DEALER_STATUS_LABELS, VEHICLE_STATUS_LABELS, getVehicleStatusColor, for
 import Link from 'next/link'
 import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe, CheckCircle, Clock, Shield, StickyNote, Trash2, AlertTriangle, Bot } from 'lucide-react'
 import { provisionDealerAssistant, deactivateDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
+import { pauseExcessActiveVehicles } from '@/lib/plan-transitions'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -51,8 +52,12 @@ async function setDealerPlan(dealerId: string, plan: string) {
   const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
   const supabase = await createAdminClient()
   const slots = plan === 'elite' ? 100 : plan === 'professional' ? 50 : plan === 'essential' ? 15 : 5
+  const isElite = plan === 'elite'
   const { data: dealerRow } = await supabase.from('dealers').select('name').eq('id', dealerId).maybeSingle()
-  await supabase.from('dealers').update({ subscription_plan: plan, vehicle_slots: slots }).eq('id', dealerId)
+  await supabase
+    .from('dealers')
+    .update({ subscription_plan: plan, vehicle_slots: slots, is_featured: isElite })
+    .eq('id', dealerId)
 
   // Aprovisiona o desactiva el asistente dedicado (workflow n8n) según el plan de destino —
   // antes solo lo hacía la aprobación de alta/Stripe; un cambio de plan manual no lo tocaba.
@@ -65,6 +70,14 @@ async function setDealerPlan(dealerId: string, plan: string) {
   // Sync active subscription so getEntitlements() sees the new plan (subscription wins over legacy fallback)
   const { data: orgRow } = await supabase.from('organizations').select('id').eq('dealer_id', dealerId).single()
   if (orgRow) {
+    await supabase
+      .from('organizations')
+      .update({
+        is_featured: isElite,
+        featured_since: isElite ? new Date().toISOString() : null,
+      })
+      .eq('id', orgRow.id)
+
     const { data: planRow } = await supabase.from('plans').select('id').eq('slug', plan).single()
     if (planRow) {
       await supabase
@@ -75,7 +88,10 @@ async function setDealerPlan(dealerId: string, plan: string) {
     }
   }
 
+  await pauseExcessActiveVehicles(supabase, dealerId, slots)
+
   revalidatePath(`/admin/dealers/${dealerId}`)
+  revalidatePath('/dealers')
   redirect(`/admin/dealers/${dealerId}`)
 }
 

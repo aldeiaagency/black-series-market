@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
-import { getPermissions } from '@/lib/permissions'
+import { getEntitlements } from '@/lib/entitlements'
+import { getPermissions, type DashboardSection } from '@/lib/permissions'
 import Sidebar from '@/components/dashboard/Sidebar'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!dealer.terms_accepted_at) redirect('/aceptar-condiciones')
 
   const perms = getPermissions(access.role)
+  const ent = access.orgId ? await getEntitlements(access.orgId) : null
+
+  // Los permisos de rol deciden qué puede hacer el miembro; los entitlements
+  // deciden qué ha contratado el showroom. Las páginas mantienen sus propios
+  // guards: este filtro sólo evita mostrar accesos que el plan no incluye.
+  const gatedSections: Partial<Record<DashboardSection, boolean>> = {
+    importar:
+      ent?.features['csv_recurring']?.included === true &&
+      ent.features['csv_recurring'].status === 'operative',
+    solicitudes:
+      ent?.features['vehicles_on_request']?.included === true &&
+      ent.features['vehicles_on_request'].displayLabel === 'general_board' &&
+      ent.features['vehicles_on_request'].status === 'operative',
+    citas:
+      ent?.features['appointment_booking']?.included === true &&
+      ent.features['appointment_booking'].status === 'operative',
+  }
+  const visibleSections = perms.sections.filter(
+    (section) => gatedSections[section] ?? true,
+  )
 
   return (
     <div className="flex min-h-screen bg-obsidian">
@@ -33,7 +54,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         dealerName={dealer.name}
         dealerSlug={dealer.slug}
         plan={dealer.subscription_plan}
-        sections={perms.sections}
+        sections={visibleSections}
         role={access.role}
       />
       <div className="flex-1 overflow-hidden">
