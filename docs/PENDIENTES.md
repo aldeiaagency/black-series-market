@@ -295,3 +295,4 @@ STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ESSENTIAL, STRIPE_PRICE_P
 - `docs/ciclo-vida-trial-verificacion.md` — checklist de verificación del ciclo de vida del trial (banner + drip WF)
 - `docs/auditoria-total-2026-07/` — 13 documentos de la auditoría total (seguridad, código, API, rendimiento, UX/accesibilidad, SEO/GEO, funcional por rol, E2E autenticado) + veredicto consolidado
 - `docs/admin-dashboard-validation-report.md`, `docs/qa-final-report.md`, `docs/repair-migration-procedure.md` — reportes puntuales de validación/QA, no bloqueantes
+- `docs/verificacion-tiers-2026-07-28.md` — verificación de los 3 tiers (Codex, 2026-07-28): límites de vehículos/paneles/CSV/analítica/boosts confirmados correctos; 4 hallazgos (F-D-01/02/04 corregidos y reverificados 2026-07-29, F-D-03 abierto a propósito)
