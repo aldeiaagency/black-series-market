@@ -3,6 +3,13 @@
 > Marco estable del proyecto. Para el **estado vivo** (qué está hecho / pendiente) la fuente única es
 > [`docs/PENDIENTES.md`](docs/PENDIENTES.md). No duplicar estado aquí; este archivo se mantiene corto y estable.
 
+> **Gobierno**: este producto opera bajo la dirección ejecutiva de Black Series Agency (repo hermano
+> `black-series-core`). Al abrir sesión aquí, antes de asumir prioridades de negocio, leer
+> `../black-series-core/agency/00_estado_ceo.md` y, si la tarea es de dirección/priorización (no solo
+> ejecución técnica de este repo), la doctrina en `../black-series-core/.claude/skills/black-series-ceo/SKILL.md`.
+> Ese skill no aparece invocable por comando desde aquí (el descubrimiento de skills es por repo) — se aplica
+> leyéndolo directamente, no invocándolo. Este `CLAUDE.md` sigue gobernando la ejecución técnica local.
+
 ## 1. Qué es
 
 Black Label Market (`blacklabelmarket.es`) es un **marketplace B2B de vehículos premium** que conecta **showrooms/operadores de automoción** con **compradores**. Está **en producción**.
