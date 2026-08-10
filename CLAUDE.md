@@ -3,18 +3,20 @@
 > Marco estable del proyecto. Para el **estado vivo** (qué está hecho / pendiente) la fuente única es
 > [`docs/PENDIENTES.md`](docs/PENDIENTES.md). No duplicar estado aquí; este archivo se mantiene corto y estable.
 
-> **Gobierno**: este producto opera bajo la dirección ejecutiva de Black Series Agency (repo hermano
-> `black-series-core`). Al abrir sesión aquí, antes de asumir prioridades de negocio, leer
-> `../black-series-core/agency/00_estado_ceo.md` y, si la tarea es de dirección/priorización (no solo
-> ejecución técnica de este repo), la doctrina en `../black-series-core/.claude/skills/black-series-ceo/SKILL.md`.
-> Ese skill no aparece invocable por comando desde aquí (el descubrimiento de skills es por repo) — se aplica
-> leyéndolo directamente, no invocándolo. Este `CLAUDE.md` sigue gobernando la ejecución técnica local.
+> **Gobierno**: este producto opera bajo la dirección ejecutiva de Black Series Agency (repo padre
+> `black-series-core`, del que este repo cuelga como carpeta anidada desde 2026-08-10 — repos git
+> independientes, `black-series-core/.gitignore` ignora esta carpeta). Al abrir sesión aquí, antes de asumir
+> prioridades de negocio, leer `../agency/00_estado_ceo.md` y, si la tarea es de dirección/priorización (no
+> solo ejecución técnica de este repo), la doctrina en `../.claude/skills/black-series-ceo/SKILL.md`. Si la
+> sesión se abre con directorio de trabajo dentro de `black-series-core` (o en esta misma carpeta anidada),
+> la skill debería aparecer invocable por comando directamente, al estar ahora dentro del mismo árbol de
+> directorios.
 
 ## 1. Qué es
 
 Black Label Market (`blacklabelmarket.es`) es un **marketplace B2B de vehículos premium** que conecta **showrooms/operadores de automoción** con **compradores**. Está **en producción**.
 
-Es el **producto propio de Black Series Agency** (repo hermano `black-series-core`), no un cliente ni un proyecto externo. La agencia es la matriz; este repo es su producto/activo. La estrategia comercial (planes, servicios, tono) se enmarca en el core; la ejecución del producto vive aquí.
+Es el **producto propio de Black Series Agency** (anidado dentro del repo padre `black-series-core`, como repo git independiente), no un cliente ni un proyecto externo. La agencia es la matriz; este repo es su producto/activo. La estrategia comercial (planes, servicios, tono) se enmarca en el core; la ejecución del producto vive aquí.
 
 Dos lados:
 - **Showrooms (dealers)**: alta con auditoría, publicación de vehículos (con moderación), dashboard de oportunidades/leads (Kanban), solicitudes "a la carta", boosts, planes de suscripción (Essential / Professional / Elite / Grupo).

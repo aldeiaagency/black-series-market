@@ -1,6 +1,18 @@
 # Black Label Market — PENDIENTES
-> Documento único y canónico. Última actualización: **2026-07-21** (auditoría contra código y migraciones en disco — correcciones marcadas inline con fecha).
+> Documento único y canónico. Última actualización: **2026-08-10** (limpieza del catálogo demo; ver bloque justo debajo).
 > Elimina y sustituye: `pendientes-configuracion-externa.md`, `deployment-checklist.md`, `n8n-setup.md`, `backlog-alertas-y-vehiculos-a-la-carta.md`, `backlog-marketplace.md`.
+
+> **🧹 Limpieza del catálogo demo — 2026-08-10.** El market se dejó presentable para enseñarlo en visitas
+> comerciales: 12 showrooms y 61 vehículos, **0 fichas públicas sin foto** (antes 166 de 271, el 61 %) y
+> **0 fotos genéricas de Unsplash**. Se corrigió además un fallo que afectaba al **100 % del catálogo**: las
+> categorías de los vehículos no existían en la taxonomía pública, así que ninguna ficha aparecía en las
+> páginas de categoría ni en los filtros.
+> Detalle, cifras y trampas operativas: [`docs/limpieza-catalogo-demo-2026-08-10.md`](limpieza-catalogo-demo-2026-08-10.md).
+> Auditoría que lo originó: [`docs/auditoria-perfiles-demo-2026-08-10.md`](auditoria-perfiles-demo-2026-08-10.md).
+>
+> **Dos cosas que recordar antes de tocar el catálogo otra vez:** (1) filtrar por `status = 'active'` **no
+> basta** — la ficha pública de showroom muestra también `paused` y `sold`; (2) la caché ISR es de 5 minutos,
+> los cambios en base de datos tardan en verse en la web.
 
 ---
 
