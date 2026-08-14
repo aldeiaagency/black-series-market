@@ -43,6 +43,104 @@ function revalidateAll(id: string) {
   revalidatePath(`/admin/altas-showroom/${id}`)
 }
 
+type AdminClient = ReturnType<typeof createAdminClient>
+type ApprovalPiece =
+  | 'auth_user'
+  | 'profile'
+  | 'dealer'
+  | 'organization'
+  | 'organization_owner'
+  | 'showroom_assistant_config'
+  | 'password_setup_url'
+  | 'application_status'
+
+function planNeedsAssistant(plan: TrialPlan) {
+  return plan === 'professional' || plan === 'elite'
+}
+
+async function findAuthUserByEmail(admin: AdminClient, email: string) {
+  // Volumen actual muy bajo; una pagina amplia permite reparar el caso raro en
+  // que auth.users existe pero el trigger que crea profiles fallo.
+  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  if (error) return null
+  const normalized = email.trim().toLowerCase()
+  return data.users.find((user) => user.email?.toLowerCase() === normalized) ?? null
+}
+
+async function verifyApprovalPieces(
+  admin: AdminClient,
+  input: { userId: string | null; dealerId: string | null; plan: TrialPlan },
+): Promise<ApprovalPiece[]> {
+  const missing: ApprovalPiece[] = []
+
+  if (!input.userId) {
+    missing.push('auth_user', 'profile')
+  } else {
+    const [{ data: authData }, { data: profile }] = await Promise.all([
+      admin.auth.admin.getUserById(input.userId),
+      admin.from('profiles').select('id, role').eq('id', input.userId).maybeSingle(),
+    ])
+    if (!authData.user) missing.push('auth_user')
+    if (!profile || profile.role !== 'dealer') missing.push('profile')
+  }
+
+  if (!input.dealerId) {
+    missing.push('dealer', 'organization', 'organization_owner')
+    if (planNeedsAssistant(input.plan)) missing.push('showroom_assistant_config')
+    return missing
+  }
+
+  const [{ data: dealer }, { data: organization }, { data: assistantConfig }] = await Promise.all([
+    admin.from('dealers').select('id').eq('id', input.dealerId).maybeSingle(),
+    admin.from('organizations').select('id').eq('dealer_id', input.dealerId).maybeSingle(),
+    planNeedsAssistant(input.plan)
+      ? admin.from('showroom_assistant_config').select('id').eq('dealer_id', input.dealerId).maybeSingle()
+      : Promise.resolve({ data: { id: 'not-required' } }),
+  ])
+
+  if (!dealer) missing.push('dealer')
+  if (!organization) {
+    missing.push('organization', 'organization_owner')
+  } else if (input.userId) {
+    const { data: owner } = await admin
+      .from('organization_members')
+      .select('id')
+      .eq('organization_id', organization.id)
+      .eq('user_id', input.userId)
+      .eq('role', 'owner')
+      .maybeSingle()
+    if (!owner) missing.push('organization_owner')
+  } else {
+    missing.push('organization_owner')
+  }
+
+  if (planNeedsAssistant(input.plan) && !assistantConfig) {
+    missing.push('showroom_assistant_config')
+  }
+
+  return missing
+}
+
+async function markApprovalFailed(
+  admin: AdminClient,
+  input: { applicationId: string; dealerId: string | null; missing: ApprovalPiece[] },
+) {
+  if (input.dealerId) {
+    // Doble barrera fail-closed: aunque el trigger de contenido llegue a marcar
+    // published, status=pending lo mantiene fuera de todas las rutas publicas.
+    await admin.from('dealers').update({ status: 'pending', profile_status: 'draft' }).eq('id', input.dealerId)
+  }
+
+  await admin.from('showroom_applications').update({
+    status: 'approval_failed',
+    dealer_id: input.dealerId,
+    approval_missing_pieces: input.missing,
+    reviewed_at: new Date().toISOString(),
+    reviewed_by: await currentAdminId(),
+    updated_at: new Date().toISOString(),
+  }).eq('id', input.applicationId)
+}
+
 export async function setApplicationStatus(formData: FormData) {
   await assertAdmin()
   const id = formData.get('id') as string
@@ -115,15 +213,16 @@ export async function approveApplication(formData: FormData) {
     .eq('id', id)
     .single()
 
-  if (!application || application.status === 'approved') return
+  if (!application || !['new', 'in_review', 'pending_info', 'approval_failed'].includes(application.status)) return
 
   const trialPlan = resolveTrialPlan(application)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
   if (!appUrl) {
-    await admin.from('showroom_applications').update({
-      admin_notes: `${application.admin_notes ?? ''}\nError al aprobar: falta NEXT_PUBLIC_APP_URL para generar el enlace de acceso.`.trim(),
-      updated_at: new Date().toISOString(),
-    }).eq('id', id)
+    await markApprovalFailed(admin, {
+      applicationId: id,
+      dealerId: application.dealer_id ?? null,
+      missing: ['password_setup_url'],
+    })
     revalidateAll(id)
     return
   }
@@ -135,15 +234,15 @@ export async function approveApplication(formData: FormData) {
     .eq('email', application.email)
     .maybeSingle()
 
-  let userId: string
+  const existingAuthUser = existingProfile ? null : await findAuthUserByEmail(admin, application.email)
+  let userId: string | null = existingProfile?.id ?? existingAuthUser?.id ?? null
   let setupUrl: string
 
-  if (existingProfile) {
-    userId = existingProfile.id
-    await admin
-      .from('profiles')
-      .update({ role: 'dealer', full_name: application.full_name })
-      .eq('id', userId)
+  if (userId) {
+    await admin.from('profiles').upsert(
+      { id: userId, email: application.email, role: 'dealer', full_name: application.full_name },
+      { onConflict: 'id' },
+    )
 
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'recovery',
@@ -151,10 +250,11 @@ export async function approveApplication(formData: FormData) {
       options: { redirectTo: `${appUrl}/reset-password` },
     })
     if (linkError || !linkData.properties) {
-      await admin.from('showroom_applications').update({
-        admin_notes: `${application.admin_notes ?? ''}\nError al aprobar: no se pudo generar el enlace de establecimiento de contraseña.`.trim(),
-        updated_at: new Date().toISOString(),
-      }).eq('id', id)
+      await markApprovalFailed(admin, {
+        applicationId: id,
+        dealerId: application.dealer_id ?? null,
+        missing: ['password_setup_url'],
+      })
       revalidateAll(id)
       return
     }
@@ -172,13 +272,12 @@ export async function approveApplication(formData: FormData) {
     })
 
     if (authError || !authData.user || !authData.properties) {
-      await admin
-        .from('showroom_applications')
-        .update({
-          admin_notes: `${application.admin_notes ?? ''}\nError al aprobar: ${authError?.message ?? 'No se pudo crear el usuario.'}`.trim(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id)
+      const missing = await verifyApprovalPieces(admin, { userId: null, dealerId: null, plan: trialPlan })
+      await markApprovalFailed(admin, {
+        applicationId: id,
+        dealerId: null,
+        missing: [...missing, 'password_setup_url'],
+      })
       revalidateAll(id)
       return
     }
@@ -190,6 +289,8 @@ export async function approveApplication(formData: FormData) {
       { onConflict: 'id' }
     )
   }
+
+  if (!userId) return
 
   // Idempotent: reuse dealer if already created for this profile
   const { data: existingDealer } = await admin
@@ -249,14 +350,8 @@ export async function approveApplication(formData: FormData) {
       .single()
 
     if (dealerError || !dealer) {
-      if (!existingProfile) await admin.auth.admin.deleteUser(userId)
-      await admin
-        .from('showroom_applications')
-        .update({
-          admin_notes: `${application.admin_notes ?? ''}\nError al aprobar: no se pudo crear el showroom.`.trim(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id)
+      const missing = await verifyApprovalPieces(admin, { userId, dealerId: null, plan: trialPlan })
+      await markApprovalFailed(admin, { applicationId: id, dealerId: null, missing })
       revalidateAll(id)
       return
     }
@@ -293,7 +388,7 @@ export async function approveApplication(formData: FormData) {
   if (orgId) {
     const { data: existingMember } = await admin
       .from('organization_members')
-      .select('id')
+      .select('id, role')
       .eq('organization_id', orgId)
       .eq('user_id', userId)
       .maybeSingle()
@@ -301,6 +396,11 @@ export async function approveApplication(formData: FormData) {
       await admin
         .from('organization_members')
         .insert({ organization_id: orgId, user_id: userId, role: 'owner' })
+    } else if (existingMember.role !== 'owner') {
+      await admin
+        .from('organization_members')
+        .update({ role: 'owner' })
+        .eq('id', existingMember.id)
     }
   }
 
@@ -308,21 +408,52 @@ export async function approveApplication(formData: FormData) {
   // lib/integrations/n8n-assistant-provisioning.ts) para planes Professional/Elite. Mismo helper
   // se llama desde el webhook de Stripe (handleCheckoutCompleted) y desde setDealerPlan — los
   // fundadores del programa entran por esta vía (aprobación directa, sin Stripe).
-  if (trialPlan === 'professional' || trialPlan === 'elite') {
-    await provisionDealerAssistant(admin, { dealerId, dealerName: application.dealer_name })
+  if (planNeedsAssistant(trialPlan)) {
+    const { data: existingAssistantConfig } = await admin
+      .from('showroom_assistant_config')
+      .select('id')
+      .eq('dealer_id', dealerId)
+      .maybeSingle()
+    if (!existingAssistantConfig) {
+      await provisionDealerAssistant(admin, { dealerId, dealerName: application.dealer_name })
+    }
+  }
+
+  const missing = await verifyApprovalPieces(admin, { userId, dealerId, plan: trialPlan })
+  if (missing.length > 0) {
+    await markApprovalFailed(admin, { applicationId: id, dealerId, missing })
+    revalidateAll(id)
+    revalidatePath('/admin/dealers')
+    return
   }
 
   const reviewedBy = await currentAdminId()
-  await admin
+  const { error: dealerStatusError } = await admin.from('dealers').update({ status: 'trial' }).eq('id', dealerId)
+  if (dealerStatusError) {
+    await markApprovalFailed(admin, { applicationId: id, dealerId, missing: ['dealer'] })
+    revalidateAll(id)
+    return
+  }
+  await admin.rpc('sync_dealer_profile_publication', { p_dealer_id: dealerId })
+  const { data: approvedApplication, error: approvalUpdateError } = await admin
     .from('showroom_applications')
     .update({
       status: 'approved',
       dealer_id: dealerId,
+      approval_missing_pieces: [],
       reviewed_at: new Date().toISOString(),
       reviewed_by: reviewedBy,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
+    .select('id, status')
+    .single()
+
+  if (approvalUpdateError || approvedApplication?.status !== 'approved') {
+    await markApprovalFailed(admin, { applicationId: id, dealerId, missing: ['application_status'] })
+    revalidateAll(id)
+    return
+  }
 
   const loginUrl = `${appUrl}/login`
   const dashboardUrl = `${appUrl}/dashboard`
@@ -373,6 +504,12 @@ export async function approveApplication(formData: FormData) {
 
   revalidateAll(id)
   revalidatePath('/admin/dealers')
+}
+
+export async function retryApprovalRepair(formData: FormData) {
+  // approveApplication es idempotente: consulta cada pieza y solo crea o corrige
+  // las que faltan antes de repetir la verificacion fail-closed.
+  return approveApplication(formData)
 }
 
 export async function rejectApplication(formData: FormData) {

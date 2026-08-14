@@ -7,13 +7,14 @@ interface PageProps {
   searchParams: Promise<{ status?: string }>
 }
 
-const STATUS_FLOW = ['new', 'in_review', 'pending_info', 'approved', 'rejected'] as const
+const STATUS_FLOW = ['new', 'in_review', 'pending_info', 'approval_failed', 'approved', 'rejected'] as const
 type ApplicationStatus = (typeof STATUS_FLOW)[number]
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
   new: 'Nueva',
   in_review: 'En revisión',
   pending_info: 'Pend. info',
+  approval_failed: 'Alta incompleta',
   approved: 'Aprobada',
   rejected: 'Rechazada',
 }
@@ -22,6 +23,7 @@ const STATUS_BADGE: Record<ApplicationStatus, string> = {
   new: 'text-gold bg-gold/10 border-gold/30',
   in_review: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
   pending_info: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
+  approval_failed: 'text-red-300 bg-red-400/10 border-red-400/30',
   approved: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
   rejected: 'text-red-400 bg-red-400/10 border-red-400/30',
 }
@@ -50,7 +52,7 @@ export default async function AdminShowroomApplicationsPage({ searchParams }: Pa
     counts[item.status] = (counts[item.status] || 0) + 1
   }
   const total = (allForCounts || []).length
-  const pending = (counts['new'] || 0) + (counts['in_review'] || 0)
+  const pending = (counts['new'] || 0) + (counts['in_review'] || 0) + (counts['approval_failed'] || 0)
 
   return (
     <div className="p-8 space-y-6">

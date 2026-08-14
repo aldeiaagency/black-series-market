@@ -3,10 +3,10 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/server'
 import { timeAgo } from '@/lib/utils'
 import {
-  ArrowLeft, CheckCircle, XCircle, Clock, Mail, Phone,
+  ArrowLeft, CheckCircle, XCircle, Clock, Mail, Phone, RotateCw, AlertTriangle,
   MapPin, ExternalLink, Globe, Instagram, Star, FileText,
 } from 'lucide-react'
-import { setApplicationStatus, saveNotes, approveApplication, rejectApplication } from '../actions'
+import { setApplicationStatus, saveNotes, approveApplication, retryApprovalRepair, rejectApplication } from '../actions'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -16,6 +16,7 @@ const STATUS_LABEL: Record<string, string> = {
   new: 'Nueva',
   in_review: 'En revisión',
   pending_info: 'Pendiente de info',
+  approval_failed: 'Alta incompleta',
   approved: 'Aprobada',
   rejected: 'Rechazada',
 }
@@ -24,6 +25,7 @@ const STATUS_BADGE: Record<string, string> = {
   new: 'text-gold bg-gold/10 border-gold/30',
   in_review: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
   pending_info: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
+  approval_failed: 'text-red-300 bg-red-400/10 border-red-400/30',
   approved: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
   rejected: 'text-red-400 bg-red-400/10 border-red-400/30',
 }
@@ -41,8 +43,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   if (!app) notFound()
 
   const st: string = app.status || 'new'
-  const isActionable = st !== 'approved' && st !== 'rejected'
+  const isApprovalFailed = st === 'approval_failed'
+  const isActionable = st !== 'approved' && st !== 'rejected' && !isApprovalFailed
   const isPendingInfo = st === 'pending_info'
+  const missingPieces: string[] = Array.isArray(app.approval_missing_pieces) ? app.approval_missing_pieces : []
   const portales: string[] = Array.isArray(app.portales) ? app.portales : []
 
   const submittedAt = new Date(app.created_at).toLocaleDateString('es-ES', {
@@ -189,6 +193,21 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             )}
           </section>
 
+          {/* Verificacion de alta */}
+          {isApprovalFailed && (
+            <section className="bg-red-400/5 border border-red-400/30 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle className="w-4 h-4 text-red-300" />
+                <h2 className="text-xs text-red-200 uppercase tracking-widest">Piezas que faltan</h2>
+              </div>
+              <ul className="space-y-2 text-sm text-red-100/80">
+                {missingPieces.map((piece) => (
+                  <li key={piece} className="font-mono text-xs">{piece}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {/* Notas internas */}
           <section className="bg-surface border border-bsm-border p-6">
             <h2 className="text-xs text-bsm-text-muted uppercase tracking-widest mb-4">Notas internas</h2>
@@ -272,6 +291,19 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   </button>
                 </form>
               </>
+            )}
+
+            {isApprovalFailed && (
+              <form action={retryApprovalRepair}>
+                <input type="hidden" name="id" value={app.id} />
+                <button
+                  type="submit"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-300 hover:bg-red-200 text-black text-xs font-semibold transition-colors"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                  Reintentar reparación
+                </button>
+              </form>
             )}
 
             {st === 'approved' && app.dealer_id && (

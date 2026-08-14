@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     .from('showroom_applications')
     .select('id', { count: 'exact', head: true })
     .eq('email', email)
-    .in('status', ['new', 'in_review', 'pending_info'])
+    .in('status', ['new', 'in_review', 'pending_info', 'approval_failed'])
 
   if ((count ?? 0) > 0) {
     return NextResponse.json({ ok: true, duplicate: true })
