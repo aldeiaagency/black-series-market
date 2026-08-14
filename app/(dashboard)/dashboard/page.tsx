@@ -70,7 +70,7 @@ export default async function DashboardPage() {
   // Getting-started steps for new dealers (0 vehicles published)
   const isNewDealer = (activeVehicles ?? 0) === 0
   const hasProfile = !!(dealer.description && dealer.phone)
-  const hasPlan = dealer.status === 'active'
+  const hasPlan = dealer.is_founder || dealer.status === 'active'
   const isPro = dealer.subscription_plan === 'professional' || dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
 
   return (
@@ -86,8 +86,15 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Trial banner — visible mientras el dealer no haya pasado a plan de pago */}
-      {dealer.status === 'trial' && (
+      {/* El programa fundador depende de un gate global, no de un trial individual. */}
+      {dealer.is_founder ? (
+        <div className="mb-8 border border-gold/30 bg-[#0D0C07] px-6 py-4">
+          <p className="text-sm text-bsm-text-secondary">
+            <span className="text-gold">Fundador</span>
+            {' '}· showroom activo, sin coste hasta que el market active los planes, con 30 días de aviso previo.
+          </p>
+        </div>
+      ) : dealer.status === 'trial' ? (
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border border-gold/30 bg-[#0D0C07] px-6 py-4">
           <p className="text-sm text-bsm-text-secondary">
             <span className="text-gold">Prueba activa</span>
@@ -96,13 +103,13 @@ export default async function DashboardPage() {
             ) : (
               <>. Tu showroom ya es visible en el market.</>
             )}
-            {' '}Tu perfil y tu stock ya son públicos — sin coste durante el programa fundador.
+            {' '}Completa tu showroom y prueba las herramientas del market sin coste durante este periodo.
           </p>
           <Link href="/dashboard/suscripcion" className="shrink-0 text-xs uppercase tracking-widest text-gold hover:underline">
             Ver planes →
           </Link>
         </div>
-      )}
+      ) : null}
 
       {/* Getting started — only for dealers with no published vehicles yet */}
       {isNewDealer && (
@@ -112,7 +119,9 @@ export default async function DashboardPage() {
             {[
               { done: true,     label: 'Cuenta creada y acceso concedido',                   href: null },
               { done: hasProfile, label: 'Completa el perfil de tu showroom',                 href: '/dashboard/perfil' },
-              { done: hasPlan,   label: 'Activa tu plan de suscripción',                      href: '/dashboard/suscripcion' },
+              ...(!dealer.is_founder
+                ? [{ done: hasPlan, label: 'Activa tu plan de suscripción', href: '/dashboard/suscripcion' }]
+                : []),
               { done: false,     label: 'Publica tu primer vehículo',                         href: '/dashboard/publicar' },
               { done: false,     label: isPro ? 'Configura el asistente IA (disponible en tu plan)' : 'Mejora a Professional para activar el asistente IA', href: isPro ? '/dashboard/perfil' : '/dashboard/suscripcion' },
             ].map((step) => (

@@ -201,7 +201,12 @@ export async function approveApplication(formData: FormData) {
         subscription_plan: trialPlan,
         vehicle_slots: 0,
         is_verified: true,
-        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        is_founder: application.source === 'visita_agencia',
+        // Fundador no es un trial de 30 dias: depende de un gate global de
+        // monetizacion con preaviso, nunca de una fecha individual.
+        trial_ends_at: application.source === 'visita_agencia'
+          ? null
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       })
       .select('id')
       .single()
