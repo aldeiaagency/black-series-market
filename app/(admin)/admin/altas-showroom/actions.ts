@@ -215,7 +215,11 @@ export async function approveApplication(formData: FormData) {
 
   if (!application || !['new', 'in_review', 'pending_info', 'approval_failed'].includes(application.status)) return
 
-  const trialPlan = resolveTrialPlan(application)
+  // El programa fundador concede Elite por contrato; no debe degradarse a
+  // Essential si el watcher de visitas omite el plan_interest opcional.
+  const trialPlan: TrialPlan = application.source === 'visita_agencia'
+    ? 'elite'
+    : resolveTrialPlan(application)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
   if (!appUrl) {
     await markApprovalFailed(admin, {
