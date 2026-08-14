@@ -1,14 +1,21 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { randomBytes } from 'crypto'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { slugify } from '@/lib/utils'
 import { assertAdmin } from '@/lib/admin-auth'
 import { provisionDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
 
-function temporaryPassword() {
-  return `BLM-${randomBytes(10).toString('base64url')}`
+function passwordSetupUrl(
+  appUrl: string,
+  properties: { hashed_token: string; verification_type: string },
+) {
+  const params = new URLSearchParams({
+    token_hash: properties.hashed_token,
+    type: properties.verification_type,
+    next: '/reset-password',
+  })
+  return `${appUrl}/auth/confirm?${params.toString()}`
 }
 
 // Plan que se concede durante el trial: el que el showroom pidió en la solicitud.
@@ -111,6 +118,15 @@ export async function approveApplication(formData: FormData) {
   if (!application || application.status === 'approved') return
 
   const trialPlan = resolveTrialPlan(application)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!appUrl) {
+    await admin.from('showroom_applications').update({
+      admin_notes: `${application.admin_notes ?? ''}\nError al aprobar: falta NEXT_PUBLIC_APP_URL para generar el enlace de acceso.`.trim(),
+      updated_at: new Date().toISOString(),
+    }).eq('id', id)
+    revalidateAll(id)
+    return
+  }
 
   // Reuse existing profile if the email was already registered (e.g. as a buyer)
   const { data: existingProfile } = await admin
@@ -120,7 +136,7 @@ export async function approveApplication(formData: FormData) {
     .maybeSingle()
 
   let userId: string
-  let password: string | null = null
+  let setupUrl: string
 
   if (existingProfile) {
     userId = existingProfile.id
@@ -128,16 +144,34 @@ export async function approveApplication(formData: FormData) {
       .from('profiles')
       .update({ role: 'dealer', full_name: application.full_name })
       .eq('id', userId)
-  } else {
-    password = temporaryPassword()
-    const { data: authData, error: authError } = await admin.auth.admin.createUser({
+
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: 'recovery',
       email: application.email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: application.full_name },
+      options: { redirectTo: `${appUrl}/reset-password` },
+    })
+    if (linkError || !linkData.properties) {
+      await admin.from('showroom_applications').update({
+        admin_notes: `${application.admin_notes ?? ''}\nError al aprobar: no se pudo generar el enlace de establecimiento de contraseña.`.trim(),
+        updated_at: new Date().toISOString(),
+      }).eq('id', id)
+      revalidateAll(id)
+      return
+    }
+    setupUrl = passwordSetupUrl(appUrl, linkData.properties)
+  } else {
+    // generateLink(invite) crea el usuario sin contraseña y devuelve un enlace
+    // de un solo uso; el email lo entrega n8n dentro de la bienvenida.
+    const { data: authData, error: authError } = await admin.auth.admin.generateLink({
+      type: 'invite',
+      email: application.email,
+      options: {
+        data: { full_name: application.full_name },
+        redirectTo: `${appUrl}/reset-password`,
+      },
     })
 
-    if (authError || !authData.user) {
+    if (authError || !authData.user || !authData.properties) {
       await admin
         .from('showroom_applications')
         .update({
@@ -150,6 +184,7 @@ export async function approveApplication(formData: FormData) {
     }
 
     userId = authData.user.id
+    setupUrl = passwordSetupUrl(appUrl, authData.properties)
     await admin.from('profiles').upsert(
       { id: userId, email: application.email, full_name: application.full_name, role: 'dealer' },
       { onConflict: 'id' }
@@ -289,15 +324,15 @@ export async function approveApplication(formData: FormData) {
     })
     .eq('id', id)
 
-  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`
-  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
+  const loginUrl = `${appUrl}/login`
+  const dashboardUrl = `${appUrl}/dashboard`
 
   // Un solo email de bienvenida por alta — nunca los dos. WF2 (bienvenida genérica, autoservicio)
   // y WF-P3 (bienvenida fundador, white-glove) pedían cosas contradictorias sobre el stock cuando
   // se disparaban ambos para la misma alta. Se separan por origen: visita_agencia → WF-P3 (lleva
   // credenciales); market_directo → WF2 (self-serve, sin promesa de onboarding asistido).
   if (application.source === 'visita_agencia') {
-    // WF-P3: bienvenida de fundador (credenciales + qué hemos completado ya + una sola vía de stock).
+    // WF-P3: bienvenida de fundador (enlace de acceso + una sola vía de stock).
     const { data: dealerForOnboarding } = await admin.from('dealers').select('slug').eq('id', dealerId).single()
     const fundadorWebhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
       ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
@@ -309,7 +344,7 @@ export async function approveApplication(formData: FormData) {
         email: application.email,
         telefono: application.phone,
         dealer_slug: dealerForOnboarding?.slug ?? '',
-        temporary_password: password,
+        password_setup_url: setupUrl,
         login_url: loginUrl,
         dashboard_url: dashboardUrl,
       }),
@@ -327,7 +362,7 @@ export async function approveApplication(formData: FormData) {
           dealer_name: application.dealer_name,
           full_name: application.full_name,
           email: application.email,
-          temporary_password: password,
+          password_setup_url: setupUrl,
           login_url: loginUrl,
           dashboard_url: dashboardUrl,
           approved_at: new Date().toISOString(),
