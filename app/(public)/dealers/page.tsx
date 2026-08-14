@@ -43,6 +43,7 @@ export default async function DealersPage({ searchParams }: PageProps) {
     .from('dealers')
     .select('location_region')
     .in('status', ['trial', 'active'])
+    .eq('profile_status', 'published')
     .not('location_region', 'is', null)
 
   const zonesSet = new Set<string>()
@@ -69,6 +70,7 @@ export default async function DealersPage({ searchParams }: PageProps) {
     .from('dealers')
     .select('*, vehicles(status, vehicle_type)')
     .in('status', ['trial', 'active'])
+    .eq('profile_status', 'published')
     .order('is_featured', { ascending: false })
     .order('subscription_plan', { ascending: false })
     .order('name', { ascending: true })

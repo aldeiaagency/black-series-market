@@ -200,7 +200,9 @@ export async function approveApplication(formData: FormData) {
         status: 'trial',
         subscription_plan: trialPlan,
         vehicle_slots: 0,
-        is_verified: true,
+        // Aprobar la cuenta no equivale a verificar reputacion ni a publicar el perfil.
+        is_verified: false,
+        profile_status: 'draft',
         is_founder: application.source === 'visita_agencia',
         // Fundador no es un trial de 30 dias: depende de un gate global de
         // monetizacion con preaviso, nunca de una fecha individual.
@@ -246,7 +248,7 @@ export async function approveApplication(formData: FormData) {
         name: application.dealer_name,
         slug: orgSlug,
         status: 'active',
-        is_verified: true,
+        is_verified: false,
       })
       .select('id')
       .single()

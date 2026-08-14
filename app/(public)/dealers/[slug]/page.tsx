@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .from('dealers')
     .select('name, description, location_city, cover_url, logo_url')
     .eq('slug', slug)
+    .eq('profile_status', 'published')
     .single()
   if (!data) return {}
   const title = `${data.name} — Showroom seleccionado`
@@ -82,6 +83,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
     .select('*')
     .eq('slug', slug)
     .in('status', ['trial', 'active'])
+    .eq('profile_status', 'published')
     .single()
 
   if (!dealer) notFound()
