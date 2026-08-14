@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyShowroomApplicationCreated } from '@/lib/integrations/n8n'
 import { isGlobalRateLimited } from '@/lib/rate-limit'
@@ -8,6 +9,22 @@ import { isGlobalRateLimited } from '@/lib/rate-limit'
 // la investigación pre-visita solo puede marcar estos valores, nunca texto libre.
 const SPECIALTY_VALUES = ['sport', 'classic', 'premium', 'motorcycle', 'import', 'suv', 'supercar', 'custom'] as const
 const SERVICE_VALUES = ['financing', 'trade_in', 'warranty', 'transport_nat', 'transport_intl', 'own_workshop', 'detailing', 'home_delivery'] as const
+const VISITA_SECRET = process.env.SHOWROOM_APPLICATION_VISITA_SECRET ?? ''
+const SIGNATURE_MAX_AGE_SECONDS = 5 * 60
+
+function verifyVisitaSignature(rawBody: string, timestamp: string, header: string) {
+  try {
+    const signature = header.replace(/^sha256=/, '')
+    const expected = createHmac('sha256', VISITA_SECRET)
+      .update(`${timestamp}.${rawBody}`, 'utf8')
+      .digest('hex')
+    const expectedBytes = Buffer.from(expected, 'hex')
+    const actualBytes = Buffer.from(signature, 'hex')
+    return expectedBytes.length === actualBytes.length && timingSafeEqual(expectedBytes, actualBytes)
+  } catch {
+    return false
+  }
+}
 
 const schema = z.object({
   name:    z.string().trim().min(2).max(120),
@@ -28,7 +45,8 @@ const schema = z.object({
   // (nunca inventados) — se copia a dealers.description en la aprobación.
   profile_description: z.string().trim().max(2000).optional(),
   // Origen de la solicitud: 'visita_agencia' (checklist de visita, reputación ya auditada por
-  // la skill informe-previsita) salta la auditoría online de WF1; por defecto 'market_directo'.
+  // la skill informe-previsita) salta la auditoría online de WF1, pero requiere HMAC; por
+  // defecto 'market_directo'.
   source: z.enum(['market_directo', 'visita_agencia']).optional(),
   // Todo lo siguiente: capturado por la investigación pre-visita SOLO con evidencia pública
   // (Google Business Profile, web propia) — nunca inventado. Se copia a dealers en la aprobación.
@@ -50,14 +68,38 @@ const schema = z.object({
 }).strict()
 
 export async function POST(req: NextRequest) {
+  const rawBody = await req.text()
   let body: unknown
-  try { body = await req.json() } catch {
+  try { body = JSON.parse(rawBody) } catch {
     return NextResponse.json({ ok: false, error: 'invalid_body' }, { status: 400 })
   }
 
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 })
+  }
+
+  if (parsed.data.source === 'visita_agencia') {
+    const timestamp = req.headers.get('x-bsm-timestamp') ?? ''
+    const signature = req.headers.get('x-bsm-signature') ?? ''
+    const timestampSeconds = Number(timestamp)
+    const nowSeconds = Math.floor(Date.now() / 1000)
+
+    // Rechazo explicito (no downgrade silencioso): un watcher mal configurado
+    // debe fallar de forma visible, no entrar como market_directo por accidente.
+    if (!VISITA_SECRET) {
+      return NextResponse.json({ ok: false, error: 'server_misconfigured' }, { status: 503 })
+    }
+    if (
+      !timestamp ||
+      !signature ||
+      !/^\d{10}$/.test(timestamp) ||
+      !Number.isSafeInteger(timestampSeconds) ||
+      Math.abs(nowSeconds - timestampSeconds) > SIGNATURE_MAX_AGE_SECONDS ||
+      !verifyVisitaSignature(rawBody, timestamp, signature)
+    ) {
+      return NextResponse.json({ ok: false, error: 'invalid_signature' }, { status: 401 })
+    }
   }
 
   const {
