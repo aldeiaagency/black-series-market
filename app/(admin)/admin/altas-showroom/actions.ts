@@ -318,6 +318,7 @@ export async function approveApplication(formData: FormData) {
         location_city: application.location_city,
         location_region: application.location_region,
         phone: application.phone,
+        whatsapp: application.whatsapp,
         email: application.email,
         website: application.website,
         logo_url: application.logo_url || null,

@@ -31,6 +31,7 @@ const schema = z.object({
   email:   z.string().trim().email().max(180),
   company: z.string().trim().min(2).max(120),
   phone:   z.string().trim().min(6).max(30),
+  whatsapp: z.string().trim().max(30).optional(),
   city:    z.string().trim().min(2).max(80),
   plan:    z.string().trim().max(40).optional(),
   volume:  z.string().trim().max(80).optional(),
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
   }
 
   const {
-    name, email, company, phone, city, plan, volume, message, logo_url, profile_description, source, website,
+    name, email, company, phone, whatsapp, city, plan, volume, message, logo_url, profile_description, source, website,
     address, years_in_business, instagram_url, facebook_url, youtube_url, tiktok_url, linkedin_url, specialties, services,
     terms_accepted, terms_version,
   } = parsed.data
@@ -140,6 +141,7 @@ export async function POST(req: NextRequest) {
       email,
       dealer_name:   company,
       phone,
+      whatsapp:      whatsapp ?? null,
       location_city: city,
       plan_interest: plan ?? null,
       message:       fullMessage || null,
