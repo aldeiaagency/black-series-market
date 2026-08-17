@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
 import { signOAuthState } from '@/lib/google-calendar'
+import { planAllowsGoogleCalendar, validateSetupToken } from '@/lib/onboarding/setup-room'
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 const SCOPES = [
@@ -11,28 +12,47 @@ const SCOPES = [
 
 /**
  * GET /api/calendar/google/connect — inicia el OAuth de Google Calendar (Fase A).
- * Gate Elite/Grupo, igual que saveCalendarConfig. `prompt=consent` fuerza que Google
- * devuelva siempre un refresh_token, también en reconexiones.
+ * Gate Elite/Grupo. Puede venir por sesión de dashboard o por setup_token de la
+ * sala pública de configuración; el callback no depende de sesión.
  */
 export async function GET(req: NextRequest) {
+  const setupToken = req.nextUrl.searchParams.get('setup_token')
+  const setupReturnTo = setupToken ? `/configurar/${encodeURIComponent(setupToken)}` : null
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
-  if (!clientId) return NextResponse.redirect(new URL('/dashboard/citas?calendar_error=not_configured', req.url))
-
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.redirect(new URL('/login', req.url))
-
-  const access = await getDealerAccess(user.id)
-  if (!access) return NextResponse.redirect(new URL('/registro', req.url))
+  if (!clientId) {
+    const target = setupReturnTo ? `${setupReturnTo}?calendar_error=not_configured` : '/dashboard/citas?calendar_error=not_configured'
+    return NextResponse.redirect(new URL(target, req.url))
+  }
 
   const admin = createAdminClient()
-  const { data: dealer } = await admin.from('dealers').select('subscription_plan').eq('id', access.dealerId).single()
-  if (dealer?.subscription_plan !== 'elite' && dealer?.subscription_plan !== 'grupo') {
-    return NextResponse.redirect(new URL('/dashboard/suscripcion', req.url))
+  let dealerId: string | null = null
+  let failTarget = '/dashboard/citas'
+
+  if (setupToken) {
+    failTarget = setupReturnTo as string
+    const validation = await validateSetupToken(admin, setupToken)
+    if (!validation.ok) {
+      return NextResponse.redirect(new URL(`${failTarget}?calendar_error=invalid_request`, req.url))
+    }
+    dealerId = validation.dealerId
+  } else {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.redirect(new URL('/login', req.url))
+
+    const access = await getDealerAccess(user.id)
+    if (!access) return NextResponse.redirect(new URL('/registro', req.url))
+    dealerId = access.dealerId
+  }
+
+  const { data: dealer } = await admin.from('dealers').select('subscription_plan').eq('id', dealerId).single()
+  if (!planAllowsGoogleCalendar(dealer?.subscription_plan)) {
+    const target = setupReturnTo ? `${setupReturnTo}?calendar_error=not_entitled` : '/dashboard/suscripcion'
+    return NextResponse.redirect(new URL(target, req.url))
   }
 
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`
-  const state = signOAuthState(access.dealerId)
+  const state = signOAuthState(dealerId, setupReturnTo ? { returnTo: setupReturnTo } : undefined)
 
   const url = new URL(GOOGLE_AUTH_URL)
   url.searchParams.set('client_id', clientId)

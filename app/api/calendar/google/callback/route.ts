@@ -4,14 +4,19 @@ import { exchangeCodeForTokens, fetchPrimaryCalendar, encryptToken, verifyOAuthS
 
 /**
  * GET /api/calendar/google/callback — intercambia el `code` de Google, guarda la
- * conexión cifrada y redirige a /dashboard/citas. El `state` firmado (HMAC, ver
- * signOAuthState) es la única identificación del dealer aquí — no depende de sesión.
+ * conexión cifrada y redirige al origen: /dashboard/citas o sala tokenizada.
+ * El `state` firmado (HMAC) transporta dealerId y returnTo opcional; no depende de sesión.
  */
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code')
   const state = req.nextUrl.searchParams.get('state')
   const errorParam = req.nextUrl.searchParams.get('error')
-  const redirectTo = new URL('/dashboard/citas', req.url)
+  let redirectTo = new URL('/dashboard/citas', req.url)
+
+  if (state) {
+    const preVerified = verifyOAuthState(state)
+    if (preVerified?.returnTo) redirectTo = new URL(preVerified.returnTo, req.url)
+  }
 
   if (errorParam) {
     redirectTo.searchParams.set('calendar_error', 'denied')
@@ -27,6 +32,7 @@ export async function GET(req: NextRequest) {
     redirectTo.searchParams.set('calendar_error', 'invalid_state')
     return NextResponse.redirect(redirectTo)
   }
+  if (verified.returnTo) redirectTo = new URL(verified.returnTo, req.url)
 
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`
   const tokens = await exchangeCodeForTokens(code, redirectUri)

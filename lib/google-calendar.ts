@@ -95,15 +95,15 @@ export async function revokeGoogleToken(token: string): Promise<void> {
 
 // ── Firma del `state` de OAuth (CSRF + transporte del dealerId) ────────────────
 
-export function signOAuthState(dealerId: string): string {
+export function signOAuthState(dealerId: string, options?: { returnTo?: string }): string {
   const secret = process.env.GOOGLE_OAUTH_STATE_SECRET
   if (!secret) throw new Error('GOOGLE_OAUTH_STATE_SECRET no configurada')
-  const payloadB64 = Buffer.from(JSON.stringify({ dealerId, ts: Date.now() })).toString('base64url')
+  const payloadB64 = Buffer.from(JSON.stringify({ dealerId, ts: Date.now(), returnTo: options?.returnTo ?? null })).toString('base64url')
   const sig = createHmac('sha256', secret).update(payloadB64).digest('base64url')
   return `${payloadB64}.${sig}`
 }
 
-export function verifyOAuthState(state: string, maxAgeMs = 10 * 60_000): { dealerId: string } | null {
+export function verifyOAuthState(state: string, maxAgeMs = 10 * 60_000): { dealerId: string; returnTo: string | null } | null {
   const secret = process.env.GOOGLE_OAUTH_STATE_SECRET
   if (!secret) return null
   const [payloadB64, sig] = state.split('.')
@@ -113,9 +113,10 @@ export function verifyOAuthState(state: string, maxAgeMs = 10 * 60_000): { deale
   const expBuf = Buffer.from(expected, 'base64url')
   if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) return null
   try {
-    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')) as { dealerId: string; ts: number }
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')) as { dealerId: string; ts: number; returnTo?: string | null }
     if (!payload.dealerId || Date.now() - payload.ts > maxAgeMs) return null
-    return { dealerId: payload.dealerId }
+    const returnTo = typeof payload.returnTo === 'string' && payload.returnTo.startsWith('/') ? payload.returnTo : null
+    return { dealerId: payload.dealerId, returnTo }
   } catch {
     return null
   }

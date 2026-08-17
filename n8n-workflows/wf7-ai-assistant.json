@@ -6,7 +6,10 @@
       "name": "Notas — WF7",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [60, 60],
+      "position": [
+        60,
+        60
+      ],
       "parameters": {
         "content": "## BLM — 7. Agente IA Cualificador\n\nWebhook path: `blm/assistant`\n\nLlamado desde el market en dos momentos:\n- `event: session_start` — abre sesión, devuelve mensaje de apertura\n- `event: message` — procesa mensaje del comprador, devuelve respuesta IA\n\n**Variables necesarias:**\n- `OPENAI_API_KEY`\n- `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`\n- `MARKET_URL`\n\n**Plan requerido:** Elite o Professional\n\n**Config por dealer:** tabla `showroom_assistant_config` (webhook_url, enabled)",
         "height": 340,
@@ -18,7 +21,10 @@
       "name": "Webhook — Asistente IA",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [420, 380],
+      "position": [
+        420,
+        380
+      ],
       "webhookId": "blm-assistant",
       "parameters": {
         "httpMethod": "POST",
@@ -32,7 +38,10 @@
       "name": "Parsear y validar request",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 380],
+      "position": [
+        640,
+        380
+      ],
       "parameters": {
         "jsCode": "const raw = $input.first().json;\nconst body = raw.body || raw;\n\nconst sessionId = body.session_id  || null;\nconst dealerId  = body.dealer_id   || null;\nconst event     = body.event       || 'message';\nconst message   = body.message     || '';\nconst language  = body.language    || 'es';\n\n// Vehicle context (present on session_start)\nconst vehicle  = body.vehicle  || null;\nconst showroom = body.showroom || null;\n\nif (!sessionId || !dealerId) {\n  return [{ json: { _error: 'missing_session_or_dealer', sessionId, dealerId, event, message, language, vehicle, showroom } }];\n}\n\nreturn [{ json: { sessionId, dealerId, event, message, language, vehicle, showroom, _error: null } }];"
       }
@@ -42,16 +51,26 @@
       "name": "¿Request válida?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [860, 380],
+      "position": [
+        860,
+        380
+      ],
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
           "conditions": [
             {
               "id": "no-error",
               "leftValue": "={{ $json._error }}",
               "rightValue": "",
-              "operator": { "type": "string", "operation": "empty" }
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              }
             }
           ],
           "combinator": "and"
@@ -63,11 +82,16 @@
       "name": "Responder 400",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1080, 540],
+      "position": [
+        1080,
+        540
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={ \"error\": \"invalid_request\" }",
-        "options": { "responseCode": 400 }
+        "options": {
+          "responseCode": 400
+        }
       }
     },
     {
@@ -75,22 +99,53 @@
       "name": "Switch por tipo de evento",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
-      "position": [1080, 300],
+      "position": [
+        1080,
+        300
+      ],
       "parameters": {
         "mode": "rules",
         "rules": {
           "values": [
             {
               "conditions": {
-                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [{ "id": "session", "leftValue": "={{ $json.event }}", "rightValue": "session_start", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "session",
+                    "leftValue": "={{ $json.event }}",
+                    "rightValue": "session_start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               }
             },
             {
               "conditions": {
-                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [{ "id": "msg", "leftValue": "={{ $json.event }}", "rightValue": "message", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "msg",
+                    "leftValue": "={{ $json.event }}",
+                    "rightValue": "message",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               }
             }
@@ -103,9 +158,12 @@
       "name": "Session — Construir prompt apertura",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1300, 160],
+      "position": [
+        1300,
+        160
+      ],
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst v = d.vehicle  || {};\nconst s = d.showroom || {};\nconst lang = d.language || 'es';\n\nconst vehicleInfo = [\n  v.title   ? `Vehículo: ${v.title}` : null,\n  v.price && !v.price_on_request ? `Precio: ${new Intl.NumberFormat('es-ES', {style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v.price)}` : v.price_on_request ? 'Precio: A consultar' : null,\n  v.year        ? `Año: ${v.year}` : null,\n  v.fuel_type   ? `Combustible: ${v.fuel_type}` : null,\n  v.mileage_km  ? `Kilómetros: ${new Intl.NumberFormat('es-ES').format(v.mileage_km)} km` : null,\n  v.power_hp    ? `Potencia: ${v.power_hp} CV` : null,\n].filter(Boolean).join('\\n');\n\nconst showroomInfo = [\n  s.name ? `Concesionario: ${s.name}` : null,\n  s.city ? `Ciudad: ${s.city}` : null,\n  s.whatsapp ? `WhatsApp: ${s.whatsapp}` : null,\n].filter(Boolean).join('\\n');\n\nconst systemPrompt = `Eres el asistente de ventas de ${s.name || 'este concesionario'} en Black Label Market, especializado en vehículos premium.\n\nINFORMACIÓN DEL VEHÍCULO:\n${vehicleInfo || 'No disponible'}\n\nINFORMACIÓN DEL CONCESIONARIO:\n${showroomInfo || 'No disponible'}\n\nTu objetivo:\n1. Responder preguntas sobre el vehículo con información precisa\n2. Entender las necesidades del comprador (uso, financiación, plazo de compra, vehículo a entregar)\n3. Cuando el comprador muestre interés real, facilitar el contacto por WhatsApp o visita\n4. Ser conciso (respuestas de 2-3 frases), profesional y cercano\n5. Idioma: ${lang === 'es' ? 'Español' : lang}\n\nNO inventes características del vehículo que no figuren arriba. Si no sabes algo, di que lo consultarás con el equipo.`;\n\nconst openingMessage = lang === 'es'\n  ? `¡Hola! Soy el asistente de ${s.name || 'este concesionario'}. Estoy aquí para resolver tus dudas sobre ${v.title || 'este vehículo'} y ayudarte en lo que necesites. ¿Qué te gustaría saber?`\n  : `Hi! I'm the assistant for ${s.name || 'this dealership'}. I'm here to answer your questions about ${v.title || 'this vehicle'}. What would you like to know?`;\n\nreturn [{ json: { ...d, systemPrompt, openingMessages: [{ role: 'user', content: '(session_start)' }, { role: 'assistant', content: openingMessage }], openingMessage } }];"
+        "jsCode": "const d = $input.first().json;\nconst v = d.vehicle || {};\nconst s = d.showroom || {};\nconst lang = d.language || 'es';\nfunction whatsappLink(raw) { const digits = String(raw || '').replace(/[^0-9]/g, ''); if (!digits) return null; const normalized = digits.length === 9 ? '34' + digits : digits; return 'https://wa.me/' + normalized; }\nconst waLink = whatsappLink(s.whatsapp);\nconst priceText = v.price && !v.price_on_request ? 'Precio: ' + new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v.price) : (v.price_on_request ? 'Precio: A consultar' : null);\nconst vehicleInfo = [v.title ? 'Veh?culo: ' + v.title : null, priceText, v.year ? 'A?o: ' + v.year : null, v.fuel_type ? 'Combustible: ' + v.fuel_type : null, v.mileage_km ? 'Kil?metros: ' + new Intl.NumberFormat('es-ES').format(v.mileage_km) + ' km' : null, v.power_hp ? 'Potencia: ' + v.power_hp + ' CV' : null].filter(Boolean).join('\\n');\nconst showroomInfo = [s.name ? 'Showroom: ' + s.name : null, s.city ? 'Ciudad: ' + s.city : null, s.whatsapp ? 'WhatsApp: ' + s.whatsapp : null, waLink ? 'Enlace WhatsApp: ' + waLink : null].filter(Boolean).join('\\n');\nconst contactRule = waLink ? 'Cuando el comprador muestre intenci?n real, ofrece dos v?as con naturalidad: reservar una visita si est? disponible o hablar directamente por WhatsApp en ' + waLink + '. No fuerces el enlace al inicio; ?salo cuando ayude a avanzar la conversaci?n.' : 'Cuando el comprador muestre intenci?n real, sugiere reservar una visita o dejar datos para que el showroom le contacte.';\nconst systemPrompt = 'Eres el asistente de ventas de ' + (s.name || 'este showroom') + ' en Black Label Market, especializado en veh?culos premium.\\n\\nINFORMACI?N DEL VEH?CULO:\\n' + (vehicleInfo || 'No disponible') + '\\n\\nINFORMACI?N DEL SHOWROOM:\\n' + (showroomInfo || 'No disponible') + '\\n\\nTu objetivo:\\n1. Responder preguntas sobre el veh?culo con informaci?n precisa.\\n2. Entender necesidades del comprador: uso, financiaci?n, plazo de compra y posible veh?culo a entregar.\\n3. ' + contactRule + '\\n4. Ser conciso: 2-3 frases, tono profesional, sobrio y cercano.\\n5. Idioma: ' + (lang === 'es' ? 'Espa?ol' : lang) + '.\\n\\nNo inventes caracter?sticas del veh?culo. Si falta un dato, dilo con claridad y ofrece consultarlo con el showroom.';\nconst openingMessage = lang === 'es' ? 'Hola, soy el asistente de ' + (s.name || 'este showroom') + '. Puedo ayudarte con ' + (v.title || 'esta unidad') + ' y coordinar el siguiente paso si encaja con lo que buscas. ?Qu? te gustar?a saber?' : 'Hi, I am the assistant for ' + (s.name || 'this showroom') + '. I can help with ' + (v.title || 'this vehicle') + ' and coordinate the next step if it fits what you are looking for. What would you like to know?';\nreturn [{ json: { ...d, systemPrompt, openingMessages: [{ role: 'system', content: systemPrompt }, { role: 'assistant', content: openingMessage }], openingMessage } }];"
       }
     },
     {
@@ -113,23 +171,44 @@
       "name": "Supabase — Crear sesión",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1520, 160],
+      "position": [
+        1520,
+        160
+      ],
       "parameters": {
         "method": "POST",
         "url": "={{ $env.SUPABASE_URL }}/rest/v1/assistant_sessions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" },
-            { "name": "Prefer",        "value": "resolution=merge-duplicates,return=minimal" }
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=minimal"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "body": "={{ JSON.stringify({ session_id: $json.sessionId, dealer_id: $json.dealerId, vehicle_id: $json.vehicle?.id || null, messages: $json.openingMessages }) }}",
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       }
     },
     {
@@ -137,11 +216,16 @@
       "name": "Responder apertura de sesión",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1740, 160],
+      "position": [
+        1740,
+        160
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify({ message: $('Session — Construir prompt apertura').first().json.openingMessage }) }}",
-        "options": { "responseCode": 200 }
+        "options": {
+          "responseCode": 200
+        }
       }
     },
     {
@@ -149,23 +233,41 @@
       "name": "Supabase — Cargar historial sesión",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1300, 460],
+      "position": [
+        1300,
+        460
+      ],
       "parameters": {
         "method": "GET",
         "url": "={{ $env.SUPABASE_URL }}/rest/v1/assistant_sessions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
           ]
         },
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "session_id", "value": "=eq.{{ $json.sessionId }}" },
-            { "name": "select",     "value": "messages" },
-            { "name": "limit",      "value": "1" }
+            {
+              "name": "session_id",
+              "value": "=eq.{{ $json.sessionId }}"
+            },
+            {
+              "name": "select",
+              "value": "messages"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
           ]
         },
         "options": {}
@@ -176,9 +278,12 @@
       "name": "Construir request OpenAI",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1520, 460],
+      "position": [
+        1520,
+        460
+      ],
       "parameters": {
-        "jsCode": "const input   = $('Switch por tipo de evento').first().json;\nconst rows    = $input.all();\nconst session = rows.length > 0 ? rows[0].json : null;\n\nconst history = (session?.messages || []);\n\n// Build system prompt from last session_start context (first assistant message)\nconst vehicleContext = history.length > 0 && history[0]?.role === 'user'\n  ? '' : '';\n\nconst systemPrompt = `Eres el asistente de ventas de un concesionario premium en Black Label Market.\nResponde de forma concisa (2-3 frases), profesional y útil.\nSi el comprador muestra interés real en comprar, sugiere contactar por WhatsApp o concertar visita.\nNO inventes información que no tengas.`;\n\n// Keep last 10 messages to avoid token overflow\nconst recentHistory = history.slice(-10);\n\nconst messages = [\n  { role: 'system', content: systemPrompt },\n  ...recentHistory,\n  { role: 'user', content: input.message }\n];\n\nreturn [{ json: { ...input, messages, history } }];"
+        "jsCode": "const input = $('Switch por tipo de evento').first().json;\nconst rows = $input.all();\nconst session = rows.length > 0 ? rows[0].json : null;\nconst history = Array.isArray(session?.messages) ? session.messages : [];\nconst storedSystemPrompt = history.find(m => m?.role === 'system' && m?.content)?.content;\nconst systemPrompt = storedSystemPrompt || 'Eres el asistente de ventas de un showroom premium en Black Label Market.\\nResponde de forma concisa (2-3 frases), profesional y ?til.\\nSi el comprador muestra inter?s real en comprar, sugiere contactar por WhatsApp si est? disponible o concertar visita.\\nNo inventes informaci?n que no tengas.';\nconst recentHistory = history.filter(m => m?.role !== 'system').slice(-10);\nconst messages = [{ role: 'system', content: systemPrompt }, ...recentHistory, { role: 'user', content: input.message }];\nreturn [{ json: { ...input, messages, history } }];"
       }
     },
     {
@@ -186,15 +291,24 @@
       "name": "OpenAI — Chat Completions",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1740, 460],
+      "position": [
+        1740,
+        460
+      ],
       "parameters": {
         "method": "POST",
         "url": "https://api.openai.com/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.OPENAI_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -208,7 +322,10 @@
       "name": "Extraer respuesta + actualizar historial",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1960, 460],
+      "position": [
+        1960,
+        460
+      ],
       "parameters": {
         "jsCode": "const openaiResp = $input.first().json;\nconst prevData   = $('Construir request OpenAI').first().json;\n\nconst aiMessage = openaiResp?.choices?.[0]?.message?.content || 'Lo siento, no he podido procesar tu mensaje. Por favor, inténtalo de nuevo.';\n\nconst updatedHistory = [\n  ...prevData.history,\n  { role: 'user',      content: prevData.message },\n  { role: 'assistant', content: aiMessage }\n];\n\n// Keep only last 20 messages to limit storage\nconst trimmedHistory = updatedHistory.slice(-20);\n\nreturn [{ json: { ...prevData, aiMessage, updatedHistory: trimmedHistory } }];"
       }
@@ -218,29 +335,53 @@
       "name": "Supabase — Guardar historial",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2180, 460],
+      "position": [
+        2180,
+        460
+      ],
       "parameters": {
         "method": "PATCH",
         "url": "={{ $env.SUPABASE_URL }}/rest/v1/assistant_sessions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" },
-            { "name": "Prefer",        "value": "return=minimal" }
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
           ]
         },
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "session_id", "value": "=eq.{{ $json.sessionId }}" }
+            {
+              "name": "session_id",
+              "value": "=eq.{{ $json.sessionId }}"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "body": "={{ JSON.stringify({ messages: $json.updatedHistory, updated_at: new Date().toISOString() }) }}",
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       }
     },
     {
@@ -248,55 +389,158 @@
       "name": "Responder con mensaje IA",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [2400, 460],
+      "position": [
+        2400,
+        460
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify({ message: $('Extraer respuesta + actualizar historial').first().json.aiMessage }) }}",
-        "options": { "responseCode": 200 }
+        "options": {
+          "responseCode": 200
+        }
       }
     }
   ],
   "connections": {
     "Webhook — Asistente IA": {
-      "main": [[{ "node": "Parsear y validar request", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Parsear y validar request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parsear y validar request": {
-      "main": [[{ "node": "¿Request válida?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "¿Request válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "¿Request válida?": {
       "main": [
-        [{ "node": "Switch por tipo de evento", "type": "main", "index": 0 }],
-        [{ "node": "Responder 400",             "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Switch por tipo de evento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 400",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Switch por tipo de evento": {
       "main": [
-        [{ "node": "Session — Construir prompt apertura",  "type": "main", "index": 0 }],
-        [{ "node": "Supabase — Cargar historial sesión",   "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Session — Construir prompt apertura",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase — Cargar historial sesión",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Session — Construir prompt apertura": {
-      "main": [[{ "node": "Supabase — Crear sesión", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Supabase — Crear sesión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Supabase — Crear sesión": {
-      "main": [[{ "node": "Responder apertura de sesión", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Responder apertura de sesión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Supabase — Cargar historial sesión": {
-      "main": [[{ "node": "Construir request OpenAI", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Construir request OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Construir request OpenAI": {
-      "main": [[{ "node": "OpenAI — Chat Completions", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "OpenAI — Chat Completions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "OpenAI — Chat Completions": {
-      "main": [[{ "node": "Extraer respuesta + actualizar historial", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Extraer respuesta + actualizar historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Extraer respuesta + actualizar historial": {
-      "main": [[{ "node": "Supabase — Guardar historial", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Supabase — Guardar historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Supabase — Guardar historial": {
-      "main": [[{ "node": "Responder con mensaje IA", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Responder con mensaje IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "tags": []
 }

@@ -125,6 +125,32 @@ async function setVerification(formData: FormData) {
   redirect(`/admin/dealers/${dealerId}`)
 }
 
+async function publishDealerProfile(formData: FormData) {
+  'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
+  const dealerId = formData.get('dealerId') as string
+  const supabase = await createAdminClient()
+
+  const { data: dealer } = await supabase
+    .from('dealers')
+    .select('logo_url, profile_status')
+    .eq('id', dealerId)
+    .maybeSingle()
+  const { count: activeWithPhotoCount } = await supabase
+    .from('vehicles')
+    .select('id', { count: 'exact', head: true })
+    .eq('dealer_id', dealerId)
+    .eq('status', 'active')
+    .not('images', 'eq', '[]')
+
+  if (dealer?.profile_status === 'pending_review' && dealer.logo_url && (activeWithPhotoCount ?? 0) > 0) {
+    await supabase.from('dealers').update({ profile_status: 'published', updated_at: new Date().toISOString() }).eq('id', dealerId)
+  }
+
+  revalidatePath(`/admin/dealers/${dealerId}`)
+  revalidatePath('/dealers')
+  redirect(`/admin/dealers/${dealerId}`)
+}
 async function deleteDealer(formData: FormData) {
   'use server'
   const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
@@ -225,6 +251,7 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
   ])
 
   const totalViews = vehicles?.reduce((sum: number, v: any) => sum + (v.views || 0), 0) || 0
+  const firstActiveVehicle = vehicles?.find((v: any) => v.status === 'active' && v.images?.[0]?.url)
 
   const PLAN_OPTIONS = [
     { value: 'trial',        label: 'Trial (5 vehículos publicados)' },
@@ -289,6 +316,42 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
               Aprobar acceso
             </button>
           </form>
+        </div>
+      )}
+
+      {/* Profile publication review */}
+      {dealer.profile_status === 'pending_review' && (
+        <div className="mb-8 border border-gold/35 bg-gold/5 p-5">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-4">
+              {dealer.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={dealer.logo_url} alt={dealer.name} className="h-14 w-14 bg-obsidian object-contain p-2 border border-gold/20" />
+              ) : (
+                <AlertTriangle className="mt-1 h-5 w-5 text-amber-400" />
+              )}
+              <div>
+                <p className="text-sm font-medium text-gold">Perfil listo para revisión humana</p>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-bsm-text-muted">
+                  El gate mínimo ya se cumple: logo y al menos una unidad activa con fotografía. Revisa el perfil y la primera unidad antes de publicar la página del showroom.
+                </p>
+                {firstActiveVehicle && (
+                  <div className="mt-3 flex items-center gap-3 text-xs text-bsm-text-secondary">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={firstActiveVehicle.images[0].url} alt="" className="h-10 w-14 object-cover border border-bsm-border" />
+                    <span>{firstActiveVehicle.brand_name} {firstActiveVehicle.model_name} · {firstActiveVehicle.year}</span>
+                    <Link href={`/admin/vehiculos?dealer=${id}&status=active`} className="text-gold hover:text-gold-light">Ver inventario →</Link>
+                  </div>
+                )}
+              </div>
+            </div>
+            <form action={publishDealerProfile}>
+              <input type="hidden" name="dealerId" value={id} />
+              <button type="submit" className="btn-gold px-5 py-2.5 text-sm">
+                <CheckCircle className="h-4 w-4" /> Publicar perfil
+              </button>
+            </form>
+          </div>
         </div>
       )}
 

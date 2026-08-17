@@ -5,6 +5,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { slugify } from '@/lib/utils'
 import { assertAdmin } from '@/lib/admin-auth'
 import { provisionDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
+import { generateSetupToken, setupTokenExpiresAt } from '@/lib/onboarding/setup-room'
 
 function passwordSetupUrl(
   appUrl: string,
@@ -51,6 +52,7 @@ type ApprovalPiece =
   | 'organization'
   | 'organization_owner'
   | 'showroom_assistant_config'
+  | 'setup_room_token'
   | 'password_setup_url'
   | 'application_status'
 
@@ -440,6 +442,22 @@ export async function approveApplication(formData: FormData) {
     return
   }
   await admin.rpc('sync_dealer_profile_publication', { p_dealer_id: dealerId })
+  let founderSetupUrl: string | null = null
+  if (application.source === 'visita_agencia') {
+    const { token, tokenHash } = generateSetupToken()
+    const { error: tokenError } = await admin.from('dealer_setup_tokens').insert({
+      dealer_id: dealerId,
+      token_hash: tokenHash,
+      expires_at: setupTokenExpiresAt(),
+    })
+    if (tokenError) {
+      await markApprovalFailed(admin, { applicationId: id, dealerId, missing: ['setup_room_token'] })
+      revalidateAll(id)
+      return
+    }
+    founderSetupUrl = `${appUrl}/configurar/${encodeURIComponent(token)}`
+  }
+
   const { data: approvedApplication, error: approvalUpdateError } = await admin
     .from('showroom_applications')
     .update({
@@ -465,10 +483,11 @@ export async function approveApplication(formData: FormData) {
 
   // Un solo email de bienvenida por alta — nunca los dos. WF2 (bienvenida genérica, autoservicio)
   // y WF-P3 (bienvenida fundador, white-glove) pedían cosas contradictorias sobre el stock cuando
-  // se disparaban ambos para la misma alta. Se separan por origen: visita_agencia → WF-P3 (lleva
-  // credenciales); market_directo → WF2 (self-serve, sin promesa de onboarding asistido).
+  // se disparaban ambos para la misma alta. Se separan por origen: visita_agencia -> WF-P3
+  // (sala de configuracion); market_directo -> WF2 (self-serve, sin promesa de onboarding asistido).
   if (application.source === 'visita_agencia') {
-    // WF-P3: bienvenida de fundador (enlace de acceso + una sola vía de stock).
+    // WF-P3: invitación fundador a completar la sala de configuración.
+    // El enlace de credenciales se genera fresco cuando el fundador envía la configuración.
     const { data: dealerForOnboarding } = await admin.from('dealers').select('slug').eq('id', dealerId).single()
     const fundadorWebhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
       ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
@@ -480,7 +499,8 @@ export async function approveApplication(formData: FormData) {
         email: application.email,
         telefono: application.phone,
         dealer_slug: dealerForOnboarding?.slug ?? '',
-        password_setup_url: setupUrl,
+        event: 'setup_required',
+        setup_url: founderSetupUrl,
         login_url: loginUrl,
         dashboard_url: dashboardUrl,
       }),
