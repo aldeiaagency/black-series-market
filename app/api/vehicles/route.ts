@@ -38,8 +38,9 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
+    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
 
   const type = searchParams.get('type')
   if (type) query = query.eq('vehicle_type', type)

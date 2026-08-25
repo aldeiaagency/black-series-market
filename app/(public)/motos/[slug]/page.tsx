@@ -12,7 +12,7 @@ export const revalidate = 300
 // Prerenderiza las motos activas (ISR). Las nuevas se generan on-demand y se cachean.
 export async function generateStaticParams() {
   const { data } = await createPublicClient()
-    .from('vehicles').select('slug').eq('status', 'active').eq('vehicle_type', 'motorcycle').limit(1000)
+    .from('vehicles').select('slug, dealer:dealers!inner(profile_status)').eq('status', 'active').eq('vehicle_type', 'motorcycle').eq('dealer.profile_status', 'published').limit(1000)
   return (data ?? []).map((v: { slug: string }) => ({ slug: v.slug }))
 }
 
@@ -27,8 +27,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const supabase = createPublicClient()
   const { data } = await supabase
     .from('vehicles')
-    .select('brand_name, model_name, year, version, images, mileage_km, fuel_type, power_hp, displacement_cc, location_province, price, price_on_request')
+    .select('brand_name, model_name, year, version, images, mileage_km, fuel_type, power_hp, displacement_cc, location_province, price, price_on_request, dealer:dealers!inner(profile_status)')
     .eq('slug', slug)
+    .in('status', ['active', 'paused', 'sold'])
+    .eq('dealer.profile_status', 'published')
     .single()
   if (!data) return {}
   const title = `${data.brand_name} ${data.model_name} ${data.year}${data.version ? ' ' + data.version : ''}`
@@ -57,9 +59,11 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   const { data: vehicle } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers(*)')
+    .select('*, dealer:dealers!inner(*)')
     .eq('slug', slug)
     .eq('vehicle_type', 'motorcycle')
+    .in('status', ['active', 'paused', 'sold'])
+    .eq('dealer.profile_status', 'published')
     .single()
 
   // draft/pending_review/expired → 404; sold/paused → visible with adapted CTAs
@@ -74,8 +78,9 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   let simQuery = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
+    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .eq('vehicle_type', 'motorcycle')
     .eq('brand_name', vehicle.brand_name)
     .neq('id', vehicle.id)
@@ -88,8 +93,9 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   const { data: dealerVehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
+    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .eq('dealer_id', vehicle.dealer_id)
     .eq('vehicle_type', 'motorcycle')
     .neq('id', vehicle.id)

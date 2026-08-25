@@ -71,8 +71,9 @@ export default async function MarcasPage() {
   // Count active vehicles per brand and track which types each brand has
   const { data: vehicles } = await supabase
     .from('vehicles')
-    .select('brand_name, vehicle_type')
+    .select('brand_name, vehicle_type, dealer:dealers!inner(profile_status)')
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
 
   const countMap: Record<string, number> = {}
   const typeMap: Record<string, Set<string>> = {}

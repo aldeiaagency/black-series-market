@@ -14,12 +14,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ] = await Promise.all([
     supabase
       .from('vehicles')
-      .select('slug, vehicle_type, brand_name, updated_at')
-      .eq('status', 'active'),
+      .select('slug, vehicle_type, brand_name, updated_at, dealer:dealers!inner(profile_status)')
+      .eq('status', 'active')
+      .eq('dealer.profile_status', 'published'),
     supabase
       .from('dealers')
       .select('slug, updated_at')
-      .eq('status', 'active'),
+      .eq('status', 'active')
+      .eq('profile_status', 'published'),
     supabase
       .from('brands')
       .select('slug, name, created_at')

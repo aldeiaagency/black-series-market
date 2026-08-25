@@ -54,8 +54,9 @@ export default async function BrandPage({ params }: PageProps) {
 
   const { data: vehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url)')
+    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url)')
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .ilike('brand_name', brandData.name)
     .order('is_featured', { ascending: false })
     .order('published_at', { ascending: false })

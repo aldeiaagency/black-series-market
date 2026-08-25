@@ -199,16 +199,6 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   }
   const recoveryUrl = passwordSetupUrl(appUrl, linkData.properties)
 
-  const { data: usedToken, error: usedError } = await admin
-    .from('dealer_setup_tokens')
-    .update({ used_at: new Date().toISOString() })
-    .eq('id', setup.token.id)
-    .is('used_at', null)
-    .select('id')
-    .maybeSingle()
-  if (usedError || !usedToken) {
-    return NextResponse.json({ error: 'Este enlace ya se ha utilizado.' }, { status: 409 })
-  }
 
   const webhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
     ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
@@ -238,9 +228,24 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     webhookSent = false
   }
 
+  if (!webhookSent) {
+    return NextResponse.json({ ok: false, error: 'webhook_failed', retryable: true }, { status: 502 })
+  }
+
+  const { data: usedToken, error: usedError } = await admin
+    .from('dealer_setup_tokens')
+    .update({ used_at: new Date().toISOString() })
+    .eq('id', setup.token.id)
+    .is('used_at', null)
+    .select('id')
+    .maybeSingle()
+  if (usedError || !usedToken) {
+    return NextResponse.json({ ok: false, error: 'token_already_used', retryable: false }, { status: 409 })
+  }
+
   revalidatePath(`/admin/dealers/${setup.dealer.id}`)
   revalidatePath('/admin/dealers')
   revalidatePath(`/dealers/${setup.dealer.slug}`)
 
-  return NextResponse.json({ ok: true, webhook_sent: webhookSent })
+  return NextResponse.json({ ok: true, webhook_sent: true })
 }

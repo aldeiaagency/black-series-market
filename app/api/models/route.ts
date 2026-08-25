@@ -34,8 +34,9 @@ export async function GET(req: NextRequest) {
   //    catálogo, para no esconder nunca stock real).
   let pubQuery = supabase
     .from('vehicles')
-    .select('model_name')
+    .select('model_name, dealer:dealers!inner(profile_status)')
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .ilike('brand_name', `%${brand.replace(/-/g, ' ')}%`)
   if (vtype) pubQuery = pubQuery.eq('vehicle_type', vtype)
   const { data: published } = await pubQuery

@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const vtype = type ? (type === 'car' ? 'car' : 'motorcycle') : null
 
   const supabase = await createClient()
-  let query = supabase.from('vehicles').select('brand_name').eq('status', 'active')
+  let query = supabase.from('vehicles').select('brand_name, dealer:dealers!inner(profile_status)').eq('status', 'active').eq('dealer.profile_status', 'published')
   if (vtype) query = query.eq('vehicle_type', vtype)
   const { data } = await query
 

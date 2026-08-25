@@ -12,6 +12,21 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
+async function postJsonWithTimeout(url: string, body: unknown) {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), 12_000)
+  try {
+    return await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 async function approveDealerAccess(formData: FormData) {
   'use server'
   const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
@@ -133,7 +148,7 @@ async function publishDealerProfile(formData: FormData) {
 
   const { data: dealer } = await supabase
     .from('dealers')
-    .select('logo_url, profile_status')
+    .select('id, name, slug, logo_url, profile_status, email, profile:profiles(email, full_name)')
     .eq('id', dealerId)
     .maybeSingle()
   const { count: activeWithPhotoCount } = await supabase
@@ -144,7 +159,33 @@ async function publishDealerProfile(formData: FormData) {
     .not('images', 'eq', '[]')
 
   if (dealer?.profile_status === 'pending_review' && dealer.logo_url && (activeWithPhotoCount ?? 0) > 0) {
-    await supabase.from('dealers').update({ profile_status: 'published', updated_at: new Date().toISOString() }).eq('id', dealerId)
+    const { error: publishError } = await supabase
+      .from('dealers')
+      .update({ profile_status: 'published', updated_at: new Date().toISOString() })
+      .eq('id', dealerId)
+
+    if (!publishError) {
+      const profile = Array.isArray(dealer.profile) ? dealer.profile[0] : dealer.profile
+      const email = dealer.email || profile?.email || null
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+      const webhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
+        ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
+      const payload = {
+        event: 'profile_published',
+        dealer_id: dealerId,
+        dealer_name: dealer.name,
+        email,
+        dealer_slug: dealer.slug,
+        public_url: `${appUrl}/dealers/${dealer.slug}`,
+      }
+
+      try {
+        const res = await postJsonWithTimeout(webhookUrl, payload)
+        if (!res.ok) console.error('profile_published webhook failed', { dealerId, status: res.status })
+      } catch (error) {
+        console.error('profile_published webhook failed', { dealerId, error })
+      }
+    }
   }
 
   revalidatePath(`/admin/dealers/${dealerId}`)

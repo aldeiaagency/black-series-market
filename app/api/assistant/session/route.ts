@@ -23,9 +23,10 @@ export async function POST(req: NextRequest) {
   // Fetch vehicle + dealer (public fields only)
   const { data: vehicle } = await admin
     .from('vehicles')
-    .select('id, brand_name, model_name, year, version, price, price_on_request, fuel_type, mileage_km, power_hp, dealer_id, dealer:dealers(id, profile_id, name, location_city, whatsapp, slug)')
+    .select('id, brand_name, model_name, year, version, price, price_on_request, fuel_type, mileage_km, power_hp, dealer_id, dealer:dealers!inner(id, profile_id, name, location_city, whatsapp, slug, profile_status)')
     .eq('id', vehicleId)
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .single()
 
   if (!vehicle?.dealer) return classic()

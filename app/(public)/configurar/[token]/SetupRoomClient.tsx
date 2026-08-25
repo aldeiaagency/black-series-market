@@ -115,6 +115,7 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [retryableSubmit, setRetryableSubmit] = useState(false)
 
   const logoRef = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
@@ -179,6 +180,7 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
   async function submit() {
     setSubmitting(true)
     setSubmitError(null)
+    setRetryableSubmit(false)
     try {
       const weeklyParsed: Partial<Record<Weekday, TimeRange[]>> = {}
       for (const d of DAYS) weeklyParsed[d.key] = parseRanges(appointments.weekly[d.key] || '')
@@ -208,7 +210,16 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
         }),
       })
       const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json.error || 'No se pudo completar la configuración.')
+      if (!res.ok) {
+        const retryable = Boolean(json.retryable)
+        setRetryableSubmit(retryable)
+        const message = json.error === 'webhook_failed'
+          ? 'Hemos guardado tu configuración, pero no se pudo enviar el email de acceso. Reintenta el envío; el enlace sigue siendo válido.'
+          : json.error === 'token_already_used'
+            ? 'Este enlace ya se ha utilizado.'
+            : json.error || 'No se pudo completar la configuración.'
+        throw new Error(message)
+      }
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'No se pudo completar la configuración.')
@@ -418,7 +429,7 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
             <p className="text-xs leading-5 text-bsm-text-muted">No recibirás acceso al panel hasta que esta configuración quede enviada. Después haremos la revisión editorial antes de publicar.</p>
             <button type="button" onClick={submit} disabled={submitting} className="btn-gold shrink-0 px-6 py-3">
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              Enviar configuración
+              {retryableSubmit && submitError ? 'Reintentar envío' : 'Enviar configuración'}
             </button>
           </div>
           {submitError && <p className="text-sm text-red-400">{submitError}</p>}

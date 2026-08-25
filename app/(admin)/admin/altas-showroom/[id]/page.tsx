@@ -29,6 +29,18 @@ const STATUS_BADGE: Record<string, string> = {
   approved: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
   rejected: 'text-red-400 bg-red-400/10 border-red-400/30',
 }
+const APPROVAL_PIECE_LABEL: Record<string, string> = {
+  auth_user: 'Usuario de acceso',
+  profile: 'Perfil de usuario',
+  dealer: 'Showroom',
+  organization: 'Organización',
+  organization_owner: 'Propietario de la organización',
+  showroom_assistant_config: 'Configuración del asistente',
+  setup_room_token: 'Token de sala de configuración',
+  password_setup_url: 'Enlace de acceso',
+  application_status: 'Estado de la solicitud',
+  founder_setup_notification: 'Email fundador con sala de configuración',
+}
 
 export default async function ApplicationDetailPage({ params }: PageProps) {
   const { id } = await params
@@ -202,7 +214,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               </div>
               <ul className="space-y-2 text-sm text-red-100/80">
                 {missingPieces.map((piece) => (
-                  <li key={piece} className="font-mono text-xs">{piece}</li>
+                  <li key={piece} className="text-xs"><span className="text-red-100">{APPROVAL_PIECE_LABEL[piece] ?? piece}</span><span className="ml-2 font-mono text-red-200/50">{piece}</span></li>
                 ))}
               </ul>
             </section>

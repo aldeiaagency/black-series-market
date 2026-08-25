@@ -21,8 +21,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!data) return {}
   const { count } = await supabase
     .from('vehicles')
-    .select('*', { count: 'exact', head: true })
+    .select('id, dealer:dealers!inner(profile_status)', { count: 'exact', head: true })
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .ilike('brand_name', data.name)
     .eq('vehicle_type', 'motorcycle')
   return {
@@ -47,8 +48,9 @@ export default async function BrandMotosPage({ params }: PageProps) {
 
   const { data: vehicles, count } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
+    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .ilike('brand_name', brandData.name)
     .eq('vehicle_type', 'motorcycle')
     .order('is_featured', { ascending: false })

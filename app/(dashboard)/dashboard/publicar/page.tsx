@@ -295,7 +295,7 @@ export default function PublicarPage() {
     setLoading(false)
     if (err) { setError(err); return }
 
-    // Notify automations when the vehicle enters the review queue (non-blocking).
+    // Notify automations when the vehicle is published from the dashboard (non-blocking).
     if (publish && savedVehicleId) {
       fetch('/api/events/vehicle-submitted', {
         method: 'POST',
@@ -921,16 +921,16 @@ export default function PublicarPage() {
                 disabled={loading}
                 className="btn-gold flex-1 justify-center"
               >
-                {loading ? 'Publicando...' : 'Enviar para revisión'}
+                {loading ? 'Publicando...' : 'Publicar unidad'}
               </button>
             </div>
             <p className="text-xs text-bsm-text-muted text-center">
-              Los vehículos se revisan editorialmente antes de publicarse (habitualmente en menos de 24h).
+              La publicación es automática cuando la unidad cumple los datos mínimos: marca y modelo del catálogo, fotografías y precio.
             </p>
             {(dealerPlan === 'professional' || dealerPlan === 'elite') && form.images?.length >= 5 && form.description?.trim().length > 20 && (
               <div className="flex items-start gap-2 p-3 border border-emerald-400/20 bg-emerald-400/5 text-xs text-emerald-400">
                 <span className="mt-0.5">✓</span>
-                <span>Tu ficha cumple los requisitos de aprobación rápida (fotos + descripción completa). La activación puede ser inmediata.</span>
+                <span>Tu ficha reúne los elementos clave de una publicación completa: fotografías, descripción y datos comerciales claros.</span>
               </div>
             )}
           </div>

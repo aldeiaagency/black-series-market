@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const supabase = await createClient()
 
   // Step 1: get dealer_ids that have at least one active vehicle matching filters
-  let vq = supabase.from('vehicles').select('dealer_id').eq('status', 'active')
+  let vq = supabase.from('vehicles').select('dealer_id, dealer:dealers!inner(profile_status)').eq('status', 'active').eq('dealer.profile_status', 'published')
   if (vehicleType) vq = vq.eq('vehicle_type', vehicleType)
   if (provincias.length) vq = vq.in('location_province', provincias)
 
@@ -23,6 +23,7 @@ export async function GET(req: Request) {
     .from('dealers')
     .select('id, name, slug, location_city, location_region, is_featured, subscription_plan')
     .eq('status', 'active')
+    .eq('profile_status', 'published')
     .in('id', dealerIds)
     .order('name')
 

@@ -20,8 +20,9 @@ async function SearchResults({ q, tipo }: { q: string; tipo?: string }) {
 
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)', { count: 'exact' })
+    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)', { count: 'exact' })
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .or(`brand_name.ilike.%${q}%,model_name.ilike.%${q}%`)
 
   if (tipo === 'coches')  query = query.eq('vehicle_type', 'car')

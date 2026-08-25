@@ -21,8 +21,9 @@ export async function GET(req: NextRequest) {
     const supabase = await createClient()
     let query = supabase
       .from('vehicles')
-      .select('*', { count: 'exact', head: true })
+      .select('id, dealer:dealers!inner(profile_status)', { count: 'exact', head: true })
       .eq('status', 'active')
+      .eq('dealer.profile_status', 'published')
       .eq('vehicle_type', type)
 
     query = (await applyVehicleFilters(supabase, query, params, type)).query

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -24,9 +24,10 @@ export default function MisFavoritosPage() {
     const supabase = createClient()
     supabase
       .from('vehicles')
-      .select('*, dealer:dealers(name, slug, location_city, logo_url)')
+      .select('*, dealer:dealers!inner(name, slug, location_city, logo_url)')
       .in('id', favorites)
       .eq('status', 'active')
+      .eq('dealer.profile_status', 'published')
       .then(({ data }) => {
         setVehicles((data as Vehicle[]) || [])
         setLoading(false)

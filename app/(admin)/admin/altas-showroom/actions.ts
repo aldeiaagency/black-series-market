@@ -55,6 +55,7 @@ type ApprovalPiece =
   | 'setup_room_token'
   | 'password_setup_url'
   | 'application_status'
+  | 'founder_setup_notification'
 
 function planNeedsAssistant(plan: TrialPlan) {
   return plan === 'professional' || plan === 'elite'
@@ -123,6 +124,34 @@ async function verifyApprovalPieces(
   return missing
 }
 
+async function postJsonWithTimeout(url: string, body: unknown) {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), 12_000)
+  try {
+    return await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function markApprovalNotificationFailed(
+  admin: AdminClient,
+  input: { applicationId: string; dealerId: string | null; missing: ApprovalPiece[] },
+) {
+  await admin.from('showroom_applications').update({
+    status: 'approval_failed',
+    dealer_id: input.dealerId,
+    approval_missing_pieces: input.missing,
+    reviewed_at: new Date().toISOString(),
+    reviewed_by: await currentAdminId(),
+    updated_at: new Date().toISOString(),
+  }).eq('id', input.applicationId)
+}
 async function markApprovalFailed(
   admin: AdminClient,
   input: { applicationId: string; dealerId: string | null; missing: ApprovalPiece[] },
@@ -154,7 +183,7 @@ export async function setApplicationStatus(formData: FormData) {
   if (status === 'pending_info') {
     const { data: application } = await admin
       .from('showroom_applications')
-      .select('dealer_name, full_name, email, admin_notes')
+      .select('dealer_name, full_name, email, admin_notes, source')
       .eq('id', id)
       .single()
 
@@ -173,6 +202,7 @@ export async function setApplicationStatus(formData: FormData) {
           dealer_name: application.dealer_name,
           full_name: application.full_name,
           email: application.email,
+          source: application.source,
           admin_notes: application.admin_notes ?? '',
           admin_url: `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom/${id}`,
         }),
@@ -491,20 +521,33 @@ export async function approveApplication(formData: FormData) {
     const { data: dealerForOnboarding } = await admin.from('dealers').select('slug').eq('id', dealerId).single()
     const fundadorWebhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
       ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
-    fetch(fundadorWebhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nombre: application.dealer_name,
-        email: application.email,
-        telefono: application.phone,
-        dealer_slug: dealerForOnboarding?.slug ?? '',
-        event: 'setup_required',
-        setup_url: founderSetupUrl,
-        login_url: loginUrl,
-        dashboard_url: dashboardUrl,
-      }),
-    }).catch(() => {})
+    const founderPayload = {
+      nombre: application.dealer_name,
+      email: application.email,
+      telefono: application.phone,
+      dealer_slug: dealerForOnboarding?.slug ?? '',
+      event: 'setup_required',
+      setup_url: founderSetupUrl,
+      login_url: loginUrl,
+      dashboard_url: dashboardUrl,
+    }
+    let founderNotificationSent = false
+    try {
+      const res = await postJsonWithTimeout(fundadorWebhookUrl, founderPayload)
+      founderNotificationSent = res.ok
+    } catch {
+      founderNotificationSent = false
+    }
+    if (!founderNotificationSent) {
+      await markApprovalNotificationFailed(admin, {
+        applicationId: id,
+        dealerId,
+        missing: ['founder_setup_notification'],
+      })
+      revalidateAll(id)
+      revalidatePath('/admin/dealers')
+      return
+    }
   } else {
     // WF2: bienvenida genérica autoservicio (altas directas del market, no fundador).
     const webhookUrl = process.env.N8N_WEBHOOK_DEALER_APPROVED
@@ -572,6 +615,7 @@ export async function rejectApplication(formData: FormData) {
         dealer_name: application.dealer_name,
         full_name: application.full_name,
         email: application.email,
+        source: application.source,
         rejected_at: new Date().toISOString(),
       }),
     }).catch(() => {})

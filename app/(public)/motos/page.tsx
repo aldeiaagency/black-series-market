@@ -72,8 +72,9 @@ async function MotoList({ params }: { params: Record<string, string> }) {
   const supabase = createPublicClient()
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
+    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
     .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
     .eq('vehicle_type', 'motorcycle')
 
   query = (await applyVehicleFilters(supabase, query, params, 'motorcycle')).query
@@ -144,13 +145,15 @@ export default async function MotosPage({ searchParams }: PageProps) {
   const [{ count }, { data: itemListVehicles }] = await Promise.all([
     supabase
       .from('vehicles')
-      .select('*', { count: 'exact', head: true })
+      .select('id, dealer:dealers!inner(profile_status)', { count: 'exact', head: true })
       .eq('status', 'active')
+      .eq('dealer.profile_status', 'published')
       .eq('vehicle_type', 'motorcycle'),
     supabase
       .from('vehicles')
-      .select('slug, brand_name, model_name, year')
+      .select('slug, brand_name, model_name, year, dealer:dealers!inner(profile_status)')
       .eq('status', 'active')
+      .eq('dealer.profile_status', 'published')
       .eq('vehicle_type', 'motorcycle')
       .order('is_featured', { ascending: false })
       .order('published_at', { ascending: false })

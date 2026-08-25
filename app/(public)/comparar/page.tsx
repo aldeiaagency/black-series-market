@@ -94,8 +94,10 @@ export default async function CompararPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   const { data: rawVehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city)')
+    .select('*, dealer:dealers!inner(name, slug, location_city)')
     .in('id', vehicleIds)
+    .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
 
   const vehicles = (rawVehicles as (Vehicle & { dealer: any })[]) || []
 

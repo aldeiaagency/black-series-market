@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Shield, Star, Zap, Diamond, BadgeCheck, CarFront, Search } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -70,22 +70,25 @@ export default async function HomePage() {
     await Promise.all([
       supabase
         .from('vehicles')
-        .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
+        .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
         .eq('status', 'active')
+        .eq('dealer.profile_status', 'published')
         .eq('is_featured', true)
         .gt('featured_until', new Date().toISOString())
         .order('published_at', { ascending: false })
         .limit(8),
       supabase
         .from('vehicles')
-        .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified)')
+        .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
         .eq('status', 'active')
+        .eq('dealer.profile_status', 'published')
         .order('published_at', { ascending: false })
         .limit(8),
       supabase
         .from('dealers')
         .select('*')
         .eq('status', 'active')
+        .eq('profile_status', 'published')
         .eq('is_featured', true)
         .limit(4),
     ])

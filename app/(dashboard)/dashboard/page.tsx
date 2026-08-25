@@ -72,6 +72,24 @@ export default async function DashboardPage() {
   const hasProfile = !!(dealer.description && dealer.phone)
   const hasPlan = dealer.is_founder || dealer.status === 'active'
   const isPro = dealer.subscription_plan === 'professional' || dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
+  const profileStatus = (dealer.profile_status || 'draft') as 'draft' | 'pending_review' | 'published'
+  const profileStatusConfig = {
+    draft: {
+      label: 'Perfil en borrador',
+      text: 'Tu perfil está en borrador. Añade tu logo y al menos un vehículo activo con foto para pasar a revisión.',
+      className: 'border-amber-400/30 bg-amber-400/5 text-amber-300',
+    },
+    pending_review: {
+      label: 'Perfil en revisión editorial',
+      text: 'Tu perfil está en revisión editorial. Te avisaremos en cuanto esté publicado.',
+      className: 'border-blue-400/30 bg-blue-400/5 text-blue-300',
+    },
+    published: {
+      label: 'Perfil publicado',
+      text: 'Tu perfil ya está publicado.',
+      className: 'border-emerald-400/30 bg-emerald-400/5 text-emerald-300',
+    },
+  }[profileStatus]
 
   return (
     <div className="p-8">
@@ -86,6 +104,17 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      <div className={`mb-8 flex flex-wrap items-center justify-between gap-4 border px-6 py-4 ${profileStatusConfig.className}`}>
+        <div>
+          <p className="text-xs uppercase tracking-widest">{profileStatusConfig.label}</p>
+          <p className="mt-1 text-sm text-bsm-text-secondary">{profileStatusConfig.text}</p>
+        </div>
+        {profileStatus === 'published' && dealer.slug && (
+          <Link href={`/dealers/${dealer.slug}`} className="shrink-0 text-xs uppercase tracking-widest text-gold hover:underline">
+            Ver ficha pública →
+          </Link>
+        )}
+      </div>
       {/* El programa fundador depende de un gate global, no de un trial individual. */}
       {dealer.is_founder ? (
         <div className="mb-8 border border-gold/30 bg-[#0D0C07] px-6 py-4">
