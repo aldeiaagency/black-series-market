@@ -88,6 +88,19 @@ export function normalizeSettings(raw: unknown): BookingSettings {
   }
 }
 
+export function rangesToStr(ranges?: TimeRange[]): string {
+  return (ranges || []).map(([s, e]) => `${s}-${e}`).join(', ')
+}
+
+export function parseRanges(str: string): TimeRange[] {
+  const out: TimeRange[] = []
+  for (const part of str.split(',')) {
+    const m = part.trim().match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/)
+    if (m) out.push([m[1], m[2]])
+  }
+  return out
+}
+
 function clampInt(v: unknown, min: number, max: number, dflt: number): number {
   const n = typeof v === 'number' ? v : parseInt(String(v), 10)
   if (!Number.isFinite(n)) return dflt

@@ -106,6 +106,10 @@ export function planAllowsGoogleCalendar(plan?: string | null) {
   return plan === 'elite' || plan === 'grupo'
 }
 
+export function planAllowsAppointmentBooking(plan?: string | null) {
+  return plan === 'elite' || plan === 'grupo'
+}
+
 export async function validateSetupToken(admin: Admin, rawToken: string): Promise<SetupTokenValidation> {
   if (!rawToken?.trim()) return { ok: false, reason: 'missing' }
 

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Loader2, Check, CalendarClock, Link2, Unlink, AlertTriangle } from 'lucide-react'
 import { saveCalendarConfig, disconnectGoogleCalendar, type CalendarConfigInput } from './actions'
+import { rangesToStr, parseRanges } from '@/lib/booking'
 import type { AvailabilityRules, BookingSettings, Weekday, TimeRange } from '@/lib/booking'
 
 export interface GoogleConnectionState {
@@ -26,18 +27,6 @@ const DAYS: { key: Weekday; label: string }[] = [
   { key: 'mon', label: 'Lunes' }, { key: 'tue', label: 'Martes' }, { key: 'wed', label: 'Miércoles' },
   { key: 'thu', label: 'Jueves' }, { key: 'fri', label: 'Viernes' }, { key: 'sat', label: 'Sábado' }, { key: 'sun', label: 'Domingo' },
 ]
-
-function rangesToStr(ranges?: TimeRange[]): string {
-  return (ranges || []).map(([s, e]) => `${s}-${e}`).join(', ')
-}
-function parseRanges(str: string): TimeRange[] {
-  const out: TimeRange[] = []
-  for (const part of str.split(',')) {
-    const m = part.trim().match(/^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/)
-    if (m) out.push([m[1], m[2]])
-  }
-  return out
-}
 
 interface Props {
   initial: { enabled: boolean; rules: AvailabilityRules; settings: BookingSettings }

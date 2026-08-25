@@ -6,9 +6,11 @@ import {
   normalizeStringArray,
   normalizeText,
   passwordSetupUrl,
+  planAllowsAppointmentBooking,
   planNeedsAssistant,
   sanitizeHttpUrl,
 } from '@/lib/onboarding/setup-room'
+import { normalizeRules, normalizeSettings } from '@/lib/booking'
 
 const SPECIALTIES = ['sport', 'classic', 'premium', 'motorcycle', 'import', 'suv', 'supercar', 'custom'] as const
 const SERVICES = ['financing', 'trade_in', 'warranty', 'transport_nat', 'transport_intl', 'own_workshop', 'detailing', 'home_delivery'] as const
@@ -75,6 +77,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   const assistant = (body.assistant && typeof body.assistant === 'object' ? body.assistant : {}) as Record<string, unknown>
   const stock = (body.stock && typeof body.stock === 'object' ? body.stock : {}) as Record<string, unknown>
   const assets = (body.assets && typeof body.assets === 'object' ? body.assets : {}) as Record<string, unknown>
+  const appointments = (body.appointments && typeof body.appointments === 'object' ? body.appointments : {}) as Record<string, unknown>
 
   const dealerUpdate = {
     name: normalizeText(profile.name, 160) || setup.dealer.name,
@@ -101,6 +104,35 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   const { error: dealerError } = await admin.from('dealers').update(dealerUpdate).eq('id', setup.dealer.id)
   if (dealerError) {
     return NextResponse.json({ error: 'No se pudo guardar el perfil del showroom.' }, { status: 500 })
+  }
+
+  if (planAllowsAppointmentBooking(setup.dealer.subscription_plan)) {
+    const availability_rules = normalizeRules({ ...appointments, timezone: 'Europe/Madrid' })
+    const booking_settings = normalizeSettings({
+      ...appointments,
+      location_text: normalizeText(appointments.location_text, 240),
+      instructions: normalizeText(appointments.instructions, 500),
+    })
+
+    const { data: existingManual } = await admin
+      .from('showroom_calendar_connections')
+      .select('id')
+      .eq('dealer_id', setup.dealer.id)
+      .eq('provider', 'manual')
+      .maybeSingle()
+
+    const { error: bookingError } = existingManual
+      ? await admin
+          .from('showroom_calendar_connections')
+          .update({ status: 'connected', availability_rules, booking_settings, updated_at: new Date().toISOString() })
+          .eq('id', existingManual.id)
+      : await admin
+          .from('showroom_calendar_connections')
+          .insert({ dealer_id: setup.dealer.id, provider: 'manual', status: 'connected', availability_rules, booking_settings, connected_at: new Date().toISOString() })
+
+    if (bookingError) {
+      return NextResponse.json({ error: 'No se pudo guardar el horario de citas.' }, { status: 500 })
+    }
   }
 
   const stockMode = STOCK_MODES.includes(String(stock.mode) as typeof STOCK_MODES[number]) ? String(stock.mode) : null

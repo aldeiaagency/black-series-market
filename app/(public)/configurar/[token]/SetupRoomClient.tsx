@@ -3,6 +3,13 @@
 import { useMemo, useRef, useState } from 'react'
 import { AlertTriangle, CalendarClock, Check, FileText, ImagePlus, Link2, Loader2, UploadCloud } from 'lucide-react'
 import type { SetupRoomData } from '@/lib/onboarding/setup-room'
+import { DEFAULT_RULES, DEFAULT_SETTINGS, rangesToStr, parseRanges } from '@/lib/booking'
+import type { BookingSettings, Weekday, TimeRange } from '@/lib/booking'
+
+const DAYS: { key: Weekday; label: string }[] = [
+  { key: 'mon', label: 'Lunes' }, { key: 'tue', label: 'Martes' }, { key: 'wed', label: 'Miércoles' },
+  { key: 'thu', label: 'Jueves' }, { key: 'fri', label: 'Viernes' }, { key: 'sat', label: 'Sábado' }, { key: 'sun', label: 'Domingo' },
+]
 
 const SPECIALTIES = [
   { value: 'sport', label: 'Deportivos' },
@@ -54,6 +61,7 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
   const app = setup.application
   const needsAssistant = dealer.subscription_plan === 'professional' || dealer.subscription_plan === 'elite'
   const showCalendar = dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
+  const showAppointments = dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
 
   const [profile, setProfile] = useState({
     name: first(dealer.name, app?.dealer_name),
@@ -92,6 +100,15 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
     notes: '',
     csv_files: [] as FileRef[],
     bulk_files: [] as FileRef[],
+  })
+  const [appointments, setAppointments] = useState({
+    weekly: Object.fromEntries(DAYS.map((d) => [d.key, rangesToStr(DEFAULT_RULES.weekly[d.key])])) as Record<string, string>,
+    slot_minutes: String(DEFAULT_RULES.slot_minutes),
+    min_hours_notice: String(DEFAULT_RULES.min_hours_notice),
+    max_days_ahead: String(DEFAULT_RULES.max_days_ahead),
+    mode: DEFAULT_SETTINGS.mode as BookingSettings['mode'],
+    location_text: '',
+    instructions: '',
   })
   const [uploading, setUploading] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
@@ -163,6 +180,9 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
     setSubmitting(true)
     setSubmitError(null)
     try {
+      const weeklyParsed: Partial<Record<Weekday, TimeRange[]>> = {}
+      for (const d of DAYS) weeklyParsed[d.key] = parseRanges(appointments.weekly[d.key] || '')
+
       const res = await fetch(`/api/onboarding/${encodeURIComponent(token)}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -174,6 +194,17 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
           assistant,
           assets,
           stock,
+          appointments: showAppointments
+            ? {
+                weekly: weeklyParsed,
+                slot_minutes: Number(appointments.slot_minutes),
+                min_hours_notice: Number(appointments.min_hours_notice),
+                max_days_ahead: Number(appointments.max_days_ahead),
+                mode: appointments.mode,
+                location_text: appointments.location_text,
+                instructions: appointments.instructions,
+              }
+            : undefined,
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -282,6 +313,57 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
                 <Field label="Horario de atención" value={assistant.attention_hours} onChange={(v) => updateAssistant('attention_hours', v)} placeholder="Lunes a viernes 10:00-19:00. Sábados bajo cita previa." />
                 <TextArea label="Cómo tratáis la negociación" value={assistant.negotiation_style} onChange={(v) => updateAssistant('negotiation_style', v)} rows={3} placeholder="Ej. Transparencia desde el primer contacto; valoramos operaciones serias y estudiamos entrega a cuenta caso por caso." />
                 <Field label="WhatsApp de contacto" value={assistant.whatsapp_number} onChange={(v) => updateAssistant('whatsapp_number', v)} placeholder="+34600000000" />
+              </div>
+            </section>
+          )}
+
+          {showAppointments && (
+            <section className="border border-bsm-border bg-surface p-6">
+              <div className="mb-4 flex items-start gap-3">
+                <CalendarClock className="mt-1 h-5 w-5 text-gold" />
+                <div>
+                  <h2 className="font-display text-2xl font-light">Horario de citas</h2>
+                  <p className="mt-1 text-sm text-bsm-text-muted">
+                    El agente de tus fichas propondrá estos huecos a los compradores para reservar una visita. Puedes
+                    ajustarlo más adelante desde Dashboard → Citas.
+                  </p>
+                </div>
+              </div>
+
+              <p className="label-base mb-2">Disponibilidad semanal</p>
+              <p className="mb-3 text-xs text-bsm-text-muted">Franjas por día, formato <code>10:00-14:00, 16:00-20:00</code>. Deja vacío un día sin visitas.</p>
+              <div className="mb-6 space-y-2">
+                {DAYS.map((d) => (
+                  <div key={d.key} className="grid grid-cols-[110px_1fr] items-center gap-3">
+                    <label className="text-sm text-bsm-text-secondary">{d.label}</label>
+                    <input
+                      value={appointments.weekly[d.key]}
+                      onChange={(e) => setAppointments((prev) => ({ ...prev, weekly: { ...prev.weekly, [d.key]: e.target.value } }))}
+                      placeholder="—"
+                      className="input-base text-sm"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-6 grid gap-4 sm:grid-cols-3">
+                <Field label="Duración (min)" value={appointments.slot_minutes} onChange={(v) => setAppointments((prev) => ({ ...prev, slot_minutes: v }))} type="number" />
+                <Field label="Antelación mín. (h)" value={appointments.min_hours_notice} onChange={(v) => setAppointments((prev) => ({ ...prev, min_hours_notice: v }))} type="number" />
+                <Field label="Ventana (días)" value={appointments.max_days_ahead} onChange={(v) => setAppointments((prev) => ({ ...prev, max_days_ahead: v }))} type="number" />
+              </div>
+
+              <p className="label-base mb-2">Modalidad</p>
+              <div className="mb-4 flex gap-2">
+                {([['in_person', 'Presencial'], ['video', 'Videollamada'], ['both', 'Ambas']] as const).map(([v, l]) => (
+                  <label key={v} className="flex items-center justify-center px-4 py-2 border border-bsm-border text-sm text-bsm-text-muted cursor-pointer has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5">
+                    <input type="radio" name="appointment_mode" value={v} checked={appointments.mode === v} onChange={() => setAppointments((prev) => ({ ...prev, mode: v }))} className="sr-only" />
+                    {l}
+                  </label>
+                ))}
+              </div>
+              <Field label="Dirección / lugar (si es presencial)" value={appointments.location_text} onChange={(v) => setAppointments((prev) => ({ ...prev, location_text: v }))} placeholder="C/ Ejemplo 1, Madrid" />
+              <div className="mt-4">
+                <TextArea label="Instrucciones para el comprador (opcional)" value={appointments.instructions} onChange={(v) => setAppointments((prev) => ({ ...prev, instructions: v }))} rows={2} placeholder="Pregunta por el vehículo en recepción al llegar." />
               </div>
             </section>
           )}
