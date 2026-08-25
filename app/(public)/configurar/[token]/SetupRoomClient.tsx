@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useRef, useState } from 'react'
-import { AlertTriangle, CalendarClock, Check, FileText, ImagePlus, Link2, Loader2, UploadCloud } from 'lucide-react'
+import { AlertTriangle, CalendarClock, Check, FileText, ImagePlus, Loader2, UploadCloud } from 'lucide-react'
 import type { SetupRoomData } from '@/lib/onboarding/setup-room'
 import { DEFAULT_RULES, DEFAULT_SETTINGS, rangesToStr, parseRanges } from '@/lib/booking'
 import type { BookingSettings, Weekday, TimeRange } from '@/lib/booking'
@@ -33,34 +33,22 @@ const SERVICES = [
   { value: 'home_delivery', label: 'Entrega a domicilio' },
 ]
 
-const CALENDAR_ERROR_LABELS: Record<string, string> = {
-  not_configured: 'La conexión con Google Calendar no está disponible todavía.',
-  denied: 'Has cancelado la conexión con Google Calendar.',
-  invalid_request: 'La solicitud de conexión no es válida. Inténtalo de nuevo.',
-  invalid_state: 'La solicitud de conexión caducó. Inténtalo de nuevo.',
-  token_exchange_failed: 'Google no ha devuelto acceso permanente. Vuelve a intentarlo aceptando todos los permisos.',
-  calendar_fetch_failed: 'No se pudo leer tu calendario de Google. Inténtalo de nuevo.',
-  save_failed: 'No se pudo guardar la conexión. Inténtalo de nuevo.',
-}
-
 type FileRef = { url: string; path: string; type: string; name?: string; size?: number; content_type?: string }
 
 interface Props {
   token: string
   setup: SetupRoomData
-  calendarConnected: boolean
-  calendarError: string | null
+  feedSyncAvailable: boolean
 }
 
 function first<T>(...values: (T | null | undefined)[]): T | '' {
   return values.find((v) => v !== null && v !== undefined && v !== '') ?? ''
 }
 
-export default function SetupRoomClient({ token, setup, calendarConnected, calendarError }: Props) {
+export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Props) {
   const dealer = setup.dealer
   const app = setup.application
   const needsAssistant = dealer.subscription_plan === 'professional' || dealer.subscription_plan === 'elite'
-  const showCalendar = dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
   const showAppointments = dealer.subscription_plan === 'elite' || dealer.subscription_plan === 'grupo'
 
   const [profile, setProfile] = useState({
@@ -302,6 +290,7 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
               </UploadPanel>
               <UploadPanel title="Documento libre" icon={<FileText className="h-4 w-4" />} onClick={() => documentRef.current?.click()} busy={uploading === 'document'} action="Subir PDF o Word">
                 <input ref={documentRef} type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple className="sr-only" onChange={(e) => uploadFiles(e.target.files, 'document')} />
+                <p className="mt-4 text-xs leading-5 text-bsm-text-muted">Cualquier material que ayude al equipo a preparar tu perfil: catálogo de precios, condiciones comerciales, ficha de servicios...</p>
                 <FileList files={assets.documents} />
               </UploadPanel>
             </div>
@@ -379,33 +368,20 @@ export default function SetupRoomClient({ token, setup, calendarConnected, calen
             </section>
           )}
 
-          {showCalendar && (
-            <section className="border border-bsm-border bg-surface p-6">
-              <div className="mb-4 flex items-start gap-3">
-                <CalendarClock className="mt-1 h-5 w-5 text-gold" />
-                <div>
-                  <h2 className="font-display text-2xl font-light">Google Calendar</h2>
-                  <p className="mt-1 text-sm text-bsm-text-muted">Conecta la agenda que debe consultar el asistente antes de proponer una visita.</p>
-                </div>
-              </div>
-              {calendarConnected || setup.google.status === 'connected' ? (
-                <p className="flex items-center gap-2 text-sm text-emerald-400"><Check className="h-4 w-4" />Google Calendar conectado{setup.google.email ? ` como ${setup.google.email}` : ''}.</p>
-              ) : setup.google.configured ? (
-                <a href={`/api/calendar/google/connect?setup_token=${encodeURIComponent(token)}`} className="btn-outline px-4 py-2 text-sm"><Link2 className="h-4 w-4" />Conectar con un clic</a>
-              ) : (
-                <p className="text-sm text-amber-400">La conexión con Google Calendar todavía no está disponible. El equipo la activará cuando la app OAuth esté registrada.</p>
-              )}
-              {calendarError && <p className="mt-3 text-sm text-red-400">{CALENDAR_ERROR_LABELS[calendarError] ?? 'No se pudo conectar Google Calendar.'}</p>}
-            </section>
-          )}
-
           <section className="border border-bsm-border bg-surface p-6">
             <h2 className="mb-1 font-display text-2xl font-light">Stock inicial</h2>
             <p className="mb-6 text-sm text-bsm-text-muted">Elige la vía más cómoda para preparar las primeras unidades.</p>
             <div className="grid gap-3 md:grid-cols-3">
-              <ModeButton active={stock.mode === 'feed_url'} title="Feed o portal" text="URL de tu feed actual o portal de stock." onClick={() => setStock((s) => ({ ...s, mode: 'feed_url' }))} />
-              <ModeButton active={stock.mode === 'csv'} title="CSV" text="Plantilla compatible con el alta masiva del dashboard." onClick={() => setStock((s) => ({ ...s, mode: 'csv' }))} />
-              <ModeButton active={stock.mode === 'loose_files'} title="Archivos sueltos" text="Fotos o carpetas de material para que el equipo las revise." onClick={() => setStock((s) => ({ ...s, mode: 'loose_files' }))} />
+              <ModeButton
+                active={stock.mode === 'feed_url'}
+                title="Feed o portal"
+                text={feedSyncAvailable
+                  ? 'URL de tu feed o portal de stock. Lo sincronizamos automáticamente cada día.'
+                  : 'URL de tu feed o portal de stock. El equipo lo importa por ti.'}
+                onClick={() => setStock((s) => ({ ...s, mode: 'feed_url' }))}
+              />
+              <ModeButton active={stock.mode === 'csv'} title="CSV" text="Plantilla compatible con el alta masiva del dashboard. El equipo la sube por ti, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'csv' }))} />
+              <ModeButton active={stock.mode === 'loose_files'} title="Archivos sueltos" text="Fotos o carpetas de material para que el equipo las suba, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'loose_files' }))} />
             </div>
             <div className="mt-5 space-y-4">
               {stock.mode === 'feed_url' && <Field label="URL de feed o portal" value={stock.feed_url} onChange={(v) => setStock((s) => ({ ...s, feed_url: v }))} type="url" placeholder="https://..." />}

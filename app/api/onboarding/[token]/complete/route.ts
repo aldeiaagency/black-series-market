@@ -78,6 +78,8 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   const stock = (body.stock && typeof body.stock === 'object' ? body.stock : {}) as Record<string, unknown>
   const assets = (body.assets && typeof body.assets === 'object' ? body.assets : {}) as Record<string, unknown>
   const appointments = (body.appointments && typeof body.appointments === 'object' ? body.appointments : {}) as Record<string, unknown>
+  const stockMode = STOCK_MODES.includes(String(stock.mode) as typeof STOCK_MODES[number]) ? String(stock.mode) : null
+  const stockFeedUrl = sanitizeHttpUrl(stock.feed_url)
 
   const dealerUpdate = {
     name: normalizeText(profile.name, 160) || setup.dealer.name,
@@ -98,6 +100,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     services: normalizeStringArray(profile.services, SERVICES),
     logo_url: sanitizeHttpUrl(assets.logo_url) ?? setup.dealer.logo_url,
     cover_url: sanitizeHttpUrl(assets.cover_url) ?? setup.dealer.cover_url,
+    ...(stockMode === 'feed_url' && stockFeedUrl ? { feed_url: stockFeedUrl } : {}),
     updated_at: new Date().toISOString(),
   }
 
@@ -135,7 +138,6 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     }
   }
 
-  const stockMode = STOCK_MODES.includes(String(stock.mode) as typeof STOCK_MODES[number]) ? String(stock.mode) : null
   const setupContext = {
     profile_confirmed_at: new Date().toISOString(),
     financing: {
@@ -149,7 +151,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     documents: normalizeFiles(assets.documents),
     stock: {
       mode: stockMode,
-      feed_url: sanitizeHttpUrl(stock.feed_url),
+      feed_url: stockFeedUrl,
       notes: normalizeText(stock.notes, 700),
       csv_files: normalizeFiles(stock.csv_files),
       bulk_files: normalizeFiles(stock.bulk_files),

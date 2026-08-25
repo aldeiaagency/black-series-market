@@ -27,6 +27,34 @@ async function postJsonWithTimeout(url: string, body: unknown) {
   }
 }
 
+
+type SetupRoomStockContext = {
+  mode: string | null
+  feed_url: string | null
+  notes: string | null
+  csv_files: unknown[]
+  bulk_files: unknown[]
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
+}
+
+function getSetupRoomStock(context: unknown): SetupRoomStockContext | null {
+  if (!isRecord(context) || !isRecord(context.setup_room) || !isRecord(context.setup_room.stock)) return null
+
+  const stock = context.setup_room.stock
+  const mode = typeof stock.mode === 'string' ? stock.mode : null
+  if (!mode) return null
+
+  return {
+    mode,
+    feed_url: typeof stock.feed_url === 'string' ? stock.feed_url : null,
+    notes: typeof stock.notes === 'string' ? stock.notes : null,
+    csv_files: Array.isArray(stock.csv_files) ? stock.csv_files : [],
+    bulk_files: Array.isArray(stock.bulk_files) ? stock.bulk_files : [],
+  }
+}
 async function approveDealerAccess(formData: FormData) {
   'use server'
   const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
@@ -192,6 +220,56 @@ async function publishDealerProfile(formData: FormData) {
   revalidatePath('/dealers')
   redirect(`/admin/dealers/${dealerId}`)
 }
+
+async function processInitialStockWithIa(formData: FormData) {
+  'use server'
+  const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
+  const dealerId = formData.get('dealerId') as string
+  if (!dealerId) redirect('/admin/dealers')
+
+  const supabase = await createAdminClient()
+  const [{ data: dealer }, { data: assistantConfig }] = await Promise.all([
+    supabase
+      .from('dealers')
+      .select('id, name, slug')
+      .eq('id', dealerId)
+      .maybeSingle(),
+    supabase
+      .from('showroom_assistant_config')
+      .select('context')
+      .eq('dealer_id', dealerId)
+      .maybeSingle(),
+  ])
+
+  const stock = getSetupRoomStock(assistantConfig?.context)
+  if (!dealer || (stock?.mode !== 'csv' && stock?.mode !== 'loose_files')) {
+    redirect(`/admin/dealers/${dealerId}`)
+  }
+
+  const webhookUrl = process.env.N8N_WEBHOOK_STOCK_INICIAL_IA
+    ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/stock-inicial-ia'
+  const payload = {
+    dealer_id: dealer.id,
+    dealer_name: dealer.name,
+    dealer_slug: dealer.slug,
+    stock_mode: stock.mode,
+    stock_feed_url: stock.feed_url ?? null,
+    stock_notes: stock.notes ?? null,
+    stock_csv_files: stock.csv_files ?? [],
+    stock_bulk_files: stock.bulk_files ?? [],
+  }
+
+  postJsonWithTimeout(webhookUrl, payload)
+    .then((res) => {
+      if (!res.ok) console.error('stock_inicial_ia webhook failed', { dealerId, status: res.status })
+    })
+    .catch((error) => {
+      console.error('stock_inicial_ia webhook failed', { dealerId, error })
+    })
+
+  revalidatePath(`/admin/dealers/${dealerId}`)
+  redirect(`/admin/dealers/${dealerId}?stock_ia_disparado=1`)
+}
 async function deleteDealer(formData: FormData) {
   'use server'
   const { assertAdmin } = await import('@/lib/admin-auth'); await assertAdmin()
@@ -234,7 +312,7 @@ async function saveProfile(formData: FormData) {
 
 export default async function AdminDealerDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params
-  const { deleteError } = await searchParams
+  const { deleteError, stock_ia_disparado: stockIaTriggered } = await searchParams
   // createAdminClient bypasses RLS for cross-showroom data access
   const supabase = await createAdminClient()
 
@@ -248,7 +326,7 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
 
   const { data: assistantConfig } = await supabase
     .from('showroom_assistant_config')
-    .select('enabled, n8n_workflow_id')
+    .select('enabled, n8n_workflow_id, context')
     .eq('dealer_id', id)
     .maybeSingle()
 
@@ -293,6 +371,8 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
 
   const totalViews = vehicles?.reduce((sum: number, v: any) => sum + (v.views || 0), 0) || 0
   const firstActiveVehicle = vehicles?.find((v: any) => v.status === 'active' && v.images?.[0]?.url)
+  const setupRoomStock = getSetupRoomStock(assistantConfig?.context)
+  const canProcessInitialStock = setupRoomStock?.mode === 'csv' || setupRoomStock?.mode === 'loose_files'
 
   const PLAN_OPTIONS = [
     { value: 'trial',        label: 'Trial (5 vehículos publicados)' },
@@ -396,6 +476,30 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
         </div>
       )}
 
+      {stockIaTriggered === '1' && (
+        <div className="mb-8 border border-emerald-400/30 bg-emerald-400/5 p-4 text-sm text-emerald-400">
+          Procesamiento de stock inicial enviado a n8n.
+        </div>
+      )}
+
+      {canProcessInitialStock && (
+        <div className="mb-8 border border-gold/35 bg-gold/5 p-5">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-medium text-gold">Stock inicial listo para procesar con IA</p>
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-bsm-text-muted">
+                Hay material de stock enviado desde la sala de configuración. Dispara el pipeline manual de alta premium para preparar las primeras unidades.
+              </p>
+            </div>
+            <form action={processInitialStockWithIa}>
+              <input type="hidden" name="dealerId" value={id} />
+              <button type="submit" className="btn-gold px-5 py-2.5 text-sm">
+                <Bot className="h-4 w-4" /> Procesar stock inicial con IA
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="mb-8">
         <Link href="/admin/dealers" className="flex items-center gap-1.5 text-sm text-bsm-text-muted hover:text-gold transition-colors mb-6">

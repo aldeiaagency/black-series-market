@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ token: string }>
-  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string }>
 }
 
 function InvalidSetupLink() {
@@ -32,20 +31,30 @@ function InvalidSetupLink() {
   )
 }
 
-export default async function ConfigurarShowroomPage({ params, searchParams }: Props) {
+export default async function ConfigurarShowroomPage({ params }: Props) {
   const { token } = await params
-  const flags = await searchParams
   const admin = createAdminClient()
   const setup = await loadSetupRoom(admin, token)
 
   if (!setup) return <InvalidSetupLink />
 
+  const planSlug = setup.dealer.subscription_plan
+  const { data: feedSyncFeature } = planSlug
+    ? await admin
+        .from('plan_features')
+        .select('plan_id, plans!inner(slug)')
+        .eq('feature_key', 'feed_sync')
+        .eq('included', true)
+        .eq('availability_status', 'operative')
+        .eq('plans.slug', planSlug)
+        .maybeSingle()
+    : { data: null }
+
   return (
     <SetupRoomClient
       token={token}
       setup={setup}
-      calendarConnected={flags.calendar_connected === '1'}
-      calendarError={flags.calendar_error ?? null}
+      feedSyncAvailable={Boolean(feedSyncFeature)}
     />
   )
 }
