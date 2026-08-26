@@ -163,7 +163,7 @@
         160
       ],
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst v = d.vehicle || {};\nconst s = d.showroom || {};\nconst lang = d.language || 'es';\nfunction whatsappLink(raw) { const digits = String(raw || '').replace(/[^0-9]/g, ''); if (!digits) return null; const normalized = digits.length === 9 ? '34' + digits : digits; return 'https://wa.me/' + normalized; }\nconst waLink = whatsappLink(s.whatsapp);\nconst priceText = v.price && !v.price_on_request ? 'Precio: ' + new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v.price) : (v.price_on_request ? 'Precio: A consultar' : null);\nconst vehicleInfo = [v.title ? 'Veh?culo: ' + v.title : null, priceText, v.year ? 'A?o: ' + v.year : null, v.fuel_type ? 'Combustible: ' + v.fuel_type : null, v.mileage_km ? 'Kil?metros: ' + new Intl.NumberFormat('es-ES').format(v.mileage_km) + ' km' : null, v.power_hp ? 'Potencia: ' + v.power_hp + ' CV' : null].filter(Boolean).join('\\n');\nconst showroomInfo = [s.name ? 'Showroom: ' + s.name : null, s.city ? 'Ciudad: ' + s.city : null, s.whatsapp ? 'WhatsApp: ' + s.whatsapp : null, waLink ? 'Enlace WhatsApp: ' + waLink : null].filter(Boolean).join('\\n');\nconst contactRule = waLink ? 'Cuando el comprador muestre intenci?n real, ofrece dos v?as con naturalidad: reservar una visita si est? disponible o hablar directamente por WhatsApp en ' + waLink + '. No fuerces el enlace al inicio; ?salo cuando ayude a avanzar la conversaci?n.' : 'Cuando el comprador muestre intenci?n real, sugiere reservar una visita o dejar datos para que el showroom le contacte.';\nconst systemPrompt = 'Eres el asistente de ventas de ' + (s.name || 'este showroom') + ' en Black Label Market, especializado en veh?culos premium.\\n\\nINFORMACI?N DEL VEH?CULO:\\n' + (vehicleInfo || 'No disponible') + '\\n\\nINFORMACI?N DEL SHOWROOM:\\n' + (showroomInfo || 'No disponible') + '\\n\\nTu objetivo:\\n1. Responder preguntas sobre el veh?culo con informaci?n precisa.\\n2. Entender necesidades del comprador: uso, financiaci?n, plazo de compra y posible veh?culo a entregar.\\n3. ' + contactRule + '\\n4. Ser conciso: 2-3 frases, tono profesional, sobrio y cercano.\\n5. Idioma: ' + (lang === 'es' ? 'Espa?ol' : lang) + '.\\n\\nNo inventes caracter?sticas del veh?culo. Si falta un dato, dilo con claridad y ofrece consultarlo con el showroom.';\nconst openingMessage = lang === 'es' ? 'Hola, soy el asistente de ' + (s.name || 'este showroom') + '. Puedo ayudarte con ' + (v.title || 'esta unidad') + ' y coordinar el siguiente paso si encaja con lo que buscas. ?Qu? te gustar?a saber?' : 'Hi, I am the assistant for ' + (s.name || 'this showroom') + '. I can help with ' + (v.title || 'this vehicle') + ' and coordinate the next step if it fits what you are looking for. What would you like to know?';\nreturn [{ json: { ...d, systemPrompt, openingMessages: [{ role: 'system', content: systemPrompt }, { role: 'assistant', content: openingMessage }], openingMessage } }];"
+        "jsCode": "const d = $input.first().json;\nconst v = d.vehicle || {};\nconst s = d.showroom || {};\nconst lang = d.language || 'es';\nfunction whatsappLink(raw) { const digits = String(raw || '').replace(/[^0-9]/g, ''); if (!digits) return null; const normalized = digits.length === 9 ? '34' + digits : digits; return 'https://wa.me/' + normalized; }\nconst waLink = whatsappLink(s.whatsapp);\nconst priceText = v.price && !v.price_on_request ? 'Precio: ' + new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v.price) : (v.price_on_request ? 'Precio: A consultar' : null);\nconst vehicleInfo = [v.title ? 'Vehículo: ' + v.title : null, priceText, v.year ? 'Año: ' + v.year : null, v.fuel_type ? 'Combustible: ' + v.fuel_type : null, v.mileage_km ? 'Kilómetros: ' + new Intl.NumberFormat('es-ES').format(v.mileage_km) + ' km' : null, v.power_hp ? 'Potencia: ' + v.power_hp + ' CV' : null].filter(Boolean).join('\\n');\nconst showroomInfo = [s.name ? 'Showroom: ' + s.name : null, s.city ? 'Ciudad: ' + s.city : null, s.whatsapp ? 'WhatsApp: ' + s.whatsapp : null, waLink ? 'Enlace WhatsApp: ' + waLink : null].filter(Boolean).join('\\n');\nconst contactRule = waLink ? 'Cuando el comprador muestre intención real, ofrece dos vías con naturalidad: reservar una visita si está disponible o hablar directamente por WhatsApp en ' + waLink + '. No fuerces el enlace al inicio; úsalo cuando ayude a avanzar la conversación.' : 'Cuando el comprador muestre intención real, sugiere reservar una visita o dejar datos para que el showroom le contacte.';\nconst systemPrompt = 'Eres el asistente de ventas de ' + (s.name || 'este showroom') + ' en Black Label Market, especializado en vehículos premium.\\n\\nINFORMACIÓN DEL VEHÍCULO:\\n' + (vehicleInfo || 'No disponible') + '\\n\\nINFORMACIÓN DEL SHOWROOM:\\n' + (showroomInfo || 'No disponible') + '\\n\\nTu objetivo:\\n1. Responder preguntas sobre el vehículo con información precisa.\\n2. Entender necesidades del comprador: uso, financiación, plazo de compra y posible vehículo a entregar.\\n3. ' + contactRule + '\\n4. Ser conciso: 2-3 frases, tono profesional, sobrio y cercano.\\n5. Idioma: ' + (lang === 'es' ? 'Español' : lang) + '.\\n\\nNo inventes características del vehículo. Si falta un dato, dilo con claridad y ofrece consultarlo con el showroom.';\nconst openingMessage = lang === 'es' ? 'Hola, soy el asistente de ' + (s.name || 'este showroom') + '. Puedo ayudarte con ' + (v.title || 'esta unidad') + ' y coordinar el siguiente paso si encaja con lo que buscas. ¿Qué te gustaría saber?' : 'Hi, I am the assistant for ' + (s.name || 'this showroom') + '. I can help with ' + (v.title || 'this vehicle') + ' and coordinate the next step if it fits what you are looking for. What would you like to know?';\nreturn [{ json: { ...d, systemPrompt, openingMessages: [{ role: 'system', content: systemPrompt }, { role: 'assistant', content: openingMessage }], openingMessage } }];"
       }
     },
     {
@@ -283,7 +283,7 @@
         460
       ],
       "parameters": {
-        "jsCode": "const input = $('Switch por tipo de evento').first().json;\nconst rows = $input.all();\nconst session = rows.length > 0 ? rows[0].json : null;\nconst history = Array.isArray(session?.messages) ? session.messages : [];\nconst storedSystemPrompt = history.find(m => m?.role === 'system' && m?.content)?.content;\nconst systemPrompt = storedSystemPrompt || 'Eres el asistente de ventas de un showroom premium en Black Label Market.\\nResponde de forma concisa (2-3 frases), profesional y ?til.\\nSi el comprador muestra inter?s real en comprar, sugiere contactar por WhatsApp si est? disponible o concertar visita.\\nNo inventes informaci?n que no tengas.';\nconst recentHistory = history.filter(m => m?.role !== 'system').slice(-10);\nconst messages = [{ role: 'system', content: systemPrompt }, ...recentHistory, { role: 'user', content: input.message }];\nreturn [{ json: { ...input, messages, history } }];"
+        "jsCode": "const input = $('Switch por tipo de evento').first().json;\nconst rows = $input.all();\nconst session = rows.length > 0 ? rows[0].json : null;\nconst history = Array.isArray(session?.messages) ? session.messages : [];\nconst storedSystemPrompt = history.find(m => m?.role === 'system' && m?.content)?.content;\nconst systemPrompt = storedSystemPrompt || 'Eres el asistente de ventas de un showroom premium en Black Label Market.\\nResponde de forma concisa (2-3 frases), profesional y ?til.\\nSi el comprador muestra interés real en comprar, sugiere contactar por WhatsApp si est? disponible o concertar visita.\\nNo inventes información que no tengas.';\nconst recentHistory = history.filter(m => m?.role !== 'system').slice(-10);\nconst messages = [{ role: 'system', content: systemPrompt }, ...recentHistory, { role: 'user', content: input.message }];\nreturn [{ json: { ...input, messages, history } }];"
       }
     },
     {
@@ -304,16 +304,13 @@
             {
               "name": "Authorization",
               "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
             }
           ]
         },
         "sendBody": true,
-        "contentType": "raw",
-        "body": "={{ JSON.stringify({ model: 'gpt-4o-mini', messages: $json.messages, max_tokens: 300, temperature: 0.7 }) }}",
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o-mini', messages: $json.messages, max_tokens: 300, temperature: 0.7 }) }}",
         "options": {}
       }
     },
@@ -541,6 +538,5 @@
   },
   "settings": {
     "executionOrder": "v1"
-  },
-  "tags": []
+  }
 }
