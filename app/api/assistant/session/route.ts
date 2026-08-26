@@ -46,11 +46,26 @@ export async function POST(req: NextRequest) {
   // Check per-showroom assistant config
   const { data: cfg } = await admin
     .from('showroom_assistant_config')
-    .select('webhook_url, enabled, whatsapp_number, languages')
+    .select('webhook_url, enabled, whatsapp_number, languages, context')
     .eq('dealer_id', dealer.id)
     .single()
 
   if (!cfg?.enabled || !cfg.webhook_url) return classic()
+
+  const cfgContext = cfg.context as Record<string, any> | null | undefined
+  const setupRoomRaw = cfgContext && typeof cfgContext === 'object' && !Array.isArray(cfgContext)
+    ? cfgContext.setup_room
+    : null
+  const setupRoom = setupRoomRaw && typeof setupRoomRaw === 'object' && !Array.isArray(setupRoomRaw)
+    ? setupRoomRaw as Record<string, any>
+    : {}
+  const financingRaw = setupRoom.financing
+  const financing = financingRaw && typeof financingRaw === 'object' && !Array.isArray(financingRaw)
+    ? financingRaw as Record<string, any>
+    : {}
+  const services = Array.isArray(setupRoom.services)
+    ? setupRoom.services.filter((service): service is string => typeof service === 'string')
+    : []
 
   // ¿El showroom puede reservar cita? (Elite/Grupo con entitlement + calendario configurado)
   let bookingEnabled = false
@@ -87,6 +102,11 @@ export async function POST(req: NextRequest) {
       city:        dealer.location_city ?? null,
       whatsapp:    (cfg.whatsapp_number as string) || (dealer.whatsapp as string) || null,
       profile_url: `/dealers/${dealer.slug}`,
+      financing_available: financing.available === true,
+      financing_conditions: typeof financing.conditions === 'string' ? financing.conditions : null,
+      attention_hours:      typeof setupRoom.attention_hours === 'string' ? setupRoom.attention_hours : null,
+      negotiation_style:    typeof setupRoom.negotiation_style === 'string' ? setupRoom.negotiation_style : null,
+      services,
     },
   }
 
