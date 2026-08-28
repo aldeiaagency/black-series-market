@@ -1,0 +1,77 @@
+name: Backup diario de base de datos
+
+# Por qué existe: Supabase en plan gratuito no ofrece backups restaurables por el usuario
+# (verificado 2026-08-28: pitr_enabled=false, backups=[]). Este workflow cubre ese hueco sin
+# coste, corriendo en la infraestructura de GitHub — no depende de que ningún ordenador esté
+# encendido. Detalle completo: agency/registro_decisiones.md 2026-08-28.
+#
+# Qué hace: pg_dump completo (esquema + datos + roles, todos los schemas: public/auth/storage)
+# → comprime → cifra con la passphrase del secret BACKUP_PASSPHRASE → sube como GitHub Release
+# (retención indefinida, sin coste, hasta 2GB por asset). Purga automáticamente lo que supere
+# los 30 backups más recientes.
+#
+# Qué NO incluye: los ficheros de Supabase Storage (fotos de vehículos) — solo su metadata.
+# Restaurar: ver scripts/restaurar-backup.sh
+
+on:
+  schedule:
+    - cron: '30 3 * * *'   # 03:30 UTC diario — fuera de horario de uso real
+  workflow_dispatch:         # permite lanzarlo a mano desde la pestaña Actions
+
+permissions:
+  contents: write   # necesario para crear Releases
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dump completo (esquema + datos + roles)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y-%m-%d)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          # postgres:17 coincide con la versión real del proyecto (verificada: 17.6.1) —
+          # evita el fallo típico de pg_dump más nuevo/viejo que el servidor.
+          docker run --rm -v "$PWD":/backup -e SUPABASE_DB_URL postgres:17 \
+            pg_dump "$SUPABASE_DB_URL" \
+              --no-owner --no-privileges --format=custom \
+              --file="/backup/blm-full-${STAMP}.dump"
+          gzip -9 "blm-full-${STAMP}.dump"
+
+      - name: Cifrar
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          openssl enc -aes-256-cbc -pbkdf2 -salt \
+            -in "blm-full-${STAMP}.dump.gz" \
+            -out "blm-full-${STAMP}.dump.gz.enc" \
+            -pass env:BACKUP_PASSPHRASE
+          rm "blm-full-${STAMP}.dump.gz"
+          ls -lh "blm-full-${STAMP}.dump.gz.enc"
+
+      - name: Subir como Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release create "backup-${STAMP}" \
+            "blm-full-${STAMP}.dump.gz.enc" \
+            --title "Backup ${STAMP}" \
+            --notes "Backup cifrado automático de Black Label Market. Restaurar con scripts/restaurar-backup.sh — requiere la passphrase guardada fuera de este repo." \
+            --repo aldeiaagency/black-series-market
+
+      - name: Purgar backups con más de 30 días
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release list --repo aldeiaagency/black-series-market --limit 200 --json tagName \
+            --jq '.[].tagName' | grep '^backup-' | sort -r | tail -n +31 | \
+            xargs -r -I{} gh release delete {} --repo aldeiaagency/black-series-market --yes --cleanup-tag

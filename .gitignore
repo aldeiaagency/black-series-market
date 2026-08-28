@@ -45,3 +45,8 @@ CLAUDE.local.md
 
 # credenciales privadas locales (nunca versionar)
 CREDENTIALS.local.md
+
+# Backups de base de datos (workflow backup.yml) — nunca deben commitearse
+*.dump
+*.dump.gz
+*.dump.gz.enc
