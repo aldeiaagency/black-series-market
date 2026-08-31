@@ -1,0 +1,98 @@
+{
+  "week": "2026-09-01",
+  "pieces": [
+    {
+      "id": "20260901-w1-porsche-gt3rs",
+      "template": "IG-P1",
+      "utm_content": "ig-feed-p1-v1",
+      "cta": "Ver ficha",
+      "data": {
+        "vehicle": { "brand_name": "Porsche", "model_name": "911 GT3 RS Weissach", "power_hp": 525, "mileage_km": 2400, "year": 2024, "price": 329900 },
+        "imageUrl": "https://blacklabelmarket.es/images/demo/vehicles/porsche-911-gt3-rs-992.webp"
+      }
+    },
+    {
+      "id": "20260901-w2-range-rover-sv",
+      "template": "IG-P2",
+      "utm_content": "ig-feed-p2-v1",
+      "cta": "Ver ficha",
+      "data": {
+        "vehicle": { "brand_name": "Range Rover", "model_name": "SV P530", "power_hp": 530, "mileage_km": 14200, "location_province": "Madrid" },
+        "imageUrl": "https://blacklabelmarket.es/images/demo/vehicles/range-rover-sv.webp"
+      }
+    },
+    {
+      "id": "20260901-w3-ferrari-430-scuderia",
+      "template": "IG-P3",
+      "utm_content": "ig-feed-p3-v1",
+      "cta": "Ver carrusel completo",
+      "data": {
+        "vehicle": { "brand_name": "Ferrari", "model_name": "430 Scuderia" },
+        "imageUrl": "https://iylppoaitwnmbwjaubuy.supabase.co/storage/v1/object/public/vehicle-images/demo/ferrari-430-scuderia-2008/01.webp",
+        "slideIndex": 1,
+        "slideTotal": 5
+      }
+    },
+    {
+      "id": "20260901-w4-porsche-964-specs",
+      "template": "IG-P4",
+      "utm_content": "ig-feed-p4-v1",
+      "cta": "Ver ficha técnica",
+      "data": {
+        "vehicle": { "brand_name": "Porsche", "model_name": "911 Turbo 964" },
+        "eyebrow": "Ficha técnica",
+        "subtitle": "Numeración de origen coincidente",
+        "specs": [
+          { "label": "Año", "value": "1992" },
+          { "label": "Potencia", "value": "320 CV" },
+          { "label": "Kilómetros", "value": "72.000 km" },
+          { "label": "Transmisión", "value": "Manual" },
+          { "label": "Propietarios", "value": "3" },
+          { "label": "Documentación", "value": "Certificado" }
+        ],
+        "imageUrl": "https://blacklabelmarket.es/images/demo/vehicles/porsche-911-turbo-964.webp"
+      }
+    },
+    {
+      "id": "20260901-w5-comparativa-911",
+      "template": "IG-P5",
+      "utm_content": "ig-feed-p5-v1",
+      "cta": null,
+      "data": {
+        "headline": "Dos generaciones · 911",
+        "left": { "label": "964 Turbo", "year": "1992", "imageUrl": "https://blacklabelmarket.es/images/demo/vehicles/porsche-911-turbo-964.webp" },
+        "right": { "label": "GT3 RS", "year": "2024", "imageUrl": "https://blacklabelmarket.es/images/demo/vehicles/porsche-911-gt3-rs-992.webp" }
+      }
+    },
+    {
+      "id": "20260901-w6-manifiesto",
+      "template": "IG-P6",
+      "utm_content": "ig-feed-p6-v1",
+      "cta": null,
+      "data": {
+        "quoteLead": "No es un clasificado.",
+        "quoteEmphasis": "Es una selección."
+      }
+    },
+    {
+      "id": "20260901-w7-story-bmw-m3",
+      "template": "IG-P7",
+      "utm_content": "ig-story-p7-v1",
+      "cta": "Ver ficha",
+      "data": {
+        "vehicle": { "brand_name": "BMW", "model_name": "M3 Sport Evolution", "power_hp": 238, "year": 1990 },
+        "imageUrl": "https://blacklabelmarket.es/images/demo/vehicles/bmw-m3-e30-sport-evolution.webp"
+      }
+    },
+    {
+      "id": "20260901-w8-cierre",
+      "template": "IG-P8",
+      "utm_content": "ig-feed-p8-v1",
+      "cta": "Ver catálogo",
+      "data": {
+        "headline": "Descubre la selección completa",
+        "subtext": "Deportivos, clásicos y unidades especiales de profesionales verificados"
+      }
+    }
+  ]
+}

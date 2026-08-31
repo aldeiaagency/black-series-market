@@ -50,3 +50,6 @@ CREDENTIALS.local.md
 *.dump
 *.dump.gz
 *.dump.gz.enc
+
+# Salidas locales del renderer de Instagram (P7) — PNG generados, no versionar
+/outputs/instagram/
