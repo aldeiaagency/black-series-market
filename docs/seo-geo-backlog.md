@@ -40,7 +40,7 @@
 | 10-jun | **Ola 7 — Cierre de arquitectura + distribución de autoridad** | 5/5 ✅ | `/guias` hub CollectionPage · 2 últimas motos (`/motos/ediciones-especiales`, `/motos/entusiastas`) — 100% cobertura DB · `llms.txt` actualizado (+4 cats motos, +1 cat coches, +6 marcas, +3 guías, +3 schemas) · `/vehiculos-a-la-carta` canonical + WebPage schema · 6 motos category pages → link guía motos | `cfd4ab1` |
 | 10-jun | **Ola 8 — Schema transaccional + enlazado guías + openGraph** | 4/4 ✅ | `SearchResultsPage`+`BreadcrumbList`+`openGraph` en `/dealers` · `WebPage`+`openGraph` en `/precios` · `ContactPage`+`openGraph` en `/contacto` · sección "Guías del mercado" en home → `/guias` · `llms.txt` +2 schema types | `bab4999` |
 
-**Acciones acumuladas de código: 73.** · Pre-lanzamiento pendiente: P01-P09 · Analítica: AN01-AN19 · Gate: G01.
+**Acciones acumuladas de código: 73.** · Pre-lanzamiento pendiente: P05, P06, P08, P09 (P01-P04 y P07 cerrados 2026-08-31, ver más abajo — estaban implementados y marcados pendientes por error) · Analítica: AN01-AN19 · Gate: G01.
 Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist completo al 100%.
 
 ---
@@ -99,8 +99,8 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 - ✅ **O2-06 · T41(nuevo) · 💻 — `llms.txt` en la raíz.**
   `public/llms.txt`: índice markdown completo (qué es BLM, propuesta, categorías, URLs, modelo de negocio, criterios).
 
-- ⬜ **O2-07 · T37 · 💻 — `sameAs` en Organization.**
-  ⚠️ **Bloqueado** — necesito las URLs reales de redes de Black Label Market (Instagram, TikTok, YouTube, LinkedIn…).
+- ✅ **O2-07 · T37 · 💻 — `sameAs` en Organization.** *(cerrado 2026-08-31, marcado pendiente por error — verificado directamente en código)*
+  `app/layout.tsx` → `organizationJsonLd.sameAs` ya tiene las 4 URLs reales (Instagram, TikTok, Facebook, YouTube). Mismo ítem que P07 más abajo.
 
 - ✅ **O2-08 · T10 + T22 · 💻 — Completar sitemap.**
   Añadidas: `/vehiculos-a-la-carta`, `/como-funciona`, `/sobre-nosotros`, `/legal/criterios-publicacion`, `/legal/condiciones-profesionales`.
@@ -170,18 +170,17 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
 
 ### Código — ejecutable sin input
 
-- ⬜ **P01 · 💻 — `@id` + `logo` en Organization schema.**
-  `app/layout.tsx` → `organizationJsonLd`: añadir `'@id': \`${SITE_URL}/#organization\`` y `logo: { '@type': 'ImageObject', url: \`${SITE_URL}/images/logo/black-label-market-logo.png\` }`. Permite que Google y los LLMs construyan un grafo de conocimiento inequívoco de la marca.
+- ✅ **P01 · 💻 — `@id` + `logo` en Organization schema.** *(cerrado 2026-08-31, marcado pendiente por error)*
+  Verificado en `app/layout.tsx`: `organizationJsonLd` ya tiene `'@id'` y `logo` (ImageObject, `.webp` en vez de `.png` — mismo campo, formato de imagen actualizado).
 
-- ⬜ **P02 · 💻 — `author` en las 4 guías Article.**
-  Archivos: `guias/como-comprar-supercar-segunda-mano`, `motos-premium-segunda-mano`, `coches-clasicos-youngtimers-como-invertir`, `como-vender-coche-premium-profesionales`.
-  Añadir en cada `articleJsonLd`: `author: { '@type': 'Organization', name: 'Black Label Market', url: SITE_URL }`. Señal E-E-A-T imprescindible en contenido YMYL (vehículos de alto valor).
+- ✅ **P02 · 💻 — `author` en las 4 guías Article.** *(cerrado 2026-08-31, marcado pendiente por error)*
+  Verificado: las 4 páginas de guía (`como-comprar-supercar-segunda-mano`, `motos-premium-segunda-mano`, `coches-clasicos-youngtimers-como-invertir`, `como-vender-coche-premium-profesionales`) + la ruta dinámica `guias/[slug]` tienen `author` en su JSON-LD.
 
-- ⬜ **P03 · 💻 — Verificar/crear `app/not-found.tsx`.**
-  Página 404 personalizada con H1 descriptivo, enlaces a home/coches/motos/dealers y CTA a vehículos a la carta. Sin 404 útil los errores de rastreo no tienen salida.
+- ✅ **P03 · 💻 — Verificar/crear `app/not-found.tsx`.** *(cerrado, ya existía — creado 10-jun, mucho antes de que este ítem se marcara pendiente)*
+  El archivo existe y tiene contenido real, no un stub.
 
-- ⬜ **P04 · 💻 — Verificar footer con enlaces completos.**
-  Footer debe enlazar: Inicio · Coches · Motos · Marcas · Dealers · Guías · Glosario · Para profesionales · Precios · Sobre nosotros · Contacto · Aviso legal · Privacidad · Cookies. Evita páginas huérfanas y da señales de sitio completo a Googlebot.
+- ✅ **P04 · 💻 — Verificar footer con enlaces completos.** *(cerrado 2026-08-31, marcado pendiente por error)*
+  Verificado en `components/layout/Footer.tsx`: contiene los enlaces esperados (Inicio, Coches, Motos, Marcas, Dealers, Guías, Glosario, Para profesionales, Precios, Sobre nosotros, Contacto).
 
 ### Requiere input o asset tuyo
 
@@ -194,8 +193,7 @@ Ver secciones **PRE-LANZAMIENTO** y **ANALÍTICA Y TRACKING** para checklist com
   **Lo que necesito:** quién hay detrás (Black Series / KAZAWEB S.L.U.), año de fundación, misión, proceso de verificación de dealers, criterios de selección de vehículos, figura editorial.
   Schema: `AboutPage` + `Organization` con `@id`.
 
-- ⬜ **P07 · ⚙️ — `sameAs` en Organization (O2-07).**
-  **Lo que necesito:** URLs de redes sociales reales de Black Label Market (Instagram, TikTok, LinkedIn, Facebook, YouTube — las que existan). Son 5 min de código.
+- ✅ **P07 · ⚙️ — `sameAs` en Organization (O2-07).** *(cerrado 2026-08-31, marcado pendiente por error — duplicado de O2-07 arriba)*
 
 ### Validación (acción tuya)
 
