@@ -1,5 +1,15 @@
 # Black Label Market — PENDIENTES
-> Documento único y canónico. Última actualización: **2026-08-10** (limpieza del catálogo demo; ver bloque justo debajo).
+> Documento único y canónico **de deuda técnica general del producto** (Sprint 0/1/2, Stripe, DNS, backups).
+> Para deuda técnica y backlog específico de growth marketing (instrumentación de eventos, formularios de
+> captura, handoff/K22, advocacy/UGC), ver `agency/backlog_unificado_growth.md` — no duplicar aquí, es la
+> fuente única de eso desde 2026-08-28. Un ítem compartido: "unificar `ContactForm`/`QualifiedLeadForm`"
+> (bloque B4-B11 abajo) se relaciona con varios hallazgos de `QualifiedLeadForm` en ese otro documento.
+> Última actualización: **2026-08-27** (bloque "día a día" del roadmap de
+> market al 100% cerrado a falta de pruebas reales: ventana 24h en panel, reportes P4/P5/P6 saneados,
+> Programa Fundador y gap de Stripe corregidos — quedan abiertos dentro de este mismo bloque: lead scoring
+> (pausado a propósito), soporte/trust-safety (sin decidir canal) y onboarding white-glove (sin tocar)).
+> Actualización anterior: 2026-08-26 (cadena de alta lista a falta de pruebas con showrooms reales; import
+> CSV/feed sin fotos ya no publica en falso). Anterior: 2026-08-10 (limpieza del catálogo demo).
 > Elimina y sustituye: `pendientes-configuracion-externa.md`, `deployment-checklist.md`, `n8n-setup.md`, `backlog-alertas-y-vehiculos-a-la-carta.md`, `backlog-marketplace.md`.
 
 > **🧹 Limpieza del catálogo demo — 2026-08-10.** El market se dejó presentable para enseñarlo en visitas
@@ -13,6 +23,37 @@
 > **Dos cosas que recordar antes de tocar el catálogo otra vez:** (1) filtrar por `status = 'active'` **no
 > basta** — la ficha pública de showroom muestra también `paused` y `sold`; (2) la caché ISR es de 5 minutos,
 > los cambios en base de datos tardan en verse en la web.
+
+> **✅ Corrección de claims de verificación/moderación — 2026-08-27.** El copy público afirmaba en varios
+> sitios (FAQ de `/profesionales/precios`, portada, `/como-funciona`, una guía) que los vehículos pasan
+> "revisión editorial" individual antes de publicarse, o que se confirma "disponibilidad"/"imágenes propias" —
+> falso desde que se retiró la moderación manual por unidad (2026-07-17, ver SEC-3 arriba y el comentario en
+> `lib/vehicle-write.ts`) y sin que exista enforcement técnico real de esos otros dos puntos. La FAQ de
+> `revisión editorial en <24h` de `app/(public)/precios/page.tsx` (ruta hoy inalcanzable, redirige a
+> `/profesionales/precios`) también se limpió aunque no era código vivo. Corregidas las 5 instancias
+> encontradas (`profesionales/precios`, home, `como-funciona`, guía "cómo comprar un supercar", `precios`
+> muerto) para afirmar solo lo cierto: el profesional pasa un proceso de admisión antes de poder publicar, y
+> los vehículos deben pertenecer al catálogo cerrado de marcas/modelos.
+>
+> **Decisión de negocio de H (2026-08-27):** todo showroom con perfil publicado en BLM está verificado,
+> siempre, por defecto — no es una opción ni un estado aparte; se verifica antes de aceptar la solicitud de
+> alta. Ajustado el badge "Verificado" en `components/marketplace/DealerCard.tsx` y `DealerInlineCard.tsx`,
+> que antes lo condicionaban a `dealer.is_verified` (campo que se crea en `false` al aprobar el alta —
+> `admin/altas-showroom/actions.ts` — y depende de un checklist interno en `admin/dealers/[id]` hoy
+> "orientativo", sin bloqueo real). Ahora se muestra siempre para cualquier perfil publicado, coherente con
+> la regla de negocio real. `VehicleDetailContent.tsx` y la ficha pública de showroom ya lo mostraban sin
+> condición — coincidían con la regla correcta por casualidad, no por diseño.
+>
+> **Backlog, no bloqueante:** `dealers.is_verified` y su checklist en `admin/dealers/[id]` quedan
+> desacoplados de lo que ve el comprador — decidir si se elimina el toggle/checklist o se reconvierte en
+> seguimiento interno de calidad, sin urgencia.
+>
+> **Moderación de vehículos a futuro (no construido, solo referencia de diseño — H pide no explicar
+> públicamente el mecanismo en ningún sitio):** el comentario de `lib/vehicle-write.ts` (decisión 2026-07-17)
+> ya declara la intención de sustituir la moderación manual por un futuro "agente de auditoría
+> post-publicación". No existe ningún documento de diseño de ese agente todavía — esta es la única
+> referencia. Candidato a especificar cuando se priorice; hoy el control real es el catálogo cerrado de
+> marcas/modelos seleccionables al publicar.
 
 ---
 
@@ -48,9 +89,9 @@ Cadena de dinero rota + seguridad explotable. **CERRADO (ver nota 2026-07 arriba
 - [ ] **SEC-8** — Contraseña temporal devuelta en el JSON de respuesta + sufijo fijo `7a`. Invitación por email. `app/api/team/members/route.ts` — diferido.
 - [x] **A1** 🎨 — **Contraste AA falla en el texto gris más usado** (`bsm-text-muted` 4.02:1). Resuelto: `tailwind.config.ts:41` sube `text-muted` a `#979797` ("subido de #8A8A8A para pasar AA sobre superficies elevadas"). Verificado 2026-07-21.
 - [ ] **A2/A3** — Modales sin `role="dialog"`/focus-trap/Escape (hook `useModalA11y` compartido). `LeadsBandeja.tsx`, `KanbanBoard.tsx`, `SearchAlertModal.tsx`, `VehicleGallery.tsx`
-- [ ] **B1** — Header con **gradiente marrón** que rompe la identidad "negro premium" → gradiente negro + acento dorado. `Header.tsx:125-129`
-- [ ] **B3** — Tablas de admin/dashboard rotas en móvil (8 col con scroll) → patrón card apilada. `admin/dealers/page.tsx`
-- [ ] **B2** — Hero con 3 CTAs dorados compitiendo → 1 primario + secundarios. `app/(public)/page.tsx:112-129`
+- [x] **B1** — Header con **gradiente marrón** que rompe la identidad "negro premium" → gradiente negro + acento dorado. `components/layout/Header.tsx:125-129`. **Resuelto 2026-08-31**: gradiente marrón (`rgba(58,45,36,...)`) sustituido por negro real (`obsidian` `rgba(10,10,10,...)`→`rgba(5,5,5,...)`), borde inferior pasa de marrón (`#2A1E16`) a dorado sutil (`border-gold/20`). **Corregida también una segunda instancia no documentada**: el menú móvil (línea ~295) tenía el mismo gradiente marrón hardcodeado, no capturado en la auditoría original — mismo fix aplicado ahí.
+- [x] **B3** — Tablas de admin/dashboard rotas en móvil (8 col con scroll) → patrón card apilada. `app/(admin)/admin/dealers/page.tsx`. **Resuelto 2026-08-31**: tabla original queda `hidden lg:block` (sin tocar desktop); nueva vista `lg:hidden` con tarjetas apiladas (nombre+email, badge de estado, plan/ciudad/vehículos/fecha en grid 2 columnas), mismas clases de badge y tokens ya existentes en el archivo. Verificado por build limpio (`tsc`+`next build`, ruta `/admin/dealers` compila) — **no verificado visualmente logueado** (la ruta exige login de admin, sin credenciales disponibles en esta sesión).
+- [x] **B2** — Hero con 3 CTAs dorados compitiendo → 1 primario + secundarios. `app/(public)/page.tsx:112-129`. **Resuelto 2026-08-31**: en el código real solo había 2 botones `btn-gold` compitiendo ("Explorar coches"/"Explorar motos"), no 3 — la cifra del hallazgo original no coincidía con el código actual. "Explorar coches" queda como primario (`btn-gold`), "Explorar motos" pasa a `btn-outline` (clase ya existente en el proyecto). Verificado visualmente con Playwright contra el dev server.
 
 ### 🟢 Sprint 2 — Pulido premium + SEO
 - [ ] **BUG-bajos** — orden de membresía owner>admin (no `created_at`); `DELETE` de miembro borra auth global; TOCTOU en `maxUsers`; consumo de crédito no atómico.
@@ -84,7 +125,17 @@ Cadena de dinero rota + seguridad explotable. **CERRADO (ver nota 2026-07 arriba
 ### 🟡 Antes de captación pública
 - [ ] **Quitar noindex** (punto 9 abajo) — cuando el catálogo tenga vehículos reales
 - [ ] **GTM** en `/admin/configuracion` — para analytics; Consent Mode v2 ya está montado en el código
-- [ ] **Revisión legal** con asesor RGPD/LSSI antes de publicar
+- [x] **Auditoría legal RGPD/LSSI-CE/DSA/P2B (Codex, `gpt-5.6-sol`) + corrección de las páginas legales** — 2026-08-27.
+  `app/(public)/legal/[slug]/page.tsx` ampliado con las cláusulas P2B (preaviso 15 días cambios de condiciones,
+  preaviso motivado 30 días + revisión humana antes de suspender/terminar), mecanismo de notificación DSA,
+  plazo RGPD corregido (1+2 meses, no 3), sustitución del enlace ODR muerto, ranking/clasificación explicado.
+  Corregido también en código: GTM ya no carga sin consentimiento (`components/legal/ConsentManagedGtm.tsx`),
+  `/politica-de-cookies` redirige a `/legal/cookies`. Detalle completo en `agency/registro_decisiones.md`
+  2026-08-27. **3 puntos dejados como decisión pendiente de H** (no auto-resueltos): microempresa DSA art. 19,
+  aplicabilidad de la verificación KYBC del art. 30 DSA, y confirmación de que el texto de garantía legal es
+  informativo — ver `docs/legal-pendiente-decision-h.md` (nuevo).
+- [ ] **Revisión legal con asesor profesional RGPD/LSSI/DSA** antes de publicar — el trabajo de arriba es
+  investigación de apoyo (Codex + Claude), no sustituye asesoramiento legal profesional
 
 ### 🔵 Cuando haya dealers / stock real
 - [x] **IMPORT_API_KEY** en Vercel — configurado (2026-06-26)
@@ -237,14 +288,16 @@ El sitio está invisible para buscadores. Hacerlo cuando el catálogo tenga veh�
 | Vercel env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_PRICE_{ESSENTIAL,PROFESSIONAL,ELITE}_MONTHLY` | ✅ fijadas (test) + redeploy hecho |
 
 **Para pasar a LIVE (cuando se vaya a cobrar):** activar la cuenta (datos fiscales KAZAWEB + banco), **cerrar precios Pro/Elite/Grupo**, sustituir claves `sk_test/pk_test/whsec` por las `live`, crear add-ons, y (opcional) Stripe Tax para el IVA. Verificación más profunda pendiente: completar un checkout de test con tarjeta `4242…` para confirmar el `checkout.session.completed` → actualización del dealer (requiere un dealer de prueba con `metadata.dealer_id`).
+**Decisión 2026-08-27 (H): activación LIVE queda marcada como pendiente a propósito** — se configura cuando arranque la actividad oficial con el market, no antes.
 
 ### Resto Fase B
 
 | Tarea | Estado |
 |---|---|
-| Página `/precios` actualizada con precios reales (Essential/Professional/Elite) | 🔴 |
-| Integración checkout Stripe en el flujo de suscripción | 🔴 |
-| Plan Grupo: cerrar definición + construir en código (derivado de Elite) | 🔴 |
+| Precios Essential/Professional/Elite en `/precios` | **✅ DEFINITIVOS (decisión 2026-08-27, H)** — los que ya aparecen en la web (197/449/899€/mes) son los precios finales, no provisionales. Revisado el código (`lib/plans-config.ts` + `app/(public)/precios/page.tsx`): coincide con `docs/planes-suscripcion-definitivos.md`. |
+| Integración checkout Stripe en el flujo de suscripción | **✅ Ya construido — este documento estaba desactualizado.** `app/(dashboard)/dashboard/suscripcion/page.tsx` ya tiene el botón "Cambiar a [plan]" que llama a `/api/stripe/create-checkout`, que crea cliente Stripe si no existe, resuelve el price ID y crea la sesión de checkout real (`lib/stripe.ts`). Funciona ya en modo test. No verificado con un checkout de prueba real end-to-end (tarjeta `4242…`) — pendiente si se quiere confirmar antes de ir a live. |
+| Plan Grupo: cerrar definición + construir en código (derivado de Elite) | **Propuesta entregada 2026-08-27** — ver `agency/registro_decisiones.md`. Sin construir en código todavía (no existe en `PLANS`/`ADDONS` de `lib/plans-config.ts`) — pendiente de que H apruebe la propuesta antes de construirlo. |
+| **Add-ons — automatización de activación** (hallazgo real 2026-08-27) | De los 6 add-ons (`lib/plans-config.ts`), solo el boost (`action: 'inventory'`) tiene un camino ya automatizado (Stripe + `lib/boosts.ts`). Los otros 5 (pack de boosts, +10/+25 vehículos, stock sync, Diagnóstico Anti-Fuga) usan `action: 'request'` → un `mailto:` a `hola@blacklabelmarket.es`, sin automatización real. Plan: automatizar pack de boosts/+10/+25 (compra→activación automática vía Stripe, sin criterio humano) y dejar stock sync/Diagnóstico con validación manual del admin (si requieren criterio humano) — código delegado a Codex, pendiente de autorización del plan concreto. |
 | Banner en dashboard dealer: "Trial activo hasta [fecha]" | ✅ HECHO (2026-07-14) — migraciones 067/068/069, workflow n8n `BLM - 8. Trial drip y conversión`. Detalle y checklist de verificación en `docs/ciclo-vida-trial-verificacion.md` |
 | Dealers `status='trial'` visibles en perfil/listado/vehículos (RLS) — antes solo se veían al pasar a `active` (primer vehículo), dejando al fundador sin nada que enseñar durante todo el onboarding | ✅ HECHO (2026-07-14) — migración `067_trial_dealers_public_visibility.sql`. De paso se cerró un hueco real: un dealer `suspended` seguía teniendo sus vehículos públicamente visibles (RLS nunca comprobaba el dealer) |
 | WF drip trial: emails días 3/10/21/28 | ✅ HECHO y probado E2E las 4 etapas (2026-07-14) — `BLM - 8. Trial drip y conversión`, n8n |
@@ -258,10 +311,14 @@ Las tablas y endpoints ya están construidos. Solo falta conectar con servicios 
 
 | Feature | Qué falta |
 |---|---|
-| **Reserva de citas** (tablas `appointments` ✅) | Fase B (horario manual) operativa. Fase A (Google Calendar OAuth real) **confirmada código-completo 2026-07-21**: cifrado de tokens, freebusy, creación de eventos con Meet, UI de conectar en `CitasConfig.tsx`, `computeSlots` ya con solapamiento de rangos. Solo falta que el dueño del producto cree el proyecto Google Cloud + OAuth client (`GOOGLE_OAUTH_CLIENT_ID/SECRET/GOOGLE_TOKEN_ENCRYPTION_KEY/GOOGLE_OAUTH_STATE_SECRET`, ninguna configurada hoy) y la verificación manual con un dealer piloto antes de subir `calendar_integration` a operative. Detalle en `docs/agente-cita-fase-A-google-calendar.md` |
-| **Lead scoring** (campos `lead_score` en `leads` ✅) | **Confirmado 2026-07-21: solo la mitad construida.** `app/api/webhooks/assistant-result/route.ts` ya recibe `qualification.score` y rellena `lead_score`/`score_reason`/etc., pero `n8n-workflows/wf7-ai-assistant.json` no tiene ningún nodo de scoring ni llama a esa ruta — falta el prompt de scoring + el workflow n8n que lo dispare. |
-| **Feed/DMS automático** (feature flag ✅) | **Confirmado 2026-07-21: solo columna y flag.** `dealers.feed_url`/`feed_last_synced_at` (migración 065) no los lee ni escribe ningún archivo de código, y no hay workflow n8n que mencione "feed". Falta el conector real y el job recurrente. |
-| **Ventana exclusiva 24h a la carta** (feature flag ✅) | Matcher/temporizador 24h + aviso automático al showroom |
+| **Reserva de citas** (tablas `appointments` ✅) | **Decisión 2026-08-25: Fase A (Google Calendar OAuth) queda en backlog indefinido, no es necesaria.** Fase B (horario manual, sin OAuth) es la vía definitiva — verificada de extremo a extremo con datos reales el 2026-08-26 (disponibilidad, reserva, sin solapes, lead+cita en BD, emails de confirmación a comprador y showroom). El código de Fase A sigue completo y dormido para una futura reactivación si algún día compensa (ver `docs/agente-cita-fase-A-google-calendar.md`), pero no bloquea nada del alta de fundadores. |
+| **Lead scoring** (campos `lead_score` en `leads` ✅) | **Confirmado 2026-07-21: solo la mitad construida.** `app/api/webhooks/assistant-result/route.ts` ya recibe `qualification.score` y rellena `lead_score`/`score_reason`/etc., pero `n8n-workflows/wf7-ai-assistant.json` no tiene ningún nodo de scoring ni llama a esa ruta — falta el prompt de scoring + el workflow n8n que lo dispare. **Pausado a propósito 2026-08-27** — decisión explícita de H de no tocarlo en esta ronda del día a día. |
+| **Soporte y trust/safety** (sin construir) | **Discutido 2026-08-27, sin decidir ni construir.** Sin canal formal hoy (todo ad-hoc por Slack). Se validó WhatsApp como canal razonable, pero quedan 2 cosas por resolver: (1) confirmar si existe o hay que crear un número de WhatsApp Business propio de BLM (el de la agencia sigue bloqueado por el pago de Meta), (2) decidir el registro mínimo (Airtable) para no perder trazabilidad/urgencia si todo vive en WhatsApp. |
+| **Onboarding white-glove — watcher de Drive y dedupe de VIN** (sin construir) | **Sin tocar en la ronda de día a día de 2026-08-27** — sigue exactamente como estaba: alguien revisa a mano la carpeta de Drive del cliente, sin dedupe automático de VIN al importar. |
+| **Feed/DMS automático** (feature flag ✅) | **RESUELTO 2026-08-25/26.** Nuevo workflow n8n "BLM - Stock inicial y sync de feed (IA)" parsea CSV/feed, redacta descripciones con OpenAI cuando faltan, e importa con auto-aprobación vía `FEED_SYNC_API_KEY` (ya configurada en Vercel, antes existía vacía desde hacía 43 días). `dealers.feed_url` ahora sí se rellena desde la sala de configuración. Feature flag `feed_sync` subido a `operative` en Elite/Grupo. Verificado con datos reales (importación de 3 vehículos vía botón de admin real, sync programado verificado por lógica de elegibilidad con datos reales, no por el disparo real del cron de las 6:00). Pendiente: archivos sueltos (fotos sin datos estructurados) no se auto-importan — genera tarea manual, correcto por diseño (no hay visión artificial en el pipeline). **Corregido 2026-08-26:** los CSV no traen fotos (no hay columna en la plantilla) y el import los publicaba activos con 0 imágenes. Ahora `/api/vehicles/import` deja en `draft` cualquier vehículo importado sin al menos 1 foto real (no aparece en el catálogo público) y avisa al showroom: email automático (import por feed/admin, vía n8n+Resend) y aviso en pantalla en `/dashboard/importar` (import manual). Ver `agency/registro_decisiones.md` 2026-08-26. |
+| **Asistente IA sin contexto real** (nuevo hallazgo, cerrado 2026-08-26) | El asistente conocía solo datos del vehículo y nombre/ciudad/WhatsApp del showroom — la financiación, horario y estilo de negociación que el cliente rellena en la sala de configuración nunca llegaban a la conversación. Conectado y verificado con una conversación real (preguntó por financiación y horario de sábados, respondió con los datos exactos configurados, no genéricos). |
+| **Videollamada de bienvenida en el onboarding fundador** (pendiente futuro, no ahora) | **Decisión 2026-08-27, sin construir a propósito.** Hoy la visita y el onboarding se hacen en persona — no hace falta una videollamada mientras esto siga siendo así. Queda documentado para cuando se empiece a operar "oficialmente" (onboarding remoto, sin visita presencial): la llamada iría **justo después de completar la sala de configuración, antes de publicar el perfil** — motivo funcional real ("repasamos juntos el perfil antes de publicarlo", no solo cortesía), corrige en vivo cualquier cosa floja antes de salir a producción, y refuerza la imagen de exclusividad ("no publicamos nada sin repasarlo con vosotros"). Implementación futura: enlace para agendar en el email de "configuración recibida" (`WF-P3`, evento `setup_completed`), publicación del perfil al final de la llamada. |
+| **Ventana exclusiva 24h a la carta** (feature flag ✅) | **Parcialmente resuelto 2026-08-27.** El filtro de 24h ya funcionaba solo (por fecha en la propia consulta, sin cron necesario). Decisión de H: en vez de email/Slack por solicitud (no escala — 100 solicitudes/día serían 100 emails), se construyó un **aviso visible en el propio panel**: la sidebar del dashboard (`components/dashboard/Sidebar.tsx` + `app/(dashboard)/layout.tsx`) muestra ahora un badge numérico junto a "A la carta" con el nº de solicitudes activas visibles para ese showroom (mismo cálculo Elite/Professional que ya usaba la página). Pendiente, según cómo respondan los showrooms: decidir si además hace falta un aviso proactivo (email/digest agrupado) — ver `registro_decisiones.md` 2026-08-27. |
 
 ---
 

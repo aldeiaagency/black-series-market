@@ -14,7 +14,7 @@ import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
 const HOME_FAQ: FaqItem[] = [
   {
     q: '¿Qué es Black Label Market?',
-    a: 'Black Label Market es un marketplace de coches y motos premium en España: deportivos, clásicos, SUV de gama alta, motos premium y unidades especiales. A diferencia de un portal masivo de anuncios, solo admite profesionales verificados (concesionarios, compraventas y especialistas que superan una revisión previa) y publica únicamente vehículos con información real, imágenes propias y disponibilidad confirmada.',
+    a: 'Black Label Market es un marketplace de coches y motos premium en España: deportivos, clásicos, SUV de gama alta, motos premium y unidades especiales. A diferencia de un portal masivo de anuncios, solo admite profesionales verificados (concesionarios, compraventas y especialistas que superan nuestro proceso de admisión) y publica únicamente vehículos de nuestro catálogo de marcas y modelos seleccionados.',
   },
   {
     q: '¿Dónde puedo comprar un coche o una moto premium de segunda mano en España?',
@@ -160,7 +160,7 @@ export default async function HomePage() {
                 Explorar coches
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link href="/motos" className="btn-gold">
+              <Link href="/motos" className="btn-outline">
                 Explorar motos
                 <ArrowRight className="w-4 h-4" />
               </Link>

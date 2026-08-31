@@ -119,13 +119,13 @@ export default function Header() {
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
         scrolled || !isHome
-          ? 'backdrop-blur-md border-b border-[#2A1E16]'
+          ? 'backdrop-blur-md border-b border-gold/20'
           : ''
       )}
       style={
         scrolled || !isHome
-          ? { background: 'linear-gradient(180deg, rgba(58,45,36,0.97) 0%, rgba(42,33,28,0.97) 45%, rgba(5,5,5,0.97) 100%)' }
-          : { background: 'linear-gradient(180deg, rgba(58,45,36,0.50) 0%, rgba(5,5,5,0) 100%)' }
+          ? { background: 'linear-gradient(180deg, rgba(10,10,10,0.97) 0%, rgba(13,13,13,0.97) 45%, rgba(5,5,5,0.97) 100%)' }
+          : { background: 'linear-gradient(180deg, rgba(10,10,10,0.50) 0%, rgba(5,5,5,0) 100%)' }
       }
     >
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
@@ -292,7 +292,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-[#2A1E16] animate-slide-up" style={{ background: 'linear-gradient(180deg, #3A2D24 0%, #2A211C 45%, #050505 100%)' }}>
+        <div className="lg:hidden border-t border-gold/20 animate-slide-up" style={{ background: 'linear-gradient(180deg, #0A0A0A 0%, #0D0D0D 45%, #050505 100%)' }}>
           <div className="px-6 py-6 space-y-0.5">
             {NAV_ITEMS.map((item) => (
               <div key={item.label}>

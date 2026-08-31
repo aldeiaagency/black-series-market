@@ -108,7 +108,8 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
         ))}
       </div>
 
-      <div className="bg-surface border border-bsm-border overflow-x-auto">
+      {/* Desktop — tabla completa */}
+      <div className="hidden lg:block bg-surface border border-bsm-border overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-bsm-border">
@@ -152,6 +153,44 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
 
         {(!dealers || dealers.length === 0) && (
           <div className="p-12 text-center text-sm text-bsm-text-muted">
+            Sin concesionarios con este filtro
+          </div>
+        )}
+      </div>
+
+      {/* Móvil — tarjetas apiladas (antes: misma tabla de 8 columnas con scroll horizontal) */}
+      <div className="lg:hidden space-y-3">
+        {(dealers || []).map((d: any) => {
+          const plan = d.subscription_plan || 'trial'
+          return (
+            <Link
+              key={d.id}
+              href={`/admin/dealers/${d.id}`}
+              className="block bg-surface border border-bsm-border p-4 hover:border-bsm-border-light transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="min-w-0">
+                  <div className="font-medium text-bsm-text-primary truncate">{d.name}</div>
+                  <div className="text-xs text-bsm-text-muted truncate">{d.profile?.email}</div>
+                </div>
+                <span className={`badge text-[10px] shrink-0 ${d.status === 'active' ? 'badge-active' : d.status === 'pending' ? 'badge-pending' : 'badge-muted'}`}>
+                  {DEALER_STATUS_LABELS[d.status as keyof typeof DEALER_STATUS_LABELS]}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-y-1.5 text-xs text-bsm-text-muted">
+                <div>{d.location_city || '—'}</div>
+                <div className={`text-right capitalize ${PLAN_BADGE[plan] || 'text-bsm-text-muted'}`}>
+                  {PLAN_LABELS[plan] || plan}
+                </div>
+                <div>{d.vehicle_slots} vehículos</div>
+                <div className="text-right">{new Date(d.created_at).toLocaleDateString('es-ES')}</div>
+              </div>
+            </Link>
+          )
+        })}
+
+        {(!dealers || dealers.length === 0) && (
+          <div className="p-12 text-center text-sm text-bsm-text-muted bg-surface border border-bsm-border">
             Sin concesionarios con este filtro
           </div>
         )}
