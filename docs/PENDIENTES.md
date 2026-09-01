@@ -4,12 +4,49 @@
 > captura, handoff/K22, advocacy/UGC), ver `agency/backlog_unificado_growth.md` — no duplicar aquí, es la
 > fuente única de eso desde 2026-08-28. Un ítem compartido: "unificar `ContactForm`/`QualifiedLeadForm`"
 > (bloque B4-B11 abajo) se relaciona con varios hallazgos de `QualifiedLeadForm` en ese otro documento.
-> Última actualización: **2026-08-27** (bloque "día a día" del roadmap de
+> Última actualización: **2026-09-01** — limpieza de documentación completa (candidatos a limpieza
+> eliminados, duplicados/incoherencias corregidos), hallazgos reales de 2 auditorías cerrados en código
+> (INC-004, WF7 dealer_id, rate-limit del asistente, cache de `gtm_id`, doble auth en `Header.tsx`) o
+> documentados como bloqueados sin autorización (ahora aplicados: ver SEC-14), Incidente #0 cerrado del todo
+> (RS Premium Car era una prueba, rastro eliminado), y nueva sección **"Camino al 100%"** justo abajo — vista
+> de negocio priorizada, no solo checklist técnico. Detalle en `registro_decisiones.md` 2026-09-01 (varias
+> entradas) y `agency/00_estado_ceo.md`.
+> Actualización anterior: **2026-08-27** (bloque "día a día" del roadmap de
 > market al 100% cerrado a falta de pruebas reales: ventana 24h en panel, reportes P4/P5/P6 saneados,
 > Programa Fundador y gap de Stripe corregidos — quedan abiertos dentro de este mismo bloque: lead scoring
 > (pausado a propósito), soporte/trust-safety (sin decidir canal) y onboarding white-glove (sin tocar)).
-> Actualización anterior: 2026-08-26 (cadena de alta lista a falta de pruebas con showrooms reales; import
+> Anterior: 2026-08-26 (cadena de alta lista a falta de pruebas con showrooms reales; import
 > CSV/feed sin fotos ya no publica en falso). Anterior: 2026-08-10 (limpieza del catálogo demo).
+
+---
+
+## 🎯 Camino al 100% — visión de negocio (2026-09-01)
+
+> Prioridad de negocio, no lista técnica plana — cada fila asume que las de arriba ya están hechas. El % es
+> acumulado: "cuánto del market como negocio (no como software) estaría completo si se hiciera esto y todo lo
+> de encima". Detalle técnico de cada punto ya vive en su sección correspondiente de este documento o en el
+> documento referenciado — esto es el índice de prioridad, no una copia.
+
+| # | Qué falta | Tipo | Detalle en | % acum. |
+|---|---|---|---|---|
+| 1 | **Primer fundador real onboardeado** — el mecanismo (alta→aprobación→sala de configuración→dashboard) ya está construido y verificado; hoy solo ha entrado un simulacro. Sin stock real, todo lo demás es infraestructura sin usar. | Acción de negocio | `agency/00_plan_maestro_100.md` P2 | **42%** |
+| 2 | **Stripe en modo live** — checkout ya construido y probado en test; falta KYC de KAZAWEB, sustituir claves, y cerrar el precio del plan **Grupo** (sigue "⏳ por confirmar"). | Definición + activación | `docs/planes-suscripcion-definitivos.md` §4, FASE B abajo | **60%** |
+| 3 | **Quitar `noindex`** (una vez haya stock real del punto 1) — abre la adquisición orgánica de compradores. SEO/GEO ya construido, falta el interruptor + coordinación de sitemap. | Decisión + verificación | `lib/seo.ts`, `docs/seo-geo-backlog.md` G01 | **72%** |
+| 4 | **Cierre legal real** — revisión por abogado RGPD/LSSI/DSA (sigue en borrador); implementar en fichas públicas de showroom lo que exige el art. 30 DSA (registro mercantil + autocertificación visibles — **verificado 2026-09-01: no implementado**, cero coincidencias en `app/(public)/dealers`); rellenar placeholders de CRM/formularios/pixel. | Construcción + definición | `docs/legal-pending-data.md` | **80%** |
+| 5 | **Cerrar la seguridad al 100%** — parchear retroactivamente los clones WF7 ya existentes (el fix de hoy solo cubre clones nuevos), completar la verificación HMAC real de WF1 (hoy solo ventana anti-replay). | Construcción | SEC-14 abajo | **85%** |
+| 6 | **Referral y growth loops** — hoy no existe ni el diseño. Sin esto el crecimiento depende 100% de adquisición pagada/orgánica. | Definición + construcción | — (sin documento propio todavía) | **90%** |
+| 7 | **Redes sociales propias en marcha** — cerrar la tabla `Contenidos` (gate K3) y publicar la primera pieza real. | Construcción + acción | Nota nueva abajo (redes sociales BLM), `agency/02_growth_marketing.md` | **93%** |
+| 8 | **Newsletter operativo** — resolver el bloqueo de doble opt-in en Brevo, o decidir la migración a GHL que lleva semanas sobre la mesa. | Decisión + construcción | FASE B abajo | **95%** |
+| 9 | **Rendimiento y CRO real** — `select('*')` sin acotar / `VehicleCard` como client component completo (C4), pasar de medir a experimentar con GA4/Clarity. | Construcción | Nota "Perf (C4)" abajo | **98%** |
+| 10 | **Higiene restante** — rotación de `service_role` (bajo riesgo, pendiente de hacerla con H), unificar `/mis-favoritos` vs `/cuenta/favoritos`, pulido SEO de cola larga. | Construcción menor | Notas correspondientes abajo | **100%** |
+
+**Lectura directa**: los 3 primeros puntos (fundador real, Stripe live, quitar noindex) son el 72% del
+negocio, y ninguno necesita construirse — ya está todo hecho técnicamente. Es la diferencia entre "producto
+terminado" (ya lo es) y "negocio operando" (todavía no). El punto 4 (legal) es el único que se considera
+innegociable antes de escalar más allá del programa fundador actual, aunque no bloquea seguir onboardeando
+founders con cuidado mientras se resuelve en paralelo.
+
+---
 > Elimina y sustituye: `pendientes-configuracion-externa.md`, `deployment-checklist.md`, `n8n-setup.md`, `backlog-alertas-y-vehiculos-a-la-carta.md`, `backlog-marketplace.md`.
 
 > **🧹 Limpieza del catálogo demo — 2026-08-10.** El market se dejó presentable para enseñarlo en visitas
@@ -163,6 +200,16 @@ Cadena de dinero rota + seguridad explotable. **CERRADO (ver nota 2026-07 arriba
   pendiente, sin urgencia real, a la espera de hacerlo juntos cuando H quiera.
 - [x] **A13 (nuevo, 2026-09-01)** — `ScoreBadge` del Kanban de oportunidades (`components/dashboard/KanbanBoard.tsx`) mostraba solo un emoji de temperatura de lead (🔥/🟡/⚪) sin `aria-label` ni texto — invisible para lector de pantalla. **Resuelto**: `role="img"` + `aria-label`/`title` con el texto ("Interés alto/medio/bajo"), emoji marcado `aria-hidden`.
 - [x] **SEO-13 (nuevo, 2026-09-01)** — `/profesionales/precios` tenía 6 preguntas frecuentes visibles sin `FAQPage` JSON-LD (verificado por grep, cero coincidencias; la página hermana `/precios` sí lo tenía, con un set de preguntas ligeramente distinto — no unificadas, quedan como páginas deliberadamente separadas). **Resuelto**: preguntas extraídas a `FAQ_ITEMS` (fuente única para el bloque visible y el JSON-LD, no pueden divergir) + `<script type="application/ld+json">` con `FAQPage`/`mainEntity`, mismo patrón ya usado en `/precios` y en las landings de categoría/marca.
+- [ ] **Redes sociales propias de Black Label Market: sin construir, ni el contenido ni la distribución
+  (nuevo, 2026-09-01)** — `admin/configuracion` (`platform_config`) ya tiene los campos preparados
+  (`instagram`, `facebook`, `linkedin`) pero vacíos, solo con placeholder de formato — no hay ninguna cuenta
+  real (Instagram/TikTok/Facebook/LinkedIn) enlazada en ningún footer ni configurada con credenciales en
+  ningún `.env`. Existe un pipeline de render de plantillas de Instagram
+  (`scripts/content/instagram/`, 8 plantillas IG-P1..P8) pero solo genera PNG — nunca se ha publicado ni una
+  sola pieza, en ningún canal. El diseño de estrategia (canales, reparto comprador/negocio, reglas de
+  frontera) está completo en `agency/02_growth_marketing.md`; lo que falta es la tabla `Contenidos`
+  unificada (gate K3, sigue siendo backlog per corrección de estado del propio documento, 2026-08-28) y
+  luego la primera pieza real publicada.
 - [x] **SEC-16 (nuevo, 2026-09-01)** — `/api/assistant/message`, `/session`, `/book`, `/availability` sin ningún límite de tasa (a diferencia de leads/alertas/altas, que ya lo tenían) — `message` y `book` disparan coste real (OpenAI vía n8n; lead+cita+Google Calendar+email respectivamente). **Resuelto**: nuevo `isIpEventRateLimited` en `lib/rate-limit.ts` (mismo mecanismo que `/api/track`, sin infraestructura extra — cuenta filas recientes de `analytics_events` por `ip_hash`) aplicado a los 4 endpoints con límites por severidad (`message` 60/10min, `session` 20/10min, `availability` 60/10min, `book` 5/10min). Verificado contra producción con un `ip_hash` desechable (bloqueo exacto en la 4ª petición con límite=3 de prueba, filas de test borradas después).
 - [x] **SEC-15 (nuevo, 2026-09-01)** — RLS de `organizations`/`subscriptions`/`boosts_credits`/`plans`,
   hallazgo de auditoría de limpieza de documentación: **reverificado directamente contra las migraciones
