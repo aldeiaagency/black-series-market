@@ -1,4 +1,9 @@
--- Migration 096 — Cierra la misma exposición real en consume_boost_credit/refund_boost_credit.
+-- Migration 099 — Cierra la misma exposición real en consume_boost_credit/refund_boost_credit.
+--
+-- Numerada 099 y no 096 (donde se escribió originalmente) porque el archivo se creó
+-- pero no se commiteó/empujó a tiempo — 097 y 098 ya se habían aplicado en remoto
+-- cuando se detectó el olvido, y `supabase db push` rechaza insertar una migración
+-- fuera de orden sin --include-all. Renumerada para que aplique después de esas dos.
 --
 -- Hallazgo (verificado contra producción, mismo método que 095): estas dos funciones
 -- (migración 062) también son ejecutables directamente con la anon key pública —
