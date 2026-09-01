@@ -80,7 +80,7 @@ export default function ShareButton({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-48 bg-[#0E0E0E] border border-[#2A2A2A] shadow-[0_8px_24px_rgba(0,0,0,0.6)] z-30 animate-fade-in">
+        <div className="absolute right-0 top-full mt-1.5 w-48 bg-[#0E0E0E] border border-bsm-border shadow-[0_8px_24px_rgba(0,0,0,0.6)] z-30 animate-fade-in">
           {hasNative && (
             <button
               onClick={handleNative}

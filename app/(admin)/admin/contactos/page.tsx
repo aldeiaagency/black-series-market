@@ -14,7 +14,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 const STATUS_COLOR: Record<string, string> = {
   new: 'text-gold', contacted: 'text-blue-400', negotiating: 'text-purple-400',
-  appointment: 'text-cyan-400', reserved: 'text-[#C6A64B]', closed: 'text-emerald-400',
+  appointment: 'text-cyan-400', reserved: 'text-gold', closed: 'text-emerald-400',
   lost: 'text-red-400', discarded: 'text-bsm-text-muted',
 }
 

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const FAQ_ITEMS = [
   {
     q: '¿Qué diferencia a Black Label Market de otros portales de coches?',
-    a: 'Black Label Market solo admite profesionales verificados (concesionarios, compraventas y especialistas que han pasado revisión previa) y solo publica vehículos con información real, imágenes propias y disponibilidad confirmada. No somos un portal masivo de anuncios; nos centramos en unidades premium, deportivos, clásicos y motos de interés.',
+    a: 'Black Label Market solo admite profesionales verificados (concesionarios, compraventas y especialistas que han pasado nuestro proceso de admisión) y solo publica vehículos de nuestro catálogo de marcas y modelos seleccionados. No somos un portal masivo de anuncios; nos centramos en unidades premium, deportivos, clásicos y motos de interés.',
   },
   {
     q: '¿Comprar en Black Label Market tiene algún coste?',
@@ -180,9 +180,9 @@ export default function ComoFuncionaPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {BUYER_STEPS.map((step) => (
-            <div key={step.title} className="bg-surface border border-bsm-border p-6 hover:border-[#C6A64B]/20 transition-colors">
-              <div className="w-9 h-9 flex items-center justify-center border border-[#C6A64B]/20 bg-[#C6A64B]/5 mb-4">
-                <step.icon className="w-4 h-4 text-[#C6A64B]" />
+            <div key={step.title} className="bg-surface border border-bsm-border p-6 hover:border-gold/20 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center border border-gold/20 bg-gold/5 mb-4">
+                <step.icon className="w-4 h-4 text-gold" />
               </div>
               <h3 className="font-medium text-bsm-text-primary mb-2 text-sm leading-snug">{step.title}</h3>
               <p className="text-xs text-bsm-text-muted leading-relaxed">{step.desc}</p>
@@ -204,9 +204,9 @@ export default function ComoFuncionaPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {DEALER_STEPS.map((step) => (
-            <div key={step.title} className="bg-surface border border-bsm-border p-6 hover:border-[#C6A64B]/20 transition-colors">
-              <div className="w-9 h-9 flex items-center justify-center border border-[#C6A64B]/20 bg-[#C6A64B]/5 mb-4">
-                <step.icon className="w-4 h-4 text-[#C6A64B]" />
+            <div key={step.title} className="bg-surface border border-bsm-border p-6 hover:border-gold/20 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center border border-gold/20 bg-gold/5 mb-4">
+                <step.icon className="w-4 h-4 text-gold" />
               </div>
               <h3 className="font-medium text-bsm-text-primary mb-2 text-sm">{step.title}</h3>
               <p className="text-xs text-bsm-text-muted leading-relaxed">{step.desc}</p>
@@ -264,7 +264,7 @@ export default function ComoFuncionaPage() {
             </Link>
           </div>
         </div>
-        <div className="border border-[#C6A64B]/20 bg-[#C6A64B]/3 p-8">
+        <div className="border border-gold/20 bg-gold/3 p-8">
           <h3 className="font-display text-2xl font-light mb-3 text-bsm-text-primary">Soy profesional</h3>
           <p className="text-sm text-bsm-text-muted mb-6 leading-relaxed">
             Solicita acceso para publicar tu inventario y llegar a compradores cualificados.

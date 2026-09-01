@@ -70,7 +70,7 @@ export default function MisFavoritosPage() {
         </div>
       ) : (
         <div className="text-center py-24 border border-bsm-border bg-surface">
-          <Heart className="w-12 h-12 text-[#2A2A2A] mx-auto mb-5" />
+          <Heart className="w-12 h-12 text-bsm-border mx-auto mb-5" />
           <h2 className="font-display text-xl font-light text-bsm-text-primary mb-2">
             Aún no has guardado ningún vehículo
           </h2>
@@ -91,7 +91,7 @@ export default function MisFavoritosPage() {
       {vehicles.length > 0 && !isAuthenticated && (
         <div className="mt-10 p-4 border border-[#1A1A1A] bg-[#0A0A0A] text-[11px] text-[#9E9E9E] text-center">
           Los favoritos se guardan en este dispositivo.{' '}
-          <a href="/registro-comprador" className="text-[#C6A64B] hover:underline">
+          <a href="/registro-comprador" className="text-gold hover:underline">
             Crea una cuenta gratuita
           </a>{' '}
           para sincronizarlos en todos tus dispositivos.

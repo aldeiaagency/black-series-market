@@ -70,6 +70,18 @@ const PLANS = [
   },
 ]
 
+const GRUPO = {
+  name: 'Grupo',
+  description: 'Para grupos con varias sedes — cada sede con las condiciones de Elite.',
+  priceFrom: '1.348,50',
+  features: [
+    'Cuenta matriz Elite + 50% del precio base por cada sede adicional',
+    'Cada sede con las condiciones de Elite: 100 vehículos, 10 usuarios, 3 boosts, stock automatizado',
+    'Vista consolidada de todas las sedes para la dirección del grupo',
+    'A partir de 4 sedes, condiciones a medida',
+  ],
+}
+
 const webPageJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
@@ -106,11 +118,6 @@ const faqJsonLd = {
       '@type': 'Question',
       name: '¿Qué pasa si cancelo?',
       acceptedAnswer: { '@type': 'Answer', text: 'Tus vehículos se marcarán como inactivos al finalizar el periodo pagado. Sin penalizaciones.' },
-    },
-    {
-      '@type': 'Question',
-      name: '¿Los vehículos se publican automáticamente?',
-      acceptedAnswer: { '@type': 'Answer', text: 'No. Todos los vehículos pasan revisión editorial antes de publicarse (habitualmente en menos de 24 horas laborables).' },
     },
     {
       '@type': 'Question',
@@ -186,6 +193,38 @@ export default function PreciosPage() {
         ))}
       </div>
 
+      {/* Grupo — varias sedes, condiciones a medida a partir de 4 */}
+      <div className="bg-surface border border-bsm-border p-8 mb-16">
+        <div className="flex flex-col md:flex-row md:items-center gap-8">
+          <div className="md:flex-1">
+            <h2 className="font-medium text-bsm-text-primary text-xl mb-2">{GRUPO.name}</h2>
+            <p className="text-xs text-bsm-text-muted mb-4">{GRUPO.description}</p>
+            <div className="flex items-baseline gap-1 mb-4">
+              <span className="text-xs text-bsm-text-muted">Desde</span>
+              <span className="font-display text-4xl font-light text-bsm-text-primary">{GRUPO.priceFrom}€</span>
+              <span className="text-bsm-text-muted">/mes</span>
+            </div>
+            <ul className="space-y-2.5">
+              {GRUPO.features.map((feat) => (
+                <li key={feat} className="flex items-start gap-2.5 text-sm text-bsm-text-secondary">
+                  <Check className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
+                  {feat}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="md:w-56 flex-shrink-0">
+            <Link
+              href="/profesionales/solicitar-acceso?plan=grupo"
+              className="btn-outline w-full justify-center"
+            >
+              Contactar con ventas
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Boost puntual */}
       <div className="bg-surface border border-bsm-border p-8 text-center mb-12">
         <h3 className="font-display text-2xl font-light mb-2">Destacado puntual</h3>
@@ -204,7 +243,6 @@ export default function PreciosPage() {
           { q: '¿Hay comisión por venta?', a: 'No. Pagas solo la suscripción mensual. No cobramos comisión cuando vendes un vehículo.' },
           { q: '¿Puedo cambiar de plan en cualquier momento?', a: 'Sí. Puedes subir o bajar de plan desde tu panel. El cambio se aplica en el siguiente ciclo de facturación.' },
           { q: '¿Qué pasa si cancelo?', a: 'Tus vehículos se marcarán como inactivos al finalizar el periodo pagado. Sin penalizaciones.' },
-          { q: '¿Los vehículos se publican automáticamente?', a: 'No. Todos los vehículos pasan revisión editorial antes de publicarse (habitualmente en menos de 24 horas laborables).' },
           { q: '¿Puedo subir fotos en alta resolución?', a: 'Sí. Recomendamos entre 20 y 60 fotografías por vehículo. Hasta 10MB por imagen, formatos JPG, PNG y WebP.' },
         ].map(({ q, a }) => (
           <div key={q} className="border-b border-bsm-border py-5">

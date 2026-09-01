@@ -79,27 +79,29 @@ function RecuperarContent() {
               </p>
 
               {linkError && (
-                <p className="text-sm text-[#C6A64B] bg-[#C6A64B]/5 border border-[#C6A64B]/20 px-4 py-3 mb-4">
+                <p role="alert" className="text-sm text-gold bg-gold/5 border border-gold/20 px-4 py-3 mb-4">
                   El enlace ha caducado o no es válido. Solicita uno nuevo.
                 </p>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="label-base">Email</label>
+                  <label className="label-base" htmlFor="recuperar-email">Email</label>
                   <input
+                    id="recuperar-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tu@email.com"
                     className="input-base"
                     autoComplete="email"
+                    aria-invalid={!!error}
                     required
                   />
                 </div>
 
                 {error && (
-                  <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
+                  <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
                     {error}
                   </p>
                 )}

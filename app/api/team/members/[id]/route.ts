@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Datos inválidos.' }, { status: 400 }) }
 
   const role = body.role as OrgRole
-  if (!ASSIGNABLE_ROLES.includes(role)) {
+  if (!(ASSIGNABLE_ROLES as readonly OrgRole[]).includes(role)) {
     return NextResponse.json({ error: 'Rol no válido.' }, { status: 400 })
   }
 
@@ -56,15 +56,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   return NextResponse.json({ ok: true })
 }
 
-// DELETE → eliminar un miembro (membresía + usuario de auth, para no dejar huérfanos)
+// DELETE → quitar a un miembro de ESTA organización. El usuario de auth se conserva:
+// puede pertenecer a otras organizaciones (organization_members permite un mismo
+// user_id en varias filas, una por organización) y, si se le vuelve a añadir aquí o
+// en otro showroom, POST /api/team/members reutiliza esa misma cuenta en vez de
+// fallar por email duplicado.
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const auth = await authorize(id)
   if ('error' in auth) return auth.error
   const { admin, member } = auth
 
-  await admin.from('organization_members').delete().eq('id', member.id)
-  await admin.auth.admin.deleteUser(member.user_id) // cascada a profiles
+  const { error } = await admin.from('organization_members').delete().eq('id', member.id)
+  if (error) return NextResponse.json({ error: 'No se pudo eliminar al miembro.' }, { status: 500 })
 
   return NextResponse.json({ ok: true })
 }

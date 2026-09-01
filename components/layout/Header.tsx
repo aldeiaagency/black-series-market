@@ -18,14 +18,14 @@ const NAV_ITEMS = [
     label: 'Marcas',
     href: '/marcas',
     children: [
-      { label: 'Ferrari', href: '/coches?marca=ferrari' },
-      { label: 'Lamborghini', href: '/coches?marca=lamborghini' },
-      { label: 'McLaren', href: '/coches?marca=mclaren' },
-      { label: 'Porsche', href: '/coches?marca=porsche' },
-      { label: 'Bentley', href: '/coches?marca=bentley' },
-      { label: 'Rolls-Royce', href: '/coches?marca=rolls-royce' },
-      { label: 'BMW M', href: '/coches?marca=bmw' },
-      { label: 'Mercedes AMG', href: '/coches?marca=mercedes-benz' },
+      { label: 'Ferrari', href: '/marcas/ferrari' },
+      { label: 'Lamborghini', href: '/marcas/lamborghini' },
+      { label: 'McLaren', href: '/marcas/mclaren' },
+      { label: 'Porsche', href: '/marcas/porsche' },
+      { label: 'Bentley', href: '/marcas/bentley' },
+      { label: 'Rolls-Royce', href: '/marcas/rolls-royce' },
+      { label: 'BMW M', href: '/marcas/bmw' },
+      { label: 'Mercedes AMG', href: '/marcas/mercedes-benz' },
       { label: 'Ver todas', href: '/marcas' },
     ],
   },
@@ -159,7 +159,7 @@ export default function Header() {
                 </Link>
 
                 {item.children && activeDropdown === item.label && (
-                  <div className="absolute top-full left-0 mt-1 w-52 bg-[#0E0E0E] border border-[#1E1E1E] shadow-[0_8px_32px_rgba(0,0,0,0.6)] animate-fade-in">
+                  <div className="absolute top-full left-0 mt-1 w-52 bg-[#0E0E0E] border border-bsm-border-light shadow-[0_8px_32px_rgba(0,0,0,0.6)] animate-fade-in">
                     {item.children.map((child) => (
                       <Link
                         key={child.label}
@@ -167,7 +167,7 @@ export default function Header() {
                         className={cn(
                           'block px-4 py-2.5 text-[13px] transition-colors duration-150',
                           child.label === 'Ver todas'
-                            ? 'text-[#C9C9C9] border-t border-[#1E1E1E] mt-1 pt-3'
+                            ? 'text-[#C9C9C9] border-t border-bsm-border-light mt-1 pt-3'
                             : 'text-[#9E9E9E] hover:text-[#C9C9C9] hover:bg-[#141414]'
                         )}
                       >
@@ -182,18 +182,18 @@ export default function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <MarketSocialLinks className="mr-1 border-r border-[#2A2A2A] pr-2" />
-            <Link href="/buscar" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Buscar">
+            <MarketSocialLinks className="mr-1 border-r border-bsm-border pr-2" />
+            <Link href="/buscar" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Buscar" aria-label="Buscar">
               <Search className="w-4 h-4" />
             </Link>
 
             {/* Bell — logged-in → /cuenta/alertas, anonymous → modal */}
             {user ? (
-              <Link href="/cuenta/alertas" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Alertas de búsqueda">
+              <Link href="/cuenta/alertas" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Alertas de búsqueda" aria-label="Alertas de búsqueda">
                 <Bell className="w-4 h-4" />
               </Link>
             ) : (
-              <button onClick={() => setAlertModalOpen(true)} className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Crear alerta de búsqueda">
+              <button onClick={() => setAlertModalOpen(true)} className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Crear alerta de búsqueda" aria-label="Crear alerta de búsqueda">
                 <Bell className="w-4 h-4" />
               </button>
             )}
@@ -201,7 +201,7 @@ export default function Header() {
             {user ? (
               <>
                 {/* Heart → cuenta/favoritos */}
-                <Link href="/cuenta/favoritos" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Guardados">
+                <Link href="/cuenta/favoritos" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Guardados" aria-label="Guardados">
                   <Heart className="w-4 h-4" />
                 </Link>
 
@@ -210,15 +210,15 @@ export default function Header() {
                   <button
                     onClick={() => setUserMenuOpen((o) => !o)}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-medium
-                      bg-[#C6A64B]/15 border border-[#C6A64B]/40 text-[#C6A64B]
-                      hover:bg-[#C6A64B]/25 transition-colors"
+                      bg-gold/15 border border-gold/40 text-gold
+                      hover:bg-gold/25 transition-colors"
                     aria-label="Menú de usuario"
                   >
                     {userInitial}
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-56 bg-[#0E0E0E] border border-[#1E1E1E]
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-[#0E0E0E] border border-bsm-border-light
                       shadow-[0_8px_32px_rgba(0,0,0,0.7)] animate-fade-in">
                       {/* Email */}
                       <div className="px-4 py-3 border-b border-[#1A1A1A]">
@@ -259,7 +259,7 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/mis-favoritos" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos">
+                <Link href="/mis-favoritos" className="p-2 text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors" title="Mis favoritos" aria-label="Mis favoritos">
                   <Heart className="w-4 h-4" />
                 </Link>
                 <Link href="/login" className="px-4 py-2 text-[13px] text-[#9E9E9E] hover:text-[#C9C9C9] tracking-wide transition-colors">
@@ -268,8 +268,8 @@ export default function Header() {
                 <Link
                   href="/registro-comprador"
                   className="px-5 py-2.5 text-[12px] tracking-[0.1em] font-medium uppercase
-                    border border-[#C6A64B]/60 text-[#C6A64B]
-                    hover:bg-[#C6A64B]/8 hover:border-[#C6A64B]
+                    border border-gold/60 text-gold
+                    hover:bg-gold/8 hover:border-gold
                     transition-all duration-200"
                 >
                   Registrarse
@@ -308,7 +308,7 @@ export default function Header() {
                       <Link
                         key={child.label}
                         href={child.href}
-                        className="block py-2 text-[13px] text-[#9E9E9E] hover:text-[#C6A64B]"
+                        className="block py-2 text-[13px] text-[#9E9E9E] hover:text-gold"
                       >
                         {child.label}
                       </Link>

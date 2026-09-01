@@ -67,7 +67,7 @@ export default async function AdminAnaliticasPage() {
       .gte('created_at', d30),
 
     supabase.from('analytics_events').select('*', { count: 'exact', head: true })
-      .eq('event_type', 'vehicle_saved').gte('created_at', d30),
+      .in('event_type', ['favorite_added', 'vehicle_saved']).gte('created_at', d30),
 
     // Legacy metrics
     supabase.from('leads').select('*', { count: 'exact', head: true })
@@ -134,7 +134,7 @@ export default async function AdminAnaliticasPage() {
     (e: any) => e.vehicle_id
   )
   const savedByVehicle = groupBy(
-    events.filter((e: any) => e.event_type === 'vehicle_saved' && e.vehicle_id),
+    events.filter((e: any) => ['favorite_added', 'vehicle_saved'].includes(e.event_type) && e.vehicle_id),
     (e: any) => e.vehicle_id
   )
   const waByVehicle = groupBy(
@@ -235,7 +235,7 @@ export default async function AdminAnaliticasPage() {
   ]
 
   const PLAN_COLORS: Record<string, string> = {
-    essential: 'bg-blue-400', professional: 'bg-gold', elite: 'bg-emerald-400', trial: 'bg-[#2A2A2A]',
+    essential: 'bg-blue-400', professional: 'bg-gold', elite: 'bg-emerald-400', trial: 'bg-bsm-border',
   }
   const PLAN_LABELS: Record<string, string> = {
     essential: 'Essential', professional: 'Professional', elite: 'Elite', trial: 'Trial',
@@ -347,7 +347,7 @@ export default async function AdminAnaliticasPage() {
                   { key: 'contacted',   label: 'Contactados', color: 'text-blue-400' },
                   { key: 'negotiating', label: 'Negociando',  color: 'text-purple-400' },
                   { key: 'appointment', label: 'Cita/visita', color: 'text-cyan-400' },
-                  { key: 'reserved',    label: 'Reservado',   color: 'text-[#C6A64B]' },
+                  { key: 'reserved',    label: 'Reservado',   color: 'text-gold' },
                   { key: 'closed',      label: 'Cerrado',     color: 'text-emerald-400' },
                   { key: 'lost',        label: 'Perdido',     color: 'text-red-400' },
                   { key: 'discarded',   label: 'Descartado',  color: 'text-bsm-text-muted' },

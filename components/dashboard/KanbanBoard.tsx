@@ -33,9 +33,9 @@ const STAGE_COLORS: Record<Stage, { card: string; header: string; badge: string 
   negotiating: { card: 'border-purple-400/30 bg-purple-400/5',   header: 'text-purple-400',    badge: 'border-purple-400/30 text-purple-400' },
   appointment: { card: 'border-violet-400/30 bg-violet-400/5',   header: 'text-violet-400',    badge: 'border-violet-400/30 text-violet-400' },
   reserved:    { card: 'border-emerald-400/30 bg-emerald-400/5', header: 'text-emerald-400',   badge: 'border-emerald-400/30 text-emerald-400' },
-  closed:      { card: 'border-[#C6A64B]/30 bg-[#C6A64B]/5',    header: 'text-[#C6A64B]',     badge: 'border-[#C6A64B]/30 text-[#C6A64B]' },
+  closed:      { card: 'border-gold/30 bg-gold/5',    header: 'text-gold',     badge: 'border-gold/30 text-gold' },
   lost:        { card: 'border-red-400/20 bg-red-400/5',         header: 'text-red-400/70',    badge: 'border-red-400/30 text-red-400/70' },
-  discarded:   { card: 'border-[#2A2A2A] bg-[#111]/60',         header: 'text-[#555]',        badge: 'border-[#333] text-[#555]' },
+  discarded:   { card: 'border-bsm-border bg-[#111]/60',         header: 'text-[#555]',        badge: 'border-[#333] text-[#555]' },
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -58,6 +58,13 @@ interface Vehicle {
   year?:       number
 }
 
+interface LeadHandoff {
+  delivery_confirmed_at: string | null
+  acknowledged_at: string | null
+  decision: 'accepted' | 'rejected' | null
+  first_contact_at: string | null
+}
+
 export interface Lead {
   id:              string
   status:          Stage
@@ -70,6 +77,61 @@ export interface Lead {
   source_channel?: string | null
   qualification?:  Qualification | null
   vehicle?:        Vehicle | null
+  handoff?:        LeadHandoff | null
+}
+
+function HandoffControls({ lead }: { lead: Lead }) {
+  const [handoff, setHandoff] = useState<LeadHandoff | null>(lead.handoff ?? null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function record(fulfillment_event: string) {
+    setSaving(true)
+    setError(null)
+    const res = await fetch(`/api/leads/${lead.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fulfillment_event }),
+    })
+    const result = await res.json().catch(() => null)
+    if (res.ok && result?.handoff) setHandoff(result.handoff)
+    else setError(res.status === 409 ? 'La transición no es válida para este handoff.' : 'No se pudo guardar.')
+    setSaving(false)
+  }
+
+  if (!handoff) return null
+  const delivered = !!handoff.delivery_confirmed_at
+  const acknowledged = !!handoff.acknowledged_at
+  const contacted = !!handoff.first_contact_at
+  const rejected = handoff.decision === 'rejected'
+  const accepted = handoff.decision === 'accepted'
+
+  return (
+    <section>
+      <h3 className='text-[10px] uppercase tracking-widest text-bsm-text-muted mb-3'>Cumplimiento del handoff</h3>
+      <div className='flex flex-wrap gap-1.5 mb-3'>
+        <span className='text-[10px] border border-bsm-border px-2 py-1'>Persistido</span>
+        {delivered && <span className='text-[10px] border border-blue-400/30 text-blue-400 px-2 py-1'>Entregado</span>}
+        {acknowledged && <span className='text-[10px] border border-amber-400/30 text-amber-400 px-2 py-1'>Acusado</span>}
+        {accepted && <span className='text-[10px] border border-emerald-400/30 text-emerald-400 px-2 py-1'>Aceptado</span>}
+        {rejected && <span className='text-[10px] border border-red-400/30 text-red-400 px-2 py-1'>Rechazado · recuperar</span>}
+        {contacted && <span className='text-[10px] border border-violet-400/30 text-violet-400 px-2 py-1'>Primer contacto</span>}
+      </div>
+      <div className='flex flex-wrap gap-2'>
+        {delivered && !acknowledged && !contacted && (
+          <button disabled={saving} onClick={() => record('handoff_acknowledged')} className='text-xs border border-bsm-border px-3 py-1.5 disabled:opacity-40'>Registrar acuse</button>
+        )}
+        {acknowledged && !handoff.decision && !contacted && (<>
+          <button disabled={saving} onClick={() => record('handoff_accepted')} className='text-xs border border-emerald-400/30 text-emerald-400 px-3 py-1.5 disabled:opacity-40'>Aceptar</button>
+          <button disabled={saving} onClick={() => record('handoff_rejected')} className='text-xs border border-red-400/30 text-red-400 px-3 py-1.5 disabled:opacity-40'>Rechazar</button>
+        </>)}
+        {!contacted && !rejected && (
+          <button disabled={saving} onClick={() => record('handoff_first_contact')} className='text-xs border border-violet-400/30 text-violet-400 px-3 py-1.5 disabled:opacity-40'>Registrar primer contacto</button>
+        )}
+      </div>
+      {error && <p className='text-xs text-red-400 mt-2'>{error}</p>}
+    </section>
+  )
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -85,7 +147,7 @@ function ScoreBadge({ score }: { score: Score }) {
   const map = {
     hot:  { icon: '🔥', cls: 'text-orange-400 border-orange-400/30 bg-orange-400/5' },
     warm: { icon: '🟡', cls: 'text-amber-400 border-amber-400/30 bg-amber-400/5'   },
-    cold: { icon: '⚪', cls: 'text-[#9E9E9E] border-[#2A2A2A]'                      },
+    cold: { icon: '⚪', cls: 'text-[#9E9E9E] border-bsm-border'                      },
   }
   const { icon, cls } = map[score]
   return (
@@ -204,7 +266,7 @@ function LeadModal({
               {lead.buyer_name ?? 'Comprador anónimo'}
             </h2>
             {lead.vehicle?.brand_name && (
-              <p className="text-sm text-[#C6A64B]/80 mt-0.5">
+              <p className="text-sm text-gold/80 mt-0.5">
                 {lead.vehicle.brand_name} {lead.vehicle.model_name} {lead.vehicle.year}
               </p>
             )}
@@ -295,16 +357,18 @@ function LeadModal({
                   <p className="text-xs text-bsm-text-muted italic leading-relaxed pt-1">{q.summary}</p>
                 )}
                 {q.next_action && (
-                  <p className="text-xs text-[#C6A64B] leading-relaxed">→ {q.next_action}</p>
+                  <p className="text-xs text-gold leading-relaxed">→ {q.next_action}</p>
                 )}
                 {q.qualification_partial && (
-                  <span className="text-[10px] text-[#9E9E9E] border border-[#2A2A2A] px-2 py-0.5 inline-block">
+                  <span className="text-[10px] text-[#9E9E9E] border border-bsm-border px-2 py-0.5 inline-block">
                     Cualificación parcial
                   </span>
                 )}
               </div>
             </section>
           )}
+
+          {canManage && <HandoffControls lead={lead} />}
 
           {/* Meta */}
           <div className="flex items-center gap-3 pt-2 border-t border-bsm-border">
@@ -403,7 +467,7 @@ function LeadCard({
       aria-label={`Ver lead de ${lead.buyer_name ?? 'comprador anónimo'}`}
       onClick={onOpen}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() } }}
-      className={`border p-3 cursor-pointer hover:brightness-110 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A64B] ${card} ${isPending ? 'opacity-50' : ''} ${isGray ? 'opacity-55' : ''}`}
+      className={`border p-3 cursor-pointer hover:brightness-110 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${card} ${isPending ? 'opacity-50' : ''} ${isGray ? 'opacity-55' : ''}`}
     >
       {/* Name + score */}
       <div className="flex items-start justify-between gap-1.5 mb-0.5">
@@ -415,7 +479,7 @@ function LeadCard({
 
       {/* Vehicle */}
       {lead.vehicle?.brand_name && (
-        <p className="text-[10px] text-[#C6A64B]/80 truncate">
+        <p className="text-[10px] text-gold/80 truncate">
           {lead.vehicle.brand_name} {lead.vehicle.model_name} {lead.vehicle.year}
         </p>
       )}
@@ -471,12 +535,17 @@ export default function KanbanBoard({ initialLeads, canManage }: {
     setOpenLead(cur => cur?.id === id ? { ...cur, status: stage } : cur)
 
     try {
-      const res = await fetch(`/api/leads/${id}`, {
+        const res = await fetch(`/api/leads/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: stage }),
-      })
-      if (!res.ok) throw new Error()
+        })
+        if (!res.ok) throw new Error()
+        const result = await res.json().catch(() => null)
+        if (result?.handoff) {
+          setLeads(cur => cur.map(l => l.id === id ? { ...l, handoff: result.handoff } : l))
+          setOpenLead(cur => cur?.id === id ? { ...cur, handoff: result.handoff } : cur)
+        }
     } catch {
       setLeads(cur => cur.map(l => l.id === id ? prev : l))
       setOpenLead(cur => cur?.id === id ? prev : cur)

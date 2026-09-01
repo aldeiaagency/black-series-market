@@ -5,7 +5,13 @@ export const revalidate = 300
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getCategoryStats, buildCategoryFaqItems, MOTO_CATEGORY_FAQ } from '@/lib/category-faq'
+import { getCategoryBrandStock, MOTO_CATEGORY_RELATIONS } from '@/lib/related-categories'
+import { esGroupThousands } from '@/lib/utils'
+import FaqSection from '@/components/marketplace/FaqSection'
+import RelatedCategories from '@/components/marketplace/RelatedCategories'
 
+const CATEGORY_VALUES = ['ediciones_especiales']
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -38,6 +44,12 @@ export default async function MotosEdicionesEspecialesPage() {
     .order('published_at', { ascending: false })
     .limit(48)
 
+  const [stats, brandStock] = await Promise.all([
+    getCategoryStats(supabase, 'motorcycle', CATEGORY_VALUES),
+    getCategoryBrandStock(supabase, 'motorcycle', CATEGORY_VALUES, '/motos'),
+  ])
+  const faqItems = buildCategoryFaqItems(MOTO_CATEGORY_FAQ['ediciones-especiales'], stats, esGroupThousands)
+
   const itemListJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -62,6 +74,7 @@ export default async function MotosEdicionesEspecialesPage() {
   }
 
   return (
+    <>
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
@@ -115,5 +128,8 @@ export default async function MotosEdicionesEspecialesPage() {
         </div>
       )}
     </div>
+    <FaqSection items={faqItems} heading="Preguntas frecuentes sobre motos de edición especial" eyebrow="Ediciones especiales" />
+    <RelatedCategories categories={MOTO_CATEGORY_RELATIONS['ediciones-especiales']} brands={brandStock} />
+    </>
   )
 }

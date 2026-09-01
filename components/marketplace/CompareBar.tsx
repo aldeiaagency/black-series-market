@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { X, GitCompareArrows } from 'lucide-react'
 import { useComparator } from '@/hooks/useComparator'
+import { trackEvent } from '@/lib/analytics/client'
 
 const MAX = 3
 
@@ -40,18 +41,18 @@ export default function CompareBar() {
   const canCompare = selected.length >= 2
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#C6A64B]/20 bg-[#0A0A0A]/97 backdrop-blur-md">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gold/20 bg-[#0A0A0A]/97 backdrop-blur-md">
       <div className="max-w-screen-2xl mx-auto px-4 lg:px-12 py-3 flex items-center gap-4 flex-wrap lg:flex-nowrap justify-between">
 
         {/* Slots */}
         <div className="flex items-center gap-2 flex-1 min-w-0 overflow-x-auto">
-          <GitCompareArrows className="w-4 h-4 text-[#C6A64B] shrink-0" />
+          <GitCompareArrows className="w-4 h-4 text-gold shrink-0" />
 
           {/* Filled slots */}
           {selected.map((v) => (
             <div
               key={v.id}
-              className="flex items-center gap-2 border border-[#2A2A2A] bg-[#111] px-2 py-1.5 shrink-0"
+              className="flex items-center gap-2 border border-bsm-border bg-[#111] px-2 py-1.5 shrink-0"
             >
               {v.primaryImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -66,7 +67,7 @@ export default function CompareBar() {
                 </div>
               )}
               <div className="min-w-0 max-w-[110px]">
-                <div className="text-[9px] text-[#C6A64B]/70 uppercase tracking-widest truncate">{v.brand_name}</div>
+                <div className="text-[9px] text-gold/70 uppercase tracking-widest truncate">{v.brand_name}</div>
                 <div className="text-[11px] text-[#C9C9C9] truncate leading-tight">{v.model_name}</div>
               </div>
               <button
@@ -107,8 +108,16 @@ export default function CompareBar() {
           {canCompare && (
             <Link
               href={compareUrl}
+              onClick={() => trackEvent({
+                event_type: 'comparison_created',
+                metadata: {
+                  vehicle_ids: selected.map(v => v.id),
+                  vehicle_count: selected.length,
+                  vehicle_types: Array.from(new Set(selected.map(v => v.vehicle_type))),
+                },
+              })}
               className="px-5 py-2 text-[12px] tracking-[0.08em] font-medium uppercase
-                bg-[#C6A64B] text-[#0A0A0A] hover:bg-[#D4B560] transition-colors whitespace-nowrap"
+                bg-gold text-[#0A0A0A] hover:bg-[#D4B560] transition-colors whitespace-nowrap"
             >
               Comparar {selected.length} vehículos
             </Link>

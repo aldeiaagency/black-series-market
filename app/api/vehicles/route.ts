@@ -21,8 +21,9 @@ export async function POST(request: NextRequest) {
   try { payload = await request.json() } catch { return NextResponse.json({ error: 'Datos inválidos.' }, { status: 400 }) }
 
   // Seguridad: quita campos reservados al sistema (moderación/destacado/sellos/contador) y
-  // fuerza status a draft|pending_review. El admin client se salta el trigger 060, así que el
-  // saneo va aquí. El dealer_id lo decide el servidor, no el cliente.
+  // normaliza status a draft|active (decisión 2026-07-17, ver lib/vehicle-write.ts — ya no hay
+  // cola de moderación previa). El admin client se salta el trigger 060, así que el saneo va
+  // aquí. El dealer_id lo decide el servidor, no el cliente.
   const clean = sanitizeVehiclePayload(payload)
   clean.dealer_id = access.dealerId
 

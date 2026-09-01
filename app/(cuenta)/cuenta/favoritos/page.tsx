@@ -92,7 +92,7 @@ export default async function CuentaFavoritosPage() {
                 <input type="hidden" name="vehicleId" value={v.id} />
                 <button
                   type="submit"
-                  className="w-7 h-7 flex items-center justify-center bg-[#0A0A0A]/90 border border-[#2A2A2A] text-[#9E9E9E] hover:text-red-400 hover:border-red-400/30 focus-visible:opacity-100 focus-visible:text-red-400 transition-colors"
+                  className="w-7 h-7 flex items-center justify-center bg-[#0A0A0A]/90 border border-bsm-border text-[#9E9E9E] hover:text-red-400 hover:border-red-400/30 focus-visible:opacity-100 focus-visible:text-red-400 transition-colors"
                   title="Quitar de guardados"
                   aria-label="Quitar de guardados"
                 >
@@ -104,7 +104,7 @@ export default async function CuentaFavoritosPage() {
         </div>
       ) : (
         <div className="text-center py-24 border border-bsm-border bg-surface">
-          <Heart className="w-12 h-12 text-[#2A2A2A] mx-auto mb-5" />
+          <Heart className="w-12 h-12 text-bsm-border mx-auto mb-5" />
           <h2 className="font-display text-xl font-light text-bsm-text-primary mb-2">
             No tienes vehículos guardados
           </h2>

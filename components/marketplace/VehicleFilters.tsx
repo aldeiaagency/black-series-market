@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X, ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { cn, SPAIN_LOCATIONS, getProvinciasByComunidad } from '@/lib/utils'
 import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
+import { trackEvent } from '@/lib/analytics/client'
 
 const CAR_CATEGORIES = CAR_CATEGORIES_PUBLIC
 
@@ -358,6 +359,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
   const [showAdvanced, setShowAdvanced]         = useState(false)
   const [allDealers, setAllDealers]             = useState<{ id: string; name: string; location_city: string | null; isFeatured: boolean }[]>([])
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+  const appliedFilterSignature = useRef<string | null>(null)
 
   // ── Staging (filter drawer) ────────────────────────────────────────────────
   // While the drawer is open we edit a local `draft` instead of navigating; the URL
@@ -455,6 +457,34 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
     setSearchDraft(searchParams.get('search') || '')
     setVersionDraft(searchParams.get('version') || '')
   }, [searchParams])
+
+  // Track only committed filters. Draft drawer changes do not reach searchParams,
+  // and the debounce avoids one event per keystroke in live text inputs.
+  useEffect(() => {
+    const applied = new URLSearchParams(searchParams.toString())
+    applied.delete('page')
+    applied.delete('sort')
+    applied.sort()
+    const signature = applied.toString()
+    if (appliedFilterSignature.current === null) {
+      appliedFilterSignature.current = signature
+      return
+    }
+    if (appliedFilterSignature.current === signature) return
+    appliedFilterSignature.current = signature
+    const timeout = setTimeout(() => {
+      trackEvent({
+        event_type: 'filter_used',
+        metadata: {
+          vehicle_type: vehicleType,
+          page: pathname,
+          filters: Object.fromEntries(applied.entries()),
+          active_filter_count: Array.from(applied.keys()).length,
+        },
+      })
+    }, 500)
+    return () => clearTimeout(timeout)
+  }, [searchParams, pathname, vehicleType])
 
   // Fetch all dealers with active stock, filtered by current location
   useEffect(() => {
@@ -857,7 +887,7 @@ export default function VehicleFilters({ vehicleType, totalCount }: FiltersProps
                       {d.location_city ? `${d.name} · ${d.location_city}` : d.name}
                     </span>
                     {d.isFeatured && (
-                      <span className="shrink-0 border border-[#C6A64B]/35 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-[#C6A64B]/75">
+                      <span className="shrink-0 border border-gold/35 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.16em] text-gold/75">
                         Destacado
                       </span>
                     )}

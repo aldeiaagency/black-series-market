@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
+const LAST_UPDATED = '20 de julio de 2026'
+
 const LEGAL_CONTENT: Record<string, { title: string; content: string }> = {
   'aviso-legal': {
     title: 'Aviso Legal',
@@ -76,13 +78,17 @@ Este canal también podrá utilizarse para comunicar incidencias legales, anunci
 
 Black Label Market revisará las comunicaciones recibidas y podrá adoptar las medidas que considere oportunas, incluyendo la corrección, suspensión o retirada de contenidos.
 
-**Punto de contacto único — Reglamento de Servicios Digitales (DSA)**
+**Notificación de contenido presuntamente ilícito**
 
-En cumplimiento del Reglamento (UE) 2022/2065, de Servicios Digitales, Black Label Market designa el siguiente punto de contacto único para las comunicaciones de autoridades de los Estados miembros y de la Comisión Europea, y para la notificación de contenidos presuntamente ilícitos:
+Cualquier persona o entidad puede notificar contenido que considere ilícito escribiendo a hola@blacklabelmarket.es. La notificación deberá incluir: una explicación suficientemente motivada de la ilicitud; la URL exacta del anuncio o contenido; el nombre y email del notificante, salvo las excepciones previstas legalmente; una declaración de buena fe confirmando que la información y alegaciones son precisas y completas.
 
-hola@blacklabelmarket.es
+Black Label Market acusará recibo sin dilación indebida cuando disponga de un email de contacto. La notificación será tratada de forma diligente, objetiva, no arbitraria y en tiempo oportuno. El notificante recibirá la decisión adoptada y las vías de recurso disponibles. Si se emplean medios automatizados para tramitar o decidir, se informará de ello.
 
-Las notificaciones de contenidos ilícitos deberán identificar el contenido o anuncio afectado y exponer los motivos por los que se considera ilícito.
+**Puntos de contacto DSA**
+
+Punto de contacto para autoridades de los Estados miembros, Comisión Europea y Junta Europea de Servicios Digitales: hola@blacklabelmarket.es. Se aceptan comunicaciones en castellano e inglés.
+
+Punto de contacto para usuarios, profesionales y demás destinatarios del servicio: hola@blacklabelmarket.es. Las comunicaciones podrán ser revisadas por una persona y no se tramitarán exclusivamente mediante herramientas automatizadas.
 
 **Protección de datos y cookies**
 
@@ -90,11 +96,11 @@ El tratamiento de datos personales realizado a través de Black Label Market se 
 
 El uso de cookies y tecnologías similares se regula en la Política de Cookies. El usuario puede configurar sus preferencias de cookies a través del panel habilitado en la web.
 
-**Resolución alternativa de litigios**
+**Resolución alternativa de reclamaciones de consumo**
 
-De conformidad con el Reglamento (UE) 524/2013 y la Ley 7/2017, de 2 de noviembre, de resolución alternativa de litigios en materia de consumo, los usuarios con la condición de consumidores pueden acceder a la plataforma europea de resolución de litigios en línea para resolver controversias derivadas de servicios contratados en línea:
+Si una reclamación presentada por un consumidor a KAZAWEB, S.L.U. no pudiera resolverse directamente, Black Label Market informará al consumidor, en soporte duradero y dentro del plazo legal, de la entidad de resolución alternativa competente y de si participará en el procedimiento correspondiente, conforme al artículo 40 de la Ley 7/2017.
 
-Plataforma ODR de la UE: https://ec.europa.eu/consumers/odr/
+Lo anterior se refiere exclusivamente a controversias entre el consumidor y KAZAWEB, S.L.U. relativas a servicios propios de Black Label Market. Las reclamaciones derivadas de la compraventa del vehículo deberán dirigirse al vendedor profesional.
 
 **Legislación aplicable y jurisdicción**
 
@@ -136,6 +142,9 @@ Black Label Market puede tratar distintas categorías de datos personales en fun
 - Datos de analítica interna: vistas de vehículos, clics, contactos, vehículos guardados, filtros utilizados y otros eventos de uso, tratados de forma agregada o limitada para mejorar la plataforma.
 
 Black Label Market no solicita categorías especiales de datos personales. El usuario debe evitar incluir datos especialmente protegidos en campos libres o mensajes.
+**Fuentes públicas de showrooms**
+
+Para verificar solicitudes profesionales, Black Label Market puede consultar datos empresariales y de contacto disponibles en la web del showroom, Google Business, perfiles profesionales en redes sociales y registros públicos. La finalidad es verificar la identidad, actividad, reputación comercial y adecuación del solicitante, sobre la base de medidas precontractuales y del interés legítimo en prevenir fraude y mantener la calidad del marketplace.
 
 **Finalidades del tratamiento**
 
@@ -170,6 +179,7 @@ Cuando el tratamiento se base en el consentimiento, el usuario podrá retirarlo 
 **Comunicación de datos a terceros**
 
 Cuando el usuario solicita información sobre un vehículo, Black Label Market podrá comunicar los datos necesarios al vendedor profesional responsable de dicha unidad para que pueda responder a la solicitud.
+Respecto del formulario y entrega inicial del contacto, KAZAWEB, S.L.U. y el vendedor profesional actuarán como responsables independientes de los tratamientos cuyos fines y medios determinen respectivamente. El profesional deberá facilitar su propia información de privacidad cuando trate el contacto para su seguimiento comercial.
 
 También podrán acceder a datos personales proveedores que prestan servicios a Black Label Market como encargados del tratamiento, por ejemplo proveedores de hosting, infraestructura, base de datos, email transaccional, gestión de formularios, analítica, soporte técnico, pagos o herramientas de gestión interna, siempre que sean necesarios para prestar el servicio.
 
@@ -192,7 +202,7 @@ Esta lista puede actualizarse cuando se incorporen o modifiquen proveedores rele
 
 Algunos proveedores tecnológicos utilizados por Black Label Market pueden estar ubicados fuera del Espacio Económico Europeo o prestar servicios mediante infraestructuras internacionales.
 
-Cuando se produzcan transferencias internacionales de datos, Black Label Market procurará que se realicen conforme a las garantías previstas por la normativa aplicable, incluyendo decisiones de adecuación, cláusulas contractuales tipo u otros mecanismos reconocidos por el RGPD.
+Cuando se produzcan transferencias internacionales de datos, Black Label Market procurará que se realicen conforme a las garantías previstas por la normativa aplicable, incluyendo decisiones de adecuación, cláusulas contractuales tipo u otros mecanismos reconocidos por el RGPD. Cuando se utilicen cláusulas contractuales tipo u otras garantías del artículo 46 RGPD, el interesado podrá solicitar información adicional o una copia de las garantías aplicables escribiendo a privacidad@blacklabelmarket.es.
 
 **Conservación de los datos**
 
@@ -226,7 +236,7 @@ privacidad@blacklabelmarket.es
 
 La solicitud deberá indicar el derecho que se desea ejercer y permitir identificar razonablemente al solicitante.
 
-Black Label Market responderá a las solicitudes de ejercicio de derechos en el plazo de un mes desde su recepción. Cuando sea necesario por la complejidad o el número de solicitudes, dicho plazo podrá prorrogarse hasta tres meses adicionales, comunicando al interesado la prórroga y sus motivos dentro del plazo inicial de un mes, conforme al artículo 12 del Reglamento (UE) 2016/679.
+Black Label Market responderá a las solicitudes de ejercicio de derechos en el plazo de un mes desde su recepción. Cuando resulte necesario por la complejidad o el número de solicitudes, el plazo podrá prorrogarse otros dos meses. La prórroga y sus motivos se comunicarán al interesado dentro del primer mes.
 
 El usuario también tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos a través de www.aepd.es si considera que el tratamiento de sus datos no se ajusta a la normativa aplicable.
 
@@ -318,19 +328,18 @@ Tecnologías similares — Almacenamiento local del navegador (localStorage)
 
 Black Label Market utiliza el almacenamiento local del navegador para guardar preferencias y datos funcionales directamente en el dispositivo del usuario, sin transmitirlos a servidores externos ni utilizarlos con fines de seguimiento o publicidad.
 
-- blm_favorites: guarda los vehículos marcados como favoritos por usuarios no autenticados. Finalidad: conservar la selección de favoritos entre sesiones sin necesidad de cuenta. Duración: persiste en el dispositivo hasta que el usuario borra los datos del navegador o elimina los favoritos.
-- blm_compare: guarda los vehículos añadidos al comparador. Finalidad: mantener la selección activa durante la navegación. Duración: sesión de navegación activa o hasta que se vacía el comparador.
-- blacklabel_alerts: guarda las alertas de vehículos configuradas localmente. Finalidad: conservar las alertas seleccionadas sin necesidad de cuenta. Duración: persiste hasta que el usuario borra los datos del navegador.
-- blm_private_searches: guarda localmente los datos de solicitudes de vehículos a la carta completadas. Finalidad: conservar los detalles de búsquedas enviadas. Duración: persiste hasta que el usuario borra los datos del navegador.
-
+- black_label_cookie_consent: guarda las categorías aceptadas o rechazadas, la fecha y hora del consentimiento y la versión del panel de consentimiento. Finalidad: recordar y acreditar las preferencias de cookies. Duración: hasta que se actualice la versión del consentimiento o el usuario borre los datos del navegador.
+- blm_compare: guarda los vehículos añadidos al comparador. Finalidad: mantener la selección activa durante la navegación. Duración: hasta que se vacía el comparador o se borran los datos del navegador.
+- blm_private_searches: guarda localmente una copia de las solicitudes de vehículos a la carta completadas. Finalidad: conservar los detalles de búsquedas enviadas como comodidad para el usuario. Duración: persiste hasta que el usuario borra los datos del navegador.
+- blm_publish_draft: guarda el borrador de publicación del profesional mientras completa un alta de vehículo. Finalidad: evitar la pérdida del formulario si el profesional recarga o navega antes de guardar. Duración: hasta que se publica, se guarda o se borran los datos del navegador.
 Análisis
 
 Black Label Market utiliza las siguientes herramientas de análisis, condicionadas al consentimiento previo del usuario. Sin dicho consentimiento estas herramientas no se activan y no se depositan cookies de análisis.
 
 **Google Tag Manager (GTM)**
 - Proveedor: Google Ireland Limited / Google LLC (EE. UU.)
-- Finalidad: gestión y carga condicional de etiquetas de seguimiento; no recopila datos propios de forma independiente
-- Base de legitimación: interés legítimo (gestión técnica de scripts de terceros)
+- Finalidad: gestión y carga condicional de etiquetas de analítica; solo se carga cuando el usuario ha aceptado la categoría analítica
+- Base de legitimación: consentimiento del usuario para la categoría analítica
 - No genera cookies propias
 
 **Google Analytics 4 (GA4)**
@@ -341,15 +350,6 @@ Black Label Market utiliza las siguientes herramientas de análisis, condicionad
 - Retención: 14 meses
 - Cookies: _ga (2 años), _ga_419RRDTX12 (2 años), _gid (24 horas)
 - Más información: https://policies.google.com/privacy
-
-**Microsoft Clarity**
-- Proveedor: Microsoft Corporation (EE. UU.)
-- Finalidad: grabaciones de sesión anonimizadas, mapas de calor y análisis de comportamiento del usuario para mejorar la experiencia de uso
-- Base de legitimación: consentimiento del usuario (categoría analítica)
-- Transferencia internacional: servidores de Microsoft en la UE y EE. UU. bajo el marco EU-US Data Privacy Framework
-- Retención: datos de sesión 30 días
-- Cookies: _clsk (sesión), _clck (1 año), MUID (13 meses)
-- Más información: https://privacy.microsoft.com
 
 Marketing y publicidad
 
@@ -458,6 +458,13 @@ El vendedor profesional, concesionario, compraventa, showroom o especialista que
 - Cumplir los criterios de publicación y, en su caso, las condiciones específicas para profesionales.
 
 Estas obligaciones se entienden sin perjuicio de los Criterios de Publicación, las condiciones específicas para profesionales y las condiciones particulares de los planes de suscripción que puedan resultar aplicables.
+**Vehículos y contenidos prohibidos**
+
+No podrán publicarse vehículos robados, apropiados sin autorización, sujetos a embargo o reserva de dominio no declarada, con número de bastidor manipulado, documentación falsa, origen ilícito, características cuya comercialización esté prohibida o que no puedan venderse legalmente en España.
+
+Tampoco podrán publicarse anuncios engañosos, ofertas señuelo, precios falsos, fotografías de otra unidad, información que infrinja derechos de terceros o contenidos discriminatorios, violentos, fraudulentos o contrarios a la normativa aplicable.
+
+Las cargas, limitaciones administrativas, daños estructurales, siniestros relevantes, modificaciones no homologadas y cualquier circunstancia que afecte a la seguridad, documentación, valor o posibilidad de transmisión deberán declararse de forma clara.
 
 **Publicación, revisión y retirada de contenidos**
 
@@ -485,7 +492,7 @@ Black Label Market no se responsabiliza de incumplimientos, desacuerdos, daños,
 
 **Garantías legales aplicables**
 
-Los vehículos vendidos por profesionales a consumidores están sujetos a las garantías legales previstas en el Real Decreto Legislativo 7/2021, de 27 de abril, que transpone la Directiva (UE) 2019/771 relativa a los contratos de compraventa de bienes. El vendedor profesional es el único responsable del cumplimiento de las garantías legales aplicables a cada vehículo conforme a dicha normativa. Black Label Market no otorga garantía propia sobre los vehículos publicados ni asume en ningún caso la posición de vendedor.
+Cuando el vendedor sea un profesional y el comprador un consumidor, la compraventa estará sujeta al régimen de conformidad del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios. En vehículos de segunda mano, el plazo legal general de responsabilidad es de tres años desde la entrega, aunque vendedor y consumidor pueden pactar un plazo inferior que nunca podrá ser menor de un año. El vendedor deberá informar claramente del plazo aplicable antes de contratar. Black Label Market no otorga garantía propia sobre los vehículos publicados ni asume en ningún caso la posición de vendedor.
 
 **Planes de suscripción y pagos profesionales**
 
@@ -634,23 +641,24 @@ Estas son las condiciones que toda publicación debe cumplir. Sin excepciones.
 
 Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o retirar publicaciones en función de sus criterios de calidad y criterios comerciales.
 
-**Criterios de ordenación del catálogo (DSA art. 27)**
+**Clasificación de vehículos y showrooms**
 
-En cumplimiento del artículo 27 del Reglamento (UE) 2022/2065, de Servicios Digitales, Black Label Market informa sobre los principales parámetros que determinan el orden de presentación por defecto de los vehículos en el catálogo:
+En el catálogo de vehículos, el orden predeterminado sitúa primero los anuncios que tienen activo un Boost o destacado contratado separadamente o incluido en el plan del profesional. Dentro de cada grupo, los anuncios se ordenan por fecha de publicación, de más reciente a más antigua. El destacado remunerado es, por tanto, el parámetro de mayor importancia relativa en el orden predeterminado.
 
-- Fecha de publicación: las unidades publicadas más recientemente tienen preferencia en el orden por defecto.
-- Completitud de la ficha: las unidades con información más completa (fotografías de calidad, descripción detallada, precio visible, especificaciones técnicas y condiciones claras) tienen mejor posicionamiento en la presentación.
-- Disponibilidad: solo se muestran vehículos activos y disponibles en el catálogo.
-- Criterios editoriales: Black Label Market puede destacar unidades de especial relevancia, rareza o interés para los compradores de la plataforma.
+La completitud, calidad de las fotografías, exactitud de los datos y adecuación a los Criterios de Publicación se utilizan para decidir si un anuncio puede publicarse o mantenerse activo, pero no constituyen actualmente un parámetro directo del orden predeterminado.
 
-El usuario puede modificar el orden de presentación mediante los filtros y opciones de ordenación disponibles en el catálogo.
+El usuario puede cambiar el orden mediante las opciones de fecha, precio y kilometraje disponibles en el catálogo.
+
+En el directorio de showrooms se muestran primero los perfiles marcados como destacados; a continuación se tiene en cuenta el plan y, finalmente, el nombre del showroom. Determinados planes de pago pueden incluir tratamiento destacado y, por tanto, influir en la posición.
+
+Black Label Market podrá aplicar selecciones editoriales en espacios específicamente identificados como 'Selección editorial'. Estas selecciones se diferenciarán de los destacados remunerados.
     `.trim(),
   },
 
   'condiciones-profesionales': {
     title: 'Condiciones para profesionales',
     content: `
-**Versión:** 20 de julio de 2026
+Versión: 20 de julio de 2026
 
 **Objeto**
 
@@ -659,6 +667,17 @@ Estas Condiciones para Profesionales regulan el acceso y uso de Black Label Mark
 Black Label Market es una plataforma especializada en la presentación de coches y motos premium, deportivos, clásicos, de colección y unidades especiales publicados por profesionales verificados.
 
 El uso de la plataforma como profesional implica la aceptación de estas Condiciones, así como del Aviso Legal, la Política de Privacidad, la Política de Cookies, los Términos y Condiciones de Uso y los Criterios de Publicación vigentes en cada momento.
+**Perfección del contrato y capacidad de representación**
+
+Estas Condiciones, junto con la ficha u orden del plan contratado, los Términos y Condiciones de Uso y los Criterios de Publicación expresamente incorporados, constituyen el contrato entre KAZAWEB, S.L.U. y el profesional. La persona que acepta estas Condiciones declara que es mayor de edad, que dispone de capacidad legal suficiente y que cuenta con poder o autorización vigente para obligar al profesional en cuyo nombre actúa. KAZAWEB, S.L.U. podrá solicitar documentación que acredite dicha representación.
+
+La solicitud de acceso constituye una solicitud de contratación y no obliga a KAZAWEB, S.L.U. hasta que esta comunique la aprobación y activación de la cuenta profesional. La comunicación de activación perfeccionará el contrato, salvo que la ficha u orden del plan establezca expresamente otro momento. En caso de contradicción, prevalecerán, por este orden: (i) la ficha u orden particular del plan; (ii) estas Condiciones para Profesionales; (iii) los Términos y Condiciones de Uso; y (iv) los Criterios de Publicación.
+
+**Contratación electrónica**
+
+El procedimiento de contratación comprende: identificación del profesional, elección o confirmación del plan, revisión de la información y condiciones económicas, aceptación de los documentos contractuales y comunicación de activación. Antes de enviar la aceptación, el profesional podrá volver a los pasos anteriores y corregir los datos introducidos.
+
+El contrato se formaliza en castellano. KAZAWEB, S.L.U. archivará la versión aceptada y remitirá al profesional una confirmación en soporte duradero que incluirá la versión de las Condiciones y la información económica del plan. El profesional podrá solicitar posteriormente una copia escribiendo a hola@blacklabelmarket.es.
 
 **Titular de la plataforma**
 
@@ -670,20 +689,13 @@ El acceso profesional a Black Label Market no es automático. La plataforma podr
 
 Black Label Market podrá valorar, entre otros aspectos, la identidad profesional del solicitante, su actividad, reputación, tipo de stock, calidad de presentación, ubicación, especialización y adecuación al posicionamiento de la plataforma.
 
-Black Label Market se reserva el derecho de aceptar, rechazar, suspender o cancelar solicitudes de acceso profesional cuando considere que no encajan con los criterios comerciales, legales o de calidad de la plataforma.
+Black Label Market podrá aceptar, rechazar o solicitar información adicional sobre una solicitud de acceso profesional cuando sea necesario para verificar la actividad, prevenir fraude, mantener la calidad del marketplace o cumplir obligaciones legales o contractuales.
 
-**Verificación de datos del profesional (DSA art. 30)**
+**Verificación de profesionales**
 
-En cumplimiento del artículo 30 del Reglamento (UE) 2022/2065, de Servicios Digitales, Black Label Market recopila y verifica, en la medida razonablemente posible, los siguientes datos de cada profesional antes de activar su acceso para publicar vehículos:
+Antes de permitir la publicación, Black Label Market podrá solicitar y verificar la razón social, domicilio, teléfono, email, identificación fiscal, datos del Registro Mercantil o registro equivalente, identidad y poderes del representante y demás documentación razonablemente necesaria para acreditar la actividad profesional y prevenir fraude.
 
-- Nombre o razón social.
-- Dirección postal.
-- Número de identificación fiscal (NIF o CIF) o número de registro equivalente.
-- Email y teléfono de contacto.
-
-El profesional deberá mantener estos datos actualizados en todo momento. Si se detecta que los datos proporcionados son falsos, están desactualizados o el profesional se niega a proporcionarlos o a actualizarlos cuando se le requiera, Black Label Market podrá suspender el acceso a la plataforma hasta que la situación sea subsanada.
-
-Al solicitar el acceso profesional, el solicitante autocertifica que ofrecerá únicamente vehículos y servicios conformes con la normativa aplicable de la Unión Europea y de España.
+El profesional deberá mantener la información actualizada y comunicar sin demora cualquier cambio. La falta de entrega, inexactitud o falta de actualización podrá dar lugar a la suspensión hasta su subsanación. El profesional certifica que ofrecerá exclusivamente vehículos y servicios conformes con el Derecho aplicable.
 
 **Obligaciones del profesional**
 
@@ -699,6 +711,14 @@ El profesional se compromete a:
 - No utilizar imágenes falsas, de archivo, manipuladas de forma engañosa o correspondientes a otra unidad.
 - Atender las solicitudes de compradores de forma profesional y diligente.
 - Cumplir la normativa aplicable en materia de venta de vehículos, consumo, garantías, publicidad, protección de datos, comercio electrónico, fiscalidad y cualquier otra que resulte aplicable a su actividad.
+
+**Vehículos y contenidos prohibidos**
+
+No podrán publicarse vehículos robados, apropiados sin autorización, sujetos a embargo o reserva de dominio no declarada, con número de bastidor manipulado, documentación falsa, origen ilícito, características cuya comercialización esté prohibida o que no puedan venderse legalmente en España.
+
+Tampoco podrán publicarse anuncios engañosos, ofertas señuelo, precios falsos, fotografías de otra unidad, información que infrinja derechos de terceros o contenidos discriminatorios, violentos, fraudulentos o contrarios a la normativa aplicable.
+
+Las cargas, limitaciones administrativas, daños estructurales, siniestros relevantes, modificaciones no homologadas y cualquier circunstancia que afecte a la seguridad, documentación, valor o posibilidad de transmisión deberán declararse de forma clara.
 
 **Responsabilidad sobre los anuncios**
 
@@ -723,16 +743,31 @@ El profesional podrá recibir solicitudes de información, contactos o leads gen
 El profesional deberá utilizar dichos datos únicamente para gestionar la solicitud concreta del usuario y conforme a la normativa de protección de datos aplicable.
 
 Queda prohibido utilizar los datos recibidos para finalidades no relacionadas con la solicitud, cesiones no autorizadas, comunicaciones abusivas, spam o acciones comerciales no permitidas.
+**Acceso y utilización de datos**
 
-**Planes de suscripción y servicios profesionales**
+KAZAWEB, S.L.U. accede a los datos identificativos y contractuales del profesional, los anuncios y contenidos publicados, los contactos generados, las métricas de visualización e interacción, los datos técnicos y de seguridad y la información necesaria para facturación, soporte, prevención del fraude y mejora del servicio.
 
-Black Label Market podrá ofrecer planes de suscripción o servicios de pago para profesionales, incluyendo publicación de vehículos, funcionalidades de visibilidad, gestión de showroom, analíticas, soporte u otros servicios asociados.
+Durante la vigencia del contrato, el profesional podrá acceder desde su panel a los datos de su perfil, inventario, contactos recibidos y métricas que el plan contratado ponga a su disposición. No tendrá acceso a datos identificativos, inventario privado o métricas individuales de otros profesionales.
 
-Las condiciones económicas, duración, renovación, cancelación, impuestos, facturación y servicios incluidos se indicarán en cada plan o comunicación comercial correspondiente.
+Los datos podrán facilitarse a proveedores tecnológicos que actúen como encargados del tratamiento y a autoridades cuando exista obligación legal. No se facilitarán a terceros para fines propios incompatibles con la solicitud del usuario sin una base jurídica válida.
 
-Salvo que se indique otra cosa, la cancelación de un plan de suscripción tendrá efecto al finalizar el periodo ya facturado.
+Tras finalizar el contrato, el profesional podrá solicitar una copia de los datos y contenidos de su cuenta en un formato de uso común escribiendo a hola@blacklabelmarket.es. // TODO LEGAL — decisión pendiente de H: validar y construir el mecanismo operativo de exportación en 30 días antes de afirmar este plazo como funcional.
 
-El impago, uso indebido o incumplimiento de estas Condiciones podrá dar lugar a la suspensión del servicio, retirada de publicaciones o cancelación del acceso profesional.
+**Planes, facturación y renovación**
+
+Los servicios incluidos, límites, precio, periodicidad de facturación y fecha de inicio serán los mostrados al profesional inmediatamente antes de contratar y constarán en la confirmación de contratación. Los precios dirigidos a profesionales se expresan sin IVA, que se añadirá al tipo legal aplicable.
+
+Salvo indicación expresa en la orden del plan, la cuota se factura por anticipado al comienzo de cada período. El pago se gestiona mediante Stripe y está sujeto a los medios de pago disponibles en su interfaz.
+
+La suscripción se renovará automáticamente por períodos de igual duración al inicialmente contratado hasta que el profesional solicite su cancelación. La cancelación podrá solicitarse en cualquier momento desde el portal de facturación o escribiendo a hola@blacklabelmarket.es y surtirá efecto al finalizar el período ya pagado. No se cobrarán períodos posteriores.
+
+Salvo error de facturación, incumplimiento imputable a KAZAWEB, S.L.U. o norma imperativa aplicable, la cancelación no genera devolución proporcional del período ya iniciado. Hasta su vencimiento, el profesional conservará el acceso a los servicios contratados.
+
+Al finalizar la suscripción, el perfil dejará de ser público y el inventario quedará archivado, no eliminado. La reactivación posterior estará sujeta a la disponibilidad y condiciones comerciales vigentes.
+
+Si se produce un impago, KAZAWEB, S.L.U. notificará la incidencia y concederá un plazo razonable para subsanarla antes de suspender el servicio, salvo fraude, riesgo de seguridad o reiteración. El profesional seguirá obligado al pago de los importes vencidos.
+
+Los cambios de precio se comunicarán en soporte duradero con al menos treinta días de antelación. El profesional podrá cancelar sin penalización antes de su entrada en vigor.
 
 **Criterios de publicación**
 
@@ -744,15 +779,19 @@ El cumplimiento de los criterios mínimos no garantiza necesariamente la publica
 
 **Propiedad intelectual e imágenes**
 
-El profesional garantiza que dispone de derechos, licencias o autorización suficiente para publicar las imágenes, textos, logotipos, marcas, información comercial y demás contenidos que aporte a la plataforma.
+El profesional garantiza que dispone de derechos, licencias o autorización suficiente para publicar las imágenes, textos, logotipos, marcas, información comercial y demás contenidos que aporte a la plataforma, incluido cuando dichos contenidos hayan sido producidos por un tercero (fotógrafo, agencia, fabricante u otro proveedor). En ese caso, el profesional declara haber obtenido de ese tercero la autorización necesaria para cederlos a Black Label Market en los términos de esta cláusula antes de publicarlos.
 
-Al facilitar contenidos a Black Label Market, el profesional autoriza su uso, reproducción, adaptación técnica, comunicación pública y publicación dentro de la plataforma, canales asociados y materiales necesarios para la promoción del vehículo o del showroom, mientras el contenido permanezca activo o exista relación profesional con la plataforma.
+Al facilitar contenidos a Black Label Market, el profesional autoriza su uso, reproducción, adaptación y publicación en: el sitio web y aplicaciones de la plataforma, los perfiles oficiales de Black Label Market en redes sociales, las comunicaciones por email a compradores registrados, y los materiales publicitarios —incluida publicidad de pago— que promocionen el vehículo, el showroom o la plataforma. La adaptación autorizada incluye recorte, reencuadre, aplicación de marcos, marcas de agua o elementos de identidad visual editorial, y ajustes técnicos de color o exposición necesarios para mantener el estándar visual de la plataforma; en ningún caso incluye alterar el vehículo representado ni presentar características que no correspondan a la unidad real.
 
-El profesional responderá frente a cualquier reclamación de terceros derivada del uso de contenidos aportados por él.
+Esta autorización es aplicable a todo contenido aportado por el profesional, incluido el aportado antes de la aceptación de la versión vigente de estas Condiciones; el uso continuado de la plataforma tras cada actualización implica su aceptación también para el contenido ya publicado.
 
-**Suspensión o cancelación de cuenta profesional**
+La autorización de uso en materiales publicitarios y de captación activos (redes, email, publicidad de pago) se mantiene mientras el vehículo permanezca publicado como disponible o exista relación profesional activa. Cuando la unidad se venda, se retire o la relación finalice, Black Label Market suspenderá su uso en materiales publicitarios y de captación activos, pero podrá conservar el contenido ya publicado con carácter editorial o de archivo (por ejemplo, una pieza ya publicada sobre una unidad concreta) salvo solicitud expresa de retirada por parte del profesional, que se atenderá en un plazo razonable.
 
-Black Label Market podrá suspender, limitar o cancelar una cuenta profesional cuando detecte:
+El profesional responderá frente a cualquier reclamación de terceros derivada del uso de contenidos aportados por él, incluida la falta de autorización de terceros productores del contenido.
+
+**Restricción, suspensión y terminación**
+
+Black Label Market podrá restringir, suspender, limitar o cancelar anuncios, funcionalidades o una cuenta profesional cuando detecte:
 
 - Información falsa, incompleta o engañosa.
 - Publicación de vehículos no disponibles o no autorizados.
@@ -764,7 +803,13 @@ Black Label Market podrá suspender, limitar o cancelar una cuenta profesional c
 - Conductas contrarias a la buena fe, a estas Condiciones o a la normativa aplicable.
 - Riesgos para usuarios, terceros o para la reputación de la plataforma.
 
-Cuando resulte razonable, Black Label Market podrá comunicar al profesional los motivos principales de la medida adoptada.
+Antes o en el momento de aplicar la medida, KAZAWEB, S.L.U. remitirá al profesional, en soporte duradero, una motivación que identifique los hechos concretos, la cláusula contractual o norma aplicable, el alcance y duración de la medida, si se emplearon medios automatizados y las vías de reclamación disponibles.
+
+Cuando KAZAWEB, S.L.U. decida terminar por completo la relación contractual, lo comunicará con al menos treinta días de antelación y expresará los motivos en soporte duradero. El preaviso de treinta días no se aplicará cuando una obligación legal exija la terminación inmediata, exista una razón imperiosa reconocida por el Derecho aplicable o el profesional haya infringido reiteradamente estas Condiciones. En dichos casos, la motivación se comunicará sin dilación indebida, salvo prohibición legal.
+
+El profesional podrá presentar alegaciones y solicitar revisión humana escribiendo a hola@blacklabelmarket.es. Las reclamaciones se tramitarán gratuitamente, de forma diligente, objetiva, proporcional y no discriminatoria. Si la decisión se revoca, KAZAWEB, S.L.U. restablecerá sin demora el servicio y el acceso a los datos afectados.
+
+El profesional podrá terminar la relación contractual mediante la cancelación de su suscripción. La finalización no afectará a las obligaciones de pago vencidas, responsabilidades previas, deberes de confidencialidad ni derechos que por su naturaleza deban subsistir.
 
 **Limitación de responsabilidad**
 
@@ -778,9 +823,13 @@ El acceso profesional a Black Label Market requiere la aceptación expresa de es
 
 **Modificación de estas Condiciones**
 
-Black Label Market podrá actualizar estas Condiciones para Profesionales por cambios legales, técnicos, comerciales, operativos o de funcionamiento de la plataforma.
+KAZAWEB, S.L.U. notificará en soporte duradero cualquier modificación propuesta de estas Condiciones. La modificación no se aplicará antes de que transcurra un plazo mínimo de quince días desde la notificación. Se concederá un plazo superior cuando el cambio exija al profesional realizar ajustes técnicos o comerciales significativos.
 
-La versión vigente será la publicada en la plataforma en cada momento. Cuando los cambios sean relevantes para profesionales registrados, se procurará informar por medios razonables y, si el cambio es sustancial, se podrá solicitar una nueva aceptación.
+El profesional podrá resolver el contrato antes de que finalice el plazo de notificación. La resolución surtirá efecto dentro de los quince días siguientes a su recepción, salvo que se acuerde un plazo inferior. El profesional podrá renunciar al plazo mediante declaración escrita o acción afirmativa inequívoca posterior a la notificación.
+
+No se aplicarán cambios retroactivos, salvo que sean exigidos por una norma o resulten beneficiosos para los profesionales. El plazo anterior no será exigible cuando KAZAWEB, S.L.U. deba realizar el cambio para cumplir una obligación legal que impida respetarlo o para responder de forma excepcional a un peligro imprevisto e inminente relacionado con fraude, malware, spam, seguridad de los datos o ciberseguridad.
+
+La versión vigente será la publicada en la plataforma en cada momento.
 
 **Legislación aplicable y jurisdicción**
 
@@ -833,7 +882,7 @@ export default async function LegalPage({ params }: PageProps) {
         </div>
         <h1 className="section-title">{page.title}</h1>
         <p className="text-xs text-bsm-text-muted mt-3">
-          Última actualización: 10 de junio de 2026
+          Última actualización: {LAST_UPDATED}
         </p>
       </div>
 

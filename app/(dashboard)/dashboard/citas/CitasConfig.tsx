@@ -139,7 +139,7 @@ export default function CitasConfig({ initial, google, connectedFlag, errorFlag 
       {/* Activar */}
       <div className="mb-8">
         <label className="flex items-center gap-3 cursor-pointer">
-          <input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} className="accent-[#C6A64B] w-4 h-4" />
+          <input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} className="accent-gold w-4 h-4" />
           <span className="text-sm text-bsm-text-primary">Activar reserva de visitas en el agente</span>
         </label>
         <p className="text-xs text-bsm-text-muted mt-2 pl-7">
@@ -182,7 +182,7 @@ export default function CitasConfig({ initial, google, connectedFlag, errorFlag 
         <h2 className="text-xs text-gold tracking-widest uppercase mb-3">Modalidad</h2>
         <div className="flex gap-2 mb-4">
           {([['in_person', 'Presencial'], ['video', 'Videollamada'], ['both', 'Ambas']] as const).map(([v, l]) => (
-            <label key={v} className="flex items-center justify-center px-4 py-2 border border-bsm-border text-sm text-bsm-text-muted cursor-pointer has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-gold has-[:checked]:bg-[#C6A64B]/5">
+            <label key={v} className="flex items-center justify-center px-4 py-2 border border-bsm-border text-sm text-bsm-text-muted cursor-pointer has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5">
               <input type="radio" name="mode" value={v} checked={mode === v} onChange={() => setMode(v)} className="sr-only" />
               {l}
             </label>

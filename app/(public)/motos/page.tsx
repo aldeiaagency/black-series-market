@@ -77,7 +77,8 @@ async function MotoList({ params }: { params: Record<string, string> }) {
     .eq('dealer.profile_status', 'published')
     .eq('vehicle_type', 'motorcycle')
 
-  query = (await applyVehicleFilters(supabase, query, params, 'motorcycle')).query
+  const filtered = await applyVehicleFilters(supabase, query, params, 'motorcycle')
+  query = filtered.query
 
   const sorts = SORT_MAP[params.sort || 'featured'] || SORT_MAP.featured
   for (const s of sorts) query = query.order(s.col, { ascending: s.asc })
@@ -95,10 +96,20 @@ async function MotoList({ params }: { params: Record<string, string> }) {
     : rawVehicles
 
   if (!vehicles?.length) {
+    // Hereda los filtros ya aplicados en la búsqueda — evita que el comprador tenga que
+    // volver a teclear lo que ya había filtrado al crear la alerta desde cero-resultados.
+    const alertInitialValues = {
+      brand:      filtered.resolvedBrandName || undefined,
+      model:      params.modelo || undefined,
+      budget_max: params.precioMax || undefined,
+      year_min:   params.anioMin || undefined,
+      km_max:     params.kmMax || undefined,
+      location:   params.provincia || params.comunidad || undefined,
+    }
     return (
       <div className="flex-1 space-y-6">
         <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
-          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay motos con esos criterios</h3>
+          <h2 className="font-display text-xl mb-2 text-bsm-text-primary">No hay motos con esos criterios</h2>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
             Ajusta los filtros o dinos qué estás buscando y lo tendremos en cuenta si aparece una unidad compatible.
           </p>
@@ -108,10 +119,11 @@ async function MotoList({ params }: { params: Record<string, string> }) {
             <CreateAlertButton
               vehicleType="motorcycle"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-bsm-border text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"
+              initialValues={alertInitialValues}
             />
           </div>
         </div>
-        <SearchAlertCTA vehicleType="motorcycle" />
+        <SearchAlertCTA vehicleType="motorcycle" initialValues={alertInitialValues} />
       </div>
     )
   }

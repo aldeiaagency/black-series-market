@@ -1,38 +1,80 @@
 import { notFound } from 'next/navigation'
+import { cache, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Phone, Car, Bike, CheckCircle, BadgeCheck, ChevronRight, AlertCircle, Mail, ExternalLink, MapPin } from 'lucide-react'
 import { createPublicClient } from '@/lib/supabase/server'
+import { esGroupThousands } from '@/lib/utils'
 
 // ISR: catálogo público → cache CDN, revalida cada 5 min.
 export const revalidate = 300
-import VehicleCard from '@/components/marketplace/VehicleCard'
 import SocialLinks from '@/components/social/SocialLinks'
 import ShareButton from '@/components/social/ShareButton'
 import DealerGallery from '@/components/marketplace/DealerGallery'
 import type { DealerGalleryImage } from '@/components/marketplace/DealerGallery'
+import DealerInventory, { DealerInventoryFallback } from '@/components/marketplace/DealerInventory'
+import DealerViewTracker from '@/components/marketplace/DealerViewTracker'
 import type { Metadata } from 'next'
 
 const SITE_URL      = process.env.NEXT_PUBLIC_APP_URL    || 'https://blacklabelmarket.es'
 const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const MAX_SHOWROOM_VEHICLES = 100
+
+const DEALER_COLUMNS = [
+  'id', 'slug', 'name', 'description', 'cover_url', 'logo_url',
+  'location_city', 'location_region', 'address', 'phone', 'whatsapp', 'email',
+  'website', 'instagram', 'facebook_url', 'youtube_url', 'tiktok_url', 'linkedin_url',
+  'years_in_business', 'certifications', 'services', 'postal_code', 'attention_note',
+].join(', ')
+
+const VEHICLE_CARD_COLUMNS = [
+  'id', 'slug', 'vehicle_type', 'status', 'brand_name', 'model_name', 'version', 'year',
+  'displacement_cc', 'power_hp', 'fuel_type', 'transmission', 'color_exterior',
+  'mileage_km', 'iva_deducible', 'location_province', 'license_type',
+  'national_delivery', 'price', 'price_on_request', 'currency', 'title', 'images',
+  'is_featured', 'featured_until', 'published_at',
+  'dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)',
+].join(', ')
+
+// `select()` con una lista de columnas construida en runtime impide que supabase-js
+// infiera el tipo de la fila (devuelve GenericStringError). El proyecto no tiene tipos
+// generados de la BD, así que el acceso a campos ya era dinámico antes de este cambio
+// (`select('*')` → any). Se declara el tipo explícitamente para conservar ese contrato.
+type DealerRow = Record<string, any>
+
+const getDealer = cache(async (slug: string): Promise<DealerRow | null> => {
+  const { data } = await createPublicClient()
+    .from('dealers')
+    .select(DEALER_COLUMNS)
+    .eq('slug', slug)
+    .in('status', ['trial', 'active'])
+    .eq('profile_status', 'published')
+    .single()
+
+  return (data as DealerRow | null) ?? null
+})
+
+export async function generateStaticParams() {
+  const { data } = await createPublicClient()
+    .from('dealers')
+    .select('slug')
+    .in('status', ['trial', 'active'])
+    .eq('profile_status', 'published')
+    .limit(1000)
+
+  return (data ?? []).map(({ slug }) => ({ slug }))
+}
 const STORAGE_BASE  = `${SUPABASE_URL}/storage/v1/object/public/vehicle-images`
 
 interface PageProps {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ tipo?: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const supabase = createPublicClient()
-  const { data } = await supabase
-    .from('dealers')
-    .select('name, description, location_city, cover_url, logo_url')
-    .eq('slug', slug)
-    .eq('profile_status', 'published')
-    .single()
+  const data = await getDealer(slug)
   if (!data) return {}
-  const title = `${data.name} — Showroom seleccionado`
+  const title = `${data.name}${data.location_city ? ` — ${data.location_city}` : ''} — Showroom seleccionado`
   const description = data.description
     || `Showroom de ${data.name}${data.location_city ? ' en ' + data.location_city : ''} en Black Label Market. Vehículos premium de un profesional verificado.`
   const image = data.cover_url || data.logo_url
@@ -73,27 +115,30 @@ const WaIcon = () => (
   </svg>
 )
 
-export default async function DealerPage({ params, searchParams }: PageProps) {
+export default async function DealerPage({ params }: PageProps) {
   const { slug } = await params
-  const { tipo } = await searchParams
   const supabase = createPublicClient()
 
-  const { data: dealer } = await supabase
-    .from('dealers')
-    .select('*')
-    .eq('slug', slug)
-    .in('status', ['trial', 'active'])
-    .eq('profile_status', 'published')
-    .single()
+  const dealer = await getDealer(slug)
 
   if (!dealer) notFound()
 
-  // Gallery images (sorted by position, active dealer only)
-  const { data: galleryRows } = await supabase
-    .from('dealer_gallery_images')
-    .select('id, storage_path')
-    .eq('dealer_id', dealer.id)
-    .order('position', { ascending: true })
+  const [{ data: galleryRows }, { data: vehicles }] = await Promise.all([
+    supabase
+      .from('dealer_gallery_images')
+      .select('id, storage_path')
+      .eq('dealer_id', dealer.id)
+      .order('position', { ascending: true }),
+    supabase
+      .from('vehicles')
+      .select(VEHICLE_CARD_COLUMNS)
+      .eq('dealer_id', dealer.id)
+      .in('status', ['active', 'paused', 'sold'])
+      .order('status', { ascending: true })
+      .order('is_featured', { ascending: false })
+      .order('published_at', { ascending: false })
+      .limit(MAX_SHOWROOM_VEHICLES),
+  ])
 
   const galleryImages: DealerGalleryImage[] = (galleryRows ?? []).map(
     (row: { id: string; storage_path: string }) => ({
@@ -102,31 +147,11 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
     }),
   )
 
-  // Track profile view (non-blocking)
-  supabase.from('analytics_events').insert({
-    dealer_id: dealer.id,
-    event_type: 'professional_profile_view',
-  }).then(() => {})
-
-  const { data: vehicles } = await supabase
-    .from('vehicles')
-    .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)')
-    .eq('dealer_id', dealer.id)
-    .in('status', ['active', 'paused', 'sold'])
-    .order('status', { ascending: true })
-    .order('is_featured', { ascending: false })
-    .order('published_at', { ascending: false })
-
   const activeVehicles = vehicles?.filter((v: any) => v.status === 'active') || []
   const otherVehicles  = vehicles?.filter((v: any) => v.status !== 'active')  || []
   const cars  = activeVehicles.filter((v: any) => v.vehicle_type === 'car')
   const motos = activeVehicles.filter((v: any) => v.vehicle_type === 'motorcycle')
   const totalActive = activeVehicles.length
-
-  const displayVehicles =
-    tipo === 'car'        ? cars  :
-    tipo === 'motorcycle' ? motos :
-    activeVehicles
 
   const uniqueBrands = Array.from(
     new Set((vehicles || []).map((v: any) => v.brand_name).filter(Boolean))
@@ -168,7 +193,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
     .map((v: any) => v.price)
     .filter((p: any): p is number => typeof p === 'number' && p > 0)
   const priceRange = dealerPrices.length
-    ? `${Math.min(...dealerPrices).toLocaleString('es-ES')} € - ${Math.max(...dealerPrices).toLocaleString('es-ES')} €`
+    ? `${esGroupThousands(Math.min(...dealerPrices))} € - ${esGroupThousands(Math.max(...dealerPrices))} €`
     : '€€€€'
 
   const breadcrumbJsonLd = {
@@ -207,6 +232,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
 
   return (
     <>
+      <DealerViewTracker dealerId={dealer.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <div className="pt-20">
@@ -244,7 +270,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
 
                 {/* Logo + identity */}
                 <div className="flex items-start gap-5 mb-8">
-                  <div className="w-24 h-24 bg-[#111111] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+                  <div className="w-24 h-24 bg-[#111111] border border-bsm-border flex items-center justify-center flex-shrink-0 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
                     {dealer.logo_url ? (
                       <Image src={dealer.logo_url} alt={dealer.name} width={96} height={96} className="object-contain p-3" />
                     ) : (
@@ -305,7 +331,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Especialidades</p>
                     <div className="flex flex-wrap gap-2">
                       {specialties.map((s: string) => (
-                        <span key={s} className="px-3 py-1 text-xs border border-[#2A2A2A] text-[#9A9A9A]">
+                        <span key={s} className="px-3 py-1 text-xs border border-bsm-border text-[#9A9A9A]">
                           {SPECIALTIES_LABELS[s] || s}
                         </span>
                       ))}
@@ -319,7 +345,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-3">Servicios</p>
                     <div className="flex flex-wrap gap-2">
                       {services.map((s: string) => (
-                        <span key={s} className="px-3 py-1 text-xs border border-[#2A2A2A] text-[#9A9A9A]">
+                        <span key={s} className="px-3 py-1 text-xs border border-bsm-border text-[#9A9A9A]">
                           {SERVICES_LABELS[s] || s}
                         </span>
                       ))}
@@ -350,14 +376,14 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     )}
                     {dealer.phone && (
                       <a href={`tel:${dealer.phone}`}
-                        className="inline-flex items-center gap-2 w-full px-4 py-2.5 text-sm border border-[#2A2A2A] text-[#9A9A9A] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors">
+                        className="inline-flex items-center gap-2 w-full px-4 py-2.5 text-sm border border-bsm-border text-[#9A9A9A] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors">
                         <Phone className="w-4 h-4 flex-shrink-0" />
                         Llamar
                       </a>
                     )}
                     {dealer.email && (
                       <a href={`mailto:${dealer.email}`}
-                        className="inline-flex items-center gap-2 w-full px-4 py-2.5 text-sm border border-[#2A2A2A] text-[#9A9A9A] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors">
+                        className="inline-flex items-center gap-2 w-full px-4 py-2.5 text-sm border border-bsm-border text-[#9A9A9A] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors">
                         <Mail className="w-4 h-4 flex-shrink-0" />
                         Email
                       </a>
@@ -424,7 +450,7 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
                     title={dealer.name}
                     text={`Mira el showroom ${dealer.name} en Black Label Market`}
                     label="Compartir showroom"
-                    className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 text-sm border border-[#2A2A2A] text-[#9E9E9E] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors"
+                    className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 text-sm border border-bsm-border text-[#9E9E9E] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors"
                   />
                 </div>
               </div>
@@ -437,67 +463,21 @@ export default async function DealerPage({ params, searchParams }: PageProps) {
           )}
 
           {/* ── Inventory ── */}
-          <div className="pb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <h2 className="font-display text-2xl font-light mb-1">Inventario actual</h2>
-                <p className="text-sm text-bsm-text-muted">
-                  {totalActive} unidad{totalActive !== 1 ? 'es' : ''} disponible{totalActive !== 1 ? 's' : ''}
-                </p>
-              </div>
-
-              {cars.length > 0 && motos.length > 0 && (
-                <div className="flex border border-bsm-border">
-                  <a href={`/dealers/${slug}`}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors
-                      ${!tipo || tipo === 'all' ? 'bg-gold/10 text-gold border-r border-bsm-border' : 'text-bsm-text-muted hover:text-bsm-text-primary border-r border-bsm-border'}`}>
-                    Todos
-                    <span className="text-xs opacity-60">({totalActive})</span>
-                  </a>
-                  <a href={`/dealers/${slug}?tipo=car`}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors
-                      ${tipo === 'car' ? 'bg-gold/10 text-gold border-r border-bsm-border' : 'text-bsm-text-muted hover:text-bsm-text-primary border-r border-bsm-border'}`}>
-                    <Car className="w-3.5 h-3.5" />
-                    Coches
-                    <span className="text-xs opacity-60">({cars.length})</span>
-                  </a>
-                  <a href={`/dealers/${slug}?tipo=motorcycle`}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors
-                      ${tipo === 'motorcycle' ? 'bg-gold/10 text-gold' : 'text-bsm-text-muted hover:text-bsm-text-primary'}`}>
-                    <Bike className="w-3.5 h-3.5" />
-                    Motos
-                    <span className="text-xs opacity-60">({motos.length})</span>
-                  </a>
-                </div>
-              )}
-            </div>
-
-            {displayVehicles.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-                {displayVehicles.map((v: any) => (
-                  <VehicleCard key={v.id} vehicle={v} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-bsm-text-muted text-center py-16 border border-bsm-border bg-surface">
-                Este showroom no tiene vehículos activos en este momento.
-              </p>
-            )}
-
-            {otherVehicles.length > 0 && (
-              <div className="mb-12">
-                <h3 className="font-display text-lg font-light text-bsm-text-muted mb-6 pb-3 border-b border-[#1A1A1A]">
-                  Vendidos / Reservados
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {otherVehicles.map((v: any) => (
-                    <VehicleCard key={v.id} vehicle={v} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
+          <Suspense
+            fallback={
+              <DealerInventoryFallback
+                slug={slug}
+                vehicles={activeVehicles}
+                otherVehicles={otherVehicles}
+              />
+            }
+          >
+            <DealerInventory
+              slug={slug}
+              vehicles={activeVehicles}
+              otherVehicles={otherVehicles}
+            />
+          </Suspense>
           {/* ── Profesional verificado ── */}
           <div className="border border-[#1A1A1A] bg-[#0A0A0A] p-8 mb-20">
             <div className="max-w-3xl">

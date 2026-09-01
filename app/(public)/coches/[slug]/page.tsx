@@ -3,7 +3,8 @@ import { createPublicClient } from '@/lib/supabase/server'
 import VehicleDetailContent from '@/components/marketplace/VehicleDetailContent'
 import ViewTracker from '@/components/marketplace/ViewTracker'
 import { resolveContactMode } from '@/lib/contact-mode'
-import { FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS } from '@/lib/utils'
+import { FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS, esGroupThousands } from '@/lib/utils'
+import { findCarCategorySlug, findCarCategoryLabel } from '@/lib/vehicle-categories'
 import type { Metadata } from 'next'
 
 // ISR: la ficha ya no escribe en el render (el tracking va por beacon) → cacheable en CDN.
@@ -36,20 +37,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${data.brand_name} ${data.model_name} ${data.year}${data.version ? ' ' + data.version : ''}`
   const parts = [
     title,
-    data.mileage_km != null ? `${data.mileage_km.toLocaleString('es-ES')} km` : null,
+    data.mileage_km != null ? `${esGroupThousands(data.mileage_km)} km` : null,
     data.fuel_type ? (FUEL_LABELS[data.fuel_type as keyof typeof FUEL_LABELS] ?? data.fuel_type) : null,
     data.power_hp ? `${data.power_hp} CV` : null,
     data.location_province || null,
-    data.price && !data.price_on_request ? `${data.price.toLocaleString('es-ES')} €` : null,
+    data.price && !data.price_on_request ? `${esGroupThousands(data.price)} €` : null,
   ].filter(Boolean)
   const description = `${parts.join(' · ')} — Vendedor profesional verificado en Black Label Market.`
-  const image = data.images?.[0]?.url
+  const firstImage = data.images?.[0]
+  const canonicalUrl = `${SITE_URL}/coches/${slug}`
+  // Sin width/height: VehicleImage (lib/types.ts) no captura dimensiones al subir la
+  // foto (son variables, las decide cada concesionario) — declarar unas inventadas
+  // violaría la regla del proyecto de no fabricar datos. og:url y alt sí son reales.
+  const ogImages = firstImage ? [{ url: firstImage.url, alt: firstImage.alt || title }] : []
   return {
     title,
     description,
     alternates: { canonical: `/coches/${slug}` },
-    openGraph: { title, description, type: 'website', images: image ? [image] : [] },
-    twitter: { card: 'summary_large_image', title, description, images: image ? [image] : [] },
+    openGraph: { title, description, type: 'website', url: canonicalUrl, images: ogImages },
+    twitter: { card: 'summary_large_image', title, description, images: ogImages.map((i) => i.url) },
   }
 }
 
@@ -59,7 +65,7 @@ export default async function CocheDetailPage({ params }: PageProps) {
 
   const { data: vehicle } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(*)')
+    .select('*, dealer:dealers!inner(*), brand:brands(slug)')
     .eq('slug', slug)
     .eq('vehicle_type', 'car')
     .in('status', ['active', 'paused', 'sold'])
@@ -109,22 +115,37 @@ export default async function CocheDetailPage({ params }: PageProps) {
     : 'https://schema.org/UsedCondition'
   const descParts = [
     fullName,
-    vehicle.mileage_km != null ? `${vehicle.mileage_km.toLocaleString('es-ES')} km` : null,
+    vehicle.mileage_km != null ? `${esGroupThousands(vehicle.mileage_km)} km` : null,
     vehicle.fuel_type ? (FUEL_LABELS[vehicle.fuel_type as keyof typeof FUEL_LABELS] ?? vehicle.fuel_type) : null,
     vehicle.power_hp ? `${vehicle.power_hp} CV` : null,
     vehicle.location_province || vehicle.dealer?.location_city || null,
   ].filter(Boolean)
   const schemaDescription = vehicle.description || `${descParts.join(' · ')} — Vendedor profesional verificado en Black Label Market.`
 
+  // Nivel de categoría + enlace de marca reales — antes: sin categoría, y la marca
+  // enlazaba a un filtro por query (/coches?marca=...) en vez de a /marcas/[slug].
+  // vehicle.brand viene de un join real contra `brands` (por brand_id) — si el dealer
+  // introdujo un brand_name libre que no coincide con ninguna marca curada, brand.slug
+  // es null y se omite ese nivel en vez de enlazar a una ruta inventada.
+  const categorySlug = findCarCategorySlug(vehicle.category)
+  const categoryLabel = findCarCategoryLabel(vehicle.category)
+  const brandSlug = (vehicle as any).brand?.slug as string | undefined
+  const breadcrumbItems = [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Coches', item: `${SITE_URL}/coches` },
+    ...(categorySlug ? [{ '@type': 'ListItem', position: 3, name: categoryLabel, item: `${SITE_URL}/coches/${categorySlug}` }] : []),
+    {
+      '@type': 'ListItem',
+      position: categorySlug ? 4 : 3,
+      name: vehicle.brand_name,
+      item: brandSlug ? `${SITE_URL}/marcas/${brandSlug}` : `${SITE_URL}/coches?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}`,
+    },
+    { '@type': 'ListItem', position: categorySlug ? 5 : 4, name: fullName },
+  ]
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Coches', item: `${SITE_URL}/coches` },
-      { '@type': 'ListItem', position: 3, name: vehicle.brand_name, item: `${SITE_URL}/coches?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}` },
-      { '@type': 'ListItem', position: 4, name: fullName },
-    ],
+    itemListElement: breadcrumbItems,
   }
 
   const jsonLd = {
@@ -133,6 +154,7 @@ export default async function CocheDetailPage({ params }: PageProps) {
     name: fullName,
     description: schemaDescription,
     url: canonicalUrl,
+    ...(vehicle.updated_at && { dateModified: vehicle.updated_at }),
     image: vehicle.images?.map((i: any) => i.url) || [],
     brand: { '@type': 'Brand', name: vehicle.brand_name },
     model: vehicle.model_name,
@@ -145,7 +167,7 @@ export default async function CocheDetailPage({ params }: PageProps) {
     ...(vehicle.drive_type && { driveWheelConfiguration: DRIVE_LABELS[vehicle.drive_type as keyof typeof DRIVE_LABELS] ?? vehicle.drive_type }),
     ...(vehicle.doors && { numberOfDoors: vehicle.doors }),
     ...(vehicle.seats && { vehicleSeatingCapacity: vehicle.seats }),
-    mileageFromOdometer: { '@type': 'QuantitativeValue', value: vehicle.mileage_km, unitCode: 'KMT' },
+    ...(vehicle.mileage_km != null && { mileageFromOdometer: { '@type': 'QuantitativeValue', value: vehicle.mileage_km, unitCode: 'KMT' } }),
     ...(vehicle.power_hp && { vehicleEngine: { '@type': 'EngineSpecification', enginePower: { '@type': 'QuantitativeValue', value: vehicle.power_hp, unitCode: 'BHP' } } }),
     offers: {
       '@type': 'Offer',

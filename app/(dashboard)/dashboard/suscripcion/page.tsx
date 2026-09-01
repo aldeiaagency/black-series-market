@@ -7,6 +7,7 @@ import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions } from '@/lib/permissions'
 import { getEntitlements } from '@/lib/entitlements'
 import { PLANS, ADDONS, getPlan, ELITE_LIMIT_NOTE } from '@/lib/plans-config'
+import { getPaidAddon } from '@/lib/addons'
 
 function UsageBar({ used, max, label }: { used: number; max: number; label: string }) {
   const pct = max > 0 ? Math.min(100, Math.round((used / max) * 100)) : 0
@@ -52,6 +53,21 @@ export default async function SuscripcionPage() {
   if (!dealer) redirect('/registro')
 
   const ent = orgId ? await getEntitlements(orgId) : null
+
+  const { data: addonOrders } = orgId
+    ? await admin
+        .from('addon_orders')
+        .select('status, addon:addons(slug)')
+        .eq('organization_id', orgId)
+        .in('status', ['pending_activation', 'active'])
+    : { data: [] }
+
+  const activeManualAddonSlugs = new Set(
+    ((addonOrders ?? []) as any[])
+      .filter((order) => ['pending_activation', 'active'].includes(order.status))
+      .map((order) => (Array.isArray(order.addon) ? order.addon[0]?.slug : order.addon?.slug))
+      .filter(Boolean),
+  )
 
   const planLabel = ent?.plan ?? dealer.subscription_plan ?? 'essential'
   const currentPlan = getPlan(planLabel)
@@ -193,6 +209,8 @@ export default async function SuscripcionPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {relevantAddons.map((addon) => {
             const includedHere = addon.includedInElite && planLabel === 'elite'
+            const paidAddon = getPaidAddon(addon.slug)
+            const hasManualOrder = paidAddon?.activationMode === 'manual' && activeManualAddonSlugs.has(paidAddon.dbSlug)
 
             return (
               <div key={addon.slug} className="bg-surface border border-bsm-border p-4 flex flex-col">
@@ -217,6 +235,19 @@ export default async function SuscripcionPage() {
                   <Link href="/dashboard/inventario" className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline">
                     <Zap className="w-3.5 h-3.5" /> Activar desde la ficha del vehículo
                   </Link>
+                ) : paidAddon ? (
+                  hasManualOrder ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs text-amber-400">
+                      <ArrowUpRight className="w-3.5 h-3.5" /> Pendiente del equipo Black Label
+                    </span>
+                  ) : (
+                    <form action="/api/stripe/addon" method="POST">
+                      <input type="hidden" name="addon" value={paidAddon.uiSlug} />
+                      <button type="submit" className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline">
+                        <ArrowUpRight className="w-3.5 h-3.5" /> Contratar complemento
+                      </button>
+                    </form>
+                  )
                 ) : (
                   <a
                     href={`mailto:hola@blacklabelmarket.es?subject=${encodeURIComponent(`Complemento: ${addon.name}`)}&body=${encodeURIComponent(`Hola, soy ${dealer.name} y quiero contratar el complemento "${addon.name}" (${addon.price} ${addon.unit}).`)}`}

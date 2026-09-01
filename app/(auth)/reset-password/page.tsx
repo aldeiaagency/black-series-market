@@ -78,8 +78,8 @@ export default function ResetPasswordPage() {
           {/* Estado: enlace inválido */}
           {sessionState === 'invalid' && !done && (
             <div className="text-center">
-              <div className="w-12 h-12 bg-[#C6A64B]/10 border border-[#C6A64B]/20 flex items-center justify-center mx-auto mb-5">
-                <AlertTriangle className="w-5 h-5 text-[#C6A64B]" />
+              <div className="w-12 h-12 bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-5">
+                <AlertTriangle className="w-5 h-5 text-gold" />
               </div>
               <h1 className="font-display text-2xl font-light mb-2">Enlace no válido</h1>
               <p className="text-sm text-bsm-text-muted leading-relaxed mb-6">
@@ -117,6 +117,7 @@ export default function ResetPasswordPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <PasswordInput
+                  id="reset-password-new"
                   label="Nueva contraseña"
                   value={password}
                   onChange={setPassword}
@@ -125,6 +126,7 @@ export default function ResetPasswordPage() {
                   required
                 />
                 <PasswordInput
+                  id="reset-password-confirm"
                   label="Repetir contraseña"
                   value={confirm}
                   onChange={setConfirm}
@@ -134,7 +136,7 @@ export default function ResetPasswordPage() {
                 />
 
                 {error && (
-                  <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
+                  <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
                     {error}
                   </p>
                 )}

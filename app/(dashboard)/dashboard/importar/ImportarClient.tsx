@@ -167,7 +167,7 @@ const COLUMNS = [
 // ── Component ──────────────────────────────────────────────────────────────────
 
 type ParsedRow = { raw: Record<string, string>; error: string | null }
-type ImportResult = { inserted: number; errors: { row: number; message: string }[] } | null
+type ImportResult = { inserted: number; errors: { row: number; message: string }[]; draftNoPhotos?: number } | null
 
 export default function ImportarPage() {
   const [dragging, setDragging] = useState(false)
@@ -397,6 +397,16 @@ export default function ImportarPage() {
                 <div className="flex items-center gap-2 text-emerald-400 font-medium mb-2">
                   <CheckCircle className="w-4 h-4" />
                   {result.inserted} vehículo{result.inserted !== 1 ? 's' : ''} enviado{result.inserted !== 1 ? 's' : ''} a revisión
+                </div>
+              )}
+              {!!result.draftNoPhotos && (
+                <div className="flex items-start gap-2 text-amber-400 mb-2">
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <p className="text-sm">
+                    {result.draftNoPhotos} de esos vehículo{result.draftNoPhotos !== 1 ? 's' : ''} no traía{result.draftNoPhotos !== 1 ? 'n' : ''} fotos en el CSV
+                    y se {result.draftNoPhotos !== 1 ? 'han' : 'ha'} guardado como borrador — no se publican hasta que subas al menos una foto de cada uno desde{' '}
+                    <Link href="/dashboard/inventario" className="underline hover:text-amber-300">Inventario</Link>.
+                  </p>
                 </div>
               )}
               {result.errors.length > 0 && (

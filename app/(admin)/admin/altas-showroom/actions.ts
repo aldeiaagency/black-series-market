@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { findAuthUserByEmail, type AdminClient } from '@/lib/supabase/admin-helpers'
 import { slugify } from '@/lib/utils'
 import { assertAdmin } from '@/lib/admin-auth'
 import { provisionDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
@@ -44,7 +45,6 @@ function revalidateAll(id: string) {
   revalidatePath(`/admin/altas-showroom/${id}`)
 }
 
-type AdminClient = ReturnType<typeof createAdminClient>
 type ApprovalPiece =
   | 'auth_user'
   | 'profile'
@@ -59,15 +59,6 @@ type ApprovalPiece =
 
 function planNeedsAssistant(plan: TrialPlan) {
   return plan === 'professional' || plan === 'elite'
-}
-
-async function findAuthUserByEmail(admin: AdminClient, email: string) {
-  // Volumen actual muy bajo; una pagina amplia permite reparar el caso raro en
-  // que auth.users existe pero el trigger que crea profiles fallo.
-  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
-  if (error) return null
-  const normalized = email.trim().toLowerCase()
-  return data.users.find((user) => user.email?.toLowerCase() === normalized) ?? null
 }
 
 async function verifyApprovalPieces(

@@ -20,13 +20,13 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
         'group relative bg-[#0D0D0D] border overflow-hidden transition-all duration-300',
         'hover:shadow-[0_8px_40px_rgba(0,0,0,0.7)]',
         isFeatured
-          ? 'border-[#C6A64B]/25 hover:border-[#C6A64B]/50'
-          : 'border-[#1A1A1A] hover:border-[#C6A64B]/20'
+          ? 'border-gold/25 hover:border-gold/50'
+          : 'border-[#1A1A1A] hover:border-gold/20'
       )}>
 
         {/* Featured gold top line */}
         {isFeatured && (
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C6A64B]/60 to-transparent z-10" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent z-10" />
         )}
 
         {/* Cover + overlay + centered logo/name/verified */}
@@ -60,7 +60,7 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
           {isFeatured && (
             <div className="absolute top-3 left-3 z-10">
               <span className="inline-flex items-center px-2 py-0.5 text-[9px] tracking-[0.15em] uppercase
-                text-[#C6A64B] bg-[#0D0D0D]/90 border border-[#C6A64B]/30">
+                text-gold bg-[#0D0D0D]/90 border border-gold/30">
                 Destacado
               </span>
             </div>
@@ -68,7 +68,7 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
 
           {/* Logo + name + verified — overlaid on bottom */}
           <div className="relative z-10 flex flex-col items-center text-center px-4">
-            <div className="w-12 h-12 bg-[#0E0E0E]/90 border border-[#2A2A2A] flex items-center justify-center overflow-hidden mb-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+            <div className="w-12 h-12 bg-[#0E0E0E]/90 border border-bsm-border flex items-center justify-center overflow-hidden mb-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
               {dealer.logo_url ? (
                 <Image
                   src={dealer.logo_url}
@@ -78,7 +78,7 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
                   className="object-contain p-1.5"
                 />
               ) : (
-                <span className="font-display text-xl font-light text-[#C6A64B]/70 select-none">
+                <span className="font-display text-xl font-light text-gold/70 select-none">
                   {initial}
                 </span>
               )}
@@ -88,12 +88,10 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
               {dealer.name}
             </h3>
 
-            {dealer.is_verified && (
-              <div className="flex items-center gap-1 text-emerald-400">
-                <CheckCircle className="w-3 h-3" />
-                <span className="text-[9px] tracking-widest uppercase font-medium">Verificado</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1 text-emerald-400">
+              <CheckCircle className="w-3 h-3" />
+              <span className="text-[9px] tracking-widest uppercase font-medium">Verificado</span>
+            </div>
           </div>
         </div>
 

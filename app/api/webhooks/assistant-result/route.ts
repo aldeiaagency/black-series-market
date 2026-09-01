@@ -68,6 +68,19 @@ export async function POST(req: NextRequest) {
 
   if (existing) return NextResponse.json({ ok: true, id: existing.id, idempotent: true })
 
+  // Recupera la atribución de origen guardada al abrir la sesión (server-to-server,
+  // el navegador ya no está presente en este punto — ver /api/assistant/session).
+  const { data: startEvent } = await admin
+    .from('analytics_events')
+    .select('metadata')
+    .eq('session_id', session_id)
+    .eq('event_type', 'assistant_started')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const acquisitionContext = (startEvent?.metadata as Record<string, unknown> | undefined)
+    ?.acquisition_context ?? {}
+
   const qualData = {
     session_id,
     ...(qualification ?? {}),
@@ -86,6 +99,7 @@ export async function POST(req: NextRequest) {
       message:        qualification?.summary ?? 'Contacto via asistente de cualificación',
       source_channel: result_type === 'whatsapp_handoff' ? 'whatsapp_click' : 'ficha_assistant',
       qualification:  qualData,
+      acquisition_context: acquisitionContext,
       lead_score:     qualification?.score ?? null,
       score_reason:   qualification?.score_reason ?? null,
       score_confidence: typeof qualification?.score_confidence === 'number' ? qualification.score_confidence : null,

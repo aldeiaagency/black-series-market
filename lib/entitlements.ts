@@ -111,12 +111,14 @@ export async function getEntitlements(
     limitsMap[l.key] = l.value_number
   }
 
-  // 5. Active vehicle-block addons (only when there is a real subscription)
+  // 5. Active vehicle-block addons. Prefer paid addon_orders created by Stripe Checkout;
+  // keep subscription_addons as backward-compatible input for older/manual rows.
   let extraVehicleSlots = 0
+  const countedAddonSubscriptions = new Set<string>()
   if (sub) {
     const { data: subAddons } = await admin
       .from('subscription_addons')
-      .select('quantity, addon:addons(slug, rules)')
+      .select('quantity, stripe_subscription_id, addon:addons(slug, rules)')
       .eq('subscription_id', sub.id)
       .eq('status', 'active')
 
@@ -126,7 +128,24 @@ export async function getEntitlements(
       const slots = addon.rules?.slots ?? 0
       if (addon.slug === 'block_10_vehicles' || addon.slug === 'block_25_vehicles') {
         extraVehicleSlots += slots * sa.quantity
+        if (sa.stripe_subscription_id) countedAddonSubscriptions.add(sa.stripe_subscription_id)
       }
+    }
+  }
+
+  const { data: paidAddonOrders } = await admin
+    .from('addon_orders')
+    .select('quantity, stripe_subscription_id, addon:addons(slug, rules)')
+    .eq('organization_id', organizationId)
+    .eq('status', 'active')
+
+  for (const order of paidAddonOrders ?? []) {
+    if (order.stripe_subscription_id && countedAddonSubscriptions.has(order.stripe_subscription_id)) continue
+    const addon = order.addon as unknown as { slug: string; rules: { slots?: number } } | null
+    if (!addon) continue
+    const slots = addon.rules?.slots ?? 0
+    if (addon.slug === 'block_10_vehicles' || addon.slug === 'block_25_vehicles') {
+      extraVehicleSlots += slots * order.quantity
     }
   }
 
@@ -147,6 +166,24 @@ export async function getEntitlements(
       included: f.included,
       status: f.availability_status as FeatureStatus,
       displayLabel: f.display_label,
+    }
+  }
+
+
+  const nowIso = new Date().toISOString()
+
+  const { data: featureOverrides } = await admin
+    .from('organization_feature_overrides')
+    .select('feature_key, included, availability_status, display_label')
+    .eq('organization_id', organizationId)
+    .eq('status', 'active')
+    .or(`ends_at.is.null,ends_at.gt.${nowIso}`)
+
+  for (const override of featureOverrides ?? []) {
+    features[override.feature_key] = {
+      included: override.included,
+      status: override.availability_status as FeatureStatus,
+      displayLabel: override.display_label,
     }
   }
 

@@ -7,6 +7,24 @@ import { notifyN8n } from '@/lib/integrations/n8n'
 const CUSTOM_VEHICLE_EMAIL_LIMIT_24H = 3
 const CUSTOM_VEHICLE_IP_LIMIT_1H = 8
 
+const ACQUISITION_KEYS = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  'referrer', 'landing_path', 'entry_point', 'cep',
+] as const
+
+function sanitizeAcquisition(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const source = value as Record<string, unknown>
+  const result: Record<string, string> = {}
+  for (const key of ACQUISITION_KEYS) {
+    if (typeof source[key] !== 'string') continue
+    const max = key === 'referrer' || key === 'landing_path' ? 1000 : 200
+    const cleaned = source[key].trim().slice(0, max)
+    if (cleaned) result[key] = cleaned
+  }
+  return result
+}
+
 const optionalText = (max: number) =>
   z.preprocess((value) => {
     if (value === undefined || value === null) return undefined
@@ -32,6 +50,17 @@ const requestSchema = z.object({
   message: optionalText(1200),
   metadata: z.record(z.unknown()).optional(),
 }).strict()
+
+function fieldProvenance(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const source = value as Record<string, unknown>
+  return Object.fromEntries(
+    ['vehicle_type', 'timeline', 'financing', 'trade_in'].map((key) => [
+      key,
+      { user_modified: (source[key] as Record<string, unknown> | undefined)?.user_modified === true },
+    ]),
+  )
+}
 
 function hasUnsafeText(value: string | undefined) {
   if (!value) return false
@@ -171,6 +200,8 @@ export async function POST(req: NextRequest) {
     user_id:      userId,
     metadata:     {
       ...(input.metadata ?? {}),
+      field_provenance: fieldProvenance(input.metadata?.field_provenance),
+      acquisition_context: sanitizeAcquisition(input.metadata?.acquisition_context),
       ip_hash: ipHash,
       submitted_at: new Date().toISOString(),
     },

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { CheckCircle } from 'lucide-react'
+import { trackEvent, getAcquisitionContext } from '@/lib/analytics/client'
 
 const schema = z.object({
   name:             z.string().min(2, 'Nombre requerido'),
@@ -27,6 +28,12 @@ type FormData = z.infer<typeof schema>
 export default function PrivateSearchForm() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const modified = useRef({
+    vehicle_type: false,
+    timeline: false,
+    financing: false,
+    trade_in: false,
+  })
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -46,7 +53,18 @@ export default function PrivateSearchForm() {
       const res = await fetch('/api/custom-requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          metadata: {
+            acquisition_context: getAcquisitionContext(),
+            field_provenance: Object.fromEntries(
+              Object.entries(modified.current).map(([key, user_modified]) => [
+                key,
+                { user_modified },
+              ]),
+            ),
+          },
+        }),
       })
       if (!res.ok) {
         setError('No se pudo enviar la solicitud. Inténtalo de nuevo en unos minutos.')
@@ -64,11 +82,10 @@ export default function PrivateSearchForm() {
       localStorage.setItem('blm_private_searches', JSON.stringify(stored))
     } catch {}
 
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event_type: 'vehicle_request_submit' }),
-    }).catch(() => {})
+    trackEvent({
+      event_type: 'vehicle_request_submit',
+      metadata: { vehicle_type: data.vehicle_type },
+    })
 
     if (typeof window !== 'undefined') {
       const dl = ((window as any).dataLayer = (window as any).dataLayer || [])
@@ -129,9 +146,9 @@ export default function PrivateSearchForm() {
               { value: 'motorcycle', label: 'Moto' },
               { value: 'any',        label: 'Cualquiera' },
             ].map((o) => (
-              <label key={o.value}
+              <label key={o.value} onClick={() => { modified.current.vehicle_type = true }}
                 className="flex items-center justify-center py-2.5 border border-bsm-border text-xs text-bsm-text-muted cursor-pointer
-                  has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-[#C6A64B] has-[:checked]:bg-[#C6A64B]/5
+                  has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5
                   hover:border-bsm-border-light transition-colors">
                 <input type="radio" {...register('vehicle_type')} value={o.value} className="sr-only" />
                 {o.label}
@@ -175,7 +192,7 @@ export default function PrivateSearchForm() {
         <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-4">Tu intención de compra</p>
 
         {/* Timeline */}
-        <div className="mb-4">
+        <div className="mb-4" onChange={() => { modified.current.timeline = true }}>
           <label className="label-base">Plazo de compra</label>
           <select {...register('timeline')} className="input-base">
             <option value="immediate">Inmediata</option>
@@ -190,9 +207,9 @@ export default function PrivateSearchForm() {
           <label className="label-base">¿Necesita financiación?</label>
           <div className="grid grid-cols-3 gap-2">
             {[{ value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }, { value: 'maybe', label: 'No lo sé' }].map((o) => (
-              <label key={o.value}
+              <label key={o.value} onClick={() => { modified.current.financing = true }}
                 className="flex items-center justify-center py-2.5 border border-bsm-border text-xs text-bsm-text-muted cursor-pointer
-                  has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-[#C6A64B] has-[:checked]:bg-[#C6A64B]/5
+                  has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5
                   hover:border-bsm-border-light transition-colors">
                 <input type="radio" {...register('financing')} value={o.value} className="sr-only" />
                 {o.label}
@@ -206,9 +223,9 @@ export default function PrivateSearchForm() {
           <label className="label-base">¿Entrega vehículo?</label>
           <div className="grid grid-cols-2 gap-2">
             {[{ value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }].map((o) => (
-              <label key={o.value}
+              <label key={o.value} onClick={() => { modified.current.trade_in = true }}
                 className="flex items-center justify-center py-2.5 border border-bsm-border text-xs text-bsm-text-muted cursor-pointer
-                  has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-[#C6A64B] has-[:checked]:bg-[#C6A64B]/5
+                  has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5
                   hover:border-bsm-border-light transition-colors">
                 <input type="radio" {...register('trade_in')} value={o.value} className="sr-only" />
                 {o.label}

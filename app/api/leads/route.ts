@@ -3,6 +3,40 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyN8n } from '@/lib/integrations/n8n'
 import { isCountRateLimited } from '@/lib/rate-limit'
 
+const ACQUISITION_KEYS = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  'referrer', 'landing_path', 'entry_point', 'cep',
+] as const
+
+function sanitizeAcquisition(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const source = value as Record<string, unknown>
+  const result: Record<string, string> = {}
+  for (const key of ACQUISITION_KEYS) {
+    if (typeof source[key] !== 'string') continue
+    const max = key === 'referrer' || key === 'landing_path' ? 1000 : 200
+    const cleaned = source[key].trim().slice(0, max)
+    if (cleaned) result[key] = cleaned
+  }
+  return result
+}
+
+function sanitizeQualification(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const source = value as Record<string, unknown>
+  const allowed: Record<string, readonly string[]> = {
+    purchase_timeline: ['immediate', '1_3_months', '3_6_months', 'exploring'],
+    financing: ['yes', 'no', 'maybe'],
+    trade_in: ['yes', 'no'],
+    contact_preference: ['call', 'whatsapp', 'email'],
+  }
+  return Object.fromEntries(Object.entries(allowed).flatMap(([key, values]) =>
+    typeof source[key] === 'string' && values.includes(source[key] as string)
+      ? [[key, source[key] as string]]
+      : []
+  ))
+}
+
 /**
  * POST /api/leads
  * Single server-side insert of a buyer contact (table: leads) + `lead.created` event
@@ -23,6 +57,12 @@ export async function POST(req: NextRequest) {
   const buyerName = String(body.buyer_name || '').trim()
   const buyerEmail = String(body.buyer_email || '').trim()
   const message = String(body.message || '').trim() || 'Solicitud de información'
+
+  const acquisitionContext = sanitizeAcquisition(body.acquisition_context)
+  const qualification = sanitizeQualification(body.qualification)
+  const sessionId = typeof body.session_id === 'string'
+    ? body.session_id.trim().slice(0, 100) || null
+    : null
 
   if (!dealerId || buyerName.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail)) {
     return NextResponse.json({ ok: false, error: 'invalid_lead' }, { status: 400 })
@@ -67,6 +107,10 @@ export async function POST(req: NextRequest) {
       buyer_email:      buyerEmail,
       buyer_phone:      body.buyer_phone ? String(body.buyer_phone).trim() : null,
       message,
+      source_channel:   'ficha_form',
+      qualification,
+      acquisition_context: acquisitionContext,
+      session_id:       sessionId,
     })
     .select('id')
     .single()
@@ -83,8 +127,9 @@ export async function POST(req: NextRequest) {
     payload: {
       contact: { name: buyerName, email: buyerEmail, phone: body.buyer_phone || null },
       vehicle_id: vehicleId,
+      acquisition_context: acquisitionContext,
     },
   })
 
-  return NextResponse.json({ ok: true, id: data.id })
+  return NextResponse.json({ ok: true, id: data.id, status: 'lead_persisted' })
 }

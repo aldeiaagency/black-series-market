@@ -26,9 +26,9 @@ function hasActiveBoost(featuredUntil?: string | null): boolean {
 }
 
 const STATUS_CONFIG = {
-  sold:    { label: 'Vendido',        cls: 'text-[#9A9A9A] bg-[#141414]/95 border-[#2A2A2A]' },
-  paused:  { label: 'Reservado',      cls: 'text-[#C6A64B] bg-[#141414]/95 border-[#C6A64B]/30' },
-  expired: { label: 'No disponible',  cls: 'text-[#9A9A9A] bg-[#141414]/95 border-[#2A2A2A]' },
+  sold:    { label: 'Vendido',        cls: 'text-[#9A9A9A] bg-[#141414]/95 border-bsm-border' },
+  paused:  { label: 'Reservado',      cls: 'text-gold bg-[#141414]/95 border-gold/30' },
+  expired: { label: 'No disponible',  cls: 'text-[#9A9A9A] bg-[#141414]/95 border-bsm-border' },
 } as const
 
 export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCardProps) {
@@ -65,7 +65,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
   return (
     <article className={cn(
       'group relative bg-[#0D0D0D] border border-[#1A1A1A] overflow-hidden',
-      'transition-all duration-300 hover:border-[#C6A64B]/25 hover:shadow-[0_8px_40px_rgba(0,0,0,0.7)]',
+      'transition-all duration-300 hover:border-gold/25 hover:shadow-[0_8px_40px_rgba(0,0,0,0.7)]',
       !isActive && 'opacity-75'
     )}>
 
@@ -83,10 +83,10 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           />
         ) : (
           <div className="absolute inset-0 bg-[#111111] flex flex-col items-center justify-center gap-3">
-            <span className="font-display text-4xl font-light text-[#2A2A2A] tracking-widest select-none">
+            <span className="font-display text-4xl font-light text-bsm-text-muted tracking-widest select-none">
               {vehicle.brand_name?.[0] || 'BL'}
             </span>
-            <span className="text-[10px] text-[#2A2A2A] tracking-[0.25em] uppercase select-none">
+            <span className="text-[10px] text-bsm-text-muted tracking-[0.25em] uppercase select-none">
               Imagen no disponible
             </span>
           </div>
@@ -111,7 +111,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
         <div className="absolute top-3 left-3 z-20 pointer-events-none flex flex-col gap-1">
           {showFeatured && (
             <span className="inline-flex items-center px-2.5 py-1 text-[10px] tracking-[0.15em] uppercase
-              text-[#C6A64B] bg-[#0A0A0A] border border-[#C6A64B]/40 font-medium">
+              text-gold bg-[#0A0A0A] border border-gold/40 font-medium">
               Destacado
             </span>
           )}
@@ -158,7 +158,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
         <Link href={href} className="block">
           {/* Brand */}
           <div className="mb-0.5">
-            <span className="text-[11px] text-[#C6A64B]/80 tracking-[0.2em] uppercase font-medium">
+            <span className="text-[11px] text-gold/80 tracking-[0.2em] uppercase font-medium">
               {vehicle.brand_name}
             </span>
           </div>
@@ -186,7 +186,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             {vehicle.power_hp && (
               <>
                 <span className="text-[#9E9E9E] mx-2 select-none" aria-hidden="true">·</span>
-                <span className="text-[13px] font-medium text-[#C6A64B]/80">
+                <span className="text-[13px] font-medium text-gold/80">
                   {vehicle.power_hp} CV
                 </span>
               </>
@@ -264,7 +264,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
           {/* Price */}
           <div className={cn(
             'font-display text-[20px] font-light leading-none',
-            vehicle.price_on_request ? 'text-[#8A8A8A] text-[16px]' : 'text-[#C6A64B]'
+            vehicle.price_on_request ? 'text-[#8A8A8A] text-[16px]' : 'text-gold'
           )}>
             {formatPrice(vehicle.price, vehicle.currency, vehicle.price_on_request)}
           </div>

@@ -2,7 +2,17 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
-import { getPermissions, type OrgRole } from '@/lib/permissions'
+import { getPermissions, ASSIGNABLE_ROLES, type OrgRole, type AssignableRole } from '@/lib/permissions'
+
+// owner primero, luego el resto por jerarquía real (ASSIGNABLE_ROLES), no por antigüedad.
+// group_admin/location_manager (modelo Grupo, aún no asignable desde esta UI) se ordenan
+// al final por si alguna vez aparecen — no tienen jerarquía definida en una sede única.
+const ROLE_RANK: Record<OrgRole, number> = {
+  owner: 0,
+  group_admin: ASSIGNABLE_ROLES.length + 1,
+  location_manager: ASSIGNABLE_ROLES.length + 2,
+  ...(Object.fromEntries(ASSIGNABLE_ROLES.map((role, i) => [role, i + 1])) as Record<AssignableRole, number>),
+}
 import { getEntitlements } from '@/lib/entitlements'
 import TeamManager, { type TeamMember } from '@/components/dashboard/TeamManager'
 
@@ -69,7 +79,7 @@ export default async function EquipoPage() {
         createdAt: m.created_at,
       }
     })
-    .sort((a, b) => (a.role === 'owner' ? -1 : b.role === 'owner' ? 1 : 0))
+    .sort((a, b) => ROLE_RANK[a.role] - ROLE_RANK[b.role])
 
   return (
     <div className="p-8 max-w-3xl">

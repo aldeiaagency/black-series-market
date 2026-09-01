@@ -1,0 +1,186 @@
+{
+  "name": "WF-P5 — Seguimiento automatizado por origen",
+  "nodes": [
+    {
+      "id": "p5sg-sticky",
+      "name": "Notas — WF-P5 Seguimiento",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [60, 60],
+      "parameters": {
+        "content": "## P5 punto 3 — Seguimiento automatizado por origen\n\nCron diario, 3 sub-flujos desde el mismo trigger:\n\n**A) Crear seguimiento — Caso A (lead persistido)**: leads con 6+ días, aún abiertos, sin fila en opportunity_followups todavía (insert con ignore-duplicates, el índice único hace el resto).\n\n**B) Crear seguimiento — Caso C (contacto externo)**: clics de WhatsApp/teléfono con 6+ días, mismo mecanismo, dirigido al showroom.\n\n**C) Enviar los que tocan**: due date cumplido, máx 2 intentos, 30 días de ventana antes de 'exhausted' (no es un resultado negativo).\n\nCaso 'declarado sin origen' NO incluido — no existe todavía formulario para que el showroom lo declare (ver documento de diseño).\n\n**Suelo de fecha (2026-08-29)**: los filtros de Caso A y B solo miran actividad desde el día de activación en adelante, nunca datos de prueba/demo antiguos acumulados — evita que el primer disparo mande emails de seguimiento sobre leads de test de meses atrás con emails sin verificar.\n\n**Variables:** SUPABASE_URL, SUPABASE_SERVICE_KEY, MARKET_URL",
+        "height": 340,
+        "width": 340
+      }
+    },
+    {
+      "id": "p5sg-cron",
+      "name": "Cron diario",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [440, 400],
+      "parameters": {
+        "rule": { "interval": [{ "field": "days", "triggerAtHour": 8 }] }
+      }
+    },
+
+    { "id": "p5sg-get-leads", "name": "Supabase — Leads elegibles (Caso A)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [700, 120],
+      "parameters": {
+        "method": "GET", "url": "={{ $env.SUPABASE_URL }}/rest/v1/leads", "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+        ]},
+        "sendQuery": true, "queryParameters": { "parameters": [
+          { "name": "created_at", "value": "=lte.{{ new Date(Date.now() - 6*24*60*60*1000).toISOString() }}" },
+          { "name": "created_at", "value": "gte.2026-08-29T00:00:00Z" },
+          { "name": "status", "value": "in.(new,contacted,negotiating,appointment)" },
+          { "name": "select", "value": "id,dealer_id,vehicle_id,buyer_email,vehicle:vehicles(brand_name,model_name,year)" },
+          { "name": "limit", "value": "300" }
+        ]}, "options": {}
+      }
+    },
+    { "id": "p5sg-prep-leads", "name": "Preparar filas — Caso A", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [920, 120],
+      "parameters": { "jsCode": "const rows = $input.all().map(i => i.json);\nreturn rows.filter(r => r.buyer_email).map(r => {\n  const v = r.vehicle;\n  const title = v ? [v.brand_name, v.model_name, v.year].filter(Boolean).join(' ') : 'el vehículo consultado';\n  return { json: {\n    dealer_id: r.dealer_id,\n    vehicle_id: r.vehicle_id,\n    origin_case: 'lead_persisted',\n    lead_id: r.id,\n    target: 'buyer',\n    contact_email: r.buyer_email,\n    reference_note: title,\n    next_attempt_due_at: new Date().toISOString(),\n  }};\n});" }
+    },
+    { "id": "p5sg-insert-leads", "name": "Supabase — Insertar (Caso A)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1140, 120],
+      "parameters": {
+        "method": "POST", "url": "={{ $env.SUPABASE_URL }}/rest/v1/opportunity_followups", "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Content-Type", "value": "application/json" },
+          { "name": "Prefer", "value": "resolution=ignore-duplicates,return=minimal" }
+        ]},
+        "sendBody": true, "contentType": "raw", "body": "={{ JSON.stringify($json) }}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+
+    { "id": "p5sg-get-contacts", "name": "Supabase — Contactos externos elegibles (Caso B)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [700, 400],
+      "parameters": {
+        "method": "GET", "url": "={{ $env.SUPABASE_URL }}/rest/v1/analytics_events", "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+        ]},
+        "sendQuery": true, "queryParameters": { "parameters": [
+          { "name": "event_type", "value": "in.(vehicle_whatsapp_click,vehicle_phone_click)" },
+          { "name": "created_at", "value": "=lte.{{ new Date(Date.now() - 6*24*60*60*1000).toISOString() }}" },
+          { "name": "created_at", "value": "gte.2026-08-29T00:00:00Z" },
+          { "name": "dealer_id", "value": "not.is.null" },
+          { "name": "select", "value": "id,dealer_id,vehicle_id,metadata,dealer:dealers(email),vehicle:vehicles(brand_name,model_name,year)" },
+          { "name": "limit", "value": "300" }
+        ]}, "options": {}
+      }
+    },
+    { "id": "p5sg-prep-contacts", "name": "Preparar filas — Caso B", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [920, 400],
+      "parameters": { "jsCode": "const rows = $input.all().map(i => i.json);\nreturn rows.filter(r => r.dealer?.email).map(r => {\n  const v = r.vehicle;\n  const title = v ? [v.brand_name, v.model_name, v.year].filter(Boolean).join(' ') : 'un vehículo';\n  const ref = r.metadata?.whatsapp_ref;\n  return { json: {\n    dealer_id: r.dealer_id,\n    vehicle_id: r.vehicle_id,\n    origin_case: 'external_contact',\n    analytics_event_id: r.id,\n    target: 'dealer',\n    contact_email: r.dealer.email,\n    reference_note: ref ? `${title} — Ref: ${ref}` : title,\n    next_attempt_due_at: new Date().toISOString(),\n  }};\n});" }
+    },
+    { "id": "p5sg-insert-contacts", "name": "Supabase — Insertar (Caso B)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1140, 400],
+      "parameters": {
+        "method": "POST", "url": "={{ $env.SUPABASE_URL }}/rest/v1/opportunity_followups", "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Content-Type", "value": "application/json" },
+          { "name": "Prefer", "value": "resolution=ignore-duplicates,return=minimal" }
+        ]},
+        "sendBody": true, "contentType": "raw", "body": "={{ JSON.stringify($json) }}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+
+    { "id": "p5sg-get-due", "name": "Supabase — Seguimientos pendientes de envío", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [700, 680],
+      "parameters": {
+        "method": "GET", "url": "={{ $env.SUPABASE_URL }}/rest/v1/opportunity_followups", "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+        ]},
+        "sendQuery": true, "queryParameters": { "parameters": [
+          { "name": "status", "value": "eq.pending" },
+          { "name": "next_attempt_due_at", "value": "=lte.{{ new Date().toISOString() }}" },
+          { "name": "select", "value": "id,target,contact_email,reference_note,attempts_sent,created_at,response_token" },
+          { "name": "limit", "value": "300" }
+        ]}, "options": {}
+      }
+    },
+    { "id": "p5sg-classify", "name": "Clasificar: enviar o agotar", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [920, 680],
+      "parameters": { "jsCode": "const now = Date.now();\nconst THIRTY_DAYS = 30*24*60*60*1000;\nconst rows = $input.all().map(i => i.json);\nconst out = [];\nfor (const r of rows) {\n  const ageMs = now - new Date(r.created_at).getTime();\n  if (ageMs > THIRTY_DAYS || r.attempts_sent >= 2) {\n    out.push({ json: { ...r, action: 'exhaust' } });\n  } else {\n    out.push({ json: { ...r, action: 'send' } });\n  }\n}\nreturn out;" }
+    },
+    { "id": "p5sg-route", "name": "¿Enviar o agotar?", "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [1140, 680],
+      "parameters": { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+        "conditions": [{ "leftValue": "={{ $json.action }}", "rightValue": "send", "operator": { "type": "string", "operation": "equals" } }],
+        "combinator": "and" } }
+    },
+
+    { "id": "p5sg-prep-email", "name": "Preparar email de seguimiento", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1380, 560],
+      "parameters": { "jsCode": "const d = $input.first().json;\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\nconst MAIL_FROM = 'Black Label Market <notificaciones@blacklabelmarket.es>';\nconst base = `${MARKET_URL}/api/followups/respond?token=${d.response_token}&response=`;\n\nconst greeting = d.target === 'buyer'\n  ? `<p>Hola,</p><p>¿Cómo fue tu consulta sobre <strong>${d.reference_note}</strong>?</p>`\n  : `<p>Hola,</p><p>¿Qué tal quedó el interesado en <strong>${d.reference_note}</strong>?</p>`;\n\nconst html = `${greeting}\n<p style=\"margin:20px 0\">\n  <a href=\"${base}closed_won\" style=\"display:inline-block;margin:4px;padding:10px 16px;background:#C6A64B;color:#0A0A0A;text-decoration:none\">Ya se cerró</a>\n  <a href=\"${base}still_deciding\" style=\"display:inline-block;margin:4px;padding:10px 16px;border:1px solid #2A2A2A;color:#333;text-decoration:none\">Sigue en curso</a>\n  <a href=\"${base}not_interested\" style=\"display:inline-block;margin:4px;padding:10px 16px;border:1px solid #2A2A2A;color:#333;text-decoration:none\">No siguió adelante</a>\n</p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{ json: { ...d, emailPayload: { from: MAIL_FROM, to: [d.contact_email], subject: `¿Cómo quedó ${d.reference_note}?`, html } } }];" }
+    },
+    { "id": "p5sg-send-email", "name": "Enviar seguimiento", "type": "n8n-nodes-base.emailSend", "typeVersion": 2.1, "position": [1600, 560],
+      "parameters": {
+        "fromEmail": "={{ $json.emailPayload.from }}", "toEmail": "={{ $json.emailPayload.to[0] }}",
+        "subject": "={{ $json.emailPayload.subject }}", "emailType": "html", "html": "={{ $json.emailPayload.html }}"
+      },
+      "credentials": { "smtp": { "id": "ktAl9FVvAn6iPZRo", "name": "Hostinger SMTP - notificaciones" } },
+      "continueOnFail": true
+    },
+    { "id": "p5sg-mark-sent", "name": "Supabase — Registrar envío", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1820, 560],
+      "parameters": {
+        "method": "PATCH", "url": "={{ $env.SUPABASE_URL }}/rest/v1/opportunity_followups", "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Content-Type", "value": "application/json" }, { "name": "Prefer", "value": "return=minimal" }
+        ]},
+        "sendQuery": true, "queryParameters": { "parameters": [{ "name": "id", "value": "=eq.{{ $json.id }}" }] },
+        "sendBody": true, "contentType": "raw",
+        "body": "={ \"attempts_sent\": {{ $json.attempts_sent + 1 }}, \"last_sent_at\": \"{{ new Date().toISOString() }}\", \"next_attempt_due_at\": \"{{ new Date(Date.now() + 7*24*60*60*1000).toISOString() }}\" }",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+
+    { "id": "p5sg-mark-exhausted", "name": "Supabase — Marcar agotado", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1380, 800],
+      "parameters": {
+        "method": "PATCH", "url": "={{ $env.SUPABASE_URL }}/rest/v1/opportunity_followups", "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+          { "name": "Content-Type", "value": "application/json" }, { "name": "Prefer", "value": "return=minimal" }
+        ]},
+        "sendQuery": true, "queryParameters": { "parameters": [{ "name": "id", "value": "=eq.{{ $json.id }}" }] },
+        "sendBody": true, "contentType": "raw",
+        "body": "={ \"status\": \"exhausted\", \"exhausted_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    }
+  ],
+  "connections": {
+    "Cron diario": {
+      "main": [[
+        { "node": "Supabase — Leads elegibles (Caso A)", "type": "main", "index": 0 },
+        { "node": "Supabase — Contactos externos elegibles (Caso B)", "type": "main", "index": 0 },
+        { "node": "Supabase — Seguimientos pendientes de envío", "type": "main", "index": 0 }
+      ]]
+    },
+    "Supabase — Leads elegibles (Caso A)": { "main": [[{ "node": "Preparar filas — Caso A", "type": "main", "index": 0 }]] },
+    "Preparar filas — Caso A": { "main": [[{ "node": "Supabase — Insertar (Caso A)", "type": "main", "index": 0 }]] },
+
+    "Supabase — Contactos externos elegibles (Caso B)": { "main": [[{ "node": "Preparar filas — Caso B", "type": "main", "index": 0 }]] },
+    "Preparar filas — Caso B": { "main": [[{ "node": "Supabase — Insertar (Caso B)", "type": "main", "index": 0 }]] },
+
+    "Supabase — Seguimientos pendientes de envío": { "main": [[{ "node": "Clasificar: enviar o agotar", "type": "main", "index": 0 }]] },
+    "Clasificar: enviar o agotar": { "main": [[{ "node": "¿Enviar o agotar?", "type": "main", "index": 0 }]] },
+    "¿Enviar o agotar?": {
+      "main": [
+        [{ "node": "Preparar email de seguimiento", "type": "main", "index": 0 }],
+        [{ "node": "Supabase — Marcar agotado", "type": "main", "index": 0 }]
+      ]
+    },
+    "Preparar email de seguimiento": { "main": [[{ "node": "Enviar seguimiento", "type": "main", "index": 0 }]] },
+    "Enviar seguimiento": { "main": [[{ "node": "Supabase — Registrar envío", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

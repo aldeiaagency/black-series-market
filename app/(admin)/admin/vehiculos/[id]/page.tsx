@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import {
   VEHICLE_STATUS_LABELS, getVehicleStatusColor,
   FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS,
-  formatPrice, timeAgo,
+  formatPrice, formatMileage, timeAgo,
 } from '@/lib/utils'
 import Link from 'next/link'
 import {
@@ -434,7 +434,7 @@ export default async function AdminVehicleDetailPage({ params, searchParams }: P
               {row('Tipo', vehicle.vehicle_type === 'motorcycle' ? 'Moto' : 'Coche')}
               {row('Carrocería', vehicle.body_type)}
               {row('Año', vehicle.year)}
-              {row('Kilómetros', vehicle.mileage_km !== null ? `${vehicle.mileage_km?.toLocaleString('es-ES')} km` : null)}
+              {row('Kilómetros', vehicle.mileage_km !== null ? formatMileage(vehicle.mileage_km) : null)}
               {row('Condición', vehicle.condition_type)}
               {row('Categoría', vehicle.category)}
               {row('Color exterior', vehicle.color_exterior)}

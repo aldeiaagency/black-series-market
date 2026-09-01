@@ -20,16 +20,19 @@ export async function applyVehicleFilters(
   baseQuery: any,
   params: Record<string, string>,
   vehicleType: VehicleQueryType,
-): Promise<{ query: any }> {
+): Promise<{ query: any; resolvedBrandName: string | null }> {
   let query: any = baseQuery
+  let resolvedBrandName: string | null = null
 
   if (params.categoria) query = query.eq('category', params.categoria)
 
   if (params.marca) {
     // Resolve slug → canonical brand name (handles hyphenated brands like Mercedes-Benz).
-    const brandName = await resolveBrandNameFromSlug(supabase, params.marca)
-    query = brandName
-      ? query.ilike('brand_name', brandName)
+    // Exposed to the caller too — reused to pre-fill "brand" when offering a search alert
+    // on zero results, so it matches the exact spelling wf6's matcher compares against.
+    resolvedBrandName = await resolveBrandNameFromSlug(supabase, params.marca)
+    query = resolvedBrandName
+      ? query.ilike('brand_name', resolvedBrandName)
       : query.ilike('brand_name', `%${params.marca.replace(/-/g, ' ')}%`)
   }
 
@@ -93,5 +96,5 @@ export async function applyVehicleFilters(
     }
   }
 
-  return { query }
+  return { query, resolvedBrandName }
 }

@@ -27,7 +27,8 @@ export const ROLE_LABELS: Record<OrgRole, string> = {
 }
 
 /** Roles que el propietario puede asignar al dar de alta o editar un miembro. */
-export const ASSIGNABLE_ROLES: OrgRole[] = ['admin', 'inventory_manager', 'sales', 'viewer']
+export type AssignableRole = Exclude<OrgRole, 'owner' | 'group_admin' | 'location_manager'>
+export const ASSIGNABLE_ROLES: AssignableRole[] = ['admin', 'inventory_manager', 'sales', 'viewer']
 
 /** Secciones del dashboard (coinciden con las rutas del menú). */
 export type DashboardSection =
@@ -39,6 +40,7 @@ export type DashboardSection =
   | 'solicitudes'
   | 'citas'
   | 'analiticas'
+  | 'estado'
   | 'perfil'
   | 'suscripcion'
   | 'equipo'
@@ -60,7 +62,7 @@ export interface Permissions {
 
 const FULL: DashboardSection[] = [
   'panel', 'inventario', 'publicar', 'importar',
-  'oportunidades', 'solicitudes', 'citas', 'analiticas', 'perfil', 'suscripcion', 'equipo',
+  'oportunidades', 'solicitudes', 'citas', 'analiticas', 'estado', 'perfil', 'suscripcion', 'equipo',
 ]
 
 const PERMISSIONS: Record<OrgRole, Permissions> = {
@@ -89,7 +91,7 @@ const PERMISSIONS: Record<OrgRole, Permissions> = {
     canManageTeam: true,
   },
   inventory_manager: {
-    sections: ['panel', 'inventario', 'publicar', 'importar', 'analiticas'],
+    sections: ['panel', 'inventario', 'publicar', 'importar', 'analiticas', 'estado'],
     canEditInventory: true,
     canManageOpportunities: false,
     canEditProfile: false,
@@ -97,7 +99,7 @@ const PERMISSIONS: Record<OrgRole, Permissions> = {
     canManageTeam: false,
   },
   location_manager: {
-    sections: ['panel', 'inventario', 'publicar', 'importar', 'oportunidades', 'solicitudes', 'citas', 'analiticas'],
+    sections: ['panel', 'inventario', 'publicar', 'importar', 'oportunidades', 'solicitudes', 'citas', 'analiticas', 'estado'],
     canEditInventory: true,
     canManageOpportunities: true,
     canEditProfile: false,
@@ -105,7 +107,7 @@ const PERMISSIONS: Record<OrgRole, Permissions> = {
     canManageTeam: false,
   },
   sales: {
-    sections: ['panel', 'oportunidades', 'solicitudes', 'analiticas'],
+    sections: ['panel', 'oportunidades', 'solicitudes', 'analiticas', 'estado'],
     canEditInventory: false,
     canManageOpportunities: true,
     canEditProfile: false,
@@ -113,7 +115,7 @@ const PERMISSIONS: Record<OrgRole, Permissions> = {
     canManageTeam: false,
   },
   viewer: {
-    sections: ['panel', 'inventario', 'oportunidades', 'analiticas'],
+    sections: ['panel', 'inventario', 'oportunidades', 'analiticas', 'estado'],
     canEditInventory: false,
     canManageOpportunities: false,
     canEditProfile: false,

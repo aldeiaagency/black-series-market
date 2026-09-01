@@ -36,9 +36,21 @@ const LEGAL = [
 
 // ── Brand featured ────────────────────────────────────────────────────────────
 
+// slug = brands.slug real (lib/brand-editorial.ts). No derivarlo del label: "BMW M" y
+// "Mercedes AMG" no son slugs reales (son bmw y mercedes-benz) y generaban enlaces rotos.
 const FEATURED_BRANDS = [
-  'Ferrari', 'Lamborghini', 'McLaren', 'Bugatti', 'Porsche', 'Bentley',
-  'Rolls-Royce', 'Aston Martin', 'Maserati', 'BMW M', 'Mercedes AMG', 'Ducati',
+  { label: 'Ferrari', slug: 'ferrari' },
+  { label: 'Lamborghini', slug: 'lamborghini' },
+  { label: 'McLaren', slug: 'mclaren' },
+  { label: 'Bugatti', slug: 'bugatti' },
+  { label: 'Porsche', slug: 'porsche' },
+  { label: 'Bentley', slug: 'bentley' },
+  { label: 'Rolls-Royce', slug: 'rolls-royce' },
+  { label: 'Aston Martin', slug: 'aston-martin' },
+  { label: 'Maserati', slug: 'maserati' },
+  { label: 'BMW M', slug: 'bmw' },
+  { label: 'Mercedes AMG', slug: 'mercedes-benz' },
+  { label: 'Ducati', slug: 'ducati' },
 ]
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -73,7 +85,7 @@ export default function Footer() {
                 href="https://blackseriesagency.es"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#C9C9C9] hover:text-gold underline underline-offset-2 decoration-[#2A2A2A] transition-colors"
+                className="text-[#C9C9C9] hover:text-gold underline underline-offset-2 decoration-bsm-border transition-colors"
               >
                 Black Series
               </a>
@@ -155,11 +167,11 @@ export default function Footer() {
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             {FEATURED_BRANDS.map((brand) => (
               <Link
-                key={brand}
-                href={`/marcas/${brand.toLowerCase().replace(/\s/g, '-')}`}
+                key={brand.slug}
+                href={`/marcas/${brand.slug}`}
                 className="text-[13px] text-[#9E9E9E] hover:text-[#C9C9C9] transition-colors duration-150"
               >
-                {brand}
+                {brand.label}
               </Link>
             ))}
           </div>

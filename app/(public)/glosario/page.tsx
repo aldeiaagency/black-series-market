@@ -20,7 +20,7 @@ const TERMS: { term: string; definition: string }[] = [
   },
   {
     term: 'VIN (Vehicle Identification Number)',
-    definition: 'Código alfanumérico de 17 caracteres que identifica unívocamente cada vehículo fabricado. Permite verificar el historial, los propietarios anteriores, los accidentes registrados y la autenticidad del vehículo en cualquier mercado mundial.',
+    definition: 'Código alfanumérico de 17 caracteres que identifica unívocamente cada vehículo fabricado. Permite consultar el historial, los propietarios anteriores y los accidentes registrados en las bases de datos disponibles en cada mercado — su cobertura varía según el país y no todos ofrecen acceso público.',
   },
   {
     term: 'Matching numbers',

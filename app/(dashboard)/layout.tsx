@@ -10,6 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+  if (user.user_metadata?.must_change_password === true) redirect('/cambiar-password-temporal')
 
   // Resolución central: dueño directo o miembro del equipo de la organización.
   const access = await getDealerAccess(user.id)
@@ -48,6 +49,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
     (section) => gatedSections[section] ?? true,
   )
 
+  // Aviso en el icono de "A la carta", mismo criterio que ve el dealer al entrar en la
+  // página (Elite ve todo; Professional solo lo que ya superó la ventana exclusiva de 24h).
+  let solicitudesBadge = 0
+  if (visibleSections.includes('solicitudes')) {
+    const isElite = dealer.subscription_plan === 'elite'
+    const cutoff = isElite ? null : new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    let countQuery = admin
+      .from('custom_requests')
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['new', 'in_review'])
+    if (cutoff) countQuery = countQuery.lte('created_at', cutoff)
+    const { count } = await countQuery
+    solicitudesBadge = count ?? 0
+  }
+
   return (
     <div className="flex min-h-screen bg-obsidian">
       <Sidebar
@@ -56,6 +72,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         plan={dealer.subscription_plan}
         sections={visibleSections}
         role={access.role}
+        solicitudesBadge={solicitudesBadge}
       />
       <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto">

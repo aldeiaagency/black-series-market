@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { GuideAuthorBox, GuideFaq, GuideHeroImage, GuideToc, type FaqItem, type TocItem } from '../_components/GuideSeoBlocks'
+import NewsletterSignupForm from '@/components/marketplace/NewsletterSignupForm'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 const PAGE_PATH = '/guias/como-comprar-supercar-segunda-mano'
@@ -216,7 +217,7 @@ export default function GuiaCompraSupercarPage() {
             En el mercado de vehículos premium, la confianza en el vendedor es inseparable del valor del producto. Un concesionario especializado que conoce cada modelo en profundidad, que puede verificar y documentar el historial y que tiene reputación que proteger, ofrece una garantía implícita que un anuncio anónimo en una plataforma generalista no puede dar.
           </p>
           <p>
-            En Black Label Market trabajamos exclusivamente con concesionarios y especialistas verificados. Cada vendedor pasa por un proceso de revisión editorial antes de publicar, y cada anuncio debe cumplir estándares de documentación y presentación. No es volumen: es curación.
+            En Black Label Market trabajamos exclusivamente con concesionarios y especialistas verificados: cada vendedor pasa por nuestro proceso de admisión antes de poder publicar, y cada vehículo debe pertenecer a nuestro catálogo de marcas y modelos seleccionados. No es volumen: es curación.
           </p>
         </section>
 
@@ -235,6 +236,10 @@ export default function GuiaCompraSupercarPage() {
               Solicitar un vehículo a la carta
             </Link>
           </div>
+        </div>
+
+        <div className="mt-10">
+          <NewsletterSignupForm variant="embed" />
         </div>
 
       </div>

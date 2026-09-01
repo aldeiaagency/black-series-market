@@ -78,17 +78,17 @@ function NoImagePlaceholder({ compact }: { compact?: boolean }) {
   )
   if (compact) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center bg-surface opacity-60">
+      <div className="absolute inset-0 flex items-center justify-center bg-surface opacity-80">
         {icon}
       </div>
     )
   }
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface">
-      <div className="w-10 h-10 border border-bsm-border flex items-center justify-center opacity-40">
+      <div className="w-10 h-10 border border-bsm-border flex items-center justify-center opacity-70">
         {icon}
       </div>
-      <span className="text-[10px] text-bsm-text-muted tracking-widest uppercase opacity-60">
+      <span className="text-[10px] text-bsm-text-muted tracking-widest uppercase">
         Imagen no disponible
       </span>
     </div>
@@ -242,14 +242,14 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
               <button
                 aria-label="Anterior"
                 onClick={(e) => { e.stopPropagation(); prev() }}
-                className="w-10 h-10 bg-obsidian/70 flex items-center justify-center text-white hover:bg-obsidian transition-colors pointer-events-auto"
+                className="w-10 h-10 bg-obsidian/70 flex items-center justify-center text-white hover:bg-obsidian transition-colors pointer-events-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 aria-label="Siguiente"
                 onClick={(e) => { e.stopPropagation(); next() }}
-                className="w-10 h-10 bg-obsidian/70 flex items-center justify-center text-white hover:bg-obsidian transition-colors pointer-events-auto"
+                className="w-10 h-10 bg-obsidian/70 flex items-center justify-center text-white hover:bg-obsidian transition-colors pointer-events-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -280,7 +280,7 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
                 aria-label={item.kind === 'video' ? 'Ver vídeo' : `Ver imagen ${i + 1}`}
                 onClick={() => setActiveIndex(i)}
                 className={cn(
-                  'relative flex-shrink-0 w-20 h-14 overflow-hidden transition-all duration-150',
+                  'relative flex-shrink-0 w-20 h-14 overflow-hidden transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold',
                   i === activeIndex
                     ? 'ring-2 ring-gold opacity-100'
                     : 'opacity-50 hover:opacity-75',
@@ -338,7 +338,7 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
         >
           <button
             aria-label="Cerrar galería"
-            className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center text-bsm-text-secondary hover:text-white transition-colors"
+            className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center text-bsm-text-secondary hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             onClick={() => setLightboxOpen(false)}
           >
             <X className="w-6 h-6" />
@@ -368,14 +368,14 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
                 <button
                   aria-label="Imagen anterior"
                   onClick={lightboxPrev}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 w-10 h-10 bg-surface flex items-center justify-center hover:bg-surface-elevated transition-colors"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 w-10 h-10 bg-surface flex items-center justify-center hover:bg-surface-elevated transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   aria-label="Imagen siguiente"
                   onClick={lightboxNext}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 w-10 h-10 bg-surface flex items-center justify-center hover:bg-surface-elevated transition-colors"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 w-10 h-10 bg-surface flex items-center justify-center hover:bg-surface-elevated transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

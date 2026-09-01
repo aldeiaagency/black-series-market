@@ -69,7 +69,7 @@ interface PageProps {
   searchParams: Promise<Record<string, string>>
 }
 
-async function VehicleList({ params }: { params: Record<string, string> }) {
+async function loadVehicleList(params: Record<string, string>) {
   const supabase = createPublicClient()
   let query = supabase
     .from('vehicles')
@@ -78,7 +78,8 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
     .eq('dealer.profile_status', 'published')
     .eq('vehicle_type', 'car')
 
-  query = (await applyVehicleFilters(supabase, query, params, 'car')).query
+  const filtered = await applyVehicleFilters(supabase, query, params, 'car')
+  query = filtered.query
 
   const sorts = SORT_MAP[params.sort || 'featured'] || SORT_MAP.featured
   for (const s of sorts) query = query.order(s.col, { ascending: s.asc })
@@ -95,11 +96,31 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
       )
     : rawVehicles
 
+  return { vehicles, count, page, limit, params, resolvedBrandName: filtered.resolvedBrandName }
+}
+
+function VehicleList({
+  result,
+}: {
+  result: Awaited<ReturnType<typeof loadVehicleList>>
+}) {
+  const { vehicles, count, page, limit, params, resolvedBrandName } = result
+
   if (!vehicles?.length) {
+    // Hereda los filtros ya aplicados en la búsqueda — evita que el comprador tenga que
+    // volver a teclear lo que ya había filtrado al crear la alerta desde cero-resultados.
+    const alertInitialValues = {
+      brand:      resolvedBrandName || undefined,
+      model:      params.modelo || undefined,
+      budget_max: params.precioMax || undefined,
+      year_min:   params.anioMin || undefined,
+      km_max:     params.kmMax || undefined,
+      location:   params.provincia || params.comunidad || undefined,
+    }
     return (
       <div className="flex-1 space-y-6">
         <div className="flex flex-col items-center justify-center py-16 text-center border border-bsm-border bg-surface">
-          <h3 className="font-display text-xl mb-2 text-bsm-text-primary">No hay vehículos con esos criterios</h3>
+          <h2 className="font-display text-xl mb-2 text-bsm-text-primary">No hay vehículos con esos criterios</h2>
           <p className="text-sm text-bsm-text-muted max-w-xs mb-6">
             Ajusta los filtros o dinos qué estás buscando y lo tendremos en cuenta si aparece una unidad compatible.
           </p>
@@ -109,10 +130,11 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
             <CreateAlertButton
               vehicleType="car"
               className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-bsm-border text-bsm-text-muted hover:border-gold/40 hover:text-gold transition-colors"
+              initialValues={alertInitialValues}
             />
           </div>
         </div>
-        <SearchAlertCTA vehicleType="car" />
+        <SearchAlertCTA vehicleType="car" initialValues={alertInitialValues} />
       </div>
     )
   }
@@ -143,13 +165,8 @@ async function VehicleList({ params }: { params: Record<string, string> }) {
 export default async function CochesPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = createPublicClient()
-  const [{ count }, { data: itemListVehicles }] = await Promise.all([
-    supabase
-      .from('vehicles')
-      .select('id, dealer:dealers!inner(profile_status)', { count: 'exact', head: true })
-      .eq('status', 'active')
-      .eq('dealer.profile_status', 'published')
-      .eq('vehicle_type', 'car'),
+  const [vehicleList, { data: itemListVehicles }] = await Promise.all([
+    loadVehicleList(params),
     supabase
       .from('vehicles')
       .select('slug, brand_name, model_name, year, dealer:dealers!inner(profile_status)')
@@ -160,6 +177,7 @@ export default async function CochesPage({ searchParams }: PageProps) {
       .order('published_at', { ascending: false })
       .limit(10),
   ])
+  const count = vehicleList.count
 
   const itemListJsonLd = {
     '@context': 'https://schema.org',
@@ -201,9 +219,7 @@ export default async function CochesPage({ searchParams }: PageProps) {
         </Suspense>
       </div>
 
-      <Suspense fallback={<GridSkeleton />}>
-        <VehicleList params={params} />
-      </Suspense>
+      <VehicleList result={vehicleList} />
     </div>
     {Object.keys(params).length === 0 && (
       <FaqSection items={COCHES_FAQ} heading="Preguntas frecuentes sobre comprar un coche premium" eyebrow="Comprar un coche" />
@@ -212,19 +228,3 @@ export default async function CochesPage({ searchParams }: PageProps) {
   )
 }
 
-function GridSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="bg-surface border border-bsm-border">
-          <div className="aspect-[16/10] shimmer" />
-          <div className="p-4 space-y-3">
-            <div className="h-3 w-20 bg-surface-elevated shimmer" />
-            <div className="h-5 w-40 bg-surface-elevated shimmer" />
-            <div className="h-3 w-32 bg-surface-elevated shimmer" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}

@@ -1,71 +1,172 @@
 {
-  "name": "BLM — 5. Router de Eventos",
+  "name": "BLM - 5. Router de Eventos",
   "nodes": [
     {
       "id": "wf5-node-01-webhook",
-      "name": "Webhook — Eventos Market",
+      "name": "Webhook - Eventos Market",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "blm/events",
-        "responseMode": "lastNode",
+        "responseMode": "onReceived",
         "options": {}
-      }
+      },
+      "webhookId": "165c9a82-b175-4f2c-80e7-5c39492d42df"
     },
     {
       "id": "wf5-node-02-normalize",
       "name": "Normalizar evento",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\n\n// Secret validation (opcional)\nconst secret = process.env.N8N_WEBHOOK_SECRET;\nif (secret) {\n  const incomingSecret = (input.headers || {})['x-webhook-secret'];\n  if (incomingSecret !== secret) throw new Error('Webhook secret inválido');\n}\n\nconst eventType  = body.event_type    || body.eventType    || '';\nconst entityType = body.entity_type   || body.entityType   || '';\nconst entityId   = body.entity_id     || body.entityId     || '';\nconst dealerId   = body.dealer_id     || body.dealerId     || '';\nconst vehicleId  = body.vehicle_id    || body.vehicleId    || '';\nconst data       = body.data          || body.payload      || body;\nconst createdAt  = body.created_at    || new Date().toISOString();\n\nconst SUPPORTED_EVENTS = [\n  'lead.created',\n  'custom_request.created',\n  'search_alert.created',\n  'vehicle.approved',\n  'vehicle.rejected',\n  'vehicle.submitted_for_review'\n];\n\nif (!SUPPORTED_EVENTS.includes(eventType)) {\n  return [{ json: { ok: false, reason: `event_type no soportado: ${eventType}`, eventType } }];\n}\n\nreturn [{\n  json: {\n    ok: true,\n    eventType,\n    entityType,\n    entityId,\n    dealerId,\n    vehicleId,\n    data,\n    createdAt,\n    rawBody: body\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\n\nconst eventType  = body.event_type    || body.eventType    || '';\nconst entityType = body.entity_type   || body.entityType   || '';\nconst entityId   = body.entity_id     || body.entityId     || '';\nconst dealerId   = body.dealer_id     || body.dealerId     || '';\nconst vehicleId  = body.vehicle_id    || body.vehicleId    || '';\nconst data       = body.data          || body.payload      || body;\nconst createdAt  = body.created_at    || new Date().toISOString();\n\nconst SUPPORTED_EVENTS = [\n  'lead.created',\n  'custom_request.created',\n  'search_alert.created',\n  'vehicle.approved',\n  'vehicle.rejected',\n  'vehicle.submitted_for_review',\n  'appointment.created'\n];\n\nif (!SUPPORTED_EVENTS.includes(eventType)) {\n  return [{ json: { ok: false, reason: `event_type no soportado: ${eventType}`, eventType } }];\n}\n\nreturn [{\n  json: {\n    ok: true,\n    eventType,\n    entityType,\n    entityId,\n    dealerId,\n    vehicleId,\n    data,\n    createdAt,\n    rawBody: body\n  }\n}];"
       }
     },
     {
       "id": "wf5-node-03-router",
-      "name": "Router — Switch por tipo de evento",
+      "name": "Router - Switch por tipo de evento",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
-      "position": [480, 300],
+      "position": [
+        480,
+        300
+      ],
       "parameters": {
         "mode": "rules",
         "rules": {
           "values": [
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [{ "id": "lead", "leftValue": "={{ $json.eventType }}", "rightValue": "lead.created", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "lead",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "lead.created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               }
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [{ "id": "custom-req", "leftValue": "={{ $json.eventType }}", "rightValue": "custom_request.created", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "custom-req",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "custom_request.created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               }
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [{ "id": "search-alert", "leftValue": "={{ $json.eventType }}", "rightValue": "search_alert.created", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "search-alert",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "search_alert.created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               }
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [{ "id": "veh-approved", "leftValue": "={{ $json.eventType }}", "rightValue": "vehicle.approved", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "veh-approved",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "vehicle.approved",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               }
             },
             {
               "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [{ "id": "veh-rejected", "leftValue": "={{ $json.eventType }}", "rightValue": "vehicle.rejected", "operator": { "type": "string", "operation": "equals" } }],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "veh-rejected",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "vehicle.rejected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "appointment",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "appointment.created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
                 "combinator": "and"
               }
             }
@@ -73,239 +174,528 @@
         }
       }
     },
-
     {
       "id": "wf5-node-lead-prep",
-      "name": "Lead — Preparar emails",
+      "name": "Lead - Preparar emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 80],
+      "position": [
+        720,
+        80
+      ],
       "parameters": {
-        "jsCode": "const ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = process.env.MAIL_FROM  || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\n// Email de confirmación al comprador\nconst buyerName    = d.buyer_name    || d.name    || 'Interesado';\nconst buyerEmail   = d.buyer_email   || d.email   || '';\nconst vehicleTitle = d.vehicle_title || d.title   || 'el vehículo';\nconst dealerName   = d.dealer_name   || d.showroom || 'el concesionario';\n\nconst buyerEmailHtml = `<p>Hola ${buyerName},</p>\n<p>Tu mensaje de contacto sobre <strong>${vehicleTitle}</strong> ha sido enviado correctamente a <strong>${dealerName}</strong>.</p>\n<p>El concesionario se pondrá en contacto contigo en breve.</p>\n<p>El equipo de Black Label Market</p>`;\n\n// Email de notificación al dealer\nconst dealerEmail = d.dealer_email || '';\nconst dealerEmailHtml = `<p>Has recibido un nuevo lead en Black Label Market.</p>\n<p><strong>Vehículo:</strong> ${vehicleTitle}<br>\n<strong>Interesado:</strong> ${buyerName}<br>\n<strong>Email:</strong> ${buyerEmail}<br>\n<strong>Mensaje:</strong> ${(d.message || '').slice(0, 500)}</p>\n<p><a href=\"${MARKET_URL}/dashboard/oportunidades\">Ver en tu panel →</a></p>`;\n\nconst slackText = `*📩 Nuevo lead*\\n\\n*Vehículo:* ${vehicleTitle}\\n*Comprador:* ${buyerName} (${buyerEmail})\\n*Dealer:* ${dealerName}`;\n\nreturn [{\n  json: {\n    ...ev,\n    buyerName, buyerEmail, dealerName, dealerEmail, vehicleTitle,\n    buyerEmailPayload:  buyerEmail  ? { from: MAIL_FROM, to: [buyerEmail],  subject: 'Tu consulta ha sido enviada — Black Label Market', html: buyerEmailHtml }  : null,\n    dealerEmailPayload: dealerEmail ? { from: MAIL_FROM, to: [dealerEmail], subject: `Nuevo lead: ${vehicleTitle}`, html: dealerEmailHtml } : null,\n    slackText\n  }\n}];"
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\n// Entrada: $json = resultado del lookup (vehículo + dealer embebido desde Supabase).\n// El evento original (contacto del comprador) se lee de \"Normalizar evento\".\nconst ev = $('Normalizar evento').first().json;\nconst d = ev.data || {};\nlet look = $input.first().json || {};\n// PostgREST con Accept pgrst.object devuelve content-type que n8n no parsea →\n// el cuerpo llega como string JSON en look.data. Parsearlo si procede.\nif (look && typeof look.data === 'string') { try { look = JSON.parse(look.data); } catch (e) {} }\n\nconst MAIL_FROM  = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\n\nconst buyerName  = d.contact?.name  || d.buyer_name  || d.name  || 'Interesado';\nconst buyerEmail = d.contact?.email || d.buyer_email || d.email || '';\nconst buyerPhone = d.contact?.phone || d.buyer_phone || '';\nconst message    = (d.message || '').toString().slice(0, 800);\n\n// El lookup puede fallar (lead sin vehicle_id, p.ej. asistente) → degradar con elegancia\nconst hasVehicle  = look && look.brand_name;\nconst vehicleTitle = hasVehicle\n  ? [look.brand_name, look.model_name, look.year].filter(Boolean).join(' ')\n  : 'el vehículo de tu interés';\nconst vehicleUrl = (hasVehicle && look.slug)\n  ? `${MARKET_URL}/coches/${look.slug}`\n  : MARKET_URL;\nconst dealerName  = look?.dealer?.name  || 'el vendedor profesional';\nconst dealerEmail = look?.dealer?.email || '';\n\nconst buyerHtml = `<p>Hola ${buyerName},</p>\n<p>Hemos enviado tu consulta sobre <strong>${vehicleTitle}</strong> a ${dealerName}.</p>\n<p>El vendedor profesional se pondrá en contacto contigo lo antes posible.</p>\n<p><a href=\"${vehicleUrl}\">Ver la ficha del vehículo →</a></p>\n<p>El equipo de Black Label Market</p>`;\n\nconst dealerHtml = `<p>Has recibido una nueva consulta en Black Label Market.</p>\n<p><strong>Vehículo:</strong> ${vehicleTitle}<br>\n<strong>Interesado:</strong> ${buyerName}<br>\n<strong>Email:</strong> ${buyerEmail}${buyerPhone ? '<br><strong>Teléfono:</strong> ' + buyerPhone : ''}</p>\n${message ? '<p><strong>Mensaje:</strong> ' + message + '</p>' : ''}\n<p><a href=\"${MARKET_URL}/dashboard/oportunidades\">Ver en tu panel →</a></p>`;\n\nconst slackPayload = {\n  text: `:inbox_tray: *Nuevo lead* — ${buyerName} sobre *${vehicleTitle}*\\n`\n    + `Dealer: ${dealerName}${dealerEmail ? ' · ' + dealerEmail : ''}\\n`\n    + `Comprador: ${buyerEmail}${buyerPhone ? ' · ' + buyerPhone : ''}`\n    + `${message ? '\\n💬 ' + message : ''}`\n};\n\nreturn [{\n  json: {\n    ...ev,\n    buyerName, buyerEmail, dealerName, dealerEmail, vehicleTitle, slackPayload,\n    buyerEmailPayload: buyerEmail ? {\n      from: MAIL_FROM, to: [buyerEmail],\n      subject: `Hemos enviado tu consulta — ${vehicleTitle}`,\n      html: buyerHtml + legalFooter\n    } : null,\n    dealerEmailPayload: dealerEmail ? {\n      from: MAIL_FROM, to: [dealerEmail],\n      subject: `Nueva consulta: ${vehicleTitle}`,\n      html: dealerHtml + legalFooter\n    } : null\n  }\n}];\n"
       }
     },
     {
       "id": "wf5-node-lead-buyer-email",
-      "name": "Lead — Email al comprador",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [960, 0],
+      "name": "Lead - Email al comprador",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        0
+      ],
       "continueOnFail": true,
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.buyerEmailPayload ? JSON.stringify($json.buyerEmailPayload) : JSON.stringify({ skip: true }) }}"
-      }
+        "fromEmail": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.from : \"\" }}",
+        "toEmail": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.to[0] : \"\" }}",
+        "subject": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.subject : \"(skip)\" }}",
+        "emailType": "html",
+        "html": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.html : \"\" }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "19f78a6b-e8a7-4b6b-ac65-46c3f1f5ef6f"
     },
     {
       "id": "wf5-node-lead-dealer-email",
-      "name": "Lead — Email al dealer",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [960, 160],
+      "name": "Lead - Email al dealer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        160
+      ],
       "continueOnFail": true,
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.dealerEmailPayload ? JSON.stringify($json.dealerEmailPayload) : JSON.stringify({ skip: true }) }}"
-      }
+        "fromEmail": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.from : \"\" }}",
+        "toEmail": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.to[0] : \"\" }}",
+        "subject": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.subject : \"(skip)\" }}",
+        "emailType": "html",
+        "html": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.html : \"\" }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "9dff7dbd-d290-483a-8b99-6dbd3f7a0b96"
     },
-
     {
       "id": "wf5-node-custom-prep",
-      "name": "Custom Request — Preparar confirmación",
+      "name": "Custom Request - Preparar confirmaci�n",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 300],
+      "position": [
+        720,
+        300
+      ],
       "parameters": {
-        "jsCode": "const ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = process.env.MAIL_FROM  || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nconst name     = d.name  || d.contact?.name  || 'Interesado';\nconst email    = d.email || d.contact?.email || '';\nconst brand    = d.brand    || d.marca    || '';\nconst model    = d.model    || d.modelo   || '';\nconst budget   = d.budget_text || d.budget || '';\nconst timeline = d.timeframe  || d.timeline || '';\n\nconst vehicleDesc = [brand, model].filter(Boolean).join(' ') || 'vehículo a medida';\n\nconst html = `<p>Hola ${name},</p>\n<p>Hemos recibido tu solicitud de <strong>${vehicleDesc}</strong>.</p>\n<p>Nuestro equipo analizará tu petición y contactará con los mejores concesionarios especializados. Te contactaremos en un plazo de 24-48 horas laborables.</p>\n${budget ? '<p><strong>Presupuesto:</strong> ' + budget + '</p>' : ''}\n${timeline ? '<p><strong>Plazo:</strong> ' + timeline + '</p>' : ''}\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev,\n    name, email,\n    emailPayload: email ? {\n      from: MAIL_FROM, to: [email],\n      subject: `Solicitud recibida: ${vehicleDesc} — Black Label Market`,\n      html\n    } : null\n  }\n}];"
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\n\nconst name     = d.contact?.name  || d.name  || 'Interesado';\nconst email    = d.contact?.email || d.email || '';\nconst brand    = d.brand || '';\nconst model    = d.model || '';\nconst budget   = d.budget || d.budget_text || '';\nconst timeline = d.timeframe || d.timeline || '';\n\nconst TIMELINE_LABELS = {\n  immediate: 'Lo antes posible',\n  '1_3_months': 'En 1-3 meses',\n  '3_6_months': 'En 3-6 meses',\n  exploring: 'Explorando opciones'\n};\nconst timelineLabel = TIMELINE_LABELS[timeline] || timeline;\n\nconst location = d.location || '';\nconst vehicleDesc = [brand, model].filter(Boolean).join(' ') || 'tu vehículo a medida';\n\nconst slackPayload = {\n  text: `:memo: *Nueva solicitud a la carta* — ${name} busca *${vehicleDesc}*\\n`\n    + [budget ? 'Presupuesto: ' + budget : '', location, timelineLabel ? 'Plazo: ' + timelineLabel : '', email]\n        .filter(Boolean).join(' · ')\n};\n\nconst html = `<p>Hola ${name},</p>\n<p>Hemos recibido tu solicitud de <strong>${vehicleDesc}</strong>.</p>\n<p>Nuestro equipo la analizará y contactará con los concesionarios especializados más adecuados. Te responderemos en un plazo de 24-48 horas laborables.</p>\n${budget ? '<p><strong>Presupuesto:</strong> ' + budget + '</p>' : ''}\n${timelineLabel ? '<p><strong>Plazo:</strong> ' + timelineLabel + '</p>' : ''}\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev,\n    name, email, slackPayload,\n    emailPayload: email ? {\n      from: MAIL_FROM, to: [email],\n      subject: `Solicitud recibida: ${vehicleDesc} — Black Label Market`,\n      html: html + legalFooter\n    } : null\n  }\n}];\n"
       }
     },
     {
       "id": "wf5-node-custom-email",
-      "name": "Custom Request — Email al solicitante",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [960, 300],
+      "name": "Custom Request - Email al solicitante",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.emailPayload ? JSON.stringify($json.emailPayload) : JSON.stringify({ skip: true }) }}"
-      }
+        "fromEmail": "={{ $json.emailPayload ? $json.emailPayload.from : \"\" }}",
+        "toEmail": "={{ $json.emailPayload ? $json.emailPayload.to[0] : \"\" }}",
+        "subject": "={{ $json.emailPayload ? $json.emailPayload.subject : \"(skip)\" }}",
+        "emailType": "html",
+        "html": "={{ $json.emailPayload ? $json.emailPayload.html : \"\" }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "3a7f9afa-3c3c-4c46-89df-66fab0e0bff2"
     },
-
     {
       "id": "wf5-node-alert-prep",
-      "name": "Alerta — Preparar confirmación",
+      "name": "Alerta - Preparar confirmaci�n",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 480],
+      "position": [
+        720,
+        480
+      ],
       "parameters": {
-        "jsCode": "const ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = process.env.MAIL_FROM  || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nconst email   = d.contact?.email || d.user_email || d.email || '';\nconst name    = d.contact?.name  || d.user_name  || d.name  || '';\nconst brand   = d.brand || d.criteria?.brand  || '';\nconst model   = d.model || d.criteria?.model  || '';\nconst maxPrice = d.budget_max || d.criteria?.max_price || d.max_price || '';\n\nconst criteriaDesc = [brand, model, maxPrice ? `hasta ${maxPrice}€` : ''].filter(Boolean).join(' · ') || 'criterios guardados';\n\nconst html = `<p>Hola${name !== 'Usuario' ? ' ' + name : ''},</p>\n<p>Tu alerta de búsqueda ha quedado guardada en Black Label Market.</p>\n<p><strong>Criterios:</strong> ${criteriaDesc}</p>\n<p>Te notificaremos por email cada vez que publiquemos un vehículo que encaje con tu búsqueda.</p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev,\n    name, email,\n    emailPayload: email ? {\n      from: MAIL_FROM, to: [email],\n      subject: 'Alerta guardada — Black Label Market',\n      html\n    } : null\n  }\n}];"
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\n\n// El market (search_alert.created) envía el contacto en d.contact.*\nconst email   = d.contact?.email || d.user_email || d.email || '';\nconst name    = d.contact?.name  || d.user_name  || d.name  || '';\nconst brand   = d.brand || d.criteria?.brand || '';\nconst model   = d.model || d.criteria?.model || '';\nconst budget  = d.budget_max || d.criteria?.max_price || d.max_price || '';\nconst location = d.location || '';\n\nconst criteriaParts = [\n  [brand, model].filter(Boolean).join(' '),\n  budget ? `hasta ${budget}` : '',\n  location ? `en ${location}` : ''\n].filter(Boolean);\nconst criteriaDesc = criteriaParts.join(' · ') || 'los criterios que has indicado';\n\nconst greetingName = name ? ` ${name}` : '';\nconst html = `<p>Hola${greetingName},</p>\n<p>Tu alerta de búsqueda ha quedado guardada en Black Label Market.</p>\n<p><strong>Criterios:</strong> ${criteriaDesc}</p>\n<p>Te avisaremos por email en cuanto publiquemos un vehículo que encaje con tu búsqueda.</p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev,\n    name, email,\n    emailPayload: email ? {\n      from: MAIL_FROM, to: [email],\n      subject: 'Alerta guardada — Black Label Market',\n      html: html + legalFooter\n    } : null\n  }\n}];\n"
       }
     },
     {
       "id": "wf5-node-alert-email",
-      "name": "Alerta — Email de confirmación",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [960, 480],
+      "name": "Alerta - Email de confirmaci�n",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        480
+      ],
       "continueOnFail": true,
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.emailPayload ? JSON.stringify($json.emailPayload) : JSON.stringify({ skip: true }) }}"
-      }
+        "fromEmail": "={{ $json.emailPayload ? $json.emailPayload.from : '' }}",
+        "toEmail": "={{ $json.emailPayload ? $json.emailPayload.to[0] : '' }}",
+        "subject": "={{ $json.emailPayload ? $json.emailPayload.subject : '(skip)' }}",
+        "emailType": "html",
+        "html": "={{ $json.emailPayload ? $json.emailPayload.html : '' }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "a8f42b6c-6c7f-479b-bfc1-450039796c8d"
     },
-
     {
       "id": "wf5-node-veh-approved-prep",
-      "name": "Vehículo aprobado — Preparar email",
+      "name": "Veh�culo aprobado - Preparar email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 660],
+      "position": [
+        720,
+        660
+      ],
       "parameters": {
-        "jsCode": "const ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = process.env.MAIL_FROM  || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nconst dealerEmail  = d.dealer_email  || '';\nconst dealerName   = d.dealer_name   || 'Showroom';\nconst vehicleTitle = d.vehicle_title || d.title || 'Tu vehículo';\nconst vehicleSlug  = d.vehicle_slug  || d.slug  || '';\nconst vehicleUrl   = vehicleSlug ? `${MARKET_URL}/coches/${vehicleSlug}` : `${MARKET_URL}/dashboard/inventario`;\n\nconst html = `<p>Hola,</p>\n<p>Tu vehículo <strong>${vehicleTitle}</strong> ha sido aprobado y ya está publicado en Black Label Market.</p>\n<p><a href=\"${vehicleUrl}\">Ver ficha publicada →</a></p>\n<p>Los posibles compradores ya pueden contactarte a través de la ficha.</p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev,\n    dealerEmail, dealerName, vehicleTitle,\n    emailPayload: dealerEmail ? {\n      from: MAIL_FROM, to: [dealerEmail],\n      subject: `Vehículo aprobado: ${vehicleTitle}`,\n      html\n    } : null\n  }\n}];"
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\n\nconst dealerEmail  = d.dealer_email  || '';\nconst vehicleTitle = d.vehicle_title || [d.brand, d.model, d.year].filter(Boolean).join(' ') || 'tu vehículo';\nconst vehicleSlug  = d.vehicle_slug  || d.slug || '';\nconst vehicleUrl   = vehicleSlug ? `${MARKET_URL}/coches/${vehicleSlug}` : `${MARKET_URL}/dashboard/inventario`;\n\nconst html = `<p>Hola,</p>\n<p>Tu vehículo <strong>${vehicleTitle}</strong> ha sido aprobado y ya está publicado en Black Label Market.</p>\n<p><a href=\"${vehicleUrl}\">Ver la ficha publicada →</a></p>\n<p>Los compradores interesados ya pueden contactarte a través de la ficha.</p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev, dealerEmail, vehicleTitle,\n    emailPayload: dealerEmail ? {\n      from: MAIL_FROM, to: [dealerEmail],\n      subject: `Vehículo aprobado: ${vehicleTitle}`,\n      html: html + legalFooter\n    } : null\n  }\n}];\n"
       }
     },
     {
       "id": "wf5-node-veh-approved-email",
-      "name": "Vehículo aprobado — Email al dealer",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [960, 660],
+      "name": "Veh�culo aprobado - Email al dealer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        660
+      ],
       "continueOnFail": true,
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.emailPayload ? JSON.stringify($json.emailPayload) : JSON.stringify({ skip: true }) }}"
-      }
+        "fromEmail": "={{ $json.emailPayload ? $json.emailPayload.from : '' }}",
+        "toEmail": "={{ $json.emailPayload ? $json.emailPayload.to[0] : '' }}",
+        "subject": "={{ $json.emailPayload ? $json.emailPayload.subject : '(skip)' }}",
+        "emailType": "html",
+        "html": "={{ $json.emailPayload ? $json.emailPayload.html : '' }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "27cf12cf-5019-48b9-8696-cea229021255"
     },
-
     {
       "id": "wf5-node-veh-rejected-prep",
-      "name": "Vehículo rechazado — Preparar email",
+      "name": "Veh�culo rechazado - Preparar email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 840],
+      "position": [
+        720,
+        840
+      ],
       "parameters": {
-        "jsCode": "const ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = process.env.MAIL_FROM  || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nconst dealerEmail  = d.dealer_email  || '';\nconst vehicleTitle = d.vehicle_title || d.title || 'Tu vehículo';\nconst reason       = d.rejection_reason || d.reason || 'No cumple los requisitos editoriales actuales de la plataforma.';\n\nconst html = `<p>Hola,</p>\n<p>Hemos revisado la ficha de <strong>${vehicleTitle}</strong> y en este momento no podemos publicarla en Black Label Market.</p>\n<p><strong>Motivo:</strong> ${reason}</p>\n<p>Si tienes dudas o quieres hacer ajustes, puedes acceder a tu panel y editar la ficha.</p>\n<p><a href=\"${MARKET_URL}/dashboard/inventario\">Acceder a tu inventario →</a></p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev,\n    dealerEmail, vehicleTitle,\n    emailPayload: dealerEmail ? {\n      from: MAIL_FROM, to: [dealerEmail],\n      subject: `Ficha no aprobada: ${vehicleTitle}`,\n      html\n    } : null\n  }\n}];"
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst ev = $input.first().json;\nconst d = ev.data || {};\nconst MAIL_FROM  = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\n\nconst dealerEmail  = d.dealer_email  || '';\nconst vehicleTitle = d.vehicle_title || [d.brand, d.model, d.year].filter(Boolean).join(' ') || 'tu vehículo';\nconst reason       = d.rejection_reason || d.reason || 'No cumple los requisitos editoriales actuales de la plataforma.';\n\nconst html = `<p>Hola,</p>\n<p>Hemos revisado la ficha de <strong>${vehicleTitle}</strong> y por ahora no podemos publicarla en Black Label Market.</p>\n<p><strong>Motivo:</strong> ${reason}</p>\n<p>Puedes editar la ficha desde tu panel y volver a enviarla a revisión cuando quieras.</p>\n<p><a href=\"${MARKET_URL}/dashboard/inventario\">Acceder a tu inventario →</a></p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...ev, dealerEmail, vehicleTitle,\n    emailPayload: dealerEmail ? {\n      from: MAIL_FROM, to: [dealerEmail],\n      subject: `Ficha no aprobada: ${vehicleTitle}`,\n      html: html + legalFooter\n    } : null\n  }\n}];\n"
       }
     },
     {
       "id": "wf5-node-veh-rejected-email",
-      "name": "Vehículo rechazado — Email al dealer",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [960, 840],
+      "name": "Veh�culo rechazado - Email al dealer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        840
+      ],
       "continueOnFail": true,
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.emailPayload ? JSON.stringify($json.emailPayload) : JSON.stringify({ skip: true }) }}"
-      }
+        "fromEmail": "={{ $json.emailPayload ? $json.emailPayload.from : '' }}",
+        "toEmail": "={{ $json.emailPayload ? $json.emailPayload.to[0] : '' }}",
+        "subject": "={{ $json.emailPayload ? $json.emailPayload.subject : '(skip)' }}",
+        "emailType": "html",
+        "html": "={{ $json.emailPayload ? $json.emailPayload.html : '' }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "d28b99ad-420e-4056-8e8f-aedcca7c1869"
     },
-
     {
       "id": "wf5-note-01",
-      "name": "Notas — WF5",
+      "name": "Notas - WF5",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [0, -220],
+      "position": [
+        0,
+        -220
+      ],
       "parameters": {
-        "content": "## BLM — 5. Router de Eventos\n\nWebhook path: `blm/events`\n`N8N_WEBHOOK_URL=https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/events`\n\nEventos manejados:\n- `lead.created` → email al comprador + email al dealer\n- `custom_request.created` → email confirmación al solicitante\n- `search_alert.created` → email confirmación de alerta\n- `vehicle.approved` → email al dealer\n- `vehicle.rejected` → email al dealer con motivo\n\nRequerido: `RESEND_API_KEY, MAIL_FROM, MARKET_URL`\nOpcional: `N8N_WEBHOOK_SECRET` para verificar origen",
+        "content": "## BLM - 5. Router de Eventos\n\nWebhook path: `blm/events`\n`N8N_WEBHOOK_URL=https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/events`\n\nEventos manejados:\n- `lead.created` ? email al comprador + email al dealer\n- `custom_request.created` ? email confirmaci�n al solicitante\n- `search_alert.created` ? email confirmaci�n de alerta\n- `vehicle.approved` ? email al dealer\n- `vehicle.rejected` ? email al dealer con motivo\n\nRequerido: `RESEND_API_KEY, MAIL_FROM, MARKET_URL`\nOpcional: `N8N_WEBHOOK_SECRET` para verificar origen",
         "height": 240,
         "width": 520,
         "color": 5
       }
+    },
+    {
+      "id": "wf5-call-wf6",
+      "name": "Llamar WF6 - Alert Matcher",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        940,
+        660
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://aldeia-n8n.giuxk6.easypanel.host/webhook/blm/alert-matcher",
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ JSON.stringify($('Normalizar evento').first().json) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        },
+        "rawContentType": "application/json"
+      }
+    },
+    {
+      "id": "wf5-node-lead-lookup",
+      "name": "Lead - Buscar vehiculo y dealer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        60
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL + '/rest/v1/vehicles?id=eq.' + $json.vehicleId + '&select=brand_name,model_name,year,slug,dealer:dealers(name,email)' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.pgrst.object+json"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "971f4470-6a95-4a5a-b120-db72b97c85a1",
+      "name": "Cita - Preparar emails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        1120
+      ],
+      "parameters": {
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = ($input.first().json.data) || {};\nconst c = d.contact || {};\nconst ap = d.appointment || {};\nconst dealer = d.dealer || {};\nconst veh = d.vehicle || {};\nconst links = d.calendar_links || {};\nconst MAIL_FROM = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\nconst vehTitle = veh.title || 'el vehículo';\nconst when = ap.label || '';\nconst place = ap.mode === 'video' ? 'Videollamada' : (ap.location_text || dealer.name || 'En el showroom');\nconst instructions = ap.instructions || '';\n\nconst btn = (href, label, primary) => `<a href=\"${href}\" style=\"display:inline-block;background:${primary ? '#C6A64B' : 'transparent'};color:${primary ? '#0B0B0B' : '#C6A64B'};border:1px solid #C6A64B;text-decoration:none;padding:10px 20px;border-radius:4px;font-weight:700;font-size:14px;margin:4px 6px 4px 0;\">${label}</a>`;\nconst calBtns = [links.google ? btn(links.google, 'Añadir a Google Calendar', true) : '', links.outlook ? btn(links.outlook, 'Outlook', false) : ''].join('');\n\nconst buyerHtml = `<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\"></head>\n<body style=\"font-family:Arial,sans-serif;color:#1a1a1a;margin:0;padding:0;\">\n<div style=\"max-width:580px;margin:0 auto;padding:32px 24px;\">\n<div style=\"color:#C6A64B;font-size:22px;font-weight:700;margin-bottom:8px;\">Tu visita está confirmada</div>\n<p style=\"color:#555;font-size:14px;margin-bottom:24px;\">Has reservado una visita para ver este vehículo en ${dealer.name || 'el showroom'}.</p>\n<div style=\"background:#f8f8f8;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:24px;\">\n<div style=\"font-size:18px;font-weight:600;margin-bottom:8px;\">${vehTitle}</div>\n<div style=\"font-size:15px;margin:4px 0;\"><strong>Cuándo:</strong> ${when}</div>\n<div style=\"font-size:15px;margin:4px 0;\"><strong>Dónde:</strong> ${place}</div>\n${instructions ? `<div style=\"font-size:14px;color:#555;margin-top:8px;\">${instructions}</div>` : ''}\n</div>\n<div style=\"margin-bottom:24px;\">${calBtns}</div>\n<p style=\"font-size:13px;color:#888;\">Si necesitas cambiar o cancelar la cita, responde a este email o contacta con el showroom.</p>\n<div style=\"margin-top:24px;font-size:12px;color:#888;\">Black Label Market · <a href=\"${MARKET_URL}\" style=\"color:#C6A64B;\">${MARKET_URL}</a></div>\n</div></body></html>`;\n\nconst dealerHtml = `<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\"></head>\n<body style=\"font-family:Arial,sans-serif;color:#1a1a1a;margin:0;padding:0;\">\n<div style=\"max-width:580px;margin:0 auto;padding:32px 24px;\">\n<div style=\"color:#C6A64B;font-size:22px;font-weight:700;margin-bottom:8px;\">Nueva cita reservada</div>\n<p style=\"color:#555;font-size:14px;margin-bottom:24px;\">Un comprador ha reservado una visita desde tu ficha en Black Label Market.</p>\n<div style=\"background:#f8f8f8;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:24px;\">\n<div style=\"font-size:18px;font-weight:600;margin-bottom:8px;\">${vehTitle}</div>\n<div style=\"font-size:15px;margin:4px 0;\"><strong>Cuándo:</strong> ${when}</div>\n<div style=\"font-size:15px;margin:4px 0;\"><strong>Dónde:</strong> ${place}</div>\n</div>\n<div style=\"background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:24px;\">\n<div style=\"font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:8px;\">Datos del comprador</div>\n<div style=\"font-size:15px;margin:3px 0;\">${c.name || ''}</div>\n<div style=\"font-size:15px;margin:3px 0;\"><a href=\"mailto:${c.email}\" style=\"color:#C6A64B;\">${c.email || ''}</a></div>\n${c.phone ? `<div style=\"font-size:15px;margin:3px 0;\"><a href=\"tel:${c.phone}\" style=\"color:#C6A64B;\">${c.phone}</a></div>` : ''}\n</div>\n<div style=\"margin-bottom:16px;\">${calBtns}</div>\n<div style=\"margin-top:24px;font-size:12px;color:#888;\">Black Label Market · <a href=\"${MARKET_URL}\" style=\"color:#C6A64B;\">${MARKET_URL}</a></div>\n</div></body></html>`;\n\nconst slackText = `📅 *Nueva cita reservada* — ${vehTitle}\\n*Cuándo:* ${when} · *Dónde:* ${place}\\n*Comprador:* ${c.name || ''} (${c.email || ''}${c.phone ? ', ' + c.phone : ''})`;\n\nreturn [{ json: {\n  buyerEmailPayload: c.email ? { from: MAIL_FROM, to: [c.email], subject: `Cita confirmada: ${vehTitle} · ${when}`, html: buyerHtml + legalFooter } : null,\n  dealerEmailPayload: dealer.email ? { from: MAIL_FROM, to: [dealer.email], subject: `Nueva cita: ${vehTitle} · ${when}`, html: dealerHtml + legalFooter } : null,\n  slackPayload: { text: slackText },\n} }];\n"
+      }
+    },
+    {
+      "id": "249aed94-7ffa-4328-8762-951188fd890d",
+      "name": "Cita - Email al comprador",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        700,
+        1040
+      ],
+      "parameters": {
+        "fromEmail": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.from : \"\" }}",
+        "toEmail": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.to[0] : \"\" }}",
+        "subject": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.subject : \"(skip)\" }}",
+        "emailType": "html",
+        "html": "={{ $json.buyerEmailPayload ? $json.buyerEmailPayload.html : \"\" }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "f1175a06-aa2a-4aca-8e9b-9449e8de3e31"
+    },
+    {
+      "id": "a8d4fcb7-9118-4be2-b6e6-8f00531c0417",
+      "name": "Cita - Email al dealer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        700,
+        1160
+      ],
+      "parameters": {
+        "fromEmail": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.from : \"\" }}",
+        "toEmail": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.to[0] : \"\" }}",
+        "subject": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.subject : \"(skip)\" }}",
+        "emailType": "html",
+        "html": "={{ $json.dealerEmailPayload ? $json.dealerEmailPayload.html : \"\" }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "e64ff2fb-4279-48c9-b228-a80f03a07494"
     }
   ],
   "connections": {
-    "Webhook — Eventos Market": { "main": [[{ "node": "Normalizar evento", "type": "main", "index": 0 }]] },
-    "Normalizar evento": { "main": [[{ "node": "Router — Switch por tipo de evento", "type": "main", "index": 0 }]] },
-    "Router — Switch por tipo de evento": {
+    "Webhook - Eventos Market": {
       "main": [
-        [{ "node": "Lead — Preparar emails",                  "type": "main", "index": 0 }],
-        [{ "node": "Custom Request — Preparar confirmación",  "type": "main", "index": 0 }],
-        [{ "node": "Alerta — Preparar confirmación",          "type": "main", "index": 0 }],
-        [{ "node": "Vehículo aprobado — Preparar email",      "type": "main", "index": 0 }],
-        [{ "node": "Vehículo rechazado — Preparar email",     "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Normalizar evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "Lead — Preparar emails": {
-      "main": [[
-        { "node": "Lead — Email al comprador", "type": "main", "index": 0 },
-        { "node": "Lead — Email al dealer",    "type": "main", "index": 0 }
-      ]]
+    "Normalizar evento": {
+      "main": [
+        [
+          {
+            "node": "Router - Switch por tipo de evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Custom Request — Preparar confirmación": { "main": [[{ "node": "Custom Request — Email al solicitante",  "type": "main", "index": 0 }]] },
-    "Alerta — Preparar confirmación":          { "main": [[{ "node": "Alerta — Email de confirmación",          "type": "main", "index": 0 }]] },
-    "Vehículo aprobado — Preparar email":      { "main": [[{ "node": "Vehículo aprobado — Email al dealer",     "type": "main", "index": 0 }]] },
-    "Vehículo rechazado — Preparar email":     { "main": [[{ "node": "Vehículo rechazado — Email al dealer",    "type": "main", "index": 0 }]] }
+    "Router - Switch por tipo de evento": {
+      "main": [
+        [
+          {
+            "node": "Lead - Buscar vehiculo y dealer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Custom Request - Preparar confirmaci�n",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta - Preparar confirmaci�n",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Veh�culo aprobado - Preparar email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Veh�culo rechazado - Preparar email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cita - Preparar emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead - Preparar emails": {
+      "main": [
+        [
+          {
+            "node": "Lead - Email al comprador",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lead - Email al dealer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Custom Request - Preparar confirmaci�n": {
+      "main": [
+        [
+          {
+            "node": "Custom Request - Email al solicitante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerta - Preparar confirmaci�n": {
+      "main": [
+        [
+          {
+            "node": "Alerta - Email de confirmaci�n",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Veh�culo aprobado - Preparar email": {
+      "main": [
+        [
+          {
+            "node": "Veh�culo aprobado - Email al dealer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Veh�culo rechazado - Preparar email": {
+      "main": [
+        [
+          {
+            "node": "Veh�culo rechazado - Email al dealer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Veh�culo aprobado - Email al dealer": {
+      "main": [
+        [
+          {
+            "node": "Llamar WF6 - Alert Matcher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead - Buscar vehiculo y dealer": {
+      "main": [
+        [
+          {
+            "node": "Lead - Preparar emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cita - Preparar emails": {
+      "main": [
+        [
+          {
+            "node": "Cita - Email al comprador",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Cita - Email al dealer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1", "binaryMode": "separate" },
-  "tags": [
-    { "id": "Loz5j8r0Pb3LipWz", "name": "Black Label Market" }
-  ]
+  "settings": {
+    "executionOrder": "v1"
+  }
 }

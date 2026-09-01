@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { trackEvent } from '@/lib/analytics/client'
 
 /**
  * Registra una vista de vehículo desde el cliente (beacon a /api/track), en lugar de escribir
@@ -12,12 +13,12 @@ export default function ViewTracker({ vehicleId, dealerId }: { vehicleId: string
   useEffect(() => {
     if (fired.current) return
     fired.current = true
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event_type: 'vehicle_view', vehicle_id: vehicleId, dealer_id: dealerId ?? null }),
+    trackEvent({
+      event_type: 'vehicle_view',
+      vehicle_id: vehicleId,
+      dealer_id: dealerId ?? null,
       keepalive: true,
-    }).catch(() => {})
+    })
   }, [vehicleId, dealerId])
   return null
 }

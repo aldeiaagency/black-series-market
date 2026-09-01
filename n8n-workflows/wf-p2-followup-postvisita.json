@@ -1,0 +1,351 @@
+{
+  "name": "BSA - P2. Follow-up post-visita",
+  "nodes": [
+    {
+      "id": "wfp2-note-01",
+      "name": "Prerrequisitos y uso",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -320
+      ],
+      "parameters": {
+        "content": "## WF-P2 - Follow-up post-visita (email + digest WhatsApp)\\n\\nSecuencia D+1 / D+3 / D+7 por email a visitas con Resultado = Interesado / Volver a pasar. Stop-on-reply: marcar checkbox **FU pausado** en Airtable (Visitas) cuando el prospecto conteste.\\n\\nDoble trigger: cron diario 09:30 (produccion) + webhook bsa/followup-run-now (disparo manual / pruebas), mismo patron que el watcher.\\n\\nEl email/nombre del destinatario sale PRIMERO de la Visita (Email contacto/Nombre contacto, capturados en persona durante la visita - mas fiables que el dato de investigacion publica), con fallback al Email/Nombre del Prospecto vinculado si la Visita no los tiene rellenos. (Corregido 2026-07-20: la nota anterior describia el orden al reves de lo que hace el codigo.) Auth Airtable via credencial httpHeaderAuth (no env var). Remitente y credencial SMTP: ambos del market (hola@blacklabelmarket.es) porque el contenido empuja el alta fundador del market. WhatsApp: MANUAL con plantillas (kit_visita/plantillas_mensajes.md); este WF avisa por email de cuales tocan hoy.\\n\\nReparado y activado 2026-07-14 durante el re-test E2E (antes: inactivo, auth rota via env var inexistente, y leia datos de contacto de la Visita que en el modelo actual estan vacios).\\n\\nCorregido 2026-07-20 (revision E2E con envios reales): (1) el conteo de dias ahora ancla en \"Fecha siguiente accion\" (el campo que el checklist dice que dispara este WF), con fallback a \"Fecha\" - antes solo usaba \"Fecha\" e ignoraba el campo pensado para esto; (2) anadido el pie legal de Black Label Market (KAZAWEB S.L.U.) a las 3 plantillas de email, que no lo tenian.",
+        "height": 320,
+        "width": 680,
+        "color": 7
+      }
+    },
+    {
+      "id": "wfp2-node-01",
+      "name": "Cada dia 09:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 9 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wfp2-node-00",
+      "name": "Webhook - Ejecutar ahora",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        400
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bsa/followup-run-now",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "a1b2c3d4-e5f6-7890-abcd-bsa0followup0"
+    },
+    {
+      "id": "wfp2-node-02",
+      "name": "Airtable - Listar visitas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        280,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/appSLdWz36Q5g6p6U/tbl8H4SNVUQ9XnAEp?pageSize=100&filterByFormula={{ encodeURIComponent(\"AND(OR({Resultado}='Interesado',{Resultado}='Volver a pasar'), NOT({FU pausado}), OR({FU etapa}<3, {FU etapa}=BLANK()))\") }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "zz3sVJGOCAKg5N1i",
+          "name": "Airtable BSA API Token (Black Series independiente)"
+        }
+      }
+    },
+    {
+      "id": "wfp2-node-03",
+      "name": "Preparar candidatas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const resp = $input.first().json || {};\nconst records = Array.isArray(resp.records) ? resp.records : [];\nconst hoy = new Date();\nconst out = [];\nfor (const rec of records) {\n  const f = rec.fields || {};\n  const resultado = String(f['Resultado'] || '');\n  if (resultado !== 'Interesado' && resultado !== 'Volver a pasar') continue;\n  if (f['FU pausado'] === true) continue;\n  const etapa = parseInt(f['FU etapa'] || 0) || 0;\n  if (etapa >= 3) continue;\n  // Ancla del conteo de dias: \"Fecha siguiente accion\" (la que el comercial declara en el\n  // checklist como disparador de WF-P2) - si falta o es invalida, cae a \"Fecha\" (fecha de\n  // la visita) como respaldo. Antes solo usaba \"Fecha\", ignorando el campo pensado para esto.\n  let fv = new Date(String(f['Fecha siguiente acción'] || ''));\n  if (isNaN(fv.getTime())) fv = new Date(String(f['Fecha'] || ''));\n  if (isNaN(fv.getTime())) continue;\n  const dias = Math.floor((hoy.getTime() - fv.getTime()) / 86400000);\n  let objetivo = 0;\n  if (dias >= 7) objetivo = 3; else if (dias >= 3) objetivo = 2; else if (dias >= 1) objetivo = 1;\n  if (objetivo <= etapa) continue;\n  let siguiente = etapa + 1;\n  if (siguiente < objetivo) siguiente = objetivo;\n  const prospLink = Array.isArray(f['Prospecto']) ? f['Prospecto'] : [];\n  out.push({ json: {\n    recordId: rec.id,\n    prospectoId: prospLink[0] || '',\n    etapa: siguiente,\n    dias: dias,\n    emailVisita: String(f['Email contacto'] || '').trim(),\n    nombreVisita: String(f['Nombre contacto'] || '').trim(),\n    showroom: String(f['Showroom'] || 'vuestro showroom'),\n    informeUrl: String(f['Informe URL'] || '').trim()\n  } });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "wfp2-node-08",
+      "name": "Obtener Prospecto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/appSLdWz36Q5g6p6U/tblW5fEG7bInMEn2N/{{ $json.prospectoId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "zz3sVJGOCAKg5N1i",
+          "name": "Airtable BSA API Token (Black Series independiente)"
+        }
+      }
+    },
+    {
+      "id": "wfp2-node-04b",
+      "name": "Componer email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst cands = $('Preparar candidatas').all();\nconst MAIL_FROM = 'Black Label Market <hola@blacklabelmarket.es>';\nconst alta = 'https://blacklabelmarket.es/registro';\n\nconst legalFooter = '<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">' +\n  'Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>' +\n  'Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.' +\n  '</div>';\n\nfunction emailPara(e) {\n  if (e.etapa === 1) {\n    return { subject: 'La plaza fundador de ' + e.showroom,\n      html: '<p>Buenas ' + e.nombre + ',</p>' +\n        '<p>Gracias por el tiempo en la visita. Como hablamos, el Programa Fundador os deja publicar vuestro stock en Black Label Market sin coste durante el lanzamiento &mdash; nosotros nos encargamos de subirlo. Es un programa con solo 20 plazas a nivel nacional, así que si os interesa entrar, mejor no dejarlo para más adelante.</p>' +\n        '<p>El alta son 2 minutos: <a href=\"' + alta + '\">' + alta + '</a></p>' +\n        '<p>Un saludo,<br>Black Label Market</p>' + legalFooter };\n  }\n  if (e.etapa === 2) {\n    return { subject: 'Lo que os ofrece Black Label Market como fundadores de ' + e.showroom,\n      html: '<p>Buenas ' + e.nombre + ',</p>' +\n        '<p>Una cosa más sobre el Programa Fundador, por si ayuda a decidir: Black Label Market es un marketplace especializado en vehículos premium &mdash; compradores que buscan específicamente lo que vosotros vendéis, no un clasificado genérico. Como fundadores, nosotros subimos vuestro stock, cada ficha lleva un asistente que atiende consultas de compradores en cualquier momento, y todo esto sin coste durante el lanzamiento.</p>' +\n        '<p>Si os encaja, aquí tenéis el alta: <a href=\"' + alta + '\">' + alta + '</a></p>' +\n        '<p>Un saludo,<br>Black Label Market</p>' + legalFooter };\n  }\n  return { subject: 'Confirmadnos que no os interesa la plaza fundador',\n    html: '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Cierro el seguimiento sobre esto, salvo que me digáis lo contrario. El Programa Fundador tiene solo 20 plazas a nivel nacional &mdash; es lo que nos permite dar a cada showroom fundador la atención y visibilidad que prometemos.</p>' +\n      '<p>Si ya no os interesa entrar, confirmádmelo con un email y libero la plaza para otro showroom.</p>' +\n      '<p>Si seguís interesados, el alta son 2 minutos: <a href=\"' + alta + '\">' + alta + '</a> &mdash; nosotros publicamos vuestro stock.</p>' +\n      '<p>Un saludo,<br>Black Label Market</p>' + legalFooter };\n}\n\nconst salida = [];\nfor (let i = 0; i < items.length; i++) {\n  const cand = cands[i] ? cands[i].json : {};\n  const prospFields = (items[i].json && items[i].json.fields) ? items[i].json.fields : {};\n  const email = cand.emailVisita || String(prospFields['Email'] || '').trim();\n  if (!email || email.indexOf('@') < 1) continue;\n  const nombre = cand.nombreVisita || String(prospFields['Nombre'] || '').trim() || 'buenas';\n  const e = { etapa: cand.etapa, showroom: cand.showroom, informeUrl: cand.informeUrl, nombre: nombre };\n  const m = emailPara(e);\n  salida.push({ json: {\n    recordId: cand.recordId, etapa: cand.etapa, dias: cand.dias,\n    email: email, nombre: nombre, showroom: cand.showroom,\n    emailFrom: MAIL_FROM, emailSubject: m.subject, emailHtml: m.html\n  } });\n}\nreturn salida;"
+      }
+    },
+    {
+      "id": "wfp2-node-04",
+      "name": "Email - Follow-up",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1160,
+        300
+      ],
+      "parameters": {
+        "fromEmail": "={{ $json.emailFrom }}",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "html",
+        "html": "={{ $json.emailHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "2edce8ca-8259-4c9f-95af-50e57d75dd53",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "wfp2-node-05",
+      "name": "Airtable - Marcar etapa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1380,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "continueOnFail": true,
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/appSLdWz36Q5g6p6U/tbl8H4SNVUQ9XnAEp/{{ $('Componer email').item.json.recordId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ fields: { 'FU etapa': $('Componer email').item.json.etapa } }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "zz3sVJGOCAKg5N1i",
+          "name": "Airtable BSA API Token (Black Series independiente)"
+        }
+      }
+    },
+    {
+      "id": "wfp2-node-07",
+      "name": "Preparar tarea fallo followup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        480
+      ],
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst d = item.json || {};\nconst errInfo = d.error || item.error || 'error desconocido';\nreturn [{ json: { ...d,\n  taskTitle: 'Fallo email seguimiento visita - ' + (d.showroom || '(sin nombre)'),\n  taskEvidence: 'Etapa ' + d.etapa + ' (dias=' + d.dias + '). Email destino: ' + d.email + '. Error: ' + JSON.stringify(errInfo).slice(0, 500),\n  slackText: '*Fallo en email de seguimiento post-visita*\\n\\n*Showroom:* ' + (d.showroom || '?') + '\\n*Etapa:* ' + d.etapa + '\\n*Email:* ' + d.email,\n} }];"
+      }
+    },
+    {
+      "id": "wfp2-node-08b",
+      "name": "Airtable - Tarea fallo followup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1380,
+        480
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.airtable.com/v0/appSLdWz36Q5g6p6U/tbl7X8bxr54rqTKmW",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ records: [{ fields: { 'Título': $json.taskTitle, 'Tipo': 'Follow-up', 'Responsable': 'Humano', 'Estado': 'Pendiente', 'Evidencia / registro': $json.taskEvidence } }], typecast: true }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "zz3sVJGOCAKg5N1i",
+          "name": "Airtable BSA API Token (Black Series independiente)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cada dia 09:30": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Listar visitas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Ejecutar ahora": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Listar visitas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Listar visitas": {
+      "main": [
+        [
+          {
+            "node": "Preparar candidatas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar candidatas": {
+      "main": [
+        [
+          {
+            "node": "Obtener Prospecto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Prospecto": {
+      "main": [
+        [
+          {
+            "node": "Componer email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Componer email": {
+      "main": [
+        [
+          {
+            "node": "Email - Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Marcar etapa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar tarea fallo followup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Marcar etapa": {
+      "main": [
+        []
+      ]
+    },
+    "Preparar tarea fallo followup": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Tarea fallo followup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Tarea fallo followup": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,1045 @@
+{
+  "name": "BLM - Stock inicial y sync de feed (IA)",
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Notas",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -300
+      ],
+      "parameters": {
+        "content": "## Stock inicial + sync de feed (IA)\n\nDos disparadores:\n- Webhook bsa/stock-inicial-ia: boton admin 'Procesar stock inicial con IA' (CSV o fotos sueltas).\n- Schedule diario: dealers con feed_url + plan con feed_sync operativo.\n\nCSV/feed -> parseo + descripciones IA (gpt-4o-mini) + POST a /api/vehicles/import (FEED_SYNC_API_KEY).\nFotos sueltas -> no se auto-importan (no hay datos estructurados) -> tarea para el equipo.",
+        "width": 420,
+        "height": 260
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Webhook - Stock inicial IA",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -200
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bsa/stock-inicial-ia",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "stock-inicial-ia-webhook"
+    },
+    {
+      "id": "n3",
+      "name": "Normalizar entrada manual",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\n\nconst dealerId = String(body.dealer_id || '').trim();\nconst dealerSlug = String(body.dealer_slug || '').trim();\nif (!dealerId || !dealerSlug) throw new Error('Falta dealer_id o dealer_slug');\n\nconst mode = String(body.stock_mode || '').trim();\nconst csvFiles = Array.isArray(body.stock_csv_files) ? body.stock_csv_files : [];\n\nreturn [{ json: {\n  source: 'manual',\n  dealerId, dealerSlug,\n  dealerName: String(body.dealer_name || dealerSlug),\n  email: String(body.dealer_email || '').trim(),\n  mode,\n  csvUrl: mode === 'csv' && csvFiles[0] ? String(csvFiles[0].url || '') : '',\n  bulkFiles: Array.isArray(body.stock_bulk_files) ? body.stock_bulk_files : [],\n  notes: String(body.stock_notes || ''),\n} }];"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Responder 202",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -200
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\"ok\": true} }}",
+        "options": {
+          "responseCode": 202
+        }
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Schedule diario",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Consultar dealers con feed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/dealers?feed_url=not.is.null&status=in.(trial,active)&select=id,name,slug,feed_url,subscription_plan,email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n7",
+      "name": "Consultar planes feed_sync operativo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/plan_features?feature_key=eq.feed_sync&included=eq.true&availability_status=eq.operative&select=plans(slug)",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n8",
+      "name": "Filtrar dealers elegibles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const dealers = $('Consultar dealers con feed').all().map(i => i.json);\nconst featureRows = $input.all().map(i => i.json);\nconst elegiblePlans = new Set(featureRows.map(r => r.plans && r.plans.slug).filter(Boolean));\n\nconst out = [];\nfor (const d of dealers) {\n  if (!d.feed_url) continue;\n  if (!elegiblePlans.has(d.subscription_plan)) continue;\n  out.push({ json: {\n    source: 'feed_scheduled',\n    dealerId: d.id, dealerSlug: d.slug, dealerName: d.name,\n    mode: 'feed_url',\n    csvUrl: d.feed_url,\n    bulkFiles: [],\n    notes: '',\n    email: d.email || '',\n  } });\n}\nreturn out.length ? out : [{ json: { skip: true } }];"
+      }
+    },
+    {
+      "id": "n9",
+      "name": "Router - Descartar vacio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nif (d.skip) return [{ json: { skip: true } }];\nreturn [{ json: d }];"
+      }
+    },
+    {
+      "id": "n10",
+      "name": "IF - Hay trabajo",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        600,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "n11",
+      "name": "IF - Fotos sueltas",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.mode }}",
+              "rightValue": "loose_files",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "n12",
+      "name": "Obtener CSV o feed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        -200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.csvUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "n13",
+      "name": "Combinar texto CSV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "const meta = $('IF - Fotos sueltas').first().json;\nconst body = $input.first().json;\nconst csvText = typeof body === 'string' ? body : (body.data || JSON.stringify(body));\nreturn [{ json: { ...meta, csvText } }];"
+      }
+    },
+    {
+      "id": "n14",
+      "name": "Parsear CSV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "function parseCSVLine(line) {\n  const fields = []; let cur = ''; let inQ = false;\n  for (let i = 0; i < line.length; i++) {\n    const ch = line[i];\n    if (ch === '\"') { if (inQ && line[i + 1] === '\"') { cur += '\"'; i++; } else inQ = !inQ; }\n    else if ((ch === ',' || ch === ';') && !inQ) { fields.push(cur.trim()); cur = ''; }\n    else cur += ch;\n  }\n  fields.push(cur.trim());\n  return fields;\n}\n\nconst ALIAS = {\n  tipo: 'vehicle_type', tipo_vehiculo: 'vehicle_type',\n  marca: 'brand_name', modelo: 'model_name', version: 'version',\n  ano: 'year', anio: 'year', year: 'year', 'año': 'year',\n  km: 'mileage_km', kilometros: 'mileage_km', kilometraje: 'mileage_km',\n  precio: 'price', price: 'price', precio_consultar: 'price_on_request',\n  combustible: 'fuel_type', cambio: 'transmission', transmision: 'transmission',\n  potencia_cv: 'power_hp', cv: 'power_hp', potencia: 'power_hp',\n  carroceria: 'body_type', 'carrocería': 'body_type', body_type: 'body_type',\n  color: 'color_exterior', color_exterior: 'color_exterior', color_interior: 'color_interior',\n  descripcion: 'description', description: 'description',\n  vin: 'vin', bastidor: 'vin',\n};\n\nconst d = $input.first().json;\nconst csvText = d.csvText || '';\nconst clean = csvText.replace(/^\\uFEFF/, '').trim();\nconst lines = clean.split('\\n').map(l => l.replace(/\\r$/, '')).filter(Boolean);\nif (lines.length < 2) throw new Error('CSV vacío o sin filas de datos: ' + d.dealerName);\n\nconst rawHeaders = parseCSVLine(lines[0]).map(h => h.toLowerCase()\n  .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\s+/g, '_').trim());\n\nconst required = ['marca', 'modelo'];\nconst requiredEn = ['brand', 'model'];\nconst hasYear = rawHeaders.includes('ano') || rawHeaders.includes('anio') || rawHeaders.includes('year') || rawHeaders.includes('año');\nconst okEs = required.every(h => rawHeaders.includes(h)) && hasYear;\nconst okEn = requiredEn.every(h => rawHeaders.includes(h)) && hasYear;\nif (!okEs && !okEn) throw new Error('El CSV de ' + d.dealerName + ' no tiene las columnas mínimas (marca, modelo, año)');\n\nconst rows = lines.slice(1).map(line => {\n  const vals = parseCSVLine(line);\n  const raw = Object.fromEntries(rawHeaders.map((h, i) => [h, vals[i] ?? '']));\n  const row = {};\n  for (const [k, v] of Object.entries(raw)) row[ALIAS[k] ?? k] = v;\n  return row;\n}).filter(r => r.brand_name && r.model_name);\n\nif (!rows.length) throw new Error('El CSV de ' + d.dealerName + ' no tiene filas válidas (falta marca/modelo)');\n\nconst parsed = rows.map(r => ({\n  vehicle_type: (r.vehicle_type || 'coche').toLowerCase().includes('moto') ? 'motorcycle' : 'car',\n  brand_name: r.brand_name, model_name: r.model_name, version: r.version || undefined,\n  year: r.year, mileage_km: r.mileage_km, price: r.price || undefined,\n  price_on_request: /^(si|sí|yes|true|1)$/i.test(r.price_on_request || ''),\n  fuel_type: r.fuel_type || undefined, transmission: r.transmission || undefined,\n  power_hp: r.power_hp || undefined, color_exterior: r.color_exterior || undefined,\n  color_interior: r.color_interior || undefined, body_type: r.body_type || undefined,\n  description: (r.description || '').trim(), vin: r.vin || undefined,\n}));\n\nreturn [{ json: { ...d, rows: parsed } }];"
+      }
+    },
+    {
+      "id": "n15",
+      "name": "Preparar prompt IA descripciones",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst rows = d.rows || [];\nconst needsAi = rows.map((r, i) => ({ i, r })).filter(x => (x.r.description || '').length < 40);\n\nif (!needsAi.length) return [{ json: { ...d, aiSkipped: true } }];\n\nconst items = needsAi.map(x =>\n  `[${x.i}] ${x.r.brand_name} ${x.r.model_name} ${x.r.version || ''} (${x.r.year || 's/año'}, ${x.r.mileage_km || 's/km'} km, ${x.r.price ? x.r.price + ' EUR' : 'precio a consultar'})`\n).join('\\n');\n\nconst briefing = `Eres redactor de fichas de vehículos premium para Black Label Market, marketplace de coches y motos de alta gama en España.\nPara cada vehículo de la lista, escribe una descripción comercial de 2-3 frases en español, tono premium y directo, sin superlativos vacíos ni inventar datos no dados (nunca inventes estado, historial, extras o kilometraje real). Usa solo los datos que se dan.\n\nVehículos (formato [índice] marca modelo versión (año, km, precio)):\n${items}\n\nDevuelve SOLO un JSON válido: un array de objetos {\"i\": <índice>, \"description\": \"<texto>\"}, sin texto adicional.`;\n\nreturn [{ json: { ...d, needsAiIndices: needsAi.map(x => x.i),\n  openAIRequest: { model: $env.OPENAI_MODEL || 'gpt-4o-mini', max_tokens: 1500, messages: [{ role: 'user', content: briefing }] } } }];"
+      }
+    },
+    {
+      "id": "n16",
+      "name": "IF - Necesita IA",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        -200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.aiSkipped }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "n17",
+      "name": "OpenAI - Redactar descripciones",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2000,
+        -260
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.openAIRequest) }}"
+      }
+    },
+    {
+      "id": "n18",
+      "name": "Aplicar descripciones IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        -260
+      ],
+      "parameters": {
+        "jsCode": "const d = $('Preparar prompt IA descripciones').first().json;\nif (d.aiSkipped) return [{ json: d }];\n\nconst ai = $input.first().json;\nlet text = '';\nif (Array.isArray(ai.choices) && ai.choices[0]) text = ai.choices[0].message?.content || '';\n\nlet descriptions = [];\ntry {\n  const match = text.match(/\\[[\\s\\S]*\\]/);\n  descriptions = match ? JSON.parse(match[0]) : [];\n} catch (e) { descriptions = []; }\n\nconst rows = d.rows.slice();\nfor (const item of descriptions) {\n  if (rows[item.i] && item.description) rows[item.i] = { ...rows[item.i], description: item.description };\n}\n\nreturn [{ json: { ...d, rows } }];"
+      }
+    },
+    {
+      "id": "n19",
+      "name": "Preparar import",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nreturn [{ json: { dealerId: d.dealerId, dealerSlug: d.dealerSlug, dealerName: d.dealerName, email: d.email || '',\n  source: d.source, rowCount: (d.rows || []).length,\n  importBody: { dealer_slug: d.dealerSlug, rows: d.rows || [] } } }];"
+      }
+    },
+    {
+      "id": "n20",
+      "name": "POST importar vehiculos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2600,
+        -200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://blacklabelmarket.es/api/vehicles/import",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.importBody) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Uldq8LjURwWtBM9g",
+          "name": "Black Label Market - FEED_SYNC_API_KEY"
+        }
+      }
+    },
+    {
+      "id": "n21",
+      "name": "Evaluar import",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2800,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "const d = $('Preparar import').first().json;\nconst raw = $input.first().json;\n\nfunction extractJsonText(body) {\n  if (typeof body === 'string') return body;\n  if (body && typeof body === 'object') {\n    if (typeof body.inserted !== 'undefined' || typeof body.error !== 'undefined') return null; // ya es el objeto real\n    const buf = body._readableState && body._readableState.buffer;\n    if (Array.isArray(buf) && buf.length) {\n      const bytes = buf.map((b) => (b && b.data) ? b.data : []).flat();\n      try { return Buffer.from(bytes).toString('utf8'); } catch (e) { return null; }\n    }\n  }\n  return null;\n}\n\nlet res = {};\nif (raw.body && typeof raw.body === 'object' && (typeof raw.body.inserted !== 'undefined' || typeof raw.body.error !== 'undefined')) {\n  res = raw.body;\n} else {\n  const text = extractJsonText(raw.body);\n  try { res = text ? JSON.parse(text) : {}; } catch (e) { res = { error: 'Respuesta no parseable: ' + String(text).slice(0, 200) }; }\n}\n\nconst inserted = Array.isArray(res.inserted) ? res.inserted.length : (res.inserted || 0);\nconst errors = Array.isArray(res.errors) ? res.errors : [];\nconst draftNoPhotos = Number(res.draftNoPhotos) || 0;\nconst statusCode = raw.statusCode;\nconst httpOk = statusCode >= 200 && statusCode < 300;\nreturn [{ json: { ...d, ok: httpOk && !res.error, inserted, draftNoPhotos, errorCount: errors.length,\n  errorSummary: errors.slice(0, 5).map(e => 'Fila ' + e.row + ': ' + e.message).join(' | '),\n  apiError: res.error || (!httpOk ? ('HTTP ' + statusCode) : null) } }];"
+      }
+    },
+    {
+      "id": "n22",
+      "name": "IF - Import correcto",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3000,
+        -200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "n23",
+      "name": "IF - Es sync de feed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        -280
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "feed_scheduled",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "n24",
+      "name": "PATCH feed_last_synced_at",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3400,
+        -320
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/dealers?id=eq.{{ $json.dealerId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ feed_last_synced_at: new Date().toISOString() }) }}"
+      }
+    },
+    {
+      "id": "n25",
+      "name": "Preparar aviso OK",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3400,
+        -180
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nreturn [{ json: { ...d,\n  slackText: '*Stock importado (IA)*\\n\\n*Showroom:* ' + d.dealerName + '\\n*Fuente:* ' + d.source + '\\n*Vehículos:* ' + d.inserted + (d.errorCount ? ' (' + d.errorCount + ' con error: ' + d.errorSummary + ')' : ''),\n} }];"
+      }
+    },
+    {
+      "id": "n27",
+      "name": "Preparar tarea fallo import",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        -80
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nreturn [{ json: { ...d,\n  taskTitle: 'Fallo import stock IA - ' + d.dealerName,\n  taskEvidence: 'Fuente: ' + d.source + '. ' + (d.apiError || d.errorSummary || 'Error desconocido') + '. ' + d.inserted + ' importados, ' + d.errorCount + ' con error.',\n  slackText: '*Fallo al importar stock (IA)*\\n\\n*Showroom:* ' + d.dealerName + '\\n*Fuente:* ' + d.source + '\\n*Detalle:* ' + (d.apiError || d.errorSummary || 'ver Airtable'),\n} }];"
+      }
+    },
+    {
+      "id": "n28",
+      "name": "Airtable - Tarea fallo import",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3400,
+        -80
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.airtable.com/v0/appSLdWz36Q5g6p6U/tbl7X8bxr54rqTKmW",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ records: [{ fields: { 'Título': $json.taskTitle, 'Tipo': 'Fallo import stock IA', 'Responsable': 'Humano', 'Estado': 'Pendiente', 'Evidencia / registro': $json.taskEvidence } }], typecast: true }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "zz3sVJGOCAKg5N1i",
+          "name": "Airtable BSA API Token (Black Series independiente)"
+        }
+      }
+    },
+    {
+      "id": "n30",
+      "name": "Preparar tarea fotos sueltas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        60
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst links = (d.bulkFiles || []).map(f => f.url).filter(Boolean).join('\\n');\nreturn [{ json: { ...d,\n  taskTitle: 'Procesar fotos sueltas de stock - ' + d.dealerName,\n  taskEvidence: 'Showroom envió fotos/archivos sueltos en la sala de configuración (no auto-importable sin datos estructurados). Notas: ' + (d.notes || '(sin notas)') + '. Archivos:\\n' + (links || '(ninguno)'),\n  slackText: '*Fotos sueltas pendientes de procesar*\\n\\n*Showroom:* ' + d.dealerName + '\\n*Archivos:* ' + (d.bulkFiles || []).length + '\\nRevisar tarea en Airtable para crear las fichas a mano.',\n} }];"
+      }
+    },
+    {
+      "id": "n31",
+      "name": "Airtable - Tarea fotos sueltas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        60
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.airtable.com/v0/appSLdWz36Q5g6p6U/tbl7X8bxr54rqTKmW",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ records: [{ fields: { 'Título': $json.taskTitle, 'Tipo': 'Fotos sueltas de stock', 'Responsable': 'Humano', 'Estado': 'Pendiente', 'Evidencia / registro': $json.taskEvidence } }], typecast: true }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "zz3sVJGOCAKg5N1i",
+          "name": "Airtable BSA API Token (Black Series independiente)"
+        }
+      }
+    },
+    {
+      "id": "n33",
+      "name": "IF - Faltan fotos",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3200,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.draftNoPhotos }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "n34",
+      "name": "Preparar email fotos pendientes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3400,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\nconst MAIL_FROM = process.env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst n = d.draftNoPhotos;\nconst html = '<p>Hola,</p>' +\n  '<p>Hemos importado el stock de <strong>' + d.dealerName + '</strong> correctamente, pero <strong>' + n + ' vehículo' + (n !== 1 ? 's' : '') + '</strong> ' + (n !== 1 ? 'no traían' : 'no traía') + ' fotos en el archivo.</p>' +\n  '<p>' + (n !== 1 ? 'Esos vehículos se han' : 'Ese vehículo se ha') + ' guardado como borrador y <strong>no se publica' + (n !== 1 ? 'n' : '') + ' en el marketplace</strong> hasta que subas al menos una foto de cada uno.</p>' +\n  '<p>Puedes hacerlo desde tu panel: <a href=\"' + MARKET_URL + '/dashboard/inventario\">' + MARKET_URL + '/dashboard/inventario</a> — busca los vehículos marcados como \"Borrador\" y pulsa \"Publicar\".</p>' +\n  '<p>El equipo de Black Label Market</p>';\nreturn [{ json: { ...d,\n  emailPayload: { from: MAIL_FROM, to: [d.email], subject: 'Acción requerida: fotos pendientes en tu stock importado', html },\n  slackText: '*Fotos pendientes tras import de stock*\\n\\n*Showroom:* ' + d.dealerName + '\\n*Vehículos en borrador sin foto:* ' + n + '\\n*Aviso enviado a:* ' + d.email,\n} }];"
+      }
+    },
+    {
+      "id": "n35",
+      "name": "Email - Fotos pendientes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3600,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.emailPayload) }}"
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Webhook - Stock inicial IA": {
+      "main": [
+        [
+          {
+            "node": "Normalizar entrada manual",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Responder 202",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar entrada manual": {
+      "main": [
+        [
+          {
+            "node": "Router - Descartar vacio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule diario": {
+      "main": [
+        [
+          {
+            "node": "Consultar dealers con feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar dealers con feed": {
+      "main": [
+        [
+          {
+            "node": "Consultar planes feed_sync operativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar planes feed_sync operativo": {
+      "main": [
+        [
+          {
+            "node": "Filtrar dealers elegibles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar dealers elegibles": {
+      "main": [
+        [
+          {
+            "node": "Router - Descartar vacio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router - Descartar vacio": {
+      "main": [
+        [
+          {
+            "node": "IF - Hay trabajo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Hay trabajo": {
+      "main": [
+        [
+          {
+            "node": "IF - Fotos sueltas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "IF - Fotos sueltas": {
+      "main": [
+        [
+          {
+            "node": "Preparar tarea fotos sueltas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Obtener CSV o feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar tarea fotos sueltas": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Tarea fotos sueltas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Tarea fotos sueltas": {
+      "main": [
+        []
+      ]
+    },
+    "Obtener CSV o feed": {
+      "main": [
+        [
+          {
+            "node": "Combinar texto CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combinar texto CSV": {
+      "main": [
+        [
+          {
+            "node": "Parsear CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear CSV": {
+      "main": [
+        [
+          {
+            "node": "Preparar prompt IA descripciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar prompt IA descripciones": {
+      "main": [
+        [
+          {
+            "node": "IF - Necesita IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Necesita IA": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Redactar descripciones",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Redactar descripciones": {
+      "main": [
+        [
+          {
+            "node": "Aplicar descripciones IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aplicar descripciones IA": {
+      "main": [
+        [
+          {
+            "node": "Preparar import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar import": {
+      "main": [
+        [
+          {
+            "node": "POST importar vehiculos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST importar vehiculos": {
+      "main": [
+        [
+          {
+            "node": "Evaluar import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluar import": {
+      "main": [
+        [
+          {
+            "node": "IF - Import correcto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Import correcto": {
+      "main": [
+        [
+          {
+            "node": "IF - Es sync de feed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar aviso OK",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF - Faltan fotos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar tarea fallo import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Es sync de feed": {
+      "main": [
+        [
+          {
+            "node": "PATCH feed_last_synced_at",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Preparar aviso OK": {
+      "main": [
+        []
+      ]
+    },
+    "Preparar tarea fallo import": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Tarea fallo import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Tarea fallo import": {
+      "main": [
+        []
+      ]
+    },
+    "IF - Faltan fotos": {
+      "main": [
+        [
+          {
+            "node": "Preparar email fotos pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Preparar email fotos pendientes": {
+      "main": [
+        [
+          {
+            "node": "Email - Fotos pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Fotos pendientes": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

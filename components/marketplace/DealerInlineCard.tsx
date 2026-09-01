@@ -41,7 +41,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
         )}
       >
         {/* Logo or initial */}
-        <div className="w-7 h-7 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+        <div className="w-7 h-7 flex-shrink-0 bg-[#111111] border border-bsm-border-light flex items-center justify-center overflow-hidden">
           {dealer.logo_url ? (
             <Image
               src={dealer.logo_url}
@@ -51,27 +51,25 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
               className="object-contain"
             />
           ) : (
-            <span className="text-[10px] font-medium text-[#C6A64B]/60 leading-none select-none">
+            <span className="text-[10px] font-medium text-gold/60 leading-none select-none">
               {initial}
             </span>
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] text-[#8A8A8A] group-hover/dealer:text-[#C6A64B] transition-colors duration-150 truncate leading-tight">
+          <p className="text-[13px] text-[#8A8A8A] group-hover/dealer:text-gold transition-colors duration-150 truncate leading-tight">
             {dealer.name}
             {city && (
               <>
                 <span className="text-[#3A3A3A] mx-1.5 select-none">·</span>
-                <span className="text-[11px] text-[#9E9E9E] group-hover/dealer:text-[#C6A64B]/60">{city}</span>
+                <span className="text-[11px] text-[#9E9E9E] group-hover/dealer:text-gold/60">{city}</span>
               </>
             )}
           </p>
         </div>
 
-        {dealer.is_verified && (
-          <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" aria-label="Profesional verificado" />
-        )}
+        <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" aria-label="Profesional verificado" />
       </Link>
     )
   }
@@ -112,7 +110,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
               className="object-contain p-0.5"
             />
           ) : (
-            <span className="font-display text-sm font-light text-[#C6A64B]/70 select-none">
+            <span className="font-display text-sm font-light text-gold/70 select-none">
               {initial}
             </span>
           )}
@@ -126,13 +124,11 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
           {dealer.name}
         </Link>
 
-        {/* Verified */}
-        {dealer.is_verified && (
-          <div className="flex items-center justify-center gap-1 mb-1.5">
-            <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-            <span className="text-[10px] text-emerald-400 uppercase tracking-widest">Verificado</span>
-          </div>
-        )}
+        {/* Verified — todo perfil publicado en BLM está verificado por defecto */}
+        <div className="flex items-center justify-center gap-1 mb-1.5">
+          <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+          <span className="text-[10px] text-emerald-400 uppercase tracking-widest">Verificado</span>
+        </div>
 
         {/* Location */}
         <div className="flex items-center justify-center gap-1 text-xs text-white/50 mb-4">

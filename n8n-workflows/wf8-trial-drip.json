@@ -153,7 +153,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const items = $('Calcular etapa').all();\nconst statsItems = $input.all();\nconst MAIL_FROM = 'Black Label Market <hola@blacklabelmarket.es>';\nconst PERFIL_BASE = 'https://blacklabelmarket.es/dealers/';\nconst SUSCRIPCION = 'https://blacklabelmarket.es/dashboard/suscripcion';\n\nfunction nf(n) { return new Intl.NumberFormat('es-ES').format(n || 0); }\n\nconst salida = [];\nfor (let i = 0; i < items.length; i++) {\n  const e = items[i].json;\n  if (!e.email || e.email.indexOf('@') < 1) continue;\n\n  const stats = statsItems[i] ? statsItems[i].json : { vistas: 0, leads: 0, vehiculosActivos: 0 };\n  const perfilUrl = PERFIL_BASE + e.slug;\n  let subject, html;\n\n  if (e.etapa === 1) {\n    subject = e.nombre + ', ¿qué tal las primeras impresiones de Black Label Market?';\n    html = '<p>Buenas,</p>' +\n      '<p>Llevas unos días con vuestro perfil ya publicado (<a href=\"' + perfilUrl + '\">' + perfilUrl + '</a>). Si os falta terminar de completar el perfil o subir stock, es el momento — cuanto antes esté todo, antes empiezan a llegar contactos.</p>' +\n      '<p>Cualquier duda sobre cómo funciona el panel, respondednos a este correo.</p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else if (e.etapa === 2) {\n    subject = 'Sacadle partido a vuestro plan ' + (e.plan || '') + ' en Black Label Market';\n    html = '<p>Buenas,</p>' +\n      '<p>Con stock publicado, dos cosas que suelen marcar la diferencia: mantener las fichas con fotos y precio actualizados, y usar los <strong>boosts</strong> para destacar el vehículo que más queréis mover esta semana.</p>' +\n      '<p>Vuestro panel: <a href=\"https://blacklabelmarket.es/dashboard\">blacklabelmarket.es/dashboard</a></p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else if (e.etapa === 3) {\n    subject = 'Vuestra prueba en Black Label Market termina en ' + e.diasRestantes + ' días';\n    html = '<p>Buenas,</p>' +\n      '<p>Quedan ' + e.diasRestantes + ' días de prueba. Hasta ahora, vuestro perfil ha tenido <strong>' + nf(stats.vistas) + ' visitas</strong> y habéis recibido <strong>' + nf(stats.leads) + ' contactos</strong> a través del market.</p>' +\n      '<p>Para que el perfil siga activo sin interrupción, podéis elegir vuestro plan cuando queráis, sin esperar al último día: <a href=\"' + SUSCRIPCION + '\">' + SUSCRIPCION + '</a></p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else {\n    subject = 'Vuestra prueba en Black Label Market termina en ' + Math.max(e.diasRestantes, 0) + ' días';\n    html = '<p>Buenas,</p>' +\n      '<p>Resumen de vuestro periodo de prueba: <strong>' + nf(stats.vistas) + ' visitas</strong> al perfil, <strong>' + nf(stats.leads) + ' contactos</strong> recibidos, <strong>' + nf(stats.vehiculosActivos) + ' vehículos</strong> activos publicados.</p>' +\n      '<p>Para que vuestro perfil y stock sigan visibles sin interrupción, elegid vuestro plan aquí: <a href=\"' + SUSCRIPCION + '\">' + SUSCRIPCION + '</a></p>' +\n      '<p>Si necesitáis más tiempo o tenéis dudas sobre qué plan os encaja, respondednos a este correo — lo hablamos.</p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  }\n\n  salida.push({ json: {\n    dealerId: e.dealerId, etapa: e.etapa, nombre: e.nombre,\n    email: e.email, emailFrom: MAIL_FROM, emailSubject: subject, emailHtml: html\n  } });\n}\nreturn salida;"
+        "jsCode": "const items = $('Calcular etapa').all();\nconst statsItems = $input.all();\nconst MAIL_FROM = 'Black Label Market <hola@blacklabelmarket.es>';\nconst PERFIL_BASE = 'https://blacklabelmarket.es/dealers/';\nconst SUSCRIPCION = 'https://blacklabelmarket.es/dashboard/suscripcion';\n\nfunction nf(n) { return new Intl.NumberFormat('es-ES').format(n || 0); }\n\nconst salida = [];\nfor (let i = 0; i < items.length; i++) {\n  const e = items[i].json;\n  if (!e.email || e.email.indexOf('@') < 1) continue;\n\n  const stats = statsItems[i] ? statsItems[i].json : { vistas: 0, leads: 0, vehiculosActivos: 0 };\n  const perfilUrl = PERFIL_BASE + e.slug;\n  let subject, html;\n\n  if (e.etapa === 1) {\n    subject = e.nombre + ', ¿qué tal las primeras impresiones de Black Label Market?';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Lleváis unos días con vuestro perfil ya publicado (<a href=\"' + perfilUrl + '\">' + perfilUrl + '</a>). Si os falta terminar de completar el perfil o subir stock, es el momento — cuanto antes esté todo, antes empiezan a llegar contactos.</p>' +\n      '<p>Cualquier duda sobre cómo funciona el panel, respondednos a este correo.</p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else if (e.etapa === 2) {\n    subject = 'Sacadle partido a vuestro plan ' + (e.plan || '') + ' en Black Label Market';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Con stock publicado, dos cosas que suelen marcar la diferencia: mantener las fichas con fotos y precio actualizados, y usar los <strong>boosts</strong> para destacar el vehículo que más queréis mover esta semana.</p>' +\n      '<p>Vuestro panel: <a href=\"https://blacklabelmarket.es/dashboard\">blacklabelmarket.es/dashboard</a></p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else if (e.etapa === 3) {\n    subject = 'Vuestra prueba en Black Label Market termina en ' + e.diasRestantes + ' días';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Quedan ' + e.diasRestantes + ' días de prueba. Hasta ahora, vuestro perfil ha tenido <strong>' + nf(stats.vistas) + ' visitas</strong> y habéis recibido <strong>' + nf(stats.leads) + ' contactos</strong> a través del market.</p>' +\n      '<p>Para que el perfil siga activo sin interrupción, podéis elegir vuestro plan cuando queráis, sin esperar al último día: <a href=\"' + SUSCRIPCION + '\">' + SUSCRIPCION + '</a></p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else {\n    subject = 'Vuestra prueba en Black Label Market termina en ' + Math.max(e.diasRestantes, 0) + ' días';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Resumen de vuestro periodo de prueba: <strong>' + nf(stats.vistas) + ' visitas</strong> al perfil, <strong>' + nf(stats.leads) + ' contactos</strong> recibidos, <strong>' + nf(stats.vehiculosActivos) + ' vehículos</strong> activos publicados.</p>' +\n      '<p>Para que vuestro perfil y stock sigan visibles sin interrupción, elegid vuestro plan aquí: <a href=\"' + SUSCRIPCION + '\">' + SUSCRIPCION + '</a></p>' +\n      '<p>Si necesitáis más tiempo o tenéis dudas sobre qué plan os encaja, respondednos a este correo — lo hablamos.</p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  }\n\n  salida.push({ json: {\n    dealerId: e.dealerId, etapa: e.etapa, nombre: e.nombre,\n    email: e.email, emailFrom: MAIL_FROM, emailSubject: subject, emailHtml: html\n  } });\n}\nreturn salida;"
       }
     },
     {
@@ -232,25 +232,6 @@
       "parameters": {
         "jsCode": "const items = $('Componer email').all().map(i => i.json);\nif (!items.length) return [];\nconst porEtapa = { 1: 'día 3 (check-in)', 2: 'día 10 (aprovechar plan)', 3: 'día 21 (recordatorio)', 4: 'día 28 (conversión + resumen)' };\nconst lineas = items.map(e => '- ' + e.nombre + ': etapa ' + porEtapa[e.etapa]);\nreturn [{ json: { slackPayload: { text: '*Trial drip enviado hoy: ' + items.length + '*\\n' + lineas.join('\\n') } } }];",
         "mode": "runOnceForAllItems"
-      }
-    },
-    {
-      "id": "td-slack",
-      "name": "Slack - Trial drip de hoy",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        2040,
-        300
-      ],
-      "continueOnFail": true,
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ JSON.stringify($json.slackPayload) }}"
       }
     }
   ],
@@ -356,13 +337,7 @@
     },
     "Preparar digest": {
       "main": [
-        [
-          {
-            "node": "Slack - Trial drip de hoy",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },

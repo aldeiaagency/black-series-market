@@ -1,16 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { randomBytes } from 'crypto'
+import { randomInt } from 'crypto'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { findAuthUserByEmail } from '@/lib/supabase/admin-helpers'
 import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions, ASSIGNABLE_ROLES, type OrgRole } from '@/lib/permissions'
 import { getEntitlements } from '@/lib/entitlements'
 
-// Genera una contraseña temporal que cumple la política Media (≥8, letra + número).
-function generateTempPassword(): string {
-  const raw = randomBytes(9).toString('base64').replace(/[^a-zA-Z0-9]/g, '')
-  return `${raw.slice(0, 10)}7a` // garantiza al menos una letra y un dígito
+const TEMP_PASSWORD_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
+const TEMP_PASSWORD_LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+const TEMP_PASSWORD_DIGITS = '23456789'
+
+function randomChar(alphabet: string): string {
+  return alphabet[randomInt(alphabet.length)]
 }
 
+// Genera una contrasena temporal aleatoria que cumple la politica Media (>=8, letra + numero).
+function generateTempPassword(): string {
+  const length = 12
+  const chars = Array.from({ length }, () => randomChar(TEMP_PASSWORD_ALPHABET))
+  const letterIndex = randomInt(length)
+  let digitIndex = randomInt(length)
+  while (digitIndex === letterIndex) digitIndex = randomInt(length)
+  chars[letterIndex] = randomChar(TEMP_PASSWORD_LETTERS)
+  chars[digitIndex] = randomChar(TEMP_PASSWORD_DIGITS)
+  return chars.join('')
+}
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req: NextRequest) {
@@ -37,23 +51,59 @@ export async function POST(req: NextRequest) {
 
   if (!EMAIL_RE.test(email)) return NextResponse.json({ error: 'Email no válido.' }, { status: 400 })
   if (!fullName)             return NextResponse.json({ error: 'El nombre es obligatorio.' }, { status: 400 })
-  if (!ASSIGNABLE_ROLES.includes(role)) return NextResponse.json({ error: 'Rol no válido.' }, { status: 400 })
+  if (!(ASSIGNABLE_ROLES as readonly OrgRole[]).includes(role)) return NextResponse.json({ error: 'Rol no válido.' }, { status: 400 })
 
   const admin = createAdminClient()
 
-  // ── Límite de usuarios del plan ────────────────────────────────────────────
+  // maxUsers depende de plan + add-ons (lib/entitlements.ts) — se calcula en la app
+  // y se pasa a la RPC, que hace la comprobación y el INSERT en una sola sección
+  // crítica (pg_advisory_xact_lock por organización) para que dos altas concurrentes
+  // no puedan superar el límite a la vez. Ver migración 094.
   const ent = await getEntitlements(access.orgId)
   const maxUsers = ent?.limits.maxUsers ?? 1
-  const { count: currentCount } = await admin
-    .from('organization_members')
-    .select('id', { count: 'exact', head: true })
-    .eq('organization_id', access.orgId)
 
-  if ((currentCount ?? 0) >= maxUsers) {
-    return NextResponse.json(
-      { error: `Has alcanzado el límite de usuarios de tu plan (${maxUsers}).` },
-      { status: 409 },
-    )
+  // ── Reutilizar un usuario de auth existente con este email ─────────────────
+  // (p. ej. fue miembro de este u otro showroom antes y se le quitó el acceso sin
+  // borrar su cuenta — ver DELETE en [id]/route.ts). Evita el 409 de "email ya
+  // existe" y no genera una contraseña nueva: entra con la que ya tiene.
+  const existingUser = await findAuthUserByEmail(admin, email)
+
+  if (existingUser) {
+    const { data: existingMembership } = await admin
+      .from('organization_members')
+      .select('id')
+      .eq('organization_id', access.orgId)
+      .eq('user_id', existingUser.id)
+      .maybeSingle()
+
+    if (existingMembership) {
+      return NextResponse.json({ error: 'Ese usuario ya es miembro de tu equipo.' }, { status: 409 })
+    }
+
+    const { data: newMemberId, error: memberErr } = await admin.rpc('add_team_member_if_under_limit', {
+      p_organization_id: access.orgId,
+      p_user_id: existingUser.id,
+      p_role: role,
+      p_max_users: maxUsers,
+    })
+
+    if (memberErr) {
+      // 23505 = unique_violation (organization_id, user_id): el pre-check de arriba
+      // no está dentro del lock de la RPC, así que dos altas concurrentes del MISMO
+      // usuario existente pueden pasarlo ambas — la segunda choca aquí, no antes.
+      if (memberErr.code === '23505') {
+        return NextResponse.json({ error: 'Ese usuario ya es miembro de tu equipo.' }, { status: 409 })
+      }
+      return NextResponse.json({ error: 'No se pudo vincular el usuario al equipo.' }, { status: 500 })
+    }
+    if (!newMemberId) {
+      return NextResponse.json(
+        { error: `Has alcanzado el límite de usuarios de tu plan (${maxUsers}).` },
+        { status: 409 },
+      )
+    }
+
+    return NextResponse.json({ ok: true, email, existingAccount: true })
   }
 
   // ── Crear el usuario de auth (alta directa, sin email) ─────────────────────
@@ -62,7 +112,7 @@ export async function POST(req: NextRequest) {
     email,
     password,
     email_confirm: true, // alta directa: queda confirmado sin enviar correo
-    user_metadata: { full_name: fullName },
+    user_metadata: { full_name: fullName, must_change_password: true },
   })
 
   if (createErr || !created.user) {
@@ -74,14 +124,31 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Vincular a la organización con su rol ──────────────────────────────────
-  const { error: memberErr } = await admin
-    .from('organization_members')
-    .insert({ organization_id: access.orgId, user_id: created.user.id, role })
+  const { data: newMemberId, error: memberErr } = await admin.rpc('add_team_member_if_under_limit', {
+    p_organization_id: access.orgId,
+    p_user_id: created.user.id,
+    p_role: role,
+    p_max_users: maxUsers,
+  })
 
   if (memberErr) {
-    // Rollback: si no se pudo vincular, eliminamos el usuario recién creado.
-    await admin.auth.admin.deleteUser(created.user.id)
+    // Rollback: si no se pudo vincular, eliminamos el usuario recién creado. Si el
+    // propio borrado falla, el usuario queda huérfano (sin membresía) — se registra
+    // para poder limpiarlo a mano, ya que aquí no hay cola de reintentos.
+    const { error: cleanupErr } = await admin.auth.admin.deleteUser(created.user.id)
+    if (cleanupErr) console.error(`[team/members] rollback deleteUser falló para ${created.user.id}:`, cleanupErr)
     return NextResponse.json({ error: 'No se pudo vincular el usuario al equipo.' }, { status: 500 })
+  }
+  if (!newMemberId) {
+    // Límite alcanzado entre la comprobación inicial y este punto (carrera). No se
+    // pudo enlazar: el usuario recién creado queda huérfano si lo dejamos, así que
+    // se elimina igual que en el resto de fallos de este bloque.
+    const { error: cleanupErr } = await admin.auth.admin.deleteUser(created.user.id)
+    if (cleanupErr) console.error(`[team/members] rollback deleteUser falló para ${created.user.id}:`, cleanupErr)
+    return NextResponse.json(
+      { error: `Has alcanzado el límite de usuarios de tu plan (${maxUsers}).` },
+      { status: 409 },
+    )
   }
 
   // Devolvemos la contraseña temporal UNA vez para que el propietario la entregue.

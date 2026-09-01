@@ -3,7 +3,8 @@ import { createPublicClient } from '@/lib/supabase/server'
 import VehicleDetailContent from '@/components/marketplace/VehicleDetailContent'
 import ViewTracker from '@/components/marketplace/ViewTracker'
 import { resolveContactMode } from '@/lib/contact-mode'
-import { FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/utils'
+import { FUEL_LABELS, TRANSMISSION_LABELS, esGroupThousands } from '@/lib/utils'
+import { findMotoCategorySlug, findMotoCategoryLabel } from '@/lib/vehicle-categories'
 import type { Metadata } from 'next'
 
 // ISR: la ficha ya no escribe en el render (el tracking va por beacon) → cacheable en CDN.
@@ -36,20 +37,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${data.brand_name} ${data.model_name} ${data.year}${data.version ? ' ' + data.version : ''}`
   const parts = [
     title,
-    data.mileage_km != null ? `${data.mileage_km.toLocaleString('es-ES')} km` : null,
+    data.mileage_km != null ? `${esGroupThousands(data.mileage_km)} km` : null,
     data.displacement_cc ? `${data.displacement_cc} cc` : null,
     data.power_hp ? `${data.power_hp} CV` : null,
     data.location_province || null,
-    data.price && !data.price_on_request ? `${data.price.toLocaleString('es-ES')} €` : null,
+    data.price && !data.price_on_request ? `${esGroupThousands(data.price)} €` : null,
   ].filter(Boolean)
   const description = `${parts.join(' · ')} — Vendedor profesional verificado en Black Label Market.`
-  const image = data.images?.[0]?.url
+  const firstImage = data.images?.[0]
+  const canonicalUrl = `${SITE_URL}/motos/${slug}`
+  // Sin width/height: VehicleImage no captura dimensiones al subir la foto — declarar
+  // unas inventadas violaría la regla del proyecto de no fabricar datos.
+  const ogImages = firstImage ? [{ url: firstImage.url, alt: firstImage.alt || title }] : []
   return {
     title,
     description,
     alternates: { canonical: `/motos/${slug}` },
-    openGraph: { title, description, type: 'website', images: image ? [image] : [] },
-    twitter: { card: 'summary_large_image', title, description, images: image ? [image] : [] },
+    openGraph: { title, description, type: 'website', url: canonicalUrl, images: ogImages },
+    twitter: { card: 'summary_large_image', title, description, images: ogImages.map((i) => i.url) },
   }
 }
 
@@ -59,7 +64,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   const { data: vehicle } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(*)')
+    .select('*, dealer:dealers!inner(*), brand:brands(slug)')
     .eq('slug', slug)
     .eq('vehicle_type', 'motorcycle')
     .in('status', ['active', 'paused', 'sold'])
@@ -109,7 +114,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
     : 'https://schema.org/UsedCondition'
   const descParts = [
     fullName,
-    vehicle.mileage_km != null ? `${vehicle.mileage_km.toLocaleString('es-ES')} km` : null,
+    vehicle.mileage_km != null ? `${esGroupThousands(vehicle.mileage_km)} km` : null,
     vehicle.displacement_cc ? `${vehicle.displacement_cc} cc` : null,
     vehicle.power_hp ? `${vehicle.power_hp} CV` : null,
     vehicle.location_province || vehicle.dealer?.location_city || null,
@@ -126,15 +131,27 @@ export default async function MotoDetailPage({ params }: PageProps) {
       }
     : {}
 
+  // Mismo criterio que coches/[slug]: categoría real + marca vía join a `brands`, con
+  // fallback a filtro por query si el dealer usó un brand_name libre sin marca curada.
+  const categorySlug = findMotoCategorySlug(vehicle.category)
+  const categoryLabel = findMotoCategoryLabel(vehicle.category)
+  const brandSlug = (vehicle as any).brand?.slug as string | undefined
+  const breadcrumbItems = [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Motos', item: `${SITE_URL}/motos` },
+    ...(categorySlug ? [{ '@type': 'ListItem', position: 3, name: categoryLabel, item: `${SITE_URL}/motos/${categorySlug}` }] : []),
+    {
+      '@type': 'ListItem',
+      position: categorySlug ? 4 : 3,
+      name: vehicle.brand_name,
+      item: brandSlug ? `${SITE_URL}/marcas/${brandSlug}` : `${SITE_URL}/motos?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}`,
+    },
+    { '@type': 'ListItem', position: categorySlug ? 5 : 4, name: fullName },
+  ]
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Motos', item: `${SITE_URL}/motos` },
-      { '@type': 'ListItem', position: 3, name: vehicle.brand_name, item: `${SITE_URL}/motos?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}` },
-      { '@type': 'ListItem', position: 4, name: fullName },
-    ],
+    itemListElement: breadcrumbItems,
   }
 
   const jsonLd = {
@@ -143,6 +160,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
     name: fullName,
     description: schemaDescription,
     url: canonicalUrl,
+    ...(vehicle.updated_at && { dateModified: vehicle.updated_at }),
     image: vehicle.images?.map((i: any) => i.url) || [],
     brand: { '@type': 'Brand', name: vehicle.brand_name },
     model: vehicle.model_name,
@@ -151,7 +169,7 @@ export default async function MotoDetailPage({ params }: PageProps) {
     ...(vehicle.color_exterior && { color: vehicle.color_exterior }),
     ...(vehicle.fuel_type && { fuelType: FUEL_LABELS[vehicle.fuel_type as keyof typeof FUEL_LABELS] ?? vehicle.fuel_type }),
     ...(vehicle.transmission && { vehicleTransmission: TRANSMISSION_LABELS[vehicle.transmission as keyof typeof TRANSMISSION_LABELS] ?? vehicle.transmission }),
-    mileageFromOdometer: { '@type': 'QuantitativeValue', value: vehicle.mileage_km, unitCode: 'KMT' },
+    ...(vehicle.mileage_km != null && { mileageFromOdometer: { '@type': 'QuantitativeValue', value: vehicle.mileage_km, unitCode: 'KMT' } }),
     ...engine,
     offers: {
       '@type': 'Offer',

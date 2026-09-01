@@ -10,6 +10,7 @@ export default async function AceptarCondicionesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+  if (user.user_metadata?.must_change_password === true) redirect('/cambiar-password-temporal')
 
   const access = await getDealerAccess(user.id)
   if (!access) redirect('/registro')

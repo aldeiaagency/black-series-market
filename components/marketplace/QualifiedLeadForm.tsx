@@ -1,10 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { CheckCircle, ChevronDown, ChevronUp, Info } from 'lucide-react'
+import { Check, CheckCircle, ChevronDown, ChevronUp, Info } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import {
+  getAcquisitionContext,
+  getAnalyticsSessionId,
+  trackEvent,
+} from '@/lib/analytics/client'
 
 const schema = z.object({
   buyer_name:         z.string().min(2, 'Nombre requerido'),
@@ -16,7 +22,12 @@ const schema = z.object({
   financing:          z.enum(['yes', 'no', 'maybe']).optional(),
   trade_in:           z.enum(['yes', 'no']).optional(),
   contact_preference: z.enum(['call', 'whatsapp', 'email']).optional(),
-})
+}).refine(
+  (data) => data.contact_preference !== 'call' && data.contact_preference !== 'whatsapp'
+    ? true
+    : Boolean(data.buyer_phone && data.buyer_phone.trim().length >= 6),
+  { message: 'Indica un teléfono para que puedan contactarte así', path: ['buyer_phone'] },
+)
 
 type FormData = z.infer<typeof schema>
 
@@ -50,9 +61,21 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
   const [error, setError] = useState<string | null>(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  // Precarga nombre/email si hay sesión de comprador activa — evita que alguien ya
+  // identificado tenga que volver a teclear datos que el Market ya conoce de él.
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      const fullName = typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : ''
+      if (fullName) setValue('buyer_name', fullName)
+      if (user.email) setValue('buyer_email', user.email)
+    })
+  }, [setValue])
 
   async function onSubmit(data: FormData) {
     setError(null)
@@ -82,6 +105,14 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
           buyer_name:  data.buyer_name,
           buyer_email: data.buyer_email,
           buyer_phone: data.buyer_phone || null,
+          qualification: {
+            purchase_timeline: data.purchase_timeline,
+            financing: data.financing,
+            trade_in: data.trade_in,
+            contact_preference: data.contact_preference,
+          },
+          acquisition_context: getAcquisitionContext(),
+          session_id: getAnalyticsSessionId(),
           message:     parts.join(' · ') || 'Solicitud de información',
         }),
       })
@@ -91,11 +122,11 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
       return
     }
 
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event_type: 'vehicle_contact_submit', vehicle_id: vehicleId, dealer_id: dealerId }),
-    }).catch(() => {})
+    trackEvent({
+      event_type: 'vehicle_contact_submit',
+      vehicle_id: vehicleId,
+      dealer_id: dealerId,
+    })
 
     if (typeof window !== 'undefined') {
       const dl = ((window as any).dataLayer = (window as any).dataLayer || [])
@@ -116,7 +147,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
         <CheckCircle className="w-10 h-10 text-emerald-400 mb-3" />
         <p className="font-medium text-bsm-text-primary mb-1">Consulta enviada</p>
         <p className="text-xs text-bsm-text-muted max-w-[240px]">
-          El vendedor recibirá tu consulta y podrá responderte directamente.
+          Hemos registrado tu consulta y la estamos cursando al vendedor.
         </p>
         <p className="text-[10px] text-[#9E9E9E] mt-3 max-w-[220px] leading-relaxed italic">
           Esta consulta no implica reserva ni confirma disponibilidad de la unidad.
@@ -213,12 +244,13 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
                 {FINANCING_OPTIONS.map((o) => (
                   <label
                     key={o.value}
-                    className="flex items-center justify-center px-2 py-2 border border-bsm-border
+                    className="flex items-center justify-center gap-1.5 px-2 py-2 border border-bsm-border
                       text-xs text-bsm-text-muted cursor-pointer
-                      has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-[#C6A64B] has-[:checked]:bg-[#C6A64B]/5
+                      has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5
                       hover:border-bsm-border-light transition-colors"
                   >
-                    <input type="radio" {...register('financing')} value={o.value} className="sr-only" />
+                    <input type="radio" {...register('financing')} value={o.value} className="sr-only peer" />
+                    <Check className="w-3 h-3 shrink-0 opacity-0 peer-checked:opacity-100 transition-opacity" aria-hidden="true" />
                     {o.label}
                   </label>
                 ))}
@@ -234,12 +266,13 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
                 {[{ value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }].map((o) => (
                   <label
                     key={o.value}
-                    className="flex items-center justify-center px-2 py-2 border border-bsm-border
+                    className="flex items-center justify-center gap-1.5 px-2 py-2 border border-bsm-border
                       text-xs text-bsm-text-muted cursor-pointer
-                      has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-[#C6A64B] has-[:checked]:bg-[#C6A64B]/5
+                      has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5
                       hover:border-bsm-border-light transition-colors"
                   >
-                    <input type="radio" {...register('trade_in')} value={o.value} className="sr-only" />
+                    <input type="radio" {...register('trade_in')} value={o.value} className="sr-only peer" />
+                    <Check className="w-3 h-3 shrink-0 opacity-0 peer-checked:opacity-100 transition-opacity" aria-hidden="true" />
                     {o.label}
                   </label>
                 ))}
@@ -255,12 +288,13 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
                 {CONTACT_OPTIONS.map((o) => (
                   <label
                     key={o.value}
-                    className="flex items-center justify-center px-2 py-2 border border-bsm-border
+                    className="flex items-center justify-center gap-1.5 px-2 py-2 border border-bsm-border
                       text-xs text-bsm-text-muted cursor-pointer
-                      has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-[#C6A64B] has-[:checked]:bg-[#C6A64B]/5
+                      has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5
                       hover:border-bsm-border-light transition-colors"
                   >
-                    <input type="radio" {...register('contact_preference')} value={o.value} className="sr-only" />
+                    <input type="radio" {...register('contact_preference')} value={o.value} className="sr-only peer" />
+                    <Check className="w-3 h-3 shrink-0 opacity-0 peer-checked:opacity-100 transition-opacity" aria-hidden="true" />
                     {o.label}
                   </label>
                 ))}
@@ -283,7 +317,7 @@ export default function QualifiedLeadForm({ vehicleId, dealerId, vehicleTitle }:
       <div className="flex items-start gap-2 pt-1">
         <Info className="w-3.5 h-3.5 text-bsm-text-muted flex-shrink-0 mt-0.5" />
         <p className="text-[10px] text-bsm-text-muted leading-relaxed">
-          Tu consulta llegará directamente al vendedor. No implica reserva ni confirma disponibilidad.
+          Registraremos tu consulta para cursarla al vendedor. No implica reserva ni confirma disponibilidad.
         </p>
       </div>
     </form>

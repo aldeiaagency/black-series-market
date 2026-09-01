@@ -5,6 +5,7 @@ import { provisionPlanBoostCredits, activateBoost } from '@/lib/boosts'
 import { incrementEliteCounter } from '@/lib/elite-capacity'
 import { provisionDealerAssistant, deactivateDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
 import { pauseExcessActiveVehicles } from '@/lib/plan-transitions'
+import { getPaidAddon, getPaidAddonByDbSlug } from '@/lib/addons'
 import type Stripe from 'stripe'
 
 const PLAN_SLOTS: Record<string, number> = {
@@ -139,6 +140,11 @@ async function handleCheckoutCompleted(
   const billingCycle = (meta.billing_cycle as 'monthly' | 'annual') ?? 'monthly'
   const vehicleId = meta.vehicle_id  // boost purchase
 
+  if (session.metadata?.type === 'addon') {
+    await handleAddonCheckoutCompleted(admin, session)
+    return
+  }
+
   // ── Boost purchase ──
   if (session.metadata?.type === 'boost' && vehicleId && dealerId) {
     // Resolve the organization for this dealer
@@ -259,6 +265,7 @@ async function handleSubscriptionUpdated(
   admin: ReturnType<typeof createAdminClient>,
   sub: Stripe.Subscription
 ) {
+  if (await handleAddonSubscriptionUpdated(admin, sub)) return
   const status = mapStripeStatus(sub.status)
   const { data: currentSubscription } = await admin
     .from('subscriptions')
@@ -347,12 +354,25 @@ async function handleSubscriptionUpdated(
   ) {
     await pauseExcessActiveVehicles(admin, dealerId, newLimit)
   }
+
+  // Resincroniza el asistente dedicado cuando el cambio de plan llega desde el portal de
+  // facturación de Stripe (no desde setDealerPlan) — mismo helper que approveApplication/
+  // handleCheckoutCompleted/setDealerPlan, ver lib/integrations/n8n-assistant-provisioning.ts.
+  if (dealerId && newPlan) {
+    if (newPlan.slug === 'professional' || newPlan.slug === 'elite') {
+      const { data: d } = await admin.from('dealers').select('name').eq('id', dealerId).maybeSingle()
+      await provisionDealerAssistant(admin, { dealerId, dealerName: d?.name || 'Showroom' })
+    } else {
+      await deactivateDealerAssistant(admin, dealerId)
+    }
+  }
 }
 
 async function handleSubscriptionDeleted(
   admin: ReturnType<typeof createAdminClient>,
   sub: Stripe.Subscription
 ) {
+  if (await handleAddonSubscriptionDeleted(admin, sub)) return
   // Mark subscription as canceled
   await admin
     .from('subscriptions')
@@ -407,6 +427,7 @@ async function handleInvoicePaid(
   admin: ReturnType<typeof createAdminClient>,
   invoice: Stripe.Invoice
 ) {
+  if (await handleAddonInvoicePaid(admin, invoice)) return
   if (!invoice.subscription) return
 
   const { data: sub } = await admin
@@ -462,6 +483,7 @@ async function handlePaymentFailed(
   admin: ReturnType<typeof createAdminClient>,
   invoice: Stripe.Invoice
 ) {
+  if (await handleAddonPaymentFailed(admin, invoice)) return
   if (!invoice.subscription) return
 
   await admin
@@ -476,6 +498,415 @@ async function handlePaymentFailed(
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+type AdminClient = ReturnType<typeof createAdminClient>
+
+type AddonOrderRow = {
+  id: string
+  status: string
+  organization_id: string
+  dealer_id: string
+  stripe_subscription_id: string | null
+  addon: { slug: string; rules?: { slots?: number } } | { slug: string; rules?: { slots?: number } }[] | null
+}
+
+function relationOne<T>(value: T | T[] | null | undefined): T | null {
+  return Array.isArray(value) ? value[0] ?? null : value ?? null
+}
+
+function subscriptionPeriodFields(sub: Stripe.Subscription) {
+  return {
+    current_period_start: sub.current_period_start ? new Date(sub.current_period_start * 1000).toISOString() : null,
+    current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
+    cancel_at_period_end: sub.cancel_at_period_end,
+  }
+}
+
+function invoicePeriodFields(invoice: Stripe.Invoice) {
+  const line = (invoice as Stripe.Invoice & { lines: { data: Stripe.InvoiceLineItem[] } }).lines?.data?.[0]
+  return {
+    current_period_start: line?.period?.start ? new Date(line.period.start * 1000).toISOString() : null,
+    current_period_end: line?.period?.end ? new Date(line.period.end * 1000).toISOString() : null,
+  }
+}
+
+async function findAddonOrderBySubscription(admin: AdminClient, stripeSubscriptionId: string): Promise<AddonOrderRow | null> {
+  const { data } = await admin
+    .from('addon_orders')
+    .select('id, status, organization_id, dealer_id, stripe_subscription_id, addon:addons(slug, rules)')
+    .eq('stripe_subscription_id', stripeSubscriptionId)
+    .maybeSingle()
+
+  return (data as unknown as AddonOrderRow | null) ?? null
+}
+
+async function updateAddonSubscriptionMirror(
+  admin: AdminClient,
+  input: {
+    organizationId: string
+    addonDbSlug: string
+    stripeSubscriptionId: string | null
+    stripeCustomerId: string | null
+    status: 'active' | 'pending' | 'canceled'
+    periodStart?: string | null
+    periodEnd?: string | null
+    cancelAtPeriodEnd?: boolean
+  },
+) {
+  if (!input.stripeSubscriptionId) return
+
+  const [{ data: baseSub }, { data: addon }] = await Promise.all([
+    admin
+      .from('subscriptions')
+      .select('id')
+      .eq('organization_id', input.organizationId)
+      .in('status', ['active', 'trialing', 'past_due'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    admin.from('addons').select('id').eq('slug', input.addonDbSlug).maybeSingle(),
+  ])
+
+  if (!baseSub?.id || !addon?.id) return
+
+  await admin.from('subscription_addons').upsert({
+    subscription_id: baseSub.id,
+    addon_id: addon.id,
+    quantity: 1,
+    status: input.status,
+    stripe_subscription_id: input.stripeSubscriptionId,
+    stripe_customer_id: input.stripeCustomerId,
+    current_period_start: input.periodStart,
+    current_period_end: input.periodEnd,
+    cancel_at_period_end: input.cancelAtPeriodEnd ?? false,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'stripe_subscription_id' })
+}
+
+async function syncDealerVehicleSlots(
+  admin: AdminClient,
+  dealerId: string,
+  organizationId: string,
+  pauseOnDecrease = false,
+) {
+  const { data: dealer } = await admin
+    .from('dealers')
+    .select('subscription_plan, vehicle_slots')
+    .eq('id', dealerId)
+    .maybeSingle()
+
+  const { data: sub } = await admin
+    .from('subscriptions')
+    .select('plan:plans(slug, plan_limits(key, value_number))')
+    .eq('organization_id', organizationId)
+    .in('status', ['active', 'trialing', 'past_due'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const plan = relationOne((sub?.plan as unknown as { slug: string; plan_limits: { key: string; value_number: number | null }[] } | null) ?? null)
+  const planSlug = plan?.slug ?? dealer?.subscription_plan ?? 'essential'
+  const baseLimit = Number(
+    plan?.plan_limits?.find((limit) => limit.key === 'max_active_vehicles')?.value_number ??
+    PLAN_SLOTS[planSlug] ??
+    15,
+  )
+
+  const { data: activeOrders } = await admin
+    .from('addon_orders')
+    .select('quantity, addon:addons(slug, rules)')
+    .eq('organization_id', organizationId)
+    .eq('status', 'active')
+
+  let extraSlots = 0
+  for (const order of activeOrders ?? []) {
+    const addon = relationOne(order.addon as unknown as { slug: string; rules?: { slots?: number } } | null)
+    if (!addon || (addon.slug !== 'block_10_vehicles' && addon.slug !== 'block_25_vehicles')) continue
+    extraSlots += (addon.rules?.slots ?? 0) * order.quantity
+  }
+
+  const nextLimit = baseLimit + extraSlots
+  const previousLimit = Number(dealer?.vehicle_slots ?? baseLimit)
+  await admin.from('dealers').update({ vehicle_slots: nextLimit }).eq('id', dealerId)
+
+  if (pauseOnDecrease || nextLimit < previousLimit) {
+    await pauseExcessActiveVehicles(admin, dealerId, nextLimit)
+  }
+}
+
+async function revokeAddonEffects(admin: AdminClient, order: AddonOrderRow) {
+  const addon = relationOne(order.addon)
+  const config = getPaidAddonByDbSlug(addon?.slug)
+  if (!config) return
+
+  if (config.slots) {
+    await syncDealerVehicleSlots(admin, order.dealer_id, order.organization_id, true)
+  }
+
+  if (config.manualActivationType === 'stock_sync') {
+    await admin
+      .from('organization_feature_overrides')
+      .update({ status: 'canceled', ends_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('organization_id', order.organization_id)
+      .eq('feature_key', 'feed_sync')
+      .eq('source_addon_order_id', order.id)
+      .eq('status', 'active')
+  }
+}
+
+async function handleAddonCheckoutCompleted(admin: AdminClient, session: Stripe.Checkout.Session) {
+  const meta = session.metadata || {}
+  const addon = getPaidAddon(meta.addon_slug)
+  const organizationId = meta.organization_id
+  const dealerId = meta.dealer_id
+  if (!addon || !organizationId || !dealerId) throw new Error('Invalid addon checkout metadata')
+
+  const { data: existingOrder } = await admin
+    .from('addon_orders')
+    .select('id, status')
+    .eq('checkout_session_id', session.id)
+    .maybeSingle()
+
+  if (existingOrder && ['pending_activation', 'active', 'delivered'].includes(existingOrder.status)) return
+
+  const { data: addonRow } = await admin
+    .from('addons')
+    .select('id')
+    .eq('slug', addon.dbSlug)
+    .maybeSingle()
+  if (!addonRow?.id) throw new Error(`Addon ${addon.dbSlug} is not configured`)
+
+  const stripeSubscriptionId = typeof session.subscription === 'string'
+    ? session.subscription
+    : session.subscription?.id ?? null
+  const stripePaymentIntentId = typeof session.payment_intent === 'string'
+    ? session.payment_intent
+    : session.payment_intent?.id ?? null
+  const stripeCustomerId = typeof session.customer === 'string'
+    ? session.customer
+    : session.customer?.id ?? null
+
+  const baseOrder = {
+    organization_id: organizationId,
+    dealer_id: dealerId,
+    addon_id: addonRow.id,
+    checkout_session_id: session.id,
+    stripe_subscription_id: stripeSubscriptionId,
+    stripe_payment_intent_id: stripePaymentIntentId,
+    stripe_customer_id: stripeCustomerId,
+    quantity: 1,
+    amount_cents: addon.amountCents,
+    currency: addon.currency,
+    activation_mode: addon.activationMode,
+    manual_activation_type: addon.manualActivationType ?? null,
+    updated_at: new Date().toISOString(),
+  }
+
+  await admin.from('addon_orders').upsert({
+    ...baseOrder,
+    status: 'pending_payment',
+  }, { onConflict: 'checkout_session_id' })
+
+  if (addon.boostCredits) {
+    const expiresAt = addon.boostCreditExpiryDays
+      ? new Date(Date.now() + addon.boostCreditExpiryDays * 24 * 60 * 60 * 1000).toISOString()
+      : null
+    const { error: creditError } = await admin.from('boost_credits').insert({
+      organization_id: organizationId,
+      source: 'pack',
+      quantity: addon.boostCredits,
+      used: 0,
+      expires_at: expiresAt,
+      source_ref: session.id,
+    })
+    if (creditError && creditError.code !== '23505') throw creditError
+
+    await admin.from('addon_orders').update({ status: 'active', updated_at: new Date().toISOString() }).eq('checkout_session_id', session.id)
+    return
+  }
+
+  if (addon.slots) {
+    await admin.from('addon_orders').update({ status: 'active', updated_at: new Date().toISOString() }).eq('checkout_session_id', session.id)
+    await updateAddonSubscriptionMirror(admin, {
+      organizationId,
+      addonDbSlug: addon.dbSlug,
+      stripeSubscriptionId,
+      stripeCustomerId,
+      status: 'active',
+    })
+    await syncDealerVehicleSlots(admin, dealerId, organizationId)
+    return
+  }
+
+  await admin.from('addon_orders').update({
+    status: 'pending_activation',
+    updated_at: new Date().toISOString(),
+  }).eq('checkout_session_id', session.id)
+
+  await updateAddonSubscriptionMirror(admin, {
+    organizationId,
+    addonDbSlug: addon.dbSlug,
+    stripeSubscriptionId,
+    stripeCustomerId,
+    status: 'pending',
+  })
+}
+
+async function handleAddonSubscriptionUpdated(admin: AdminClient, sub: Stripe.Subscription): Promise<boolean> {
+  const order = await findAddonOrderBySubscription(admin, sub.id)
+  const config = order ? getPaidAddonByDbSlug(relationOne(order.addon)?.slug) : getPaidAddon(sub.metadata?.addon_slug)
+  if (!order && sub.metadata?.type !== 'addon') return false
+  if (!config) return true
+  if (!order) return true
+
+  const period = subscriptionPeriodFields(sub)
+  const stripeCustomerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null
+  const payable = sub.status === 'active' || sub.status === 'trialing'
+  const failed = ['past_due', 'unpaid', 'incomplete', 'incomplete_expired'].includes(sub.status)
+
+  if (payable) {
+    const nextStatus = config.activationMode === 'automatic'
+      ? 'active'
+      : order.status === 'active'
+        ? 'active'
+        : 'pending_activation'
+
+    await admin.from('addon_orders').update({
+      status: nextStatus,
+      stripe_customer_id: stripeCustomerId,
+      ...period,
+      updated_at: new Date().toISOString(),
+    }).eq('id', order.id)
+
+    await updateAddonSubscriptionMirror(admin, {
+      organizationId: order.organization_id,
+      addonDbSlug: config.dbSlug,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId,
+      status: nextStatus === 'active' ? 'active' : 'pending',
+      periodStart: period.current_period_start,
+      periodEnd: period.current_period_end,
+      cancelAtPeriodEnd: period.cancel_at_period_end,
+    })
+
+    if (config.slots) await syncDealerVehicleSlots(admin, order.dealer_id, order.organization_id)
+    return true
+  }
+
+  if (failed || sub.status === 'canceled') {
+    await admin.from('addon_orders').update({
+      status: sub.status === 'canceled' ? 'canceled' : 'payment_failed',
+      stripe_customer_id: stripeCustomerId,
+      ...period,
+      updated_at: new Date().toISOString(),
+    }).eq('id', order.id)
+    await updateAddonSubscriptionMirror(admin, {
+      organizationId: order.organization_id,
+      addonDbSlug: config.dbSlug,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId,
+      status: 'canceled',
+      periodStart: period.current_period_start,
+      periodEnd: period.current_period_end,
+      cancelAtPeriodEnd: period.cancel_at_period_end,
+    })
+    await revokeAddonEffects(admin, order)
+  }
+
+  return true
+}
+
+async function handleAddonSubscriptionDeleted(admin: AdminClient, sub: Stripe.Subscription): Promise<boolean> {
+  const order = await findAddonOrderBySubscription(admin, sub.id)
+  if (!order && sub.metadata?.type !== 'addon') return false
+  if (!order) return true
+
+  const config = getPaidAddonByDbSlug(relationOne(order.addon)?.slug)
+  await admin.from('addon_orders').update({
+    status: 'canceled',
+    canceled_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }).eq('id', order.id)
+
+  if (config) {
+    const stripeCustomerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null
+    await updateAddonSubscriptionMirror(admin, {
+      organizationId: order.organization_id,
+      addonDbSlug: config.dbSlug,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId,
+      status: 'canceled',
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+    })
+  }
+  await revokeAddonEffects(admin, order)
+  return true
+}
+
+async function handleAddonInvoicePaid(admin: AdminClient, invoice: Stripe.Invoice): Promise<boolean> {
+  if (!invoice.subscription) return false
+  const stripeSubscriptionId = invoice.subscription as string
+  const order = await findAddonOrderBySubscription(admin, stripeSubscriptionId)
+  if (!order) return false
+
+  const config = getPaidAddonByDbSlug(relationOne(order.addon)?.slug)
+  if (!config) return true
+
+  const period = invoicePeriodFields(invoice)
+  const stripeCustomerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? null
+  const nextStatus = config.activationMode === 'automatic'
+    ? 'active'
+    : order.status === 'active'
+      ? 'active'
+      : 'pending_activation'
+
+  await admin.from('addon_orders').update({
+    status: nextStatus,
+    stripe_customer_id: stripeCustomerId,
+    ...period,
+    updated_at: new Date().toISOString(),
+  }).eq('id', order.id)
+
+  await updateAddonSubscriptionMirror(admin, {
+    organizationId: order.organization_id,
+    addonDbSlug: config.dbSlug,
+    stripeSubscriptionId,
+    stripeCustomerId,
+    status: nextStatus === 'active' ? 'active' : 'pending',
+    periodStart: period.current_period_start,
+    periodEnd: period.current_period_end,
+  })
+
+  if (config.slots) await syncDealerVehicleSlots(admin, order.dealer_id, order.organization_id)
+  return true
+}
+
+async function handleAddonPaymentFailed(admin: AdminClient, invoice: Stripe.Invoice): Promise<boolean> {
+  if (!invoice.subscription) return false
+  const stripeSubscriptionId = invoice.subscription as string
+  const order = await findAddonOrderBySubscription(admin, stripeSubscriptionId)
+  if (!order) return false
+
+  const config = getPaidAddonByDbSlug(relationOne(order.addon)?.slug)
+  await admin.from('addon_orders').update({
+    status: 'payment_failed',
+    updated_at: new Date().toISOString(),
+  }).eq('id', order.id)
+
+  if (config) {
+    const stripeCustomerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? null
+    await updateAddonSubscriptionMirror(admin, {
+      organizationId: order.organization_id,
+      addonDbSlug: config.dbSlug,
+      stripeSubscriptionId,
+      stripeCustomerId,
+      status: 'canceled',
+    })
+  }
+
+  await revokeAddonEffects(admin, order)
+  return true
+}
 
 function mapStripeStatus(
   status: Stripe.Subscription.Status

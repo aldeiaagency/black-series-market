@@ -1,11 +1,12 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { X, Bell, CheckCircle } from 'lucide-react'
 import { useModalA11y } from '@/lib/hooks/useModalA11y'
+import { trackEvent, getAcquisitionContext } from '@/lib/analytics/client'
 
 const schema = z.object({
   vehicle_type: z.enum(['car', 'motorcycle', 'any']),
@@ -22,22 +23,42 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
+interface AlertInitialValues {
+  brand?: string
+  model?: string
+  budget_max?: string
+  year_min?: string
+  km_max?: string
+  location?: string
+}
+
 interface Props {
   open: boolean
   onClose: () => void
   defaultVehicleType?: 'car' | 'motorcycle'
+  initialValues?: AlertInitialValues
 }
 
-export default function SearchAlertModal({ open, onClose, defaultVehicleType }: Props) {
+export default function SearchAlertModal({ open, onClose, defaultVehicleType, initialValues }: Props) {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const dialogRef = useModalA11y(open, onClose)
+  const modified = useRef({ vehicle_type: false, timeline: false })
+  const inheritedFromSearch = Boolean(
+    initialValues && Object.values(initialValues).some((v) => v),
+  )
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       vehicle_type: defaultVehicleType ?? 'any',
       timeline: '1_3_months',
+      brand:      initialValues?.brand ?? '',
+      model:      initialValues?.model ?? '',
+      budget_max: initialValues?.budget_max ?? '',
+      year_min:   initialValues?.year_min ?? '',
+      km_max:     initialValues?.km_max ?? '',
+      location:   initialValues?.location ?? '',
     },
   })
 
@@ -51,7 +72,20 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
       const res = await fetch('/api/search-alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          acquisition_context: getAcquisitionContext(),
+          field_provenance: {
+            vehicle_type: {
+              user_modified: modified.current.vehicle_type,
+              default_kind: defaultVehicleType ? 'route_context' : 'ui_default',
+            },
+            timeline: {
+              user_modified: modified.current.timeline,
+              default_kind: 'ui_default',
+            },
+          },
+        }),
       })
       if (!res.ok) {
         setError('No se pudo registrar la alerta. Inténtalo de nuevo.')
@@ -63,11 +97,10 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
     }
 
     // Track alert creation (non-blocking)
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event_type: 'search_alert_created' }),
-    }).catch(() => {})
+    trackEvent({
+      event_type: 'search_alert_created',
+      metadata: { vehicle_type: data.vehicle_type },
+    })
 
     setSubmitted(true)
   }
@@ -84,13 +117,13 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
     >
       <div
         ref={dialogRef}
-        className="w-full max-w-lg bg-[#0D0D0D] border border-[#1E1E1E] shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-fade-in"
+        className="w-full max-w-lg bg-[#0D0D0D] border border-bsm-border-light shadow-[0_24px_80px_rgba(0,0,0,0.8)] animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#1A1A1A]">
           <div className="flex items-center gap-3">
-            <Bell className="w-4 h-4 text-[#C6A64B]" />
+            <Bell className="w-4 h-4 text-gold" />
             <h2 className="text-sm font-medium text-[#F4F1EA] tracking-wide">
               Crear alerta de búsqueda
             </h2>
@@ -123,6 +156,12 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
 
+            {inheritedFromSearch && (
+              <p className="text-[11px] text-gold bg-gold/5 border border-gold/20 px-3 py-2">
+                Hemos rellenado esto con tu búsqueda actual — revísalo o ajústalo antes de guardar.
+              </p>
+            )}
+
             {/* Tipo */}
             <div>
               <label className="label-base">Tipo de vehículo</label>
@@ -132,9 +171,9 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
                   { value: 'motorcycle', label: 'Moto' },
                   { value: 'any',        label: 'Cualquiera' },
                 ].map((o) => (
-                  <label key={o.value}
+                  <label key={o.value} onClick={() => { modified.current.vehicle_type = true }}
                     className="flex items-center justify-center py-2.5 border border-bsm-border text-xs text-bsm-text-muted cursor-pointer
-                      has-[:checked]:border-[#C6A64B]/40 has-[:checked]:text-[#C6A64B] has-[:checked]:bg-[#C6A64B]/5
+                      has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5
                       hover:border-bsm-border-light transition-colors">
                     <input type="radio" {...register('vehicle_type')} value={o.value} className="sr-only" />
                     {o.label}
@@ -180,7 +219,7 @@ export default function SearchAlertModal({ open, onClose, defaultVehicleType }: 
             </div>
 
             {/* Plazo */}
-            <div>
+            <div onChange={() => { modified.current.timeline = true }}>
               <label className="label-base">Plazo de compra</label>
               <select {...register('timeline')} className="input-base">
                 <option value="immediate">Inmediata</option>

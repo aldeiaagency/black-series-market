@@ -18,10 +18,10 @@ interface PasswordInputProps {
   id?: string
 }
 
-const BAR_COLOR = ['bg-red-400', 'bg-red-400', 'bg-[#C6A64B]', 'bg-[#C6A64B]', 'bg-emerald-400', 'bg-emerald-400']
+const BAR_COLOR = ['bg-red-400', 'bg-red-400', 'bg-gold', 'bg-gold', 'bg-emerald-400', 'bg-emerald-400']
 const LABEL_COLOR: Record<string, string> = {
   'débil': 'text-red-400',
-  'aceptable': 'text-[#C6A64B]',
+  'aceptable': 'text-gold',
   'fuerte': 'text-emerald-400',
 }
 

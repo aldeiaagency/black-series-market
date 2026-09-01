@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { GuideAuthorBox, GuideFaq, GuideHeroImage, GuideToc, type FaqItem, type TocItem } from '../_components/GuideSeoBlocks'
+import NewsletterSignupForm from '@/components/marketplace/NewsletterSignupForm'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 const PAGE_PATH = '/guias/motos-premium-segunda-mano'
@@ -291,6 +292,7 @@ export default function GuiaMotosPage() {
             </Link>
           </div>
         </div>
+        <NewsletterSignupForm variant="embed" />
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Car, MessageSquare, Eye, MapPin, Mail, Phone, Globe, CheckCircle, Clock, Shield, StickyNote, Trash2, AlertTriangle, Bot } from 'lucide-react'
 import { provisionDealerAssistant, deactivateDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
 import { pauseExcessActiveVehicles } from '@/lib/plan-transitions'
+import DealerApiKeysPanel from './DealerApiKeysPanel'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -231,7 +232,7 @@ async function processInitialStockWithIa(formData: FormData) {
   const [{ data: dealer }, { data: assistantConfig }] = await Promise.all([
     supabase
       .from('dealers')
-      .select('id, name, slug')
+      .select('id, name, slug, email, profile:profiles(email)')
       .eq('id', dealerId)
       .maybeSingle(),
     supabase
@@ -246,12 +247,15 @@ async function processInitialStockWithIa(formData: FormData) {
     redirect(`/admin/dealers/${dealerId}`)
   }
 
+  const dealerEmail = dealer.email || (dealer as unknown as { profile?: { email?: string } }).profile?.email || null
+
   const webhookUrl = process.env.N8N_WEBHOOK_STOCK_INICIAL_IA
     ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/stock-inicial-ia'
   const payload = {
     dealer_id: dealer.id,
     dealer_name: dealer.name,
     dealer_slug: dealer.slug,
+    dealer_email: dealerEmail,
     stock_mode: stock.mode,
     stock_feed_url: stock.feed_url ?? null,
     stock_notes: stock.notes ?? null,
@@ -329,6 +333,13 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
     .select('enabled, n8n_workflow_id, context')
     .eq('dealer_id', id)
     .maybeSingle()
+
+  const { data: dealerApiKeys } = await supabase
+    .from('dealer_api_keys')
+    .select('id, label, created_at, last_used_at, revoked_at')
+    .eq('dealer_id', id)
+    .order('created_at', { ascending: false })
+    .limit(20)
 
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -610,6 +621,8 @@ export default async function AdminDealerDetailPage({ params, searchParams }: Pa
               Vehículos publicados: <span className="text-bsm-text-primary">{activeCount ?? 0} / {dealer.vehicle_slots ?? '—'}</span>
             </div>
           </div>
+
+          <DealerApiKeysPanel dealerId={id} keys={dealerApiKeys ?? []} />
 
           {/* Asistente IA — solo lectura */}
           <div className="bg-surface border border-bsm-border p-5">

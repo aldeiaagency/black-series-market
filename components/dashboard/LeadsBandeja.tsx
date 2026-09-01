@@ -17,6 +17,58 @@ export interface BandejaLead {
   source_channel: string | null
   qualification: { summary?: string; intent?: string; budget?: string; timeline?: string } | null
   vehicle: { brand_name: string; model_name: string; year: number } | null
+  handoff: {
+    delivery_confirmed_at: string | null
+    acknowledged_at: string | null
+    decision: 'accepted' | 'rejected' | null
+    first_contact_at: string | null
+  } | null
+}
+
+type Handoff = NonNullable<BandejaLead['handoff']>
+
+function HandoffActions({ leadId, initial }: { leadId: string; initial: Handoff | null }) {
+  const [handoff, setHandoff] = useState(initial)
+  const [saving, setSaving] = useState(false)
+
+  async function record(fulfillment_event: string) {
+    setSaving(true)
+    const res = await fetch(`/api/leads/${leadId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fulfillment_event }),
+    })
+    const result = await res.json().catch(() => null)
+    if (res.ok && result?.handoff) setHandoff(result.handoff)
+    setSaving(false)
+  }
+
+  if (!handoff) return null
+  const delivered = !!handoff.delivery_confirmed_at
+  const acknowledged = !!handoff.acknowledged_at
+  const contacted = !!handoff.first_contact_at
+  const rejected = handoff.decision === 'rejected'
+  return (
+    <div>
+      <p className='text-[10px] text-bsm-text-muted uppercase tracking-widest mb-2'>Cumplimiento del handoff</p>
+      <div className='flex flex-wrap gap-1.5 mb-2'>
+        <span className='text-[10px] border border-bsm-border px-2 py-1'>Persistido</span>
+        {delivered && <span className='text-[10px] border border-blue-400/30 text-blue-400 px-2 py-1'>Entregado</span>}
+        {acknowledged && <span className='text-[10px] border border-amber-400/30 text-amber-400 px-2 py-1'>Acusado</span>}
+        {handoff.decision === 'accepted' && <span className='text-[10px] border border-emerald-400/30 text-emerald-400 px-2 py-1'>Aceptado</span>}
+        {rejected && <span className='text-[10px] border border-red-400/30 text-red-400 px-2 py-1'>Rechazado · recuperar</span>}
+        {contacted && <span className='text-[10px] border border-violet-400/30 text-violet-400 px-2 py-1'>Primer contacto</span>}
+      </div>
+      <div className='flex flex-wrap gap-2'>
+        {delivered && !acknowledged && !contacted && <button disabled={saving} onClick={() => record('handoff_acknowledged')} className='text-xs border border-bsm-border px-3 py-1.5 disabled:opacity-40'>Registrar acuse</button>}
+        {acknowledged && !handoff.decision && !contacted && (<>
+          <button disabled={saving} onClick={() => record('handoff_accepted')} className='text-xs border border-emerald-400/30 text-emerald-400 px-3 py-1.5 disabled:opacity-40'>Aceptar</button>
+          <button disabled={saving} onClick={() => record('handoff_rejected')} className='text-xs border border-red-400/30 text-red-400 px-3 py-1.5 disabled:opacity-40'>Rechazar</button>
+        </>)}
+        {!contacted && !rejected && <button disabled={saving} onClick={() => record('handoff_first_contact')} className='text-xs border border-violet-400/30 text-violet-400 px-3 py-1.5 disabled:opacity-40'>Registrar primer contacto</button>}
+      </div>
+    </div>
+  )
 }
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -65,13 +117,20 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
 
   async function updateStatus(leadId: string, newStatus: string) {
     setUpdating(true)
-    await fetch(`/api/leads/${leadId}`, {
+    const res = await fetch(`/api/leads/${leadId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     })
-    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l))
-    setSelected(prev => prev?.id === leadId ? { ...prev, status: newStatus } : prev)
+    const result = await res.json().catch(() => null)
+    if (res.ok) {
+      setLeads(prev => prev.map(l => l.id === leadId
+        ? { ...l, status: newStatus, handoff: result?.handoff ?? l.handoff }
+        : l))
+      setSelected(prev => prev?.id === leadId
+        ? { ...prev, status: newStatus, handoff: result?.handoff ?? prev.handoff }
+        : prev)
+    }
     setUpdating(false)
   }
 
@@ -105,7 +164,7 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
                     {timeAgo(lead.created_at)}
                     {lead.vehicle?.brand_name && (
                       <span className="ml-1">
-                        · <span className="text-[#C6A64B]/80">{lead.vehicle.brand_name} {lead.vehicle.model_name}</span>
+                        · <span className="text-gold/80">{lead.vehicle.brand_name} {lead.vehicle.model_name}</span>
                       </span>
                     )}
                   </p>
@@ -151,7 +210,7 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
               {selected.vehicle && (
                 <div>
                   <p className="text-[10px] text-bsm-text-muted uppercase tracking-widest mb-1">Vehículo de interés</p>
-                  <p className="text-sm text-[#C6A64B] font-medium">
+                  <p className="text-sm text-gold font-medium">
                     {selected.vehicle.brand_name} {selected.vehicle.model_name}
                     {selected.vehicle.year && <span className="text-bsm-text-muted font-normal"> · {selected.vehicle.year}</span>}
                   </p>
@@ -230,6 +289,8 @@ export default function LeadsBandeja({ initialLeads }: { initialLeads: BandejaLe
                   )}
                 </div>
               )}
+
+              <HandoffActions leadId={selected.id} initial={selected.handoff} />
 
               {/* Estado */}
               <div>

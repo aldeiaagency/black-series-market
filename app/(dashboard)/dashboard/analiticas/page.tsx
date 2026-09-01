@@ -55,10 +55,10 @@ function toInputDate(d: Date): string {
 
 const STATUS_STYLE: Record<string, string> = {
   active:         'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
-  paused:         'text-[#C6A64B] border-[#C6A64B]/30',
+  paused:         'text-gold border-gold/30',
   sold:           'text-[#9A9A9A] border-[#3A3A3A]',
   pending_review: 'text-blue-400 border-blue-400/30',
-  draft:          'text-[#9E9E9E] border-[#2A2A2A]',
+  draft:          'text-[#9E9E9E] border-bsm-border',
 }
 
 // ── Upgrade gating block ──────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ export default async function AnaliticasPage({
   // ── Global counts ──────────────────────────────────────────────────────────
   const totalViews    = evts.filter((e: any) => e.event_type === 'vehicle_view'           || e.event_type === 'view').length
   const totalContacts = evts.filter((e: any) => e.event_type === 'vehicle_contact_submit' || e.event_type === 'contact').length
-  const totalSaved    = evts.filter((e: any) => e.event_type === 'vehicle_saved'          || e.event_type === 'favorite').length
+  const totalSaved    = evts.filter((e: any) => ['favorite_added', 'vehicle_saved', 'favorite'].includes(e.event_type)).length
   const totalWhatsapp = evts.filter((e: any) => e.event_type === 'vehicle_whatsapp_click').length
   const totalPhone    = evts.filter((e: any) => e.event_type === 'vehicle_phone_click').length
   const activeVehicles = vehicles_.filter((v: any) => v.status === 'active').length
@@ -167,7 +167,7 @@ export default async function AnaliticasPage({
     const s = byVehicle[e.vehicle_id]
     if (e.event_type === 'vehicle_view'           || e.event_type === 'view')    s.views++
     if (e.event_type === 'vehicle_contact_submit' || e.event_type === 'contact') s.contacts++
-    if (e.event_type === 'vehicle_saved'          || e.event_type === 'favorite') s.saved++
+    if (['favorite_added', 'vehicle_saved', 'favorite'].includes(e.event_type)) s.saved++
     if (e.event_type === 'vehicle_whatsapp_click') s.whatsapp++
     if (e.event_type === 'vehicle_phone_click')    s.phone++
   }
@@ -219,7 +219,7 @@ export default async function AnaliticasPage({
     previousTotals = {
       views:    pe.filter((e: any) => e.event_type === 'vehicle_view'           || e.event_type === 'view').length,
       contacts: pe.filter((e: any) => e.event_type === 'vehicle_contact_submit' || e.event_type === 'contact').length,
-      saved:    pe.filter((e: any) => e.event_type === 'vehicle_saved'          || e.event_type === 'favorite').length,
+      saved:    pe.filter((e: any) => ['favorite_added', 'vehicle_saved', 'favorite'].includes(e.event_type)).length,
       whatsapp: pe.filter((e: any) => e.event_type === 'vehicle_whatsapp_click').length,
       phone:    pe.filter((e: any) => e.event_type === 'vehicle_phone_click').length,
     }
@@ -394,11 +394,11 @@ export default async function AnaliticasPage({
                 ins.type === 'good'
                   ? 'border-emerald-400/20 bg-emerald-400/5'
                   : ins.type === 'warn'
-                    ? 'border-[#C6A64B]/20 bg-[#C6A64B]/5'
+                    ? 'border-gold/20 bg-gold/5'
                     : 'border-bsm-border bg-surface'
               }`}>
                 <AlertCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
-                  ins.type === 'good' ? 'text-emerald-400' : ins.type === 'warn' ? 'text-[#C6A64B]' : 'text-[#9E9E9E]'
+                  ins.type === 'good' ? 'text-emerald-400' : ins.type === 'warn' ? 'text-gold' : 'text-[#9E9E9E]'
                 }`} />
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-bsm-text-primary mb-0.5">{ins.vehicleName}</p>

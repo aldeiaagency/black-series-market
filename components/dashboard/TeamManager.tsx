@@ -26,7 +26,7 @@ export default function TeamManager({ members, maxUsers, canManage }: Props) {
   const [form, setForm]   = useState({ full_name: '', email: '', role: 'sales' as OrgRole })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null)
+  const [credentials, setCredentials] = useState<{ email: string; password: string | null } | null>(null)
   const [copied, setCopied] = useState(false)
 
   const atLimit = members.length >= maxUsers
@@ -43,7 +43,7 @@ export default function TeamManager({ members, maxUsers, canManage }: Props) {
     const data = await res.json()
     setLoading(false)
     if (!res.ok) { setError(data.error ?? 'No se pudo crear el usuario.'); return }
-    setCredentials({ email: data.email, password: data.password })
+    setCredentials({ email: data.email, password: data.password ?? null })
     setForm({ full_name: '', email: '', role: 'sales' })
     setShowForm(false)
     router.refresh()
@@ -65,7 +65,7 @@ export default function TeamManager({ members, maxUsers, canManage }: Props) {
   }
 
   function copyCreds() {
-    if (!credentials) return
+    if (!credentials?.password) return
     navigator.clipboard.writeText(`Email: ${credentials.email}\nContraseña: ${credentials.password}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -94,22 +94,34 @@ export default function TeamManager({ members, maxUsers, canManage }: Props) {
         <div className="border border-emerald-400/30 bg-emerald-400/5 p-5">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div>
-              <p className="text-sm font-medium text-bsm-text-primary mb-0.5">Usuario creado</p>
+              <p className="text-sm font-medium text-bsm-text-primary mb-0.5">
+                {credentials.password ? 'Usuario creado' : 'Usuario añadido al equipo'}
+              </p>
               <p className="text-xs text-bsm-text-muted">
-                Entrega estas credenciales al nuevo miembro. No se volverán a mostrar.
+                {credentials.password
+                  ? 'Entrega estas credenciales al nuevo miembro. No se volverán a mostrar.'
+                  : 'Ya tenía una cuenta en Black Label Market: entra con su email y su contraseña habitual.'}
               </p>
             </div>
             <button onClick={() => setCredentials(null)} className="text-bsm-text-muted hover:text-bsm-text-primary">
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="bg-[#0A0A0A] border border-bsm-border p-3 font-mono text-xs text-bsm-text-secondary mb-3">
-            <p>Email: {credentials.email}</p>
-            <p>Contraseña: {credentials.password}</p>
-          </div>
-          <button onClick={copyCreds} className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline">
-            {copied ? <><Check className="w-3.5 h-3.5" /> Copiado</> : <><Copy className="w-3.5 h-3.5" /> Copiar credenciales</>}
-          </button>
+          {credentials.password ? (
+            <>
+              <div className="bg-[#0A0A0A] border border-bsm-border p-3 font-mono text-xs text-bsm-text-secondary mb-3">
+                <p>Email: {credentials.email}</p>
+                <p>Contraseña: {credentials.password}</p>
+              </div>
+              <button onClick={copyCreds} className="inline-flex items-center gap-1.5 text-xs text-gold hover:underline">
+                {copied ? <><Check className="w-3.5 h-3.5" /> Copiado</> : <><Copy className="w-3.5 h-3.5" /> Copiar credenciales</>}
+              </button>
+            </>
+          ) : (
+            <div className="bg-[#0A0A0A] border border-bsm-border p-3 font-mono text-xs text-bsm-text-secondary">
+              <p>Email: {credentials.email}</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -118,30 +130,37 @@ export default function TeamManager({ members, maxUsers, canManage }: Props) {
         <form onSubmit={handleCreate} className="border border-bsm-border bg-surface p-5 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="label-base">Nombre</label>
+              <label className="label-base" htmlFor="team-member-name">Nombre</label>
               <input
+                id="team-member-name"
                 value={form.full_name}
                 onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
                 placeholder="Nombre y apellidos"
                 className="input-base"
+                autoComplete="name"
+                aria-invalid={!!error}
                 required
               />
             </div>
             <div>
-              <label className="label-base">Email</label>
+              <label className="label-base" htmlFor="team-member-email">Email</label>
               <input
+                id="team-member-email"
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="usuario@email.com"
                 className="input-base"
+                autoComplete="email"
+                aria-invalid={!!error}
                 required
               />
             </div>
           </div>
           <div>
-            <label className="label-base">Rol</label>
+            <label className="label-base" htmlFor="team-member-role">Rol</label>
             <select
+              id="team-member-role"
               value={form.role}
               onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as OrgRole }))}
               className="select-base"
@@ -152,7 +171,7 @@ export default function TeamManager({ members, maxUsers, canManage }: Props) {
             </select>
           </div>
 
-          {error && <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">{error}</p>}
+          {error && <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">{error}</p>}
 
           <div className="flex gap-3">
             <button type="submit" disabled={loading} className="btn-gold px-5 text-sm">
@@ -161,7 +180,7 @@ export default function TeamManager({ members, maxUsers, canManage }: Props) {
             <button type="button" onClick={() => setShowForm(false)} className="btn-outline px-5 text-sm">Cancelar</button>
           </div>
           <p className="text-[11px] text-bsm-text-muted">
-            Se generará una contraseña temporal que podrás entregar al usuario. Podrá cambiarla más adelante.
+            Si el email no tiene cuenta todavía, se generará una contraseña temporal para entregarle. Si ya tiene una cuenta en Black Label Market, se vincula directamente con ella.
           </p>
         </form>
       )}

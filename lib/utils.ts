@@ -6,21 +6,31 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Miles con punto, sin depender de Intl.NumberFormat/toLocaleString: comprobado en este
+// entorno (Node 24.15, ICU completo — no es un problema de build "small-icu") que
+// Intl.NumberFormat('es-ES') NO agrupa por miles para valores de 1.000 a 9.999
+// (2400 -> "2400" en vez de "2.400"), aunque sí formatea bien fuera de ese rango
+// (14.200, 329.900 correctos) — bug real, determinista y reproducible del runtime,
+// afectaba a precios y kilometrajes reales en producción (catálogo, ficha, dashboard,
+// admin — cualquier vehículo con precio o km entre 1.000 y 9.999).
+export function esGroupThousands(n: number): string {
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+const CURRENCY_SYMBOLS: Record<string, string> = { EUR: '€', USD: '$', GBP: '£' }
+
 export function formatPrice(price: number | null, currency = 'EUR', onRequest = false): string {
   if (onRequest || price === null) return 'Precio bajo consulta'
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(price)
+  const symbol = CURRENCY_SYMBOLS[currency] ?? currency
+  return `${esGroupThousands(price)} ${symbol}`
 }
 
 export function formatMileage(km: number): string {
-  return new Intl.NumberFormat('es-ES').format(km) + ' km'
+  return `${esGroupThousands(km)} km`
 }
 
 export function formatNumber(n: number): string {
-  return new Intl.NumberFormat('es-ES').format(n)
+  return esGroupThousands(n)
 }
 
 export function slugify(text: string): string {
@@ -108,7 +118,7 @@ export function getLeadStatusColor(status: LeadStatus): string {
     contacted: 'text-blue-400 bg-blue-400/10',
     negotiating: 'text-amber-400 bg-amber-400/10',
     appointment: 'text-purple-400 bg-purple-400/10',
-    reserved: 'text-[#C6A64B] bg-[#C6A64B]/10',
+    reserved: 'text-gold bg-gold/10',
     closed: 'text-emerald-400 bg-emerald-400/10',
     lost: 'text-red-400 bg-red-400/10',
     discarded: 'text-[#C9C9C9] bg-[#3A3A3A]',

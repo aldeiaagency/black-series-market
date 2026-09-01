@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Car, PlusCircle, User, BarChart2,
-  MessageSquare, CreditCard, LogOut, ExternalLink, FileUp, Users, ClipboardList, CalendarClock,
+  MessageSquare, CreditCard, LogOut, ExternalLink, FileUp, Users, ClipboardList, CalendarClock, Gauge,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -21,6 +21,7 @@ const NAV: { label: string; href: string; icon: typeof LayoutDashboard; exact?: 
   { label: 'A la carta', href: '/dashboard/solicitudes', icon: ClipboardList, section: 'solicitudes' },
   { label: 'Citas', href: '/dashboard/citas', icon: CalendarClock, section: 'citas' },
   { label: 'Analíticas', href: '/dashboard/analiticas', icon: BarChart2, section: 'analiticas' },
+  { label: 'Estado', href: '/dashboard/estado', icon: Gauge, section: 'estado' },
   { label: 'Equipo', href: '/dashboard/equipo', icon: Users, section: 'equipo' },
   { label: 'Mi perfil', href: '/dashboard/perfil', icon: User, section: 'perfil' },
   { label: 'Suscripción', href: '/dashboard/suscripcion', icon: CreditCard, section: 'suscripcion' },
@@ -32,9 +33,10 @@ interface SidebarProps {
   plan: string | null
   sections: DashboardSection[]
   role: OrgRole
+  solicitudesBadge?: number
 }
 
-export default function Sidebar({ dealerName, dealerSlug, plan, sections, role }: SidebarProps) {
+export default function Sidebar({ dealerName, dealerSlug, plan, sections, role, solicitudesBadge = 0 }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -90,6 +92,11 @@ export default function Sidebar({ dealerName, dealerSlug, plan, sections, role }
             >
               <item.icon className="w-4 h-4 flex-shrink-0" />
               {item.label}
+              {item.section === 'solicitudes' && solicitudesBadge > 0 && (
+                <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-obsidian text-[10px] font-medium flex items-center justify-center">
+                  {solicitudesBadge > 99 ? '99+' : solicitudesBadge}
+                </span>
+              )}
             </Link>
           )
         })}

@@ -3,6 +3,40 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { notifyN8n } from '@/lib/integrations/n8n'
 import { isCountRateLimited } from '@/lib/rate-limit'
 
+const ACQUISITION_KEYS = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  'referrer', 'landing_path', 'entry_point', 'cep',
+] as const
+
+function sanitizeAcquisition(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const source = value as Record<string, unknown>
+  const result: Record<string, string> = {}
+  for (const key of ACQUISITION_KEYS) {
+    if (typeof source[key] !== 'string') continue
+    const max = key === 'referrer' || key === 'landing_path' ? 1000 : 200
+    const cleaned = source[key].trim().slice(0, max)
+    if (cleaned) result[key] = cleaned
+  }
+  return result
+}
+
+function provenance(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const source = value as Record<string, unknown>
+  return Object.fromEntries(['vehicle_type', 'timeline'].flatMap((key) => {
+    const item = source[key]
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return []
+    const row = item as Record<string, unknown>
+    return [[key, {
+      user_modified: row.user_modified === true,
+      default_kind: typeof row.default_kind === 'string'
+        ? row.default_kind.slice(0, 40)
+        : null,
+    }]]
+  }))
+}
+
 /**
  * POST /api/search-alerts
  * Persists a search alert server-side (table: search_alerts) for BOTH anonymous and
@@ -54,6 +88,8 @@ export async function POST(req: NextRequest) {
     timeline:     body.timeline ? String(body.timeline).trim() : null,
     is_active:    true,
     source:       userId ? 'web_account' : 'web_anonymous',
+    field_provenance: provenance(body.field_provenance),
+    acquisition_context: sanitizeAcquisition(body.acquisition_context),
   }
 
   const { data, error } = await admin

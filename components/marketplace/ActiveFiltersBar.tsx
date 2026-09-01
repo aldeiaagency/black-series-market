@@ -2,6 +2,8 @@
 
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
+import { findCarCategoryLabel, findMotoCategoryLabel } from '@/lib/vehicle-categories'
+import { esGroupThousands } from '@/lib/utils'
 
 // ─── Label mapping ────────────────────────────────────────────────────────────
 
@@ -33,31 +35,18 @@ const DRIVE_LABELS: Record<string, string> = {
   rwd: 'Tracción trasera', fwd: 'Tracción delantera', awd: 'Tracción total', '4wd': '4x4',
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  // Coches
-  supercars: 'Supercars', luxury_executive: 'Lujo y Ejecutivo',
-  premium_modern: 'Premium Moderno', sport_performance: 'Sport y Performance',
-  classics_youngtimers: 'Clásicos y Youngtimers', enthusiast_selection: 'Selección Entusiasta',
-  // Motos
-  deportivas: 'Deportivas', naked: 'Naked',
-  touring_adventure: 'Touring / Adventure', custom_cruiser: 'Custom / Cruiser',
-  clasicas_youngtimers: 'Clásicas y youngtimers', scooter_premium: 'Scooter premium',
-  trail_premium: 'Trail premium', ediciones_especiales: 'Ediciones especiales',
-  entusiastas: 'Motos para entusiastas',
-}
-
 function getLabel(key: string, value: string): string | null {
   switch (key) {
     case 'search':      return `"${value}"`
     case 'marca':       return value.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     case 'modelo':      return value.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     case 'version':     return `Versión: ${value}`
-    case 'categoria':   return CATEGORY_LABELS[value] || value
+    case 'categoria':   return findCarCategoryLabel(value) || findMotoCategoryLabel(value) || value
     case 'anioMin':     return `Desde ${value}`
     case 'anioMax':     return `Hasta ${value}`
-    case 'precioMin':   return `Desde ${parseInt(value).toLocaleString('es-ES')} €`
-    case 'precioMax':   return `Hasta ${parseInt(value).toLocaleString('es-ES')} €`
-    case 'kmMax':       return `Máx. ${parseInt(value).toLocaleString('es-ES')} km`
+    case 'precioMin':   return `Desde ${esGroupThousands(parseInt(value))} €`
+    case 'precioMax':   return `Hasta ${esGroupThousands(parseInt(value))} €`
+    case 'kmMax':       return `Máx. ${esGroupThousands(parseInt(value))} km`
     case 'cvMin':       return `Desde ${value} CV`
     case 'cvMax':       return `Hasta ${value} CV`
     case 'tipo':        return value
@@ -123,8 +112,8 @@ export default function ActiveFiltersBar({ className = '' }: ActiveFiltersBarPro
           key={f.key}
           onClick={() => removeFilter(f.key)}
           className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 text-xs
-            border border-[#2A2A2A] bg-[#0D0D0D] text-[#9A9A9A]
-            hover:border-[#C6A64B]/30 hover:text-[#C6A64B]
+            border border-bsm-border bg-[#0D0D0D] text-[#9A9A9A]
+            hover:border-gold/30 hover:text-gold
             transition-colors duration-150 group"
           aria-label={`Quitar filtro: ${f.label}`}
         >

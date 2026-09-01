@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/analytics/client'
 
 const STORAGE_KEY = 'blm_favorites'
 
@@ -76,14 +77,10 @@ export function useFavorites() {
       }
 
       // Track save/unsave (non-blocking, fire-and-forget)
-      fetch('/api/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_type: isSaved ? 'vehicle_unsaved' : 'vehicle_saved',
-          vehicle_id: vehicleId,
-        }),
-      }).catch(() => {})
+      trackEvent({
+        event_type: isSaved ? 'vehicle_unsaved' : 'favorite_added',
+        vehicle_id: vehicleId,
+      })
 
       return next
     })

@@ -12,9 +12,11 @@ import FavoriteButton from '@/components/marketplace/FavoriteButton'
 import CompareButton from '@/components/marketplace/CompareButton'
 import DealerInlineCard from '@/components/marketplace/DealerInlineCard'
 import TrackLink from '@/components/marketplace/TrackLink'
+import MobileContactBar from '@/components/marketplace/MobileContactBar'
 import ShareButton from '@/components/social/ShareButton'
 import StickyAwareSidebar from '@/components/marketplace/StickyAwareSidebar'
 import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LABELS, VEHICLE_CONDITION_LABELS } from '@/lib/utils'
+import { findCarCategorySlug, findCarCategoryLabel, findMotoCategorySlug, findMotoCategoryLabel } from '@/lib/vehicle-categories'
 import type { Vehicle } from '@/lib/types'
 
 export type ContactMode = 'classic' | 'assistant' | 'assistant_preview'
@@ -85,7 +87,7 @@ function HistoryRow({
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   active: { label: 'Disponible', cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5' },
-  paused: { label: 'Reservado',  cls: 'text-[#C6A64B] border-[#C6A64B]/30' },
+  paused: { label: 'Reservado',  cls: 'text-gold border-gold/30' },
   sold:   { label: 'Vendido',    cls: 'text-[#9A9A9A] border-[#3A3A3A]' },
 }
 
@@ -106,6 +108,11 @@ export default function VehicleDetailContent({
 }: Props) {
   const isCar = vehicle.vehicle_type === 'car'
   const title = `${vehicle.brand_name} ${vehicle.model_name}${vehicle.version ? ' ' + vehicle.version : ''}`
+  // Mismo criterio que coches/motos [slug]/page.tsx: categoría real + marca vía join a
+  // `brands`, con fallback a filtro por query si el dealer usó un brand_name libre.
+  const categorySlug = isCar ? findCarCategorySlug(vehicle.category) : findMotoCategorySlug(vehicle.category)
+  const categoryLabel = isCar ? findCarCategoryLabel(vehicle.category) : findMotoCategoryLabel(vehicle.category)
+  const brandSlug = (vehicle as any).brand?.slug as string | undefined
   const loc = vehicle.location_province || vehicle.dealer?.location_city || vehicle.registration_country || null
   const statusBadge = STATUS_BADGE[vehicle.status as keyof typeof STATUS_BADGE]
   const showFeatured = vehicle.status === 'active' && vehicle.is_featured && hasActiveBoost(vehicle.featured_until)
@@ -193,22 +200,34 @@ export default function VehicleDetailContent({
 
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
+    <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-24 lg:pb-20">
+
+      <MobileContactBar vehicle={vehicle} title={title} />
 
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-bsm-text-muted mb-8 flex-wrap">
-        <Link href="/" className="hover:text-gold transition-colors">Inicio</Link>
-        <span className="text-[#666666]">/</span>
-        <Link href={backHref} className="hover:text-gold transition-colors">{backLabel}</Link>
-        <span className="text-[#666666]">/</span>
-        <Link
-          href={`${backHref}?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}`}
-          className="hover:text-gold transition-colors"
-        >
-          {vehicle.brand_name}
-        </Link>
-        <span className="text-[#666666]">/</span>
-        <span className="text-bsm-text-secondary truncate max-w-[180px]">{vehicle.model_name}</span>
+      <nav aria-label="breadcrumb" className="mb-8">
+        <ol className="flex items-center gap-2 text-xs text-bsm-text-muted flex-wrap">
+          <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
+          <li className="text-[#666666]" aria-hidden="true">/</li>
+          <li><Link href={backHref} className="hover:text-gold transition-colors">{backLabel}</Link></li>
+          <li className="text-[#666666]" aria-hidden="true">/</li>
+          {categorySlug && (
+            <>
+              <li><Link href={`${backHref}/${categorySlug}`} className="hover:text-gold transition-colors">{categoryLabel}</Link></li>
+              <li className="text-[#666666]" aria-hidden="true">/</li>
+            </>
+          )}
+          <li>
+            <Link
+              href={brandSlug ? `/marcas/${brandSlug}` : `${backHref}?marca=${vehicle.brand_name?.toLowerCase().replace(/\s+/g, '-') ?? ''}`}
+              className="hover:text-gold transition-colors"
+            >
+              {vehicle.brand_name}
+            </Link>
+          </li>
+          <li className="text-[#666666]" aria-hidden="true">/</li>
+          <li className="text-bsm-text-secondary truncate max-w-[180px]" aria-current="page">{vehicle.model_name}</li>
+        </ol>
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -241,6 +260,9 @@ export default function VehicleDetailContent({
             <p className="text-[#8A8A8A] text-sm mt-1.5">
               {[vehicle.version, String(vehicle.year), loc].filter(Boolean).join(' · ')}
             </p>
+            <p className="text-[11px] text-[#6E6E6E] mt-1">
+              Actualizado en {fmtDate(vehicle.updated_at)}
+            </p>
 
             {/* Action buttons */}
             <div className="flex items-center gap-3 mt-5 flex-wrap">
@@ -264,21 +286,21 @@ export default function VehicleDetailContent({
 
           {/* Status banners */}
           {vehicle.status === 'sold' && (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 border border-[#2A2A2A] bg-[#0D0D0D]">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 border border-bsm-border bg-[#0D0D0D]">
               <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
-                text-[#9A9A9A] border border-[#2A2A2A] self-start sm:self-auto flex-shrink-0">
+                text-[#9A9A9A] border border-bsm-border self-start sm:self-auto flex-shrink-0">
                 Vendido
               </span>
               <p className="text-xs text-[#9E9E9E]">Esta unidad ya no está disponible.</p>
-              <Link href={backHref} className="text-xs text-[#C6A64B] hover:text-[#D4B560] transition-colors sm:ml-auto whitespace-nowrap flex-shrink-0">
+              <Link href={backHref} className="text-xs text-gold hover:text-[#D4B560] transition-colors sm:ml-auto whitespace-nowrap flex-shrink-0">
                 Ver unidades disponibles →
               </Link>
             </div>
           )}
           {vehicle.status === 'paused' && (
-            <div className="flex items-center gap-3 p-4 border border-[#C6A64B]/20 bg-[#0D0D0D]">
+            <div className="flex items-center gap-3 p-4 border border-gold/20 bg-[#0D0D0D]">
               <span className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
-                text-[#C6A64B] border border-[#C6A64B]/30 flex-shrink-0">
+                text-gold border border-gold/30 flex-shrink-0">
                 Reservado
               </span>
               <p className="text-xs text-[#8A8A8A]">Consulta disponibilidad directamente con el vendedor.</p>
@@ -302,7 +324,7 @@ export default function VehicleDetailContent({
           <div>
             <SectionTitle>Descripción del vehículo</SectionTitle>
             {vehicle.description ? (
-              <div className="text-bsm-text-secondary leading-relaxed whitespace-pre-wrap text-sm">
+              <div className="text-bsm-text-secondary leading-relaxed whitespace-pre-wrap text-base">
                 {vehicle.description}
               </div>
             ) : (
@@ -405,7 +427,7 @@ export default function VehicleDetailContent({
               <div className="border border-bsm-border p-6">
                 <div className="flex items-start gap-4 mb-4">
                   {vehicle.dealer.logo_url ? (
-                    <div className="w-12 h-12 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center overflow-hidden">
+                    <div className="w-12 h-12 flex-shrink-0 bg-[#111111] border border-bsm-border-light flex items-center justify-center overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={vehicle.dealer.logo_url}
@@ -414,7 +436,7 @@ export default function VehicleDetailContent({
                       />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 flex-shrink-0 bg-[#111111] border border-[#1E1E1E] flex items-center justify-center">
+                    <div className="w-12 h-12 flex-shrink-0 bg-[#111111] border border-bsm-border-light flex items-center justify-center">
                       <span className="font-display text-xl font-light text-gold/60">
                         {vehicle.dealer.name?.[0]}
                       </span>
@@ -474,7 +496,7 @@ export default function VehicleDetailContent({
                 <div className="bg-surface border border-bsm-border p-6">
                   <div className="mb-5">
                     <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
-                      text-[#9A9A9A] border border-[#2A2A2A] mb-3">
+                      text-[#9A9A9A] border border-bsm-border mb-3">
                       Vendido
                     </div>
                     <div className="font-display text-2xl font-light text-bsm-text-muted line-through opacity-40">
@@ -510,7 +532,7 @@ export default function VehicleDetailContent({
                 <div className="bg-surface border border-bsm-border p-6">
                   <div className="mb-5">
                     <div className="inline-flex items-center px-3 py-1 text-[10px] tracking-widest uppercase
-                      text-[#C6A64B] border border-[#C6A64B]/30 mb-3">
+                      text-gold border border-gold/30 mb-3">
                       Reservado
                     </div>
                     <div className="font-display text-3xl font-light text-bsm-text-secondary">

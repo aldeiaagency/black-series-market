@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { MessageSquare, Send, Loader2, Info, Calendar } from 'lucide-react'
 import QualifiedLeadForm from './QualifiedLeadForm'
 import AppointmentBooking from './AppointmentBooking'
+import { getAcquisitionContext } from '@/lib/analytics/client'
 
 interface Msg { role: 'assistant' | 'user'; text: string }
 type Mode = 'init' | 'consent' | 'chat' | 'classic' | 'done' | 'booking'
@@ -55,7 +56,7 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
         const res  = await fetch('/api/assistant/session', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ vehicle_id: vehicleId }),
+          body:    JSON.stringify({ vehicle_id: vehicleId, acquisition_context: getAcquisitionContext() }),
         })
         if (cancelled) return
         const data = await res.json()
@@ -183,7 +184,7 @@ export default function AssistantWidget({ vehicleId, dealerId, vehicleTitle, dea
           type="checkbox"
           checked={consent}
           onChange={e => setConsent(e.target.checked)}
-          className="mt-0.5 accent-[#C6A64B]"
+          className="mt-0.5 accent-gold"
         />
         <span className="text-xs text-bsm-text-muted leading-relaxed">
           Acepto que mis datos sean compartidos con el vendedor para gestionar mi consulta.{' '}

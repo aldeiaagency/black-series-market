@@ -134,8 +134,8 @@ export default async function HomePage() {
 
             {/* Eyebrow */}
             <div className="flex items-center gap-3 mb-10">
-              <div className="h-px w-10 bg-[#C6A64B]/60" />
-              <span className="text-[10px] text-[#C6A64B]/80 tracking-[0.35em] uppercase font-medium">
+              <div className="h-px w-10 bg-gold/60" />
+              <span className="text-[10px] text-gold/80 tracking-[0.35em] uppercase font-medium">
                 ENCUENTRA EL VEHÍCULO DE TUS SUEÑOS
               </span>
             </div>
@@ -167,7 +167,7 @@ export default async function HomePage() {
               <Link
                 href="/vehiculos-a-la-carta"
                 className="inline-flex items-center gap-2 px-6 py-3 text-sm text-[#9A9A9A]
-                  border border-[#2A2A2A] hover:border-[#3A3A3A] hover:text-[#C9C9C9]
+                  border border-bsm-border hover:border-[#3A3A3A] hover:text-[#C9C9C9]
                   transition-all duration-200 tracking-wide"
               >
                 ¿No encuentras tu vehículo?
@@ -194,8 +194,8 @@ export default async function HomePage() {
           <div className="mt-16 lg:mt-24 grid grid-cols-2 md:grid-cols-4 gap-px border border-[#161616] bg-[#161616]">
             {PILLARS.map(({ label, icon: Icon }) => (
               <div key={label} className="bg-[#0A0A0A] px-6 py-8 flex flex-col items-center text-center">
-                <Icon className="w-6 h-6 text-[#C6A64B]/60 mb-4" strokeWidth={1.25} />
-                <div className="h-px w-8 bg-[#C6A64B]/40 mb-4" />
+                <Icon className="w-6 h-6 text-gold/60 mb-4" strokeWidth={1.25} />
+                <div className="h-px w-8 bg-gold/40 mb-4" />
                 <div className="text-[11px] text-[#8A8A8A] uppercase tracking-[0.18em] leading-relaxed">
                   {label}
                 </div>
@@ -211,8 +211,8 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-px w-8 bg-[#C6A64B]/50" />
-                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">
+                <div className="h-px w-8 bg-gold/50" />
+                <span className="text-[10px] text-gold/70 tracking-[0.3em] uppercase">
                   Selección destacada
                 </span>
               </div>
@@ -257,8 +257,8 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-px w-8 bg-[#C6A64B]/50" />
-                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">
+                <div className="h-px w-8 bg-gold/50" />
+                <span className="text-[10px] text-gold/70 tracking-[0.3em] uppercase">
                   Novedades
                 </span>
               </div>
@@ -282,8 +282,8 @@ export default async function HomePage() {
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
           <div className="max-w-3xl mb-14">
             <div className="flex items-center gap-3 mb-5">
-              <div className="h-px w-8 bg-[#C6A64B]/40" />
-              <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+              <div className="h-px w-8 bg-gold/40" />
+              <span className="text-[10px] text-gold/60 tracking-[0.3em] uppercase">
                 NUESTRO ESTÁNDAR
               </span>
             </div>
@@ -314,8 +314,8 @@ export default async function HomePage() {
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="p-8 border border-[#181818] hover:border-[#242424] transition-colors duration-300">
-                <div className="w-9 h-9 border border-[#C6A64B]/20 flex items-center justify-center mb-6">
-                  <Icon className="w-4 h-4 text-[#C6A64B]/60" />
+                <div className="w-9 h-9 border border-gold/20 flex items-center justify-center mb-6">
+                  <Icon className="w-4 h-4 text-gold/60" />
                 </div>
                 <h3 className="font-medium text-[#D4D4D4] mb-3 tracking-wide">{title}</h3>
                 <p className="text-[13px] text-[#8A8A8A] leading-relaxed">{desc}</p>
@@ -331,8 +331,8 @@ export default async function HomePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-px w-8 bg-[#C6A64B]/50" />
-                <span className="text-[10px] text-[#C6A64B]/70 tracking-[0.3em] uppercase">
+                <div className="h-px w-8 bg-gold/50" />
+                <span className="text-[10px] text-gold/70 tracking-[0.3em] uppercase">
                   Profesionales verificados
                 </span>
               </div>
@@ -356,8 +356,8 @@ export default async function HomePage() {
   <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
     <div className="mb-12">
       <div className="flex items-center gap-3 mb-4">
-        <div className="h-px w-8 bg-[#C6A64B]/40" />
-        <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+        <div className="h-px w-8 bg-gold/40" />
+        <span className="text-[10px] text-gold/60 tracking-[0.3em] uppercase">
           Cómo te ayuda Black Label
         </span>
       </div>
@@ -395,7 +395,7 @@ export default async function HomePage() {
         },
       ].map((item) => (
         <div key={item.n} className="bg-[#0A0A0A] p-6 md:p-8">
-          <div className="font-display text-xs text-[#C6A64B]/40 mb-4 tracking-[0.2em]">
+          <div className="font-display text-xs text-gold/40 mb-4 tracking-[0.2em]">
             {item.n}
           </div>
           <h3 className="text-[13px] font-medium text-[#C9C9C9] mb-3 leading-snug">
@@ -416,8 +416,8 @@ export default async function HomePage() {
     <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-10 lg:gap-16 items-stretch">
       <div className="max-w-lg">
         <div className="flex items-center gap-3 mb-5">
-          <div className="h-px w-8 bg-[#C6A64B]/40" />
-          <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+          <div className="h-px w-8 bg-gold/40" />
+          <span className="text-[10px] text-gold/60 tracking-[0.3em] uppercase">
             Vehículos a la carta
           </span>
         </div>
@@ -440,7 +440,7 @@ export default async function HomePage() {
             'Recibe aviso si aparece una oportunidad compatible con lo que estás buscando',
           ].map((point) => (
             <li key={point} className="flex items-start gap-3">
-              <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
+              <span className="text-gold/60 mt-0.5 flex-shrink-0">—</span>
               <span className="text-[13px] text-[#8A8A8A] leading-relaxed">
                 {point}
               </span>
@@ -465,7 +465,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden">
+      <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-bsm-border-light bg-[#080808] overflow-hidden">
         <Image
           src="/images/hero/vehicle-concierge-black-label.webp"
           alt="Búsqueda personalizada de coche o moto premium en Black Label"
@@ -479,7 +479,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#080808]/85 via-[#080808]/10 to-[#080808]/20" />
 
         <div className="relative z-10 h-full flex flex-col justify-end p-5 md:p-7 lg:p-8">
-          <div className="w-full max-w-lg border border-[#1E1E1E] bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
+          <div className="w-full max-w-lg border border-bsm-border-light bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
             <p className="text-[10px] text-[#9E9E9E] uppercase tracking-widest mb-4">
               ¿Buscas algo muy concreto?
             </p>
@@ -508,7 +508,7 @@ export default async function HomePage() {
     <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-stretch">
 
       {/* Imagen — izquierda en desktop, arriba en mobile */}
-      <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-[#1E1E1E] bg-[#080808] overflow-hidden order-first">
+      <div className="relative w-full min-h-[440px] lg:min-h-[500px] border border-bsm-border-light bg-[#080808] overflow-hidden order-first">
         <Image
           src="/images/hero/professional-showroom-black-label.webp"
           alt="Showroom profesional premium con vehículo revisado para Black Label"
@@ -522,7 +522,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#080808]/85 via-[#080808]/15 to-[#080808]/20" />
 
         <div className="relative z-10 h-full flex flex-col justify-end p-5 md:p-7 lg:p-8">
-          <div className="w-full max-w-lg border border-[#1E1E1E] bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
+          <div className="w-full max-w-lg border border-bsm-border-light bg-[#080808]/72 backdrop-blur-sm p-5 md:p-6">
             <p className="text-[10px] text-[#9E9E9E] uppercase tracking-widest mb-4">
               Qué queremos publicar
             </p>
@@ -538,7 +538,7 @@ export default async function HomePage() {
                   key={c}
                   className="flex items-start gap-2.5 text-[12px] text-[#9A9A9A] leading-relaxed"
                 >
-                  <span className="text-[#C6A64B]/50 mt-0.5 flex-shrink-0">→</span>
+                  <span className="text-gold/50 mt-0.5 flex-shrink-0">→</span>
                   {c}
                 </li>
               ))}
@@ -559,8 +559,8 @@ export default async function HomePage() {
       {/* Texto — derecha en desktop */}
       <div className="max-w-xl lg:py-4">
         <div className="flex items-center gap-3 mb-5">
-          <div className="h-px w-8 bg-[#C6A64B]/30" />
-          <span className="text-[10px] text-[#C6A64B]/50 tracking-[0.3em] uppercase">
+          <div className="h-px w-8 bg-gold/30" />
+          <span className="text-[10px] text-gold/50 tracking-[0.3em] uppercase">
             Para showrooms, concesionarios y especialistas
           </span>
         </div>
@@ -588,7 +588,7 @@ export default async function HomePage() {
             'Tu propio perfil profesional: catálogo completo, ubicación y contacto directo del comprador',
           ].map((point) => (
             <li key={point} className="flex items-start gap-3">
-              <span className="text-[#C6A64B]/60 mt-0.5 flex-shrink-0">—</span>
+              <span className="text-gold/60 mt-0.5 flex-shrink-0">—</span>
               <span className="text-[13px] text-[#8A8A8A] leading-relaxed">
                 {point}
               </span>

@@ -78,7 +78,7 @@ export default function Pagination({
             Anterior
           </Link>
         ) : (
-          <span className="flex items-center gap-1 px-3 py-2 text-sm text-[#3A3A3A] border border-[#1E1E1E] select-none">
+          <span className="flex items-center gap-1 px-3 py-2 text-sm text-[#3A3A3A] border border-bsm-border-light select-none">
             <ChevronLeft className="w-4 h-4" />
             Anterior
           </span>
@@ -102,8 +102,8 @@ export default function Pagination({
                 aria-label={`Página ${p}`}
                 className={`w-9 h-9 flex items-center justify-center text-sm border transition-colors ${
                   p === page
-                    ? 'border-[#C6A64B]/50 bg-[#C6A64B]/10 text-[#C6A64B] font-medium pointer-events-none'
-                    : 'border-bsm-border text-bsm-text-muted hover:border-[#C6A64B]/30 hover:text-bsm-text-primary'
+                    ? 'border-gold/50 bg-gold/10 text-gold font-medium pointer-events-none'
+                    : 'border-bsm-border text-bsm-text-muted hover:border-gold/30 hover:text-bsm-text-primary'
                 }`}
               >
                 {p}
@@ -124,7 +124,7 @@ export default function Pagination({
             <ChevronRight className="w-4 h-4" />
           </Link>
         ) : (
-          <span className="flex items-center gap-1 px-3 py-2 text-sm text-[#3A3A3A] border border-[#1E1E1E] select-none">
+          <span className="flex items-center gap-1 px-3 py-2 text-sm text-[#3A3A3A] border border-bsm-border-light select-none">
             Siguiente
             <ChevronRight className="w-4 h-4" />
           </span>

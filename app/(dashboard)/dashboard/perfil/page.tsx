@@ -217,7 +217,7 @@ export default function PerfilPage() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1.5" />
             ) : (
-              <span className="font-display text-2xl font-light text-[#C6A64B]/40 select-none">{initial}</span>
+              <span className="font-display text-2xl font-light text-gold/40 select-none">{initial}</span>
             )}
           </div>
           <div className="flex flex-col gap-2">

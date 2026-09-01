@@ -1,0 +1,211 @@
+{
+  "name": "WF-P5 — SLA de acuse",
+  "nodes": [
+    {
+      "id": "p5sla-sticky",
+      "name": "Notas — WF-P5 SLA",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [60, 60],
+      "parameters": {
+        "content": "## P5 punto 4 — SLA de acuse\n\nCron cada hora. Revisa `lead_handoffs` con entrega confirmada y sin acuse.\n\n**Simplificación v1, a propósito**: el SLA de growth marketing dice \"≤1 día laborable\" — esta primera versión usa 24h de calendario, no día laborable real (no distingue fin de semana). Un handoff entregado un viernes por la tarde se marcaría vencido el sábado, no el lunes. Anotado como limitación conocida, no oculta.\n\n**Flujo:** 20-24h sin acuse → recordatorio suave al showroom (email). >24h sin acuse → escalado a H por Slack, deja de insistir al showroom.\n\n**Variables necesarias:** SUPABASE_URL, SUPABASE_SERVICE_KEY, SLACK_WEBHOOK_URL, MARKET_URL",
+        "height": 280,
+        "width": 320
+      }
+    },
+    {
+      "id": "p5sla-cron",
+      "name": "Cron — cada hora",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [420, 300],
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 1 }] }
+      }
+    },
+    {
+      "id": "p5sla-get-handoffs",
+      "name": "Supabase — Handoffs sin acuse",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/lead_handoffs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "delivery_confirmed_at", "value": "not.is.null" },
+            { "name": "acknowledged_at", "value": "is.null" },
+            { "name": "select", "value": "id,lead_id,dealer_id,delivery_confirmed_at,sla_reminder_sent_at,sla_escalated_at,dealer:dealers(name,email),lead:leads(buyer_name,vehicle:vehicles(brand_name,model_name,year))" },
+            { "name": "limit", "value": "200" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "p5sla-classify",
+      "name": "Clasificar por SLA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 300],
+      "parameters": {
+        "jsCode": "const now = Date.now();\nconst rows = $input.all().map(i => i.json);\nconst out = [];\n\nfor (const r of rows) {\n  const deliveredAt = new Date(r.delivery_confirmed_at).getTime();\n  const hoursElapsed = (now - deliveredAt) / (1000 * 60 * 60);\n  const vehicle = r.lead?.vehicle;\n  const vehicleTitle = vehicle ? [vehicle.brand_name, vehicle.model_name, vehicle.year].filter(Boolean).join(' ') : 'un vehículo';\n\n  if (hoursElapsed > 24 && !r.sla_escalated_at) {\n    out.push({ json: { action: 'escalate', handoffId: r.id, dealerName: r.dealer?.name || 'showroom', vehicleTitle, hoursElapsed: Math.round(hoursElapsed) } });\n  } else if (hoursElapsed >= 20 && hoursElapsed <= 24 && !r.sla_reminder_sent_at) {\n    out.push({ json: { action: 'remind', handoffId: r.id, dealerEmail: r.dealer?.email, dealerName: r.dealer?.name || 'showroom', vehicleTitle } });\n  }\n}\n\nreturn out;"
+      }
+    },
+    {
+      "id": "p5sla-route",
+      "name": "¿Recordatorio o escalado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1080, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.action }}", "rightValue": "remind", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "p5sla-remind-prep",
+      "name": "Preparar recordatorio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 180],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\nconst MAIL_FROM = 'Black Label Market <notificaciones@blacklabelmarket.es>';\n\nconst html = `<p>Hola,</p>\n<p>Tienes una oportunidad sobre <strong>${d.vehicleTitle}</strong> pendiente de confirmar recepción — vence en las próximas horas.</p>\n<p><a href=\"${MARKET_URL}/dashboard/oportunidades\">Ver en tu panel →</a></p>\n<p>El equipo de Black Label Market</p>`;\n\nreturn [{ json: { ...d, emailPayload: d.dealerEmail ? { from: MAIL_FROM, to: [d.dealerEmail], subject: `Oportunidad pendiente de confirmar — ${d.vehicleTitle}`, html } : null } }];"
+      }
+    },
+    {
+      "id": "p5sla-send-remind",
+      "name": "Enviar recordatorio",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1520, 180],
+      "parameters": {
+        "fromEmail": "={{ $json.emailPayload ? $json.emailPayload.from : \"\" }}",
+        "toEmail": "={{ $json.emailPayload ? $json.emailPayload.to[0] : \"\" }}",
+        "subject": "={{ $json.emailPayload ? $json.emailPayload.subject : \"(skip)\" }}",
+        "emailType": "html",
+        "html": "={{ $json.emailPayload ? $json.emailPayload.html : \"\" }}"
+      },
+      "credentials": {
+        "smtp": { "id": "ktAl9FVvAn6iPZRo", "name": "Hostinger SMTP - notificaciones" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "p5sla-mark-reminded",
+      "name": "Supabase — Marcar recordatorio enviado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1740, 180],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/lead_handoffs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "id", "value": "=eq.{{ $json.handoffId }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={ \"sla_reminder_sent_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "p5sla-escalate-prep",
+      "name": "Preparar escalado Slack",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 420],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nreturn [{ json: { ...d, slackPayload: { text: `:rotating_light: *SLA de acuse vencido* — ${d.dealerName}, oportunidad sobre *${d.vehicleTitle}* sin confirmar hace ${d.hoursElapsed}h.` } } }];"
+      }
+    },
+    {
+      "id": "p5sla-send-slack",
+      "name": "Slack — Avisar a H",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1520, 420],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ JSON.stringify($json.slackPayload) }}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    },
+    {
+      "id": "p5sla-mark-escalated",
+      "name": "Supabase — Marcar escalado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1740, 420],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/lead_handoffs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "id", "value": "=eq.{{ $json.handoffId }}" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={ \"sla_escalated_at\": \"{{ new Date().toISOString() }}\" }",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    }
+  ],
+  "connections": {
+    "Cron — cada hora": { "main": [[{ "node": "Supabase — Handoffs sin acuse", "type": "main", "index": 0 }]] },
+    "Supabase — Handoffs sin acuse": { "main": [[{ "node": "Clasificar por SLA", "type": "main", "index": 0 }]] },
+    "Clasificar por SLA": { "main": [[{ "node": "¿Recordatorio o escalado?", "type": "main", "index": 0 }]] },
+    "¿Recordatorio o escalado?": {
+      "main": [
+        [{ "node": "Preparar recordatorio", "type": "main", "index": 0 }],
+        [{ "node": "Preparar escalado Slack", "type": "main", "index": 0 }]
+      ]
+    },
+    "Preparar recordatorio": { "main": [[{ "node": "Enviar recordatorio", "type": "main", "index": 0 }]] },
+    "Enviar recordatorio": { "main": [[{ "node": "Supabase — Marcar recordatorio enviado", "type": "main", "index": 0 }]] },
+    "Preparar escalado Slack": { "main": [[{ "node": "Slack — Avisar a H", "type": "main", "index": 0 }]] },
+    "Slack — Avisar a H": { "main": [[{ "node": "Supabase — Marcar escalado", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

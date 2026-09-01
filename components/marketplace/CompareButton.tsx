@@ -28,10 +28,10 @@ export default function CompareButton({ vehicle, variant = 'card', className }: 
         className={cn(
           'flex items-center gap-2 px-3 py-1.5 border text-xs transition-all duration-200',
           sel
-            ? 'border-[#C6A64B]/40 text-[#C6A64B] bg-[#C6A64B]/5'
+            ? 'border-gold/40 text-gold bg-gold/5'
             : disabled
               ? 'border-[#1A1A1A] text-[#8A8A8A] cursor-not-allowed'
-              : 'border-[#2A2A2A] text-[#8A8A8A] hover:border-[#C6A64B]/30 hover:text-[#C9C9C9]',
+              : 'border-bsm-border text-[#8A8A8A] hover:border-gold/30 hover:text-[#C9C9C9]',
           className
         )}
         title={disabled ? 'Máximo 3 vehículos en comparador' : undefined}
@@ -49,10 +49,10 @@ export default function CompareButton({ vehicle, variant = 'card', className }: 
       className={cn(
         'w-9 h-9 flex items-center justify-center bg-black/75 backdrop-blur-md border transition-all duration-200',
         sel
-          ? 'border-[#C6A64B]/50 text-[#C6A64B]'
+          ? 'border-gold/50 text-gold'
           : disabled
-            ? 'border-[#1A1A1A] text-[#2A2A2A] cursor-not-allowed'
-            : 'border-[#3A3A3A] text-[#A0A0A0] hover:border-[#C6A64B]/50 hover:text-white hover:bg-black/90',
+            ? 'border-[#1A1A1A] text-bsm-border cursor-not-allowed'
+            : 'border-[#3A3A3A] text-[#A0A0A0] hover:border-gold/50 hover:text-white hover:bg-black/90',
         className
       )}
       title={disabled ? 'Máximo 3 vehículos' : sel ? 'Quitar del comparador' : 'Añadir al comparador'}

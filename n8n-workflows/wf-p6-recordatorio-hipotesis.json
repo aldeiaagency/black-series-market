@@ -1,0 +1,163 @@
+{
+  "name": "WF-P6 — Recordatorio mensual del registro de hipótesis",
+  "nodes": [
+    {
+      "id": "p6rec-sticky",
+      "name": "Notas — WF-P6 Recordatorio",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [60, 60],
+      "parameters": {
+        "content": "## P6 — Recordatorio mensual\n\nCron el día 1 de cada mes. Cuenta actividad real de los últimos 30 días (leads, respuestas de seguimiento, señales de comportamiento del comprador) y avisa a H por Slack para que revise `agency/registro_hipotesis_comprador.md`.\n\n**No interpreta nada** — solo cuenta y avisa. Si el volumen total es bajo, lo dice explícitamente en vez de sugerir una lectura que los datos no sostienen.\n\nConteo por longitud de array (limit=1000 por consulta, de sobra para el volumen real de hoy) — no depende de leer cabeceras HTTP, evita cualquier ambigüedad sobre qué expone el nodo.\n\n**Variables:** SUPABASE_URL, SUPABASE_SERVICE_KEY, SLACK_WEBHOOK_URL",
+        "height": 300,
+        "width": 340
+      }
+    },
+    {
+      "id": "p6rec-cron",
+      "name": "Cron mensual",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [420, 300],
+      "parameters": {
+        "rule": { "interval": [{ "field": "months", "triggerAtDayOfMonth": 1, "triggerAtHour": 9 }] }
+      }
+    },
+    {
+      "id": "p6rec-get-leads",
+      "name": "Supabase — Leads (30 días)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 160],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "created_at", "value": "=gte.{{ new Date(Date.now() - 30*24*60*60*1000).toISOString() }}" },
+            { "name": "select", "value": "id" },
+            { "name": "limit", "value": "1000" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "p6rec-get-followups",
+      "name": "Supabase — Respuestas de seguimiento (30 días)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/opportunity_followups",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "responded_at", "value": "=gte.{{ new Date(Date.now() - 30*24*60*60*1000).toISOString() }}" },
+            { "name": "select", "value": "id" },
+            { "name": "limit", "value": "1000" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "p6rec-get-events",
+      "name": "Supabase — Señales de comportamiento (30 días)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 440],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/analytics_events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "event_type", "value": "in.(favorite_added,search_alert_created,filter_used,comparison_created)" },
+            { "name": "created_at", "value": "=gte.{{ new Date(Date.now() - 30*24*60*60*1000).toISOString() }}" },
+            { "name": "select", "value": "event_type" },
+            { "name": "limit", "value": "2000" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "p6rec-merge",
+      "name": "Combinar conteos",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [860, 300],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": { "includeUnpaired": true }
+      }
+    },
+    {
+      "id": "p6rec-prepare",
+      "name": "Preparar aviso Slack",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 300],
+      "parameters": {
+        "jsCode": "const leadsCount = $('Supabase — Leads (30 días)').all().length;\nconst followupsCount = $('Supabase — Respuestas de seguimiento (30 días)').all().length;\nconst events = $('Supabase — Señales de comportamiento (30 días)').all().map(i => i.json);\n\nconst counts = { favorite_added: 0, search_alert_created: 0, filter_used: 0, comparison_created: 0 };\nfor (const e of events) { if (counts[e.event_type] !== undefined) counts[e.event_type]++; }\n\nconst totalSignal = leadsCount + followupsCount + events.length;\nconst lowVolumeNote = totalSignal < 5\n  ? '\\n\\n_Volumen todavía bajo — no saques conclusiones de esto solo, espera a acumular más._'\n  : '';\n\nconst text = `:bar_chart: *Revisión mensual — Registro de hipótesis del comprador*\\n`\n  + `Actividad de los últimos 30 días:\\n`\n  + `• Leads nuevos: ${leadsCount}\\n`\n  + `• Respuestas de seguimiento registradas: ${followupsCount}\\n`\n  + `• Alertas creadas: ${counts.search_alert_created} · Comparaciones: ${counts.comparison_created} · Favoritos: ${counts.favorite_added} · Filtros usados: ${counts.filter_used}`\n  + lowVolumeNote\n  + `\\n\\nRevisa \\`agency/registro_hipotesis_comprador.md\\` cuando tengas un rato.`;\n\nreturn [{ json: { slackPayload: { text } } }];"
+      }
+    },
+    {
+      "id": "p6rec-send-slack",
+      "name": "Slack — Aviso a H",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1300, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ JSON.stringify($json.slackPayload) }}",
+        "options": { "response": { "response": { "neverError": true } } }
+      }
+    }
+  ],
+  "connections": {
+    "Cron mensual": {
+      "main": [[
+        { "node": "Supabase — Leads (30 días)", "type": "main", "index": 0 },
+        { "node": "Supabase — Respuestas de seguimiento (30 días)", "type": "main", "index": 0 },
+        { "node": "Supabase — Señales de comportamiento (30 días)", "type": "main", "index": 0 }
+      ]]
+    },
+    "Supabase — Leads (30 días)": { "main": [[{ "node": "Combinar conteos", "type": "main", "index": 0 }]] },
+    "Supabase — Respuestas de seguimiento (30 días)": { "main": [[{ "node": "Combinar conteos", "type": "main", "index": 1 }]] },
+    "Supabase — Señales de comportamiento (30 días)": { "main": [[{ "node": "Combinar conteos", "type": "main", "index": 2 }]] },
+    "Combinar conteos": { "main": [[{ "node": "Preparar aviso Slack", "type": "main", "index": 0 }]] },
+    "Preparar aviso Slack": { "main": [[{ "node": "Slack — Aviso a H", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

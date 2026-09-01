@@ -28,7 +28,7 @@ function Row({ label, values, cols }: { label: string; values: (string | null | 
     <div className={`grid border-b border-bsm-border ${grid}`}>
       <div className="px-4 py-3 text-xs text-bsm-text-muted bg-[#0A0A0A] flex items-center">{label}</div>
       {values.map((v, i) => (
-        <div key={i} className={`px-4 py-3 flex items-center border-l border-bsm-border ${!allSame && v ? 'bg-[#C6A64B]/3' : ''}`}>
+        <div key={i} className={`px-4 py-3 flex items-center border-l border-bsm-border ${!allSame && v ? 'bg-gold/3' : ''}`}>
           <Cell value={v} />
         </div>
       ))}
@@ -70,7 +70,7 @@ export default function CompareExpandToggle({ vehicles, cols }: Props) {
       <div className="flex justify-center py-6 border-b border-bsm-border">
         <button
           onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-2 text-sm text-[#8A8A8A] hover:text-gold border border-[#2A2A2A] hover:border-gold/30 px-6 py-2.5 transition-all duration-200"
+          className="flex items-center gap-2 text-sm text-[#8A8A8A] hover:text-gold border border-bsm-border hover:border-gold/30 px-6 py-2.5 transition-all duration-200"
         >
           {expanded ? (
             <>

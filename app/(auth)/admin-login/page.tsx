@@ -66,18 +66,21 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="label-base">Email</label>
+              <label className="label-base" htmlFor="admin-login-email">Email</label>
               <input
+                id="admin-login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input-base"
                 autoComplete="username"
+                aria-invalid={!!error}
                 required
               />
             </div>
             <div>
               <PasswordInput
+                id="admin-login-password"
                 value={password}
                 onChange={setPassword}
                 autoComplete="current-password"
@@ -91,7 +94,7 @@ export default function AdminLoginPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
+              <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
                 {error}
               </p>
             )}

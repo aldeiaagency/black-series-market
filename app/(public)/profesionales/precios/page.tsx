@@ -165,8 +165,10 @@ export default async function PreciosPage() {
           <p className="text-xs text-gold tracking-widest uppercase mb-1">Varias sedes</p>
           <h3 className="font-display text-2xl font-light mb-2">¿Operas más de una sede?</h3>
           <p className="text-sm text-bsm-text-secondary max-w-lg">
-            Si gestionas varias ubicaciones o marcas, ponte en contacto con nosotros y te preparamos
-            una propuesta a medida con visión consolidada de inventario y oportunidades.
+            Cuenta matriz Elite + 50% del precio base por cada sede adicional, con las condiciones de
+            Elite en cada una (100 vehículos, 10 usuarios, 3 boosts, stock automatizado) y visión
+            consolidada para la dirección del grupo. <strong className="text-bsm-text-primary">Desde 1.348,50 €/mes</strong> (2 sedes) —
+            a partir de 4 sedes, condiciones a medida.
           </p>
         </div>
         <Link href="/profesionales/solicitar-acceso?plan=grupo" className="btn-outline px-6 whitespace-nowrap flex-shrink-0">
@@ -192,7 +194,7 @@ export default async function PreciosPage() {
           },
           {
             q: '¿El pago garantiza la publicación?',
-            a: 'No. Todos los perfiles y vehículos pasan verificación editorial previa a la publicación, idéntica para todos los planes.',
+            a: 'No. El acceso a Black Label Market requiere pasar nuestro proceso de admisión de calidad y reputación — por eso todos los showrooms publicados aparecen como verificados. Los vehículos deben pertenecer a nuestro catálogo de marcas y modelos seleccionados.',
           },
           {
             q: '¿Los precios incluyen IVA?',

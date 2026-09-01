@@ -73,7 +73,7 @@ export default function VehiculosALaCartaPage() {
             <ul className="space-y-3">
               {EXAMPLES.map((ex) => (
                 <li key={ex} className="flex items-start gap-2.5 text-xs text-[#8A8A8A] leading-relaxed">
-                  <span className="text-[#C6A64B] mt-0.5">→</span>
+                  <span className="text-gold mt-0.5">→</span>
                   {ex}
                 </li>
               ))}

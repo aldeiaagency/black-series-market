@@ -279,7 +279,7 @@ export default function SobreNosotrosPage() {
             Explorar el catálogo <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="border border-[#C6A64B]/20 bg-[#C6A64B]/3 p-7">
+        <div className="border border-gold/20 bg-gold/3 p-7">
           <p className="text-xs text-gold tracking-widest uppercase mb-3">Profesionales</p>
           <p className="text-sm text-bsm-text-secondary leading-relaxed mb-5">
             Publica tu inventario y llega a compradores que ya saben lo que buscan.

@@ -37,7 +37,7 @@ export default async function OportunidadesPage() {
 
   const { data: rawLeads } = await admin
     .from('leads')
-    .select('id, status, created_at, buyer_name, buyer_email, buyer_phone, buyer_whatsapp, message, source_channel, qualification, vehicle:vehicles(brand_name, model_name, year)')
+    .select('id, status, created_at, buyer_name, buyer_email, buyer_phone, buyer_whatsapp, message, source_channel, qualification, vehicle:vehicles(brand_name, model_name, year), handoff:lead_handoffs(delivery_confirmed_at, acknowledged_at, decision, first_contact_at)')
     .eq('dealer_id', access.dealerId)
     .order('created_at', { ascending: false })
     .limit(200)
@@ -54,6 +54,7 @@ export default async function OportunidadesPage() {
     source_channel:  l.source_channel ?? null,
     qualification:   l.qualification as Lead['qualification'] ?? null,
     vehicle:         Array.isArray(l.vehicle) ? l.vehicle[0] ?? null : l.vehicle ?? null,
+    handoff:         Array.isArray(l.handoff) ? l.handoff[0] ?? null : l.handoff ?? null,
   }))
 
   // ── Kanban (Professional / Elite) ────────────────────────────────────────────
@@ -86,6 +87,7 @@ export default async function OportunidadesPage() {
       model_name: l.vehicle.model_name ?? '',
       year:       l.vehicle.year ?? 0,
     } : null,
+    handoff:        l.handoff ?? null,
   }))
 
   return (

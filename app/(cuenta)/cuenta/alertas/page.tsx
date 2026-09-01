@@ -172,7 +172,7 @@ export default async function CuentaAlertasPage() {
         </div>
       ) : (
         <div className="text-center py-24 border border-bsm-border bg-surface max-w-2xl">
-          <Bell className="w-12 h-12 text-[#2A2A2A] mx-auto mb-5" />
+          <Bell className="w-12 h-12 text-bsm-border mx-auto mb-5" />
           <h2 className="font-display text-xl font-light text-bsm-text-primary mb-2">
             Sin alertas activas
           </h2>

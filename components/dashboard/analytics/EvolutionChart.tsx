@@ -24,7 +24,7 @@ function fmtTick(dateStr: string) {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[#111] border border-[#2A2A2A] px-3 py-2 text-xs space-y-1">
+    <div className="bg-[#111] border border-bsm-border px-3 py-2 text-xs space-y-1">
       <p className="text-bsm-text-muted mb-1">{fmtTick(label)}</p>
       {payload.map((p: any) => (
         <div key={p.dataKey} className="flex items-center gap-2">

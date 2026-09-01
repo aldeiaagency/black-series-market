@@ -45,8 +45,8 @@ export default function FaqSection({
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-8 bg-[#C6A64B]/40" />
-            <span className="text-[10px] text-[#C6A64B]/60 tracking-[0.3em] uppercase">
+            <div className="h-px w-8 bg-gold/40" />
+            <span className="text-[10px] text-gold/60 tracking-[0.3em] uppercase">
               {eyebrow}
             </span>
           </div>
@@ -62,7 +62,7 @@ export default function FaqSection({
                 <span>{q}</span>
                 <ChevronDown
                   aria-hidden="true"
-                  className="w-4 h-4 flex-shrink-0 text-[#C6A64B]/60 transition-transform duration-200 group-open:rotate-180"
+                  className="w-4 h-4 flex-shrink-0 text-gold/60 transition-transform duration-200 group-open:rotate-180"
                 />
               </summary>
               <p className="pb-6 -mt-1 text-[14px] text-[#9A9A9A] leading-relaxed max-w-2xl">

@@ -29,7 +29,7 @@ function Toggle({
       onClick={() => !disabled && onChange?.(!checked)}
       className={`relative inline-flex h-5 w-9 flex-shrink-0 rounded-full border-2 transition-colors duration-200 focus:outline-none
         ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-        ${checked ? 'bg-[#C6A64B] border-[#C6A64B]' : 'bg-[#2A2A2A] border-[#3A3A3A]'}`}
+        ${checked ? 'bg-gold border-gold' : 'bg-bsm-border border-[#3A3A3A]'}`}
     >
       <span
         className={`pointer-events-none inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform duration-200 mt-px
@@ -59,12 +59,12 @@ function CategoryRow({
   badge?: string
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-4 border-b border-[#1E1E1E] last:border-0">
+    <div className="flex items-start justify-between gap-4 py-4 border-b border-bsm-border-light last:border-0">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span id={`${id}-label`} className="text-sm font-medium text-[#E8E4DA]">{title}</span>
           {badge && (
-            <span className="text-[9px] tracking-widest uppercase text-[#C6A64B] border border-[#C6A64B]/40 px-1.5 py-0.5 leading-none">
+            <span className="text-[9px] tracking-widest uppercase text-gold border border-gold/40 px-1.5 py-0.5 leading-none">
               {badge}
             </span>
           )}
@@ -136,7 +136,7 @@ export default function CookieConsentBanner() {
           aria-modal="true"
           aria-label="Configuración de cookies"
         >
-          <div className="w-full max-w-lg bg-[#0D0D0D] border border-[#1E1E1E] shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
+          <div className="w-full max-w-lg bg-[#0D0D0D] border border-bsm-border-light shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#1A1A1A]">
@@ -184,19 +184,19 @@ export default function CookieConsentBanner() {
             <div className="px-6 py-5 border-t border-[#1A1A1A] flex flex-col sm:flex-row gap-3">
               <button
                 onClick={rejectAll}
-                className="flex-1 px-4 py-2.5 text-sm border border-[#2A2A2A] text-[#9A9A9A] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm border border-bsm-border text-[#9A9A9A] hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors"
               >
                 Rechazar todo
               </button>
               <button
                 onClick={saveSettings}
-                className="flex-1 px-4 py-2.5 text-sm border border-[#C6A64B]/40 text-[#C6A64B] hover:bg-[#C6A64B]/10 transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm border border-gold/40 text-gold hover:bg-gold/10 transition-colors"
               >
                 Guardar configuración
               </button>
               <button
                 onClick={acceptAll}
-                className="flex-1 px-4 py-2.5 text-sm bg-[#C6A64B] text-[#0A0A0A] font-medium hover:bg-[#D4B560] transition-colors"
+                className="flex-1 px-4 py-2.5 text-sm bg-gold text-[#0A0A0A] font-medium hover:bg-[#D4B560] transition-colors"
               >
                 Aceptar todo
               </button>
@@ -208,7 +208,7 @@ export default function CookieConsentBanner() {
       {/* ── Banner (primera capa) ──────────────────────────────────────────── */}
       {view === 'banner' && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 bg-[#0E0E0E] border-t border-[#1E1E1E] shadow-[0_-8px_32px_rgba(0,0,0,0.6)]"
+          className="fixed bottom-0 left-0 right-0 z-50 bg-[#0E0E0E] border-t border-bsm-border-light shadow-[0_-8px_32px_rgba(0,0,0,0.6)]"
           role="region"
           aria-label="Aviso de cookies"
         >
@@ -223,7 +223,7 @@ export default function CookieConsentBanner() {
                   usar cookies de análisis para entender cómo se utiliza Black Label Market y mejorar el servicio.{' '}
                   <Link
                     href="/legal/cookies"
-                    className="text-[#C6A64B] hover:text-[#D4B560] transition-colors underline-offset-2 hover:underline"
+                    className="text-gold hover:text-[#D4B560] transition-colors underline-offset-2 hover:underline"
                   >
                     Política de cookies
                   </Link>
@@ -234,22 +234,22 @@ export default function CookieConsentBanner() {
               <div className="flex flex-wrap items-center gap-2.5 flex-shrink-0">
                 <button
                   onClick={rejectAll}
-                  className="px-4 py-2 text-sm border border-[#2A2A2A] text-[#9A9A9A]
+                  className="px-4 py-2 text-sm border border-bsm-border text-[#9A9A9A]
                     hover:border-[#3A3A3A] hover:text-[#C9C9C9] transition-colors whitespace-nowrap"
                 >
                   Rechazar
                 </button>
                 <button
                   onClick={() => setView('settings')}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm border border-[#2A2A2A] text-[#9A9A9A]
-                    hover:border-[#C6A64B]/40 hover:text-[#C6A64B] transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm border border-bsm-border text-[#9A9A9A]
+                    hover:border-gold/40 hover:text-gold transition-colors whitespace-nowrap"
                 >
                   Configurar
                   <ChevronUp className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={acceptAll}
-                  className="px-5 py-2 text-sm bg-[#C6A64B] text-[#0A0A0A] font-medium
+                  className="px-5 py-2 text-sm bg-gold text-[#0A0A0A] font-medium
                     hover:bg-[#D4B560] transition-colors whitespace-nowrap"
                 >
                   Aceptar

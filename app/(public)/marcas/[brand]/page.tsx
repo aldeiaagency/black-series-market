@@ -8,6 +8,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { BRAND_EDITORIAL } from '@/lib/brand-editorial'
+import { getBrandPriceStats, buildBrandFaqItems } from '@/lib/brand-faq'
+import { esGroupThousands } from '@/lib/utils'
+import FaqSection from '@/components/marketplace/FaqSection'
 
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -91,6 +94,9 @@ export default async function BrandPage({ params }: PageProps) {
 
   const editorial = BRAND_EDITORIAL[brandData.slug] || (brandData as any).description || null
 
+  const brandStats = await getBrandPriceStats(supabase, brandData.name)
+  const faqItems = buildBrandFaqItems(brandData.slug, brandData.name, brandStats, esGroupThousands)
+
   const brandJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Brand',
@@ -101,6 +107,7 @@ export default async function BrandPage({ params }: PageProps) {
   }
 
   return (
+    <>
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(brandJsonLd) }} />
@@ -135,6 +142,28 @@ export default async function BrandPage({ params }: PageProps) {
             </p>
           </div>
         </div>
+
+        {(cars.length > 0 || motos.length > 0) && (
+          <div className="flex gap-3 text-sm mt-6">
+            <span className="text-gold">Todos los {brandData.name}</span>
+            {cars.length > 0 && (
+              <>
+                <span className="text-[#3A3A3A]">·</span>
+                <Link href={`/marcas/${brand}/coches`} className="text-bsm-text-muted hover:text-gold transition-colors">
+                  Coches
+                </Link>
+              </>
+            )}
+            {motos.length > 0 && (
+              <>
+                <span className="text-[#3A3A3A]">·</span>
+                <Link href={`/marcas/${brand}/motos`} className="text-bsm-text-muted hover:text-gold transition-colors">
+                  Motos
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Editorial — texto SEO único por marca */}
@@ -153,6 +182,13 @@ export default async function BrandPage({ params }: PageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {cars.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
           </div>
+          {motos.length > 0 && (
+            <div className="mt-6">
+              <Link href={`/marcas/${brand}/coches`} className="text-sm text-gold hover:text-gold-light transition-colors">
+                Ver todos los coches {brandData.name} →
+              </Link>
+            </div>
+          )}
         </div>
       )}
 
@@ -165,6 +201,13 @@ export default async function BrandPage({ params }: PageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {motos.map((v: any) => <VehicleCard key={v.id} vehicle={v} />)}
           </div>
+          {cars.length > 0 && (
+            <div className="mt-6">
+              <Link href={`/marcas/${brand}/motos`} className="text-sm text-gold hover:text-gold-light transition-colors">
+                Ver todas las motos {brandData.name} →
+              </Link>
+            </div>
+          )}
         </div>
       )}
 
@@ -180,5 +223,7 @@ export default async function BrandPage({ params }: PageProps) {
         </div>
       )}
     </div>
+    <FaqSection items={faqItems} heading={`Preguntas frecuentes sobre ${brandData.name}`} eyebrow={brandData.name} />
+    </>
   )
 }

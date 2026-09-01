@@ -1,73 +1,110 @@
 {
-  "name": "BLM — 3. Rechazo Showroom",
+  "name": "BLM - 3. Rechazo Showroom",
   "nodes": [
     {
       "id": "wf3-node-01-webhook",
-      "name": "Webhook — Dealer Rejected",
+      "name": "Webhook - Dealer Rejected",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "blm/dealer-rejected",
         "responseMode": "responseNode",
         "options": {}
-      }
+      },
+      "webhookId": "68f850a4-8677-4115-b493-36ee79813d5e"
     },
     {
       "id": "wf3-node-02-validate",
       "name": "Validar payload rechazo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing, body } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    rejected_at:    body.rejected_at || new Date().toISOString()\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing, body } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    rejected_at:    body.rejected_at || new Date().toISOString(),\n    source:         body.source || null\n  }\n}];"
       }
     },
     {
       "id": "wf3-node-03-if",
-      "name": "Payload válido?",
+      "name": "Payload v�lido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [480, 300],
+      "position": [
+        480,
+        300
+      ],
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-          "conditions": [{ "id": "ok", "leftValue": "={{ $json.ok }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } }],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "ok",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
           "combinator": "and"
         }
       }
     },
     {
       "id": "wf3-node-04-respond-ok",
-      "name": "Responder 202 — Aceptado",
+      "name": "Responder 202 - Aceptado",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [720, 200],
+      "position": [
+        720,
+        200
+      ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM — 3. Rechazo Showroom', application_id: $json.application_id } }}",
-        "options": { "responseCode": 202 }
+        "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM - 3. Rechazo Showroom', application_id: $json.application_id } }}",
+        "options": {
+          "responseCode": 202
+        }
       }
     },
     {
       "id": "wf3-node-respond-bad",
-      "name": "Responder 400 — Inválido",
+      "name": "Responder 400 - Inv�lido",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [720, 450],
+      "position": [
+        720,
+        450
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { ok: false, missing: $json.missing } }}",
-        "options": { "responseCode": 400 }
+        "options": {
+          "responseCode": 400
+        }
       }
     },
     {
       "id": "wf3-node-05-get-notes",
-      "name": "Supabase — Obtener notas de la solicitud",
+      "name": "Supabase - Obtener notas de la solicitud",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [960, 200],
+      "position": [
+        960,
+        200
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "GET",
@@ -75,8 +112,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}" }
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
           ]
         }
       }
@@ -86,33 +129,44 @@
       "name": "Preparar prompt email rechazo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1200, 200],
+      "position": [
+        1200,
+        200
+      ],
       "parameters": {
-        "jsCode": "const d = $('Responder 202 — Aceptado').first().json;\nconst supabaseResp = $input.first().json;\n\nlet adminNotes = '';\nlet location = '';\nif (Array.isArray(supabaseResp)) {\n  const row = supabaseResp[0] || {};\n  adminNotes = row.admin_notes || '';\n  location = [row.location_city, row.location_region].filter(Boolean).join(', ');\n}\n\nconst notesContext = adminNotes\n  ? `\\n\\nNotas internas del equipo (NO incluyas esto literalmente, úsalo solo como contexto para redactar):\\n${adminNotes.slice(0, 800)}`\n  : '';\n\nconst briefing = `Eres redactor senior de Black Label Market, marketplace premium de vehículos de alta gama en España.\\nEscribe un email de respuesta a una solicitud de alta de showroom que NO ha sido aprobada.\\n\\nDatos del solicitante:\\n- Showroom: ${d.dealer_name}\\n- Contacto: ${d.full_name}\\n- Email: ${d.email}${location ? '\\n- Ubicación: ' + location : ''}${notesContext}\\n\\nEl email debe:\\n1. Agradecer el interés y el tiempo dedicado a rellenar la solicitud\\n2. Comunicar que la solicitud no encaja con el perfil actual de la plataforma (sin dar razones concretas, de forma educada y profesional)\\n3. Dejar la puerta abierta a futuras colaboraciones cuando el showroom amplíe su actividad\\n4. Ofrecer que pueden volver a solicitar acceso en el futuro\\n5. Firma: «El equipo de Black Label Market»\\n\\nTono: premium, empático, breve. Sin condescendencia. Sin mencionar motivos específicos de rechazo. Devuelve SOLO el HTML del cuerpo (con <p> y <strong>).`;\n\nreturn [{\n  json: {\n    ...d,\n    adminNotes, location,\n    claudeRequest: {\n      model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',\n      max_tokens: 800,\n      messages: [{ role: 'user', content: briefing }]\n    }\n  }\n}];"
+        "jsCode": "const d = $(\"Responder 202 - Aceptado\").first().json;\nconst supabaseResp = $input.first().json;\n\nlet adminNotes = \"\";\nlet location = \"\";\nif (Array.isArray(supabaseResp)) {\n  const row = supabaseResp[0] || {};\n  adminNotes = row.admin_notes || \"\";\n  location = [row.location_city, row.location_region].filter(Boolean).join(\", \");\n}\n\nconst notesContext = adminNotes\n  ? `\\n\\nNotas internas del equipo (NO incluyas esto literalmente, úsalo solo como contexto para redactar):\\n${adminNotes.slice(0, 800)}`\n  : \"\";\n\nconst esVisitaAgencia = d.source === \"visita_agencia\";\nconst origenContext = esVisitaAgencia\n  ? \"\\n- Origen: alta gestionada tras una visita presencial de nuestro equipo comercial al showroom (mencionar y agradecer esa visita en el email, con calidez, sin sonar a solicitud fría online)\"\n  : \"\";\n\nconst briefing = `Eres redactor senior de Black Label Market, marketplace premium de vehículos de alta gama en España.\\nEscribe un email de respuesta a una solicitud de alta de showroom que NO ha sido aprobada.\\n\\nDatos del solicitante:\\n- Showroom: ${d.dealer_name}\\n- Contacto: ${d.full_name}\\n- Email: ${d.email}${location ? \"\\n- Ubicación: \" + location : \"\"}${origenContext}${notesContext}\\n\\nEl email debe:\\n1. Agradecer el interés${esVisitaAgencia ? \" y el tiempo dedicado durante la visita\" : \" y el tiempo dedicado a rellenar la solicitud\"}\\n2. Comunicar que la solicitud no encaja con el perfil actual de la plataforma (sin dar razones concretas, de forma educada y profesional)\\n3. Dejar la puerta abierta a futuras colaboraciones cuando el showroom amplíe su actividad\\n4. Ofrecer que pueden volver a solicitar acceso en el futuro\\n5. Firma: \"El equipo de Black Label Market\"\\n\\nTono: premium, empático, breve. Sin condescendencia. Sin mencionar motivos específicos de rechazo. Devuelve SOLO el HTML del cuerpo (con <p> y <strong>).`;\n\nreturn [{\n  json: {\n    ...d, adminNotes, location,\n    openAIRequest: {\n      model: $env.OPENAI_MODEL || \"gpt-4o-mini\",\n      max_tokens: 800,\n      messages: [{ role: \"user\", content: briefing }]\n    }\n  }\n}];"
       }
     },
     {
       "id": "wf3-node-07-claude",
-      "name": "Claude — Generar email rechazo",
+      "name": "OpenAI - Generar email rechazo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1440, 200],
+      "position": [
+        1440,
+        200
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
-        "url": "https://api.anthropic.com/v1/messages",
+        "url": "https://api.openai.com/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-api-key",        "value": "={{ $env.ANTHROPIC_API_KEY }}" },
-            { "name": "anthropic-version", "value": "2023-06-01" },
-            { "name": "Content-Type",      "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify($json.claudeRequest) }}"
+        "body": "={{ JSON.stringify($json.openAIRequest) }}"
       }
     },
     {
@@ -120,74 +174,183 @@
       "name": "Componer email rechazo final",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1680, 200],
+      "position": [
+        1680,
+        200
+      ],
       "parameters": {
-        "jsCode": "const d = $('Preparar prompt email rechazo').first().json;\nconst claude = $input.first().json;\n\nlet body = '';\nif (Array.isArray(claude.content)) body = claude.content.map(b => b.text || '').join('\\n').trim();\nelse if (claude.text) body = claude.text;\nelse body = `<p>Hola ${d.full_name},</p><p>Gracias por tu interés en Black Label Market. Tras revisar la solicitud de <strong>${d.dealer_name}</strong>, en este momento no encaja con el perfil actual de la plataforma.</p><p>Quedamos a tu disposición para cualquier consulta futura.</p><p>El equipo de Black Label Market</p>`;\n\nconst MAIL_FROM   = process.env.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = 'marketing@blackseriesagency.es'; // Fijo: notificaciones de Black Label Market siempre a la agencia, nunca al ADMIN_EMAIL compartido con AldeIA (bug real hallado 2026-08-17, ver registro_decisiones.md)\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: 'Respuesta a tu solicitud — Black Label Market',\n      html: body\n    },\n    slackText: `*❌ Solicitud rechazada*\\n\\n*Showroom:* ${d.dealer_name}\\n*Contacto:* ${d.full_name} (${d.email})\\n*Email de rechazo:* enviado`\n  }\n}];"
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $(\"Preparar prompt email rechazo\").first().json;\nconst ai = $input.first().json;\n\nlet body = \"\";\nif (Array.isArray(ai.choices) && ai.choices[0]) {\n  body = ai.choices[0].message?.content || \"\";\n} else if (Array.isArray(ai.content)) {\n  body = ai.content.map(b => b.text || \"\").join(\"\\n\").trim();\n} else {\n  const esVisitaAgencia = d.source === \"visita_agencia\";\n  body = esVisitaAgencia\n    ? `<p>Hola ${d.full_name},</p><p>Gracias por la visita y el tiempo dedicado. Tras revisar la solicitud de <strong>${d.dealer_name}</strong>, en este momento no encaja con el perfil actual de la plataforma.</p><p>Quedamos a tu disposición para cualquier consulta futura.</p><p>El equipo de Black Label Market</p>`\n    : `<p>Hola ${d.full_name},</p><p>Gracias por tu interés en Black Label Market. Tras revisar la solicitud de <strong>${d.dealer_name}</strong>, en este momento no encaja con el perfil actual de la plataforma.</p><p>Quedamos a tu disposición para cualquier consulta futura.</p><p>El equipo de Black Label Market</p>`;\n}\n\nconst MAIL_FROM   = $env.MAIL_FROM   || \"Black Label Market <hola@blacklabelmarket.es>\";\nconst ADMIN_EMAIL = \"marketing@blackseriesagency.es\"; // Fijo: notificaciones de Black Label Market siempre a la agencia, nunca al ADMIN_EMAIL compartido con AldeIA (bug real hallado 2026-08-17, ver registro_decisiones.md)\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: \"Respuesta a tu solicitud - Black Label Market\",\n      html: body + legalFooter\n    },\n    slackText: `*❌ Solicitud rechazada*\\n\\n*Showroom:* ${d.dealer_name}\\n*Contacto:* ${d.full_name} (${d.email})\\n*Email de rechazo:* enviado`\n  }\n}];"
       }
     },
     {
       "id": "wf3-node-09-email",
-      "name": "Email — Rechazo al showroom",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1920, 120],
+      "name": "Email - Rechazo al showroom",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1920,
+        120
+      ],
       "continueOnFail": true,
       "parameters": {
-        "method": "POST",
-        "url": "https://api.resend.com/emails",
+        "fromEmail": "={{ $json.emailPayload.from }}",
+        "toEmail": "={{ $json.emailPayload.to[0] }}",
+        "subject": "={{ $json.emailPayload.subject }}",
+        "emailType": "html",
+        "html": "={{ $json.emailPayload.html }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "aaeefa8b-996a-4d2c-b74d-7a18fb51b8bd"
+    },
+    {
+      "id": "2996c1da-7bcd-4467-a742-f22c9f3642ec",
+      "name": "Supabase - Marcar rechazado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1880,
+        350
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL + '/rest/v1/showroom_applications?id=eq.' + $json.application_id }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.RESEND_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify($json.emailPayload) }}"
-      }
-    },
-    {
-      "id": "wf3-node-10-slack",
-      "name": "Slack — Dealer rechazado",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1920, 300],
-      "continueOnFail": true,
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ text: $json.slackText }) }}"
+        "body": "={{ JSON.stringify({ status: 'rejected' }) }}"
       }
     }
   ],
   "connections": {
-    "Webhook — Dealer Rejected":   { "main": [[{ "node": "Validar payload rechazo",              "type": "main", "index": 0 }]] },
-    "Validar payload rechazo":     { "main": [[{ "node": "Payload válido?",                       "type": "main", "index": 0 }]] },
-    "Payload válido?": {
+    "Webhook - Dealer Rejected": {
       "main": [
-        [{ "node": "Responder 202 — Aceptado", "type": "main", "index": 0 }],
-        [{ "node": "Responder 400 — Inválido", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Validar payload rechazo",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "Responder 202 — Aceptado":    { "main": [[{ "node": "Supabase — Obtener notas de la solicitud", "type": "main", "index": 0 }]] },
-    "Supabase — Obtener notas de la solicitud": { "main": [[{ "node": "Preparar prompt email rechazo", "type": "main", "index": 0 }]] },
-    "Preparar prompt email rechazo": { "main": [[{ "node": "Claude — Generar email rechazo", "type": "main", "index": 0 }]] },
-    "Claude — Generar email rechazo": { "main": [[{ "node": "Componer email rechazo final", "type": "main", "index": 0 }]] },
+    "Validar payload rechazo": {
+      "main": [
+        [
+          {
+            "node": "Payload v�lido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payload v�lido?": {
+      "main": [
+        [
+          {
+            "node": "Responder 202 - Aceptado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 400 - Inv�lido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder 202 - Aceptado": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Obtener notas de la solicitud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Obtener notas de la solicitud": {
+      "main": [
+        [
+          {
+            "node": "Preparar prompt email rechazo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar prompt email rechazo": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Generar email rechazo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Componer email rechazo final": {
-      "main": [[
-        { "node": "Email — Rechazo al showroom", "type": "main", "index": 0 },
-        { "node": "Slack — Dealer rechazado",    "type": "main", "index": 0 }
-      ]]
+      "main": [
+        [
+          {
+            "node": "Email - Rechazo al showroom",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Supabase - Marcar rechazado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Generar email rechazo": {
+      "main": [
+        [
+          {
+            "node": "Componer email rechazo final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1", "binaryMode": "separate" },
-  "tags": [
-    { "id": "Loz5j8r0Pb3LipWz", "name": "Black Label Market" },
-    { "id": "DUQcfY17inLRptof", "name": "Showroom" }
-  ]
+  "settings": {
+    "executionOrder": "v1"
+  }
 }

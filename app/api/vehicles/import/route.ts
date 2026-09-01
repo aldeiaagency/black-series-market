@@ -1,6 +1,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganizationIdForUser, can } from '@/lib/entitlements'
+import { verifyDealerApiKeyHash } from '@/lib/dealer-api-keys'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -192,9 +193,10 @@ async function runImport(
   dealerId: string,
   supabase: Awaited<ReturnType<typeof createClient>>,
   autoApprove: boolean,
-): Promise<{ inserted: number; errors: RowError[] }> {
+): Promise<{ inserted: number; errors: RowError[]; draftNoPhotos: number }> {
   const errors: RowError[] = []
   let inserted = 0
+  let draftNoPhotos = 0
   const admin = createAdminClient()
 
   // El path de feed-sync (autoApprove) ya reescribe descripciones con IA antes de llamar a este
@@ -261,18 +263,49 @@ async function runImport(
     }
     inserted++
 
-    if (r.image_urls?.length) {
-      const images = await importImagesForVehicle(admin, dealerId, inserted_row.id, r.image_urls)
-      if (images.length) {
-        await admin.from('vehicles').update({ images }).eq('id', inserted_row.id)
-      }
+    const images = r.image_urls?.length
+      ? await importImagesForVehicle(admin, dealerId, inserted_row.id, r.image_urls)
+      : []
+
+    if (images.length) {
+      await admin.from('vehicles').update({ images }).eq('id', inserted_row.id)
+    } else {
+      // Nunca se publica un vehículo sin al menos una foto real: se deja en borrador para que
+      // el showroom las complete desde el dashboard, en vez de auto-aprobarlo vacío.
+      await admin.from('vehicles').update({ status: 'draft' }).eq('id', inserted_row.id)
+      draftNoPhotos++
     }
   }
 
-  return { inserted, errors }
+  return { inserted, errors, draftNoPhotos }
 }
 
 // ── Route handler ─────────────────────────────────────────────────────────────
+
+
+type DealerApiKeyRow = { id: string; dealer_id: string; key_hash: string }
+
+async function getDealerIdForScopedImportKey(
+  admin: ReturnType<typeof createAdminClient>,
+  token: string,
+): Promise<string | null> {
+  const { data: keys, error } = await admin
+    .from('dealer_api_keys')
+    .select('id, dealer_id, key_hash')
+    .is('revoked_at', null)
+
+  if (error || !keys?.length) return null
+
+  const match = (keys as DealerApiKeyRow[]).find((key) => verifyDealerApiKeyHash(token, key.key_hash))
+  if (!match) return null
+
+  await admin
+    .from('dealer_api_keys')
+    .update({ last_used_at: new Date().toISOString() })
+    .eq('id', match.id)
+
+  return match.dealer_id
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
@@ -284,7 +317,7 @@ export async function POST(req: NextRequest) {
   let dealerId: string | null = null
   let autoApprove = false
 
-  // Auth method 1 — API key (for n8n / external automation)
+  // Auth method 1 - API key (for n8n / external automation)
   const authHeader = req.headers.get('authorization') ?? ''
   if (authHeader.startsWith('Bearer ')) {
     const token = authHeader.slice(7)
@@ -292,23 +325,52 @@ export async function POST(req: NextRequest) {
     const feedSyncKey = process.env.FEED_SYNC_API_KEY
 
     // Dos niveles de confianza con la MISMA forma de auth, para no reabrir SEC-3:
-    // - IMPORT_API_KEY: uso general (white-glove manual) → siempre pending_review.
-    // - FEED_SYNC_API_KEY: exclusivo del workflow de sincronización de feed → único caso con auto-aprobación.
-    //   autoApprove nunca se lee del body — solo se activa si el token coincide con esta clave concreta.
+    // - IMPORT_API_KEY: uso general (white-glove manual) -> siempre pending_review.
+    // - FEED_SYNC_API_KEY: exclusivo del workflow de sincronizacion de feed -> unico caso con auto-aprobacion.
+    //   autoApprove nunca se lee del body; solo se activa si el token coincide con esta clave concreta.
     if (feedSyncKey && token === feedSyncKey) {
       autoApprove = true
-    } else if (!importKey || token !== importKey) {
-      return NextResponse.json({ error: 'Clave de API no válida.' }, { status: 401 })
-    }
 
-    // Caller must provide dealer_slug to identify the target dealer
-    const slug = body.dealer_slug as string | undefined
-    if (!slug) {
-      return NextResponse.json({ error: 'Se requiere dealer_slug al usar clave de API.' }, { status: 400 })
+      // Caller must provide dealer_slug to identify the target dealer
+      const slug = body.dealer_slug as string | undefined
+      if (!slug) {
+        return NextResponse.json({ error: 'Se requiere dealer_slug al usar clave de API.' }, { status: 400 })
+      }
+      const { data: dealer } = await supabase.from('dealers').select('id').eq('slug', slug).single()
+      if (!dealer) return NextResponse.json({ error: 'Showroom no encontrado.' }, { status: 404 })
+      dealerId = dealer.id
+    } else {
+      const admin = createAdminClient()
+      const scopedDealerId = await getDealerIdForScopedImportKey(admin, token)
+
+      if (scopedDealerId) {
+        dealerId = scopedDealerId
+
+        const slug = body.dealer_slug as string | undefined
+        if (slug) {
+          const { data: dealer } = await admin.from('dealers').select('id').eq('slug', slug).maybeSingle()
+          if (!dealer) return NextResponse.json({ error: 'Showroom no encontrado.' }, { status: 404 })
+          if (dealer.id !== dealerId) {
+            return NextResponse.json({ error: 'La clave no pertenece al showroom indicado.' }, { status: 403 })
+          }
+        }
+      } else {
+        // Legacy, usar dealer_api_keys para nuevas integraciones. Mantener IMPORT_API_KEY
+        // durante la transicion para no romper automatizaciones existentes.
+        if (!importKey || token !== importKey) {
+          return NextResponse.json({ error: 'Clave de API no valida.' }, { status: 401 })
+        }
+
+        // Caller must provide dealer_slug to identify the target dealer
+        const slug = body.dealer_slug as string | undefined
+        if (!slug) {
+          return NextResponse.json({ error: 'Se requiere dealer_slug al usar clave de API.' }, { status: 400 })
+        }
+        const { data: dealer } = await supabase.from('dealers').select('id').eq('slug', slug).single()
+        if (!dealer) return NextResponse.json({ error: 'Showroom no encontrado.' }, { status: 404 })
+        dealerId = dealer.id
+      }
     }
-    const { data: dealer } = await supabase.from('dealers').select('id').eq('slug', slug).single()
-    if (!dealer) return NextResponse.json({ error: 'Showroom no encontrado.' }, { status: 404 })
-    dealerId = dealer.id
   } else {
     // Auth method 2 — Supabase session (dashboard upload). Siempre pending_review: input directo del dealer.
     const { data: { user } } = await supabase.auth.getUser()

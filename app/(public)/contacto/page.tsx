@@ -100,17 +100,17 @@ export default function ContactoPage() {
             <form onSubmit={handleSubmit} className="bg-surface border border-bsm-border p-8 space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="label-base">Nombre</label>
-                  <input value={form.name} onChange={(e) => update('name', e.target.value)} placeholder="Tu nombre" className="input-base" required />
+                  <label className="label-base" htmlFor="contacto-name">Nombre</label>
+                  <input id="contacto-name" value={form.name} onChange={(e) => update('name', e.target.value)} placeholder="Tu nombre" className="input-base" autoComplete="name" required />
                 </div>
                 <div>
-                  <label className="label-base">Email</label>
-                  <input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="tu@email.com" className="input-base" required />
+                  <label className="label-base" htmlFor="contacto-email">Email</label>
+                  <input id="contacto-email" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="tu@email.com" className="input-base" autoComplete="email" required />
                 </div>
               </div>
               <div>
-                <label className="label-base">Asunto</label>
-                <select value={form.subject} onChange={(e) => update('subject', e.target.value)} className="select-base" required>
+                <label className="label-base" htmlFor="contacto-subject">Asunto</label>
+                <select id="contacto-subject" value={form.subject} onChange={(e) => update('subject', e.target.value)} className="select-base" required>
                   <option value="">Seleccionar...</option>
                   <option value="suscripcion">Información sobre suscripción</option>
                   <option value="soporte">Soporte técnico</option>
@@ -120,8 +120,9 @@ export default function ContactoPage() {
                 </select>
               </div>
               <div>
-                <label className="label-base">Mensaje</label>
+                <label className="label-base" htmlFor="contacto-message">Mensaje</label>
                 <textarea
+                  id="contacto-message"
                   value={form.message}
                   onChange={(e) => update('message', e.target.value)}
                   rows={6}

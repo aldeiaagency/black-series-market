@@ -1,5 +1,5 @@
 {
-  "name": "BLM - 4. Solicitar M�s Informaci�n Showroom",
+  "name": "BLM - 4. Solicitar Más Información Showroom",
   "nodes": [
     {
       "id": "wf4-node-01-webhook",
@@ -28,7 +28,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    admin_notes:    body.admin_notes,\n    admin_url:      body.admin_url || ''\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    admin_notes:    body.admin_notes,\n    admin_url:      body.admin_url || '',\n    source:         body.source || null\n  }\n}];"
       }
     },
     {
@@ -106,7 +106,7 @@
         200
       ],
       "parameters": {
-        "jsCode": "const d = $input.first().json;\nconst MAIL_FROM   = $env.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = 'marketing@blackseriesagency.es'; // Fijo: notificaciones de Black Label Market siempre a la agencia, nunca al ADMIN_EMAIL compartido con AldeIA (bug real hallado 2026-08-17, ver registro_decisiones.md)\nconst MARKET_URL  = $env.MARKET_URL  || 'https://blacklabelmarket.es';\n\nconst notesHtml = d.admin_notes\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n  .replace(/\\n/g, '<br>');\n\nconst emailHtml = `<p>Hola ${d.full_name},</p>\n<p>Hemos revisado la solicitud de alta de <strong>${d.dealer_name}</strong> en Black Label Market y nos gustar�a obtener alguna informaci�n adicional antes de continuar con el proceso.</p>\n<blockquote style=\"border-left:3px solid #c9a227;padding-left:12px;margin:16px 0;color:#555\">${notesHtml}</blockquote>\n<p>Por favor, responde a este email con la informaci�n solicitada o, si lo prefieres, puedes contactarnos directamente.</p>\n<p>Quedamos a tu disposici�n.<br>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: `Solicitud de alta - necesitamos informaci�n adicional`,\n      html: emailHtml\n    },\n    slackText: `*?? Solicitud de m�s info enviada*\\n\\n*Showroom:* ${d.dealer_name}\\n*Contacto:* ${d.full_name} (${d.email})${d.admin_url ? '\\n' + d.admin_url : ''}`\n  }\n}];"
+        "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $input.first().json;\nconst MAIL_FROM   = $env.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = 'marketing@blackseriesagency.es'; // Fijo: notificaciones de Black Label Market siempre a la agencia, nunca al ADMIN_EMAIL compartido con AldeIA (bug real hallado 2026-08-17, ver registro_decisiones.md)\nconst MARKET_URL  = $env.MARKET_URL  || 'https://blacklabelmarket.es';\nconst esVisitaAgencia = d.source === 'visita_agencia';\n\nconst notesHtml = d.admin_notes\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n  .replace(/\\n/g, '<br>');\n\nconst intro = esVisitaAgencia\n  ? `Gracias por la visita. Antes de completar el alta de <strong>${d.dealer_name}</strong> como showroom fundador, nos gustaría confirmar un detalle:`\n  : `Hemos revisado la solicitud de alta de <strong>${d.dealer_name}</strong> en Black Label Market y nos gustaría obtener alguna información adicional antes de continuar con el proceso:`;\n\nconst emailHtml = `<p>Hola ${d.full_name},</p>\n<p>${intro}</p>\n<blockquote style=\"border-left:3px solid #c9a227;padding-left:12px;margin:16px 0;color:#555\">${notesHtml}</blockquote>\n<p>Responde a este email con la información solicitada o, si lo prefieres, puedes contactarnos directamente.</p>\n<p>Quedamos a tu disposición.<br>El equipo de Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: `Solicitud de alta - necesitamos información adicional`,\n      html: emailHtml + legalFooter\n    },\n    slackText: `*Solicitud de más info enviada*\\n\\n*Showroom:* ${d.dealer_name}\\n*Contacto:* ${d.full_name} (${d.email})${d.admin_url ? '\\n' + d.admin_url : ''}`\n  }\n}];"
       }
     },
     {
@@ -133,25 +133,6 @@
         }
       },
       "webhookId": "9564de6b-a79c-42e5-a37b-92bec5778271"
-    },
-    {
-      "id": "wf4-node-07-slack",
-      "name": "Slack - Pending info enviado",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1200,
-        300
-      ],
-      "continueOnFail": true,
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ text: $json.slackText }) }}"
-      }
     },
     {
       "id": "wf4-note-01",
@@ -267,11 +248,6 @@
         [
           {
             "node": "Email - Solicitar info al showroom",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Slack - Pending info enviado",
             "type": "main",
             "index": 0
           },
