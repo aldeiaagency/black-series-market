@@ -356,6 +356,7 @@ export async function approveApplication(formData: FormData) {
         linkedin_url: application.linkedin_url || null,
         certifications: application.specialties || null,
         services: application.services || null,
+        source_prospecto_id: application.source_prospecto_id || null,
         // Aceptación de /legal/condiciones-profesionales — si vino del formulario público con
         // checkbox, se copia aquí. Si es NULL (alta gestionada por la agencia, sin checkbox),
         // el layout del dashboard pedirá aceptarlas en el primer acceso.
@@ -521,6 +522,10 @@ export async function approveApplication(formData: FormData) {
       setup_url: founderSetupUrl,
       login_url: loginUrl,
       dashboard_url: dashboardUrl,
+      // Cierra la trazabilidad de vuelta al Prospecto de Airtable que originó esta visita
+      // (hallazgo de auditoría 2026-08-17). NULL si la alta no vino de una visita con Prospecto
+      // enlazado (no debería ocurrir en la rama visita_agencia, pero no se asume).
+      prospecto_id: application.source_prospecto_id ?? null,
     }
     let founderNotificationSent = false
     try {

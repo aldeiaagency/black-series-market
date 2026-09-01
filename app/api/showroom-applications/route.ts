@@ -49,6 +49,10 @@ const schema = z.object({
   // la skill informe-previsita) salta la auditoría online de WF1, pero requiere HMAC; por
   // defecto 'market_directo'.
   source: z.enum(['market_directo', 'visita_agencia']).optional(),
+  // Record ID de Airtable (tabla Prospectos, base BSA) que originó esta alta — solo lo manda
+  // el watcher de la agencia (source='visita_agencia'). Cierra la trazabilidad agencia<->market
+  // (hallazgo de auditoría 2026-08-17, sin cerrar hasta ahora). Ver migración 101.
+  source_prospecto_id: z.string().trim().max(60).optional(),
   // Todo lo siguiente: capturado por la investigación pre-visita SOLO con evidencia pública
   // (Google Business Profile, web propia) — nunca inventado. Se copia a dealers en la aprobación.
   address: z.string().trim().max(300).optional(),
@@ -106,7 +110,7 @@ export async function POST(req: NextRequest) {
   const {
     name, email, company, phone, whatsapp, city, plan, volume, message, logo_url, profile_description, source, website,
     address, years_in_business, instagram_url, facebook_url, youtube_url, tiktok_url, linkedin_url, specialties, services,
-    terms_accepted, terms_version,
+    terms_accepted, terms_version, source_prospecto_id,
   } = parsed.data
 
   const fullMessage = [
@@ -149,6 +153,7 @@ export async function POST(req: NextRequest) {
       profile_description: profile_description ?? null,
       website:       website ?? null,
       source:        source ?? 'market_directo',
+      source_prospecto_id: source_prospecto_id ?? null,
       address:            address ?? null,
       years_in_business:  years_in_business ?? null,
       instagram_url:      instagram_url ?? null,
@@ -180,6 +185,7 @@ export async function POST(req: NextRequest) {
     plan_interest: plan ?? null,
     message:       fullMessage || null,
     source:        source ?? 'market_directo',
+    source_prospecto_id: source_prospecto_id ?? null,
     admin_url:     `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom/${data.id}`,
   }).catch(() => {})
 

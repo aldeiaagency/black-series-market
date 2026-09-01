@@ -20,8 +20,8 @@ export default function AdminLoginPage() {
     setLoading(true)
     const supabase = createClient()
 
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    if (authError) {
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    if (authError || !authData.user) {
       setError('Credenciales incorrectas.')
       setLoading(false)
       return
@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('email', email)
+      .eq('id', authData.user.id)
       .single()
 
     if (profile?.role !== 'admin') {

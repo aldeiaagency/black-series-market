@@ -4,8 +4,13 @@ import { getDealerBookingContext, getBusyRanges } from '@/lib/assistant-booking'
 import { computeSlots } from '@/lib/booking'
 import { notifyN8n } from '@/lib/integrations/n8n'
 import { createEvent } from '@/lib/google-calendar'
+import { getClientIp, hashIdentifier, isIpEventRateLimited } from '@/lib/rate-limit'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Esto escribe lead + cita real + evento de Google Calendar + email al showroom — el más
+// caro de los 4 endpoints de abrir. Nadie reserva 10 citas en 10 min de forma legítima.
+const BOOK_IP_LIMIT = 5
+const BOOK_IP_WINDOW_MS = 10 * 60 * 1000
 
 function pad(n: number) { return String(n).padStart(2, '0') }
 /** YYYYMMDDTHHMMSSZ (UTC) para enlaces de calendario. */
@@ -53,6 +58,13 @@ export async function POST(req: NextRequest) {
   }
   const startDate = new Date(startIso)
   if (isNaN(startDate.getTime())) return NextResponse.json({ ok: false, error: 'invalid_start' }, { status: 400 })
+
+  const rateLimitAdmin = createAdminClient()
+  const clientIp = getClientIp(req)
+  const ipHash = clientIp ? hashIdentifier(clientIp) : null
+  if (await isIpEventRateLimited(rateLimitAdmin, 'assistant_book', ipHash, BOOK_IP_LIMIT, BOOK_IP_WINDOW_MS)) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 })
+  }
 
   // Gating + reglas del showroom.
   const ctx = await getDealerBookingContext(dealerId)

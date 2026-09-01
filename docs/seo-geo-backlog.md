@@ -1,7 +1,10 @@
 # SEO / GEO — Backlog de trabajo (referencia viva)
 
-> **Documento canónico y consolidado.** Funde tres fuentes en una sola referencia ejecutable:
-> 1. El **informe SEO/GEO original** (`AUDITORIA SEO_GEO (CLAUDE CODE).md`) — auditoría completa por lectura de código.
+> **Documento canónico y consolidado — el que se ejecuta y se mantiene.** Funde tres fuentes en una sola
+> referencia ejecutable:
+> 1. El **informe SEO/GEO original** (hoy `docs/auditoria-total-2026-07/06-seo-geo.md`, numeración H/M/L
+>    propia — el archivo original con el nombre `AUDITORIA SEO_GEO (CLAUDE CODE).md` ya no existe con ese
+>    nombre) — auditoría completa por lectura de código.
 > 2. El **backlog CSV** (`seo-geo-backlog.csv`, T01-T39) — histórico del 5-jun.
 > 3. La **auditoría de esta sesión** + el **estado real del código hoy** (reconciliación de qué está ya hecho).
 >

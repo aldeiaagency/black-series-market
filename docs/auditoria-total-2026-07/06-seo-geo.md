@@ -1,5 +1,10 @@
 # 06 · Auditoría SEO / GEO — Black Label Market
 
+> **Aviso (2026-09-01):** el backlog vivo y con `Estado` actualizado es `docs/seo-geo-backlog.md` (numeración
+> T/O/P/AN/G) — este documento usa su propia numeración H/M/L, independiente y sin cruzar con la de arriba.
+> Antes de dar por abierto o cerrado un hallazgo de aquí, comprobar si ya tiene equivalente marcado en
+> `seo-geo-backlog.md`; ese es el que se ejecuta y se mantiene.
+
 > Auditoría **desde cero** contra el código real (App Router, Next.js 14.2). Fecha: 2026-07-03.
 > Verificada también contra producción en solo lectura: `robots.txt` (`Disallow: /`) y `sitemap.xml` (173 URLs) en `blacklabelmarket.es`.
 > Alcance: SEO técnico + on-page + datos estructurados + arquitectura/silo + GEO (citabilidad por motores de IA).

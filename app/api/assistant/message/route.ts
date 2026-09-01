@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { createHmac } from 'crypto'
+import { getClientIp, hashIdentifier, isIpEventRateLimited } from '@/lib/rate-limit'
 
 const WEBHOOK_SECRET = process.env.ASSISTANT_WEBHOOK_SECRET ?? ''
 const TIMEOUT_MS     = 5000
+// Una conversación real manda varios mensajes seguidos; 60/10min por IP deja margen holgado
+// a una sesión activa normal y corta un flood que agotaría presupuesto de OpenAI vía n8n.
+const MESSAGE_IP_LIMIT = 60
+const MESSAGE_IP_WINDOW_MS = 10 * 60 * 1000
 // Factory, not a shared instance: a NextResponse body is consumed once, so a
 // single module-level response returns an empty body on every reuse.
 const degradation = () => NextResponse.json({ type: 'degradation', fallback: true })
@@ -19,6 +24,13 @@ export async function POST(req: NextRequest) {
   const sanitized = (message ?? '').slice(0, 2000).replace(/<[^>]*>/g, '')
 
   const admin = createAdminClient()
+
+  const clientIp = getClientIp(req)
+  const ipHash = clientIp ? hashIdentifier(clientIp) : null
+  if (await isIpEventRateLimited(admin, 'assistant_message', ipHash, MESSAGE_IP_LIMIT, MESSAGE_IP_WINDOW_MS)) {
+    return NextResponse.json({ type: 'degradation', fallback: true, reason: 'rate_limited' }, { status: 429 })
+  }
+
   const { data: cfg } = await admin
     .from('showroom_assistant_config')
     .select('webhook_url, enabled')

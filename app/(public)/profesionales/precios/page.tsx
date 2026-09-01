@@ -11,6 +11,35 @@ import {
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
+// Fuente única para el FAQPage JSON-LD y el bloque visible de abajo — así no pueden divergir
+// (hallazgo de auditoría: esta página tenía las preguntas visibles pero sin marcado FAQPage).
+const FAQ_ITEMS = [
+  {
+    q: '¿Hay comisión por venta?',
+    a: 'No. Pagas solo la suscripción mensual. No cobramos comisión cuando vendes un vehículo.',
+  },
+  {
+    q: '¿Puedo cambiar de plan?',
+    a: 'Sí. Un upgrade es inmediato. Un downgrade se aplica al final del periodo de facturación. Tus datos y vehículos nunca se borran.',
+  },
+  {
+    q: '¿Qué pasa si cancelo?',
+    a: 'Accedes hasta el fin del periodo pagado. Después tu perfil deja de ser público y el inventario queda archivado, no eliminado.',
+  },
+  {
+    q: '¿El pago garantiza la publicación?',
+    a: 'No. El acceso a Black Label Market requiere pasar nuestro proceso de admisión de calidad y reputación — por eso todos los showrooms publicados aparecen como verificados. Los vehículos deben pertenecer a nuestro catálogo de marcas y modelos seleccionados.',
+  },
+  {
+    q: '¿Los precios incluyen IVA?',
+    a: 'No. Todos los precios mostrados son sin IVA; se añade en el momento del pago.',
+  },
+  {
+    q: '¿Qué es un boost?',
+    a: 'Un boost posiciona uno de tus vehículos en primer lugar de los resultados de búsqueda durante 7 días, dándole visibilidad extra frente al resto del inventario. Cada plan incluye un número de boosts al mes; si necesitas más, puedes comprarlos desde tu panel.',
+  },
+] as const
+
 export const metadata: Metadata = {
   title: 'Precios y planes para profesionales — Black Label Market',
   description:
@@ -65,9 +94,20 @@ export default async function PreciosPage() {
     inLanguage: 'es-ES',
   }
 
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  }
+
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-32 pb-24">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
       {/* Header */}
       <div className="text-center mb-16">
@@ -179,32 +219,7 @@ export default async function PreciosPage() {
       {/* FAQ */}
       <div className="max-w-2xl mx-auto">
         <h2 className="font-display text-2xl font-light text-center mb-8">Preguntas frecuentes</h2>
-        {[
-          {
-            q: '¿Hay comisión por venta?',
-            a: 'No. Pagas solo la suscripción mensual. No cobramos comisión cuando vendes un vehículo.',
-          },
-          {
-            q: '¿Puedo cambiar de plan?',
-            a: 'Sí. Un upgrade es inmediato. Un downgrade se aplica al final del periodo de facturación. Tus datos y vehículos nunca se borran.',
-          },
-          {
-            q: '¿Qué pasa si cancelo?',
-            a: 'Accedes hasta el fin del periodo pagado. Después tu perfil deja de ser público y el inventario queda archivado, no eliminado.',
-          },
-          {
-            q: '¿El pago garantiza la publicación?',
-            a: 'No. El acceso a Black Label Market requiere pasar nuestro proceso de admisión de calidad y reputación — por eso todos los showrooms publicados aparecen como verificados. Los vehículos deben pertenecer a nuestro catálogo de marcas y modelos seleccionados.',
-          },
-          {
-            q: '¿Los precios incluyen IVA?',
-            a: 'No. Todos los precios mostrados son sin IVA; se añade en el momento del pago.',
-          },
-          {
-            q: '¿Qué es un boost?',
-            a: 'Un boost posiciona uno de tus vehículos en primer lugar de los resultados de búsqueda durante 7 días, dándole visibilidad extra frente al resto del inventario. Cada plan incluye un número de boosts al mes; si necesitas más, puedes comprarlos desde tu panel.',
-          },
-        ].map(({ q, a }) => (
+        {FAQ_ITEMS.map(({ q, a }) => (
           <div key={q} className="border-b border-bsm-border py-5">
             <h3 className="font-medium text-bsm-text-primary mb-2">{q}</h3>
             <p className="text-sm text-bsm-text-secondary">{a}</p>

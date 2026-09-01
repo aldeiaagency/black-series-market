@@ -3,9 +3,14 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { getOrganizationIdForUser, getEntitlements } from '@/lib/entitlements'
 import { getDealerBookingContext } from '@/lib/assistant-booking'
 import { createHmac } from 'crypto'
+import { getClientIp, hashIdentifier, isIpEventRateLimited } from '@/lib/rate-limit'
 
 const WEBHOOK_SECRET  = process.env.ASSISTANT_WEBHOOK_SECRET ?? ''
 const TIMEOUT_MS      = 5000
+// Arrancar una sesión nueva es más "caro" de sospechar que un mensaje suelto dentro de una
+// ya abierta — 20/10min por IP es holgado para un visitante mirando varias fichas seguidas.
+const SESSION_IP_LIMIT = 20
+const SESSION_IP_WINDOW_MS = 10 * 60 * 1000
 
 const ACQUISITION_KEYS = [
   'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
@@ -37,6 +42,12 @@ export async function POST(req: NextRequest) {
   if (!vehicleId) return classic()
 
   const admin = createAdminClient()
+
+  const clientIp = getClientIp(req)
+  const ipHash = clientIp ? hashIdentifier(clientIp) : null
+  if (await isIpEventRateLimited(admin, 'assistant_session', ipHash, SESSION_IP_LIMIT, SESSION_IP_WINDOW_MS)) {
+    return classic()
+  }
 
   // Fetch vehicle + dealer (public fields only)
   const { data: vehicle } = await admin

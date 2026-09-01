@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Cormorant_Garamond } from 'next/font/google'
+import { unstable_cache } from 'next/cache'
 import './globals.css'
 import { ComparatorProvider } from '@/lib/comparator-context'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner'
@@ -7,6 +8,27 @@ import ConsentManagedGtm from '@/components/legal/ConsentManagedGtm'
 import AcquisitionCapture from '@/components/analytics/AcquisitionCapture'
 import { createAdminClient } from '@/lib/supabase/server'
 import { rootRobotsMeta } from '@/lib/seo'
+
+// El GTM ID casi nunca cambia — sin cache, esta consulta se repetía en CADA request de
+// CADA página (el layout raíz se ejecuta siempre), solo para leer un valor casi estático.
+// 1h de revalidación es margen de sobra frente a un cambio manual ocasional en /admin.
+const getCachedGtmId = unstable_cache(
+  async () => {
+    try {
+      const admin = createAdminClient()
+      const { data } = await admin
+        .from('platform_config')
+        .select('value')
+        .eq('key', 'seo')
+        .single()
+      return (data?.value as { gtm_id?: string } | null)?.gtm_id || null
+    } catch {
+      return null
+    }
+  },
+  ['root-layout-gtm-id'],
+  { revalidate: 3600 },
+)
 
 const inter = Inter({
   subsets: ['latin'],
@@ -98,16 +120,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  let gtmId: string | null = null
-  try {
-    const admin = await createAdminClient()
-    const { data } = await admin
-      .from('platform_config')
-      .select('value')
-      .eq('key', 'seo')
-      .single()
-    gtmId = data?.value?.gtm_id || null
-  } catch {}
+  const gtmId = await getCachedGtmId()
 
   return (
     <html lang="es" className={`${inter.variable} ${cormorant.variable}`}>

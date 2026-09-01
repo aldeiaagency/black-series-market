@@ -52,6 +52,19 @@ async function cloneAssistantWorkflow(dealerId: string, dealerName: string): Pro
   const webhookPath = `blm/assistant/${dealerId}`
   webhookNode.parameters.path = webhookPath
 
+  // Hallazgo de auditoría 2026-08-17: la plantilla solo comprueba que `dealer_id` venga presente
+  // en el body, nunca que coincida con el dealer dueño de este clon — la ruta del webhook ya es
+  // por-dealer (arriba), pero el nodo de validación ignoraba esa fuente de verdad y confiaba en
+  // un campo que cualquiera con la URL puede rellenar con el `dealer_id` de otro showroom.
+  // Fix: inyectar el dealerId real de este clon como constante y rechazar cualquier mismatch.
+  const validateNode = nodes.find((n: { name: string }) => n.name === 'Parsear y validar request')
+  if (validateNode?.parameters?.jsCode?.includes('missing_session_or_dealer')) {
+    validateNode.parameters.jsCode = validateNode.parameters.jsCode.replace(
+      "if (!sessionId || !dealerId) {",
+      `const EXPECTED_DEALER_ID = ${JSON.stringify(dealerId)};\nif (dealerId && dealerId !== EXPECTED_DEALER_ID) {\n  return [{ json: { _error: 'dealer_id_mismatch', sessionId, dealerId, event, message, language, vehicle, showroom } }];\n}\nif (!sessionId || !dealerId) {`,
+    )
+  }
+
   const shortId = dealerId.slice(0, 8)
   const body = {
     name: `WF7 · Agente IA · ${dealerName} · ${shortId}`,

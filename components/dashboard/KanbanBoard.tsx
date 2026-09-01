@@ -145,14 +145,19 @@ const SOURCE_LABELS: Record<string, string> = {
 
 function ScoreBadge({ score }: { score: Score }) {
   const map = {
-    hot:  { icon: '🔥', cls: 'text-orange-400 border-orange-400/30 bg-orange-400/5' },
-    warm: { icon: '🟡', cls: 'text-amber-400 border-amber-400/30 bg-amber-400/5'   },
-    cold: { icon: '⚪', cls: 'text-[#9E9E9E] border-bsm-border'                      },
+    hot:  { icon: '🔥', label: 'Interés alto',  cls: 'text-orange-400 border-orange-400/30 bg-orange-400/5' },
+    warm: { icon: '🟡', label: 'Interés medio', cls: 'text-amber-400 border-amber-400/30 bg-amber-400/5'   },
+    cold: { icon: '⚪', label: 'Interés bajo',  cls: 'text-[#9E9E9E] border-bsm-border'                      },
   }
-  const { icon, cls } = map[score]
+  const { icon, label, cls } = map[score]
   return (
-    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] border ${cls}`}>
-      {icon}
+    <span
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] border ${cls}`}
+      role="img"
+      aria-label={label}
+      title={label}
+    >
+      <span aria-hidden="true">{icon}</span>
     </span>
   )
 }

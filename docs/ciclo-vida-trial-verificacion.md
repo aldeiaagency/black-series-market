@@ -146,7 +146,11 @@ Después de cada prueba, resetear `trial_email_stage = 0` si se quiere repetir l
 
 ## 5. Fuera de alcance de este cierre (pendiente aparte)
 
-- **Checkout de Stripe real integrado en el flujo** (`/precios` con precios reales + botón de pago) — sigue sin construir, es la pieza que falta para que "Ver planes →" termine en un pago real, no solo en una página informativa.
+- **Checkout de Stripe directo desde `/precios` (público, sin cuenta todavía)** — sigue sin construir; hoy
+  "Ver planes →" lleva a `/registro` (alta de trial), no a un pago directo. **Distinto del checkout que sí
+  existe:** un dealer ya registrado puede pagar de verdad desde `/dashboard/suscripcion` (botón "Cambiar a
+  [plan]" → `/api/stripe/create-checkout`, ver `docs/PENDIENTES.md`) — ese flujo lleva semanas construido y
+  verificado. Lo que falta aquí es únicamente la vía pública de pago sin pasar antes por el trial.
 - **Plan Grupo** — sin cerrar ni construir.
 - **Disparo semestral del Black Audit para dealers Elite** — sin mecanismo automático todavía.
 - **Reporting** (WF-P4/WF-P5) — siguiente bloque a construir tras cerrar este.

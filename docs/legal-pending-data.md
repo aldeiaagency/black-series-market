@@ -6,22 +6,26 @@ Empresa titular: KAZAWEB, S.L.U. (NIF: B42761254)
 
 ## Datos pendientes de definir
 
-| Dato | Estado | Placeholder en código |
+> **Revisado 2026-09-01 contra el código real** (`app/(public)/legal/[slug]/page.tsx`, `components/legal/`).
+> Varias filas de esta tabla ya estaban resueltas y seguían marcadas PENDIENTE — corregido abajo. El resto
+> no tiene evidencia directa en código y se mantiene como estaba.
+
+| Dato | Estado | Nota |
 |---|---|---|
-| Dominio definitivo | PENDIENTE | `[PENDIENTE_DEFINIR_DOMINIO]` |
-| Email legal | PENDIENTE | `[PENDIENTE_EMAIL_LEGAL]` |
-| Email privacidad / RGPD | PENDIENTE | `[PENDIENTE_EMAIL_PRIVACIDAD]` |
-| Email de contacto | PENDIENTE | `[PENDIENTE_EMAIL_CONTACTO]` |
-| Herramienta de formularios | PENDIENTE | `[PENDIENTE_HERRAMIENTA_FORMULARIOS]` |
-| CRM / webhook | PENDIENTE | `[PENDIENTE_CRM]` |
-| Email marketing | PENDIENTE | `[PENDIENTE_EMAIL_MARKETING]` |
-| Analytics | PENDIENTE | `[PENDIENTE_ANALYTICS]` |
-| Pixel de publicidad | PENDIENTE | `[PENDIENTE_PIXEL]` |
-| Datos técnicos de navegación | PENDIENTE | `[PENDIENTE_DEFINIR_ANALYTICS_COOKIES]` |
-| Banner de cookies | PENDIENTE — no implementado | — |
-| Jurisdicción específica | PENDIENTE | `[PENDIENTE_DEFINIR_JURISDICCION_ESPECIFICA]` |
-| Revisión legal profesional | PENDIENTE | — |
-| Política de cookies definitiva | PENDIENTE — configuración técnica | `/legal/cookies` |
+| Dominio definitivo | **RESUELTO** | `blacklabelmarket.es`, citado literalmente en el aviso legal |
+| Email legal | **RESUELTO** | `hola@blacklabelmarket.es` |
+| Email privacidad / RGPD | **RESUELTO** | `privacidad@blacklabelmarket.es` |
+| Email de contacto | **RESUELTO** | `hola@blacklabelmarket.es` |
+| Email marketing | **RESUELTO** | Brevo, sender `hola@blacklabelmarket.es` (ver `reference_black_series_market_credentials` en memoria del CEO) |
+| Banner de cookies | **RESUELTO** | `components/legal/CookieConsentBanner.tsx` + `ConsentManagedGtm.tsx` (carga GTM condicionada al consentimiento) |
+| Analytics | **RESUELTO** | GTM cargado vía `gtm_id` (dinámico, no env var) detrás de `ConsentManagedGtm.tsx` |
+| Herramienta de formularios | PENDIENTE | `[PENDIENTE_HERRAMIENTA_FORMULARIOS]` — sin evidencia de resolución en código |
+| CRM / webhook | PENDIENTE | `[PENDIENTE_CRM]` — sin evidencia de resolución en código |
+| Pixel de publicidad | PENDIENTE | `[PENDIENTE_PIXEL]` — sin evidencia de resolución en código |
+| Datos técnicos de navegación | PENDIENTE | `[PENDIENTE_DEFINIR_ANALYTICS_COOKIES]` — sin evidencia de resolución en código |
+| Jurisdicción específica | **Decisión ya tomada, no pendiente** | El aviso legal usa cláusula genérica ("juzgados y tribunales que resulten competentes conforme a la normativa aplicable"), sin fijar ciudad concreta — es una elección de redacción válida, no un dato que falte. Contradecía la fila "Jurisdicción: España" de la tabla de abajo; corregido |
+| Revisión legal profesional | PENDIENTE | Sigue sin validación por abogado — ver sección de revisión preparatoria más abajo |
+| Política de cookies definitiva | **RESUELTO en lo técnico** | `/legal/cookies` + banner de consentimiento ya implementados |
 
 ---
 
@@ -67,15 +71,15 @@ Empresa titular: KAZAWEB, S.L.U. (NIF: B42761254)
 
 ## Acciones requeridas antes de publicación pública
 
-1. Definir y registrar el dominio definitivo
-2. Activar y verificar buzones de email (legal, privacidad, contacto)
-3. Configurar SPF, DKIM y DMARC para el dominio
-4. Definir herramientas de formularios y CRM — reemplazar placeholders
-5. Configurar analytics si procede — actualizar política de cookies
-6. Implementar banner de consentimiento de cookies si se activan cookies no técnicas
-7. Revisar toda la documentación legal con asesor especializado en RGPD y LSSI
-8. Reemplazar todos los `[PENDIENTE_...]` con datos reales antes del lanzamiento público
-9. Actualizar `NEXT_PUBLIC_SITE_URL` en Vercel con el dominio definitivo
+1. ~~Definir y registrar el dominio definitivo~~ — hecho (`blacklabelmarket.es`)
+2. ~~Activar y verificar buzones de email (legal, privacidad, contacto)~~ — hecho
+3. ~~Configurar SPF, DKIM y DMARC para el dominio~~ — hecho (ver `reference_hostinger_api` en memoria del CEO)
+4. Definir herramientas de formularios y CRM — reemplazar placeholders (sigue pendiente)
+5. ~~Configurar analytics si procede — actualizar política de cookies~~ — hecho (GTM + banner de consentimiento)
+6. ~~Implementar banner de consentimiento de cookies si se activan cookies no técnicas~~ — hecho
+7. Revisar toda la documentación legal con asesor especializado en RGPD y LSSI (sigue pendiente)
+8. Reemplazar los `[PENDIENTE_HERRAMIENTA_FORMULARIOS]` / `[PENDIENTE_CRM]` / `[PENDIENTE_PIXEL]` restantes con datos reales antes del lanzamiento público
+9. Actualizar `NEXT_PUBLIC_SITE_URL` en Vercel con el dominio definitivo (verificar que sigue apuntando al apex)
 
 ---
 
@@ -127,4 +131,6 @@ Aplicado como borrador en el propio fichero de condiciones — **pendiente de qu
 
 ---
 
-Última actualización: 2026-07-20 (añadida sección de revisión preparatoria — alta de profesionales)
+Última actualización: 2026-09-01 (revisión de duplicados/incoherencias — tabla de datos pendientes y lista de
+acciones reconciliadas contra el código real; sección de revisión preparatoria de 2026-07-20 sin tocar, sigue
+vigente y pendiente de abogado).

@@ -67,17 +67,31 @@ export default function Header() {
   // Auth state
   useEffect(() => {
     const supabase = createClient()
+    // onAuthStateChange dispara una vez de inmediato con la sesión local al suscribirse,
+    // además de en cambios reales — sin este guard, checkDealer() (una consulta a `dealers`)
+    // corría dos veces en cada carga de página con sesión activa (Header monta en todo el sitio).
+    let lastCheckedUserId: string | null = null
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
-      if (user) checkDealer(user.id, supabase)
+      if (user && user.id !== lastCheckedUserId) {
+        lastCheckedUserId = user.id
+        checkDealer(user.id, supabase)
+      }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       const u = session?.user ?? null
       setUser(u)
-      if (u) checkDealer(u.id, supabase)
-      else setIsDealer(false)
+      if (u) {
+        if (u.id !== lastCheckedUserId) {
+          lastCheckedUserId = u.id
+          checkDealer(u.id, supabase)
+        }
+      } else {
+        lastCheckedUserId = null
+        setIsDealer(false)
+      }
     })
 
     return () => subscription.unsubscribe()

@@ -109,6 +109,86 @@ Cadena de dinero rota + seguridad explotable. **CERRADO (ver nota 2026-07 arriba
 - [x] **SEO-7/8/9** — breadcrumb con nivel categoría + marca→`/marcas/[slug]` (resuelto 2026-09-01, `VehicleDetailContent.tsx` + ambos `[slug]/page.tsx`) · silo horizontal entre categorías (resuelto 2026-09-01, ver detalle abajo). **Pendiente**: `priority={activeIndex===0}` en galería.
 - [x] **SEO-10/11/12** — fecha visible derivada de `dateModified` (`VehicleDetailContent.tsx`, "Actualizado en [mes] de [año]") · título de dealer con ciudad (`dealers/[slug]/page.tsx:77`) · enlaces al split `/marcas/[brand]/coches|motos` (nav "Todos los X · Coches · Motos" en la página hub + enlaces "ver todos" al final de cada grid) + dropdown "Marcas" del Header y lista de marcas del Footer corregidos para enlazar a `/marcas/[slug]` reales en vez de `/coches?marca=X` (Footer tenía el mismo bug que el Header: "BMW M"/"Mercedes AMG" generaban slugs inventados `bmw-m`/`mercedes-amg` en vez de los reales `bmw`/`mercedes-benz` — hallado con Playwright, no estaba en ningún checklist). **Todos 2026-08-31/09-01.**
 - [x] **SEC-13 (nuevo)** — **6 funciones RPC de Supabase eran llamables directamente con la anon key pública**, saltándose toda la autorización de la app: `add_team_member_if_under_limit`, `consume_boost_credit`, `refund_boost_credit`, `trial_dealer_stats`, `record_followup_response`, `confirm_vehicle_freshness`. Causa: `REVOKE ALL ... FROM PUBLIC` no basta en este proyecto — Supabase concede `EXECUTE` a `anon`/`authenticated` por defecto como grant directo, no heredado de PUBLIC. **Resuelto y verificado 2026-09-01** (migraciones 095-100, `REVOKE EXECUTE ... FROM anon, authenticated` explícito en cada una, confirmado con llamadas reales contra producción — las 6 devuelven `42501 permission denied`). Detalle completo en `registro_decisiones.md` 2026-09-01 (tarde). **Recomendación permanente para toda función `SECURITY DEFINER` nueva**: no basta con `REVOKE ALL FROM PUBLIC` — hay que revocar explícitamente de `anon` y `authenticated`, y verificar con una llamada real usando la anon key antes de dar el fix por bueno.
+- [~] **SEC-14 (nuevo, 2026-09-01)** — Tres hallazgos de `agency/auditoria_alta_fundador_blm_2026-08-17.md`
+  reverificados contra el código/n8n real (auditoría de limpieza de documentación, no todo lo que decía ese
+  archivo seguía vigente — un cuarto hallazgo del mismo documento, filtrado de catálogo por
+  `dealer.profile_status`, resultó **ya resuelto desde el 2026-08-25** y se ha retirado de aquí):
+  - **WF7 (asistente IA por dealer) no valida que el `dealer_id` del body coincida con el dealer dueño del
+    clon: mitad cerrada.** Cada dealer Professional/Elite tiene su propio workflow clonado con una ruta de
+    webhook única (`blm/assistant/{dealerId}`, ver `cloneAssistantWorkflow` en
+    `lib/integrations/n8n-assistant-provisioning.ts`) — pero el nodo "Parsear y validar request" solo
+    comprobaba que `dealer_id` viniera presente en el body, nunca que coincidiera con el dealer de esa ruta.
+    Con la URL de un dealer (o si el frontend tuviera un bug), se podía mandar el `dealer_id` de otro
+    showroom y el workflow lo aceptaba. **Hecho**: `cloneAssistantWorkflow` ahora inyecta el `dealerId` real
+    como constante en el nodo clonado y rechaza cualquier mismatch (`_error: 'dealer_id_mismatch'`, ya
+    integrado con el IF de validación existente que enruta cualquier `_error` no vacío a "Responder 400") —
+    aplica a **todo clon nuevo** desde ahora. **Falta el retroactivo**: los clones ya existentes en
+    producción (RS Automoción BETA, Sport Auto Barcelona, WF7 Agente IA Cualificador BLM y varios TEST
+    SINTÉTICO) siguen con el nodo viejo sin el check — parchearlos requiere una escritura por workflow en
+    n8n, bloqueada por el mismo motivo que los dos puntos de abajo.
+  - **Trazabilidad Prospecto→alta rota: mitad cerrada.** El market no guardaba ni reenviaba el
+    Record ID de Airtable que origina una visita, así que WF-P3 (onboarding fundador) no podía enlazar de
+    vuelta al Prospecto. **Hecho en este repo**: migración `101_add_source_prospecto_id.sql`
+    (`showroom_applications.source_prospecto_id` + `dealers.source_prospecto_id`, aplicada en prod y
+    verificada), schema de `/api/showroom-applications` acepta `source_prospecto_id`, `approveApplication`
+    lo copia a `dealers`, y el payload de WF-P3 en `altas-showroom/actions.ts` ahora manda `prospecto_id`.
+    **Falta el otro lado, en n8n (agencia), fuera de este repo**: el workflow `BSA - Watcher. Disparo
+    checklist visita` (n8n id `pbAKnWQGK7KiSOQq`) tiene que añadir `source_prospecto_id` (el Record ID del
+    Prospecto) al payload que ya envía a `/api/showroom-applications` cuando dispara una alta —
+    sin eso el campo nuevo se queda siempre a NULL. Cambio de una línea en ese workflow, no intentado
+    todavía: una escritura en un workflow de n8n **activo y en producción** la bloqueó el clasificador de
+    permisos de Claude Code (acción de alto riesgo, requiere autorización explícita del usuario antes de
+    reintentarla).
+  - **WF1 (`BLM - 1. Nueva Solicitud Showroom`, n8n id `ZQJODaihrw0K0kOP`) no verifica de verdad la firma
+    HMAC de `x-blacklabel-signature`** — el propio código del nodo lo admite en un comentario: el sandbox de
+    Code de n8n bloquea `require("crypto")`. Hoy solo protege el secreto de la URL del webhook + la
+    presencia (no validez) de los headers. **Fix real identificado, no aplicado**: mover la verificación a
+    un nodo nativo `n8n-nodes-base.crypto` (HMAC-SHA256 sobre el body crudo — el webhook ya tiene
+    `rawBody:true` — comparado contra el header) en vez de intentarlo dentro del nodo Code. El esquema exacto
+    a replicar es el de `lib/integrations/n8n.ts`: `HMAC-SHA256(N8N_WEBHOOK_DEALER_SIGNUP_SECRET,
+    JSON.stringify(payload))` sobre el body crudo (timestamp va en un header aparte, no entra en la firma).
+    **No aplicado por el mismo motivo que el punto anterior** — incluso la mejora más pequeña que se intentó
+    (una ventana de frescura anti-replay de 5 min sobre el timestamp, sin tocar el HMAC) quedó bloqueada por
+    el clasificador al ser una escritura sobre un workflow activo en producción. Requiere que el usuario
+    autorice explícitamente la escritura en n8n, o la haga él mismo desde la UI.
+- [ ] **Rotación de `service_role` sin ejecutar** — el runbook existe
+  (`docs/auditoria-total-2026-07/ROTACION-service-role-checklist.md`) desde julio, nunca se ha ejecutado.
+  **No la he ejecutado yo tampoco** (2026-09-01): rotar una clave que está viva en Vercel/n8n/scripts locales
+  es exactamente el tipo de acción irreversible-si-sale-mal que requiere que H la apruebe y esté presente
+  para verificar que nada se rompe, no algo para hacer de forma autónoma en medio de una limpieza de
+  documentación. Sigue pendiente, con dueño (H) y runbook ya escrito.
+- [x] **A13 (nuevo, 2026-09-01)** — `ScoreBadge` del Kanban de oportunidades (`components/dashboard/KanbanBoard.tsx`) mostraba solo un emoji de temperatura de lead (🔥/🟡/⚪) sin `aria-label` ni texto — invisible para lector de pantalla. **Resuelto**: `role="img"` + `aria-label`/`title` con el texto ("Interés alto/medio/bajo"), emoji marcado `aria-hidden`.
+- [x] **SEO-13 (nuevo, 2026-09-01)** — `/profesionales/precios` tenía 6 preguntas frecuentes visibles sin `FAQPage` JSON-LD (verificado por grep, cero coincidencias; la página hermana `/precios` sí lo tenía, con un set de preguntas ligeramente distinto — no unificadas, quedan como páginas deliberadamente separadas). **Resuelto**: preguntas extraídas a `FAQ_ITEMS` (fuente única para el bloque visible y el JSON-LD, no pueden divergir) + `<script type="application/ld+json">` con `FAQPage`/`mainEntity`, mismo patrón ya usado en `/precios` y en las landings de categoría/marca.
+- [x] **SEC-16 (nuevo, 2026-09-01)** — `/api/assistant/message`, `/session`, `/book`, `/availability` sin ningún límite de tasa (a diferencia de leads/alertas/altas, que ya lo tenían) — `message` y `book` disparan coste real (OpenAI vía n8n; lead+cita+Google Calendar+email respectivamente). **Resuelto**: nuevo `isIpEventRateLimited` en `lib/rate-limit.ts` (mismo mecanismo que `/api/track`, sin infraestructura extra — cuenta filas recientes de `analytics_events` por `ip_hash`) aplicado a los 4 endpoints con límites por severidad (`message` 60/10min, `session` 20/10min, `availability` 60/10min, `book` 5/10min). Verificado contra producción con un `ip_hash` desechable (bloqueo exacto en la 4ª petición con límite=3 de prueba, filas de test borradas después).
+- [x] **SEC-15 (nuevo, 2026-09-01)** — RLS de `organizations`/`subscriptions`/`boosts_credits`/`plans`,
+  hallazgo de auditoría de limpieza de documentación: **reverificado directamente contra las migraciones
+  reales y resultó ya cerrado, no hacía falta ningún fix.** Las 4 tablas tienen RLS activado con políticas
+  coherentes (`orgs_public_read` solo si `status='active'` y sin columnas sensibles; `locations_public_read`
+  abierta a propósito, son datos de showroom ya públicos; `subscriptions_own_read`/`boost_credits_own`
+  acotadas a `auth.uid()`; `plans_public_read` abierta a propósito, es contenido de la página de precios);
+  ninguna de las 4 tiene política de escritura para `anon`/`authenticated`, así que INSERT/UPDATE/DELETE
+  quedan denegados por defecto salvo `service_role`. Las dos únicas funciones `SECURITY DEFINER` que tocan
+  estas tablas (`handle_new_user`, `enforce_active_vehicle_limit`) son triggers, no RPC expuestas — no
+  aplica el patrón de SEC-13. `boost_credits` además ya tenía sus dos funciones (`consume_boost_credit`,
+  `refund_boost_credit`) cerradas en el propio SEC-13.
+- [~] **Perf (C4, sin cerrar del todo)** — cache de `gtm_id` en el layout raíz: **hecho** (`app/layout.tsx`,
+  `unstable_cache` con revalidación de 1h — antes se consultaba `platform_config` en cada request de cada
+  página). Doble llamada de auth en `Header.tsx` (`getUser()` + el disparo inicial de
+  `onAuthStateChange` duplicaban la consulta a `dealers` en cada carga de página con sesión activa):
+  **hecho**, guardado por `lastCheckedUserId` para no repetir `checkDealer()` si el id no cambió. **Sin
+  revisar en esta pasada** (llevado tal cual del hallazgo original, sin reverificar contra el código actual):
+  `select('*')` sin acotar + recuentos duplicados en algún listado, y `VehicleCard` como client component
+  completo cuando podría ser mayormente servidor — requieren perfilar antes de tocarlos, no son correcciones
+  de una línea como las dos de arriba.
+- [~] **`/mis-favoritos` vs `/cuenta/favoritos` (sin resolver, con matiz)** — son dos implementaciones reales
+  y completas de "ver mis favoritos", no un despiste: `/mis-favoritos` (cliente, hook `useFavorites`, sirve
+  también a visitantes anónimos vía localStorage con migración a Supabase al iniciar sesión) enlazada desde
+  el Header global; `/cuenta/favoritos` (servidor, requiere sesión, lee `favorites` directo + server action
+  propia para borrar) enlazada desde la sección "cuenta". **Para un usuario logueado ambas leen la misma
+  tabla — no hay divergencia de datos**, solo duplicación de código/mantenimiento. No fusionado en esta
+  pasada porque la decisión correcta depende de UX (si `/cuenta/favoritos` redirige a `/mis-favoritos`,
+  pierde el layout/breadcrumbs de la sección cuenta) y no quise forzar un cambio de navegación visible sin
+  que se revise primero.
 - [x] **SEC-9/10/11** — Cabeceras de seguridad (CSP/HSTS/X-Frame-Options) en `next.config.js`; validar/rate-limit `/api/track`; no devolver errores crudos de PostgREST. **Resuelto 2026-08-31 (noche):**
   - **SEC-9**: HSTS/X-Frame-Options/X-Content-Type-Options/Referrer-Policy/Permissions-Policy **ya existían** (el audit de 2026-07 estaba desactualizado). Solo faltaba **CSP real**, que no existía en ningún sitio. Añadida con dominios verificados en código (GTM/GA4, Supabase, YouTube embed) — `script-src` usa `'unsafe-inline'` (el layout raíz tiene 3 `<script>` inline sin nonce, incluido el bootstrap de Consent Mode v2) y en dev añade `'unsafe-eval'` (React Fast Refresh, no existe en producción). Clarity (`*.clarity.ms`) añadido tras encontrarlo con una prueba real en navegador — GTM lo inyecta desde su propio contenedor, invisible a cualquier grep del código.
   - **SEC-10**: `/api/track` sin ningún límite. Añadido rate-limit por IP (300/5min, vía el `ip_hash` en `metadata` — mismo patrón ya usado en `custom_requests`, sin migración nueva) reutilizando `lib/rate-limit.ts` ya existente.
@@ -377,13 +457,17 @@ STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ESSENTIAL, STRIPE_PRICE_P
 ---
 
 ## Docs del repo que siguen siendo válidos
-- `docs/configuracion-email-smtp.md` — guía paso a paso para configurar SMTP en Supabase
 - `docs/planes-suscripcion-definitivos.md` — definición definitiva de planes y add-ons
 - `docs/seo-geo-backlog.md` + `seo-geo-backlog.csv` — backlog SEO/GEO (independiente)
 - `docs/guia-copy-black-label.md` — guía de tono y copy de la marca
-- `docs/legal-pending-data.md` — investigación legal del alta de profesionales (clickwrap, DSA art. 30, RGPD responsable/encargado) + datos legales pendientes de rellenar. Borrador para revisión de abogado (extendido 2026-07-20)
-- `docs/agente-cita-fase-A-google-calendar.md` — diseño de la Fase A de Google Calendar, ya construida (ver tabla Fase C arriba)
+- `docs/legal-pending-data.md` — investigación legal del alta de profesionales (clickwrap, DSA art. 30, RGPD responsable/encargado) + datos legales pendientes de rellenar. Borrador para revisión de abogado (extendido 2026-07-20, tabla de pendientes reconciliada contra código 2026-09-01)
+- `docs/agente-cita-fase-A-google-calendar.md` — diseño de la Fase A de Google Calendar. Código completo y dormido; **decisión 2026-08-25: queda en backlog indefinido**, no activada — Fase B (horario manual, sin OAuth) es la vía definitiva, verificada E2E el 2026-08-26 (ver fila "Reserva de citas" en Features Elite arriba)
 - `docs/ciclo-vida-trial-verificacion.md` — checklist de verificación del ciclo de vida del trial (banner + drip WF)
 - `docs/auditoria-total-2026-07/` — 13 documentos de la auditoría total (seguridad, código, API, rendimiento, UX/accesibilidad, SEO/GEO, funcional por rol, E2E autenticado) + veredicto consolidado
-- `docs/admin-dashboard-validation-report.md`, `docs/qa-final-report.md`, `docs/repair-migration-procedure.md` — reportes puntuales de validación/QA, no bloqueantes
-- `docs/verificacion-tiers-2026-07-28.md` — verificación de los 3 tiers (Codex, 2026-07-28): límites de vehículos/paneles/CSV/analítica/boosts confirmados correctos; 4 hallazgos (F-D-01/02/04 corregidos y reverificados 2026-07-29, F-D-03 abierto a propósito)
+- `docs/verificacion-tiers-2026-07-28.md` — verificación de los 3 tiers (Codex, 2026-07-28): límites de vehículos/paneles/CSV/analítica/boosts confirmados correctos; 4 hallazgos (F-D-01/02/04 corregidos y reverificados 2026-07-29; **F-D-03 revisado 2026-09-01: sus 4 sub-hallazgos ya no aplican** — el propio campo `future`/`availability_status` de `lib/plans-config.ts` que citaba fue retirado en la refactorización de planes, feed/DMS y ventana Elite 24h se presentan ya como incluidos, y reservas por calendario quedó resuelto por la vía Fase B de arriba, no por Fase A)
+
+**Eliminados 2026-09-01 por limpieza de documentación** (contenido superado por el código real, ver
+`registro_decisiones.md` en el core): `docs/admin-dashboard-validation-report.md` (su único hallazgo vivo,
+INC-004, ya corregido en `app/(auth)/admin-login/page.tsx`), `docs/qa-final-report.md`,
+`docs/repair-migration-procedure.md`, `docs/configuracion-email-smtp.md` (describía Resend; el SMTP real es
+Hostinger, sin doc propio todavía), `docs/ajustes/` (5 changelogs puntuales ya consumidos).

@@ -4,6 +4,14 @@
 **Fecha:** 2026-06-02
 **Basado en:** auditoría de código + investigación de 18 marketplaces globales
 
+> **Aviso de precios (2026-09-01):** este informe usa los precios de lanzamiento (Essential €149,
+> Professional €349, Elite €699), ya sustituidos por los precios definitivos cerrados en
+> `docs/planes-suscripcion-definitivos.md` — **Essential €197, Professional €449, Elite €899** (+IVA). Todas
+> las cifras de ARPU, proyección de ingresos y comparativa con el sector que aparecen abajo parten de la
+> base antigua y **subestiman los ingresos reales**; no usar los totales de este informe para decisiones de
+> negocio sin recalcular con los precios vigentes. El resto del análisis (benchmarking, gaps de producto,
+> roadmap de expansión) sigue siendo válido — solo la base de precio quedó desactualizada.
+
 ---
 
 ## 1. Estado actual de monetización

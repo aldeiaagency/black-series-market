@@ -123,7 +123,7 @@ También quedó en Stripe **test** el cliente `cus_Uy4YFOgvuNVJPM` y una sesión
 |---|---|---|
 | F-D-01 — Downgrade | ✅ Corregido | El dealer Professional de prueba pasó temporalmente de 50 vehículos activos a Essential: quedaron exactamente 15 `active` y 35 `paused`, sin borrar ninguno. Una segunda ejecución pausó 0 vehículos, confirmando idempotencia. Después se restauró el dealer a Professional y sus 50 activos. |
 | F-D-02 — Destacado Elite | ✅ Corregido | Los cambios de plan por administración y Stripe sincronizan `organizations.is_featured` y `dealers.is_featured`, incluida su revocación. El Elite de prueba quedó destacado y apareció dentro del bloque «Showrooms destacados» de `/dealers`. |
-| F-D-03 — Funciones `future` | ⏸️ Sin cambios | Permanece abierto por indicación expresa; no se modificaron las funciones futuras. |
+| F-D-03 — Funciones `future` | ✅ Ya no aplica (revisado 2026-09-01) | El campo `future`/`availability_status` de `lib/plans-config.ts` que citaba este hallazgo fue retirado en una refactorización posterior de la configuración de planes. Sus 4 sub-casos hoy: feed/DMS y la ventana Elite de 24 h se presentan como incluidos sin caveat; la sugerencia de mejora forma parte de la analítica Elite entregada; la reserva por calendario se resolvió por la vía Fase B (horario manual, sin Google OAuth), verificada E2E el 2026-08-26 — Fase A quedó en backlog indefinido por decisión 2026-08-25, no por estar a medio construir. |
 | F-D-04 — Navegación | ✅ Corregido | El menú se filtra en servidor según los entitlements reales y su estado operativo. En sesión Essential no aparecen Importar CSV, A la carta ni Citas; Inventario permanece visible. |
 
 ### Cambios aplicados

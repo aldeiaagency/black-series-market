@@ -2,6 +2,16 @@
 
 **Fecha:** 2026-07-01 · **Método:** design system fundamentado con la skill `ui-ux-pro-max` (patrón, estilo, tipografía, motion) + lectura del código real (`tailwind.config.ts`, `globals.css`, componentes clave). Alineada con los hallazgos de diseño de [`auditoria-completa-2026-07.md`](auditoria-completa-2026-07.md) (B1-B11, A1-A12).
 
+> **Estado real (revisado 2026-09-01): a medias, no discontinuada por decisión — simplemente no se retomó.**
+> `framer-motion` sigue instalado y con **cero imports** en todo el repo — el sistema de motion en sí (Fase
+> 1, punto 1: `lib/motion.ts` + `useReducedMotion` + tokens de duración en `tailwind.config.ts`) nunca se
+> construyó, y con él tampoco Fases 2-4 (microinteracciones, scroll-reveal, shared-element, hero con luz
+> ambiental). Los otros dos puntos de Fase 1 (B7 tokens de dorado/borde, A1-A3 contraste y modales
+> accesibles) sí quedaron resueltos, pero por el trabajo de accesibilidad del Sprint 2 (ver
+> `docs/PENDIENTES.md`), no por ejecutar este plan. **No hay una prioridad de negocio activa que la
+> reclame ahora mismo** (el foco actual es completar el funnel y el lanzamiento, no pulido visual) — se deja
+> como propuesta de diseño válida para retomar cuando corresponda, no como backlog abierto.
+
 ---
 
 ## Diagnóstico en una frase
