@@ -126,37 +126,41 @@ Cadena de dinero rota + seguridad explotable. **CERRADO (ver nota 2026-07 arriba
     producción (RS Automoción BETA, Sport Auto Barcelona, WF7 Agente IA Cualificador BLM y varios TEST
     SINTÉTICO) siguen con el nodo viejo sin el check — parchearlos requiere una escritura por workflow en
     n8n, bloqueada por el mismo motivo que los dos puntos de abajo.
-  - **Trazabilidad Prospecto→alta rota: mitad cerrada.** El market no guardaba ni reenviaba el
+  - **Trazabilidad Prospecto→alta: cerrada del todo (2026-09-01).** El market no guardaba ni reenviaba el
     Record ID de Airtable que origina una visita, así que WF-P3 (onboarding fundador) no podía enlazar de
-    vuelta al Prospecto. **Hecho en este repo**: migración `101_add_source_prospecto_id.sql`
+    vuelta al Prospecto. Migración `101_add_source_prospecto_id.sql`
     (`showroom_applications.source_prospecto_id` + `dealers.source_prospecto_id`, aplicada en prod y
     verificada), schema de `/api/showroom-applications` acepta `source_prospecto_id`, `approveApplication`
-    lo copia a `dealers`, y el payload de WF-P3 en `altas-showroom/actions.ts` ahora manda `prospecto_id`.
-    **Falta el otro lado, en n8n (agencia), fuera de este repo**: el workflow `BSA - Watcher. Disparo
-    checklist visita` (n8n id `pbAKnWQGK7KiSOQq`) tiene que añadir `source_prospecto_id` (el Record ID del
-    Prospecto) al payload que ya envía a `/api/showroom-applications` cuando dispara una alta —
-    sin eso el campo nuevo se queda siempre a NULL. Cambio de una línea en ese workflow, no intentado
-    todavía: una escritura en un workflow de n8n **activo y en producción** la bloqueó el clasificador de
-    permisos de Claude Code (acción de alto riesgo, requiere autorización explícita del usuario antes de
-    reintentarla).
+    lo copia a `dealers`, y el payload de WF-P3 en `altas-showroom/actions.ts` manda `prospecto_id`. **Lado
+    n8n (agencia) aplicado y verificado, autorizado explícitamente por H**: el workflow `BSA - Watcher.
+    Disparo checklist visita` (`pbAKnWQGK7KiSOQq`), nodo "Preparar payload alta", ahora añade
+    `altaPayload.source_prospecto_id = visita.prospectoId` (el Record ID ya resuelto en el propio flujo,
+    mismo patrón que el resto de campos opcionales del payload) — sintaxis verificada tras el cambio.
   - **WF1 (`BLM - 1. Nueva Solicitud Showroom`, n8n id `ZQJODaihrw0K0kOP`) no verifica de verdad la firma
     HMAC de `x-blacklabel-signature`** — el propio código del nodo lo admite en un comentario: el sandbox de
-    Code de n8n bloquea `require("crypto")`. Hoy solo protege el secreto de la URL del webhook + la
-    presencia (no validez) de los headers. **Fix real identificado, no aplicado**: mover la verificación a
-    un nodo nativo `n8n-nodes-base.crypto` (HMAC-SHA256 sobre el body crudo — el webhook ya tiene
-    `rawBody:true` — comparado contra el header) en vez de intentarlo dentro del nodo Code. El esquema exacto
-    a replicar es el de `lib/integrations/n8n.ts`: `HMAC-SHA256(N8N_WEBHOOK_DEALER_SIGNUP_SECRET,
+    Code de n8n bloquea `require("crypto")`. Solo protege el secreto de la URL del webhook + la presencia
+    (no validez) de los headers. **Mitigación aplicada y verificada 2026-09-01** (autorizado explícitamente
+    por H): ventana de frescura anti-replay de 5 min sobre `x-blacklabel-timestamp`, antes de la
+    comprobación de payload. Probado con 2 ejecuciones reales contra producción — timestamp fresco pasó el
+    check y falló después en "payload incompleto" (como se esperaba de un payload de prueba deliberadamente
+    incompleto); timestamp de hace 10 min rechazado exactamente en el nuevo check (`"x-blacklabel-timestamp
+    fuera de ventana (601s)"`), antes de llegar al de payload. **Sigue sin resolver la verificación HMAC
+    completa** — fix real identificado, no aplicado: mover la verificación a un nodo nativo
+    `n8n-nodes-base.crypto` (HMAC-SHA256 sobre el body crudo — el webhook ya tiene `rawBody:true` —
+    comparado contra el header) en vez de intentarlo dentro del nodo Code. El esquema exacto a replicar es
+    el de `lib/integrations/n8n.ts`: `HMAC-SHA256(N8N_WEBHOOK_DEALER_SIGNUP_SECRET,
     JSON.stringify(payload))` sobre el body crudo (timestamp va en un header aparte, no entra en la firma).
-    **No aplicado por el mismo motivo que el punto anterior** — incluso la mejora más pequeña que se intentó
-    (una ventana de frescura anti-replay de 5 min sobre el timestamp, sin tocar el HMAC) quedó bloqueada por
-    el clasificador al ser una escritura sobre un workflow activo en producción. Requiere que el usuario
-    autorice explícitamente la escritura en n8n, o la haga él mismo desde la UI.
-- [ ] **Rotación de `service_role` sin ejecutar** — el runbook existe
-  (`docs/auditoria-total-2026-07/ROTACION-service-role-checklist.md`) desde julio, nunca se ha ejecutado.
-  **No la he ejecutado yo tampoco** (2026-09-01): rotar una clave que está viva en Vercel/n8n/scripts locales
-  es exactamente el tipo de acción irreversible-si-sale-mal que requiere que H la apruebe y esté presente
-  para verificar que nada se rompe, no algo para hacer de forma autónoma en medio de una limpieza de
-  documentación. Sigue pendiente, con dueño (H) y runbook ya escrito.
+- [ ] **Rotación de `service_role` — evaluada 2026-09-01, veredicto: no urgente, y no puedo completarla solo.**
+  H pidió explícitamente "si es necesaria, hazlo" — releído el runbook
+  (`docs/auditoria-total-2026-07/ROTACION-service-role-checklist.md`) antes de decidir. Dos motivos para no
+  ejecutarla ahora: (1) el propio runbook ya califica el riesgo real como "≈ nulo" — la clave legacy expuesta
+  está en historial de git de un repo privado (solo `aldeiaagency`), no en ningún sitio público; es higiene
+  pendiente, no una respuesta a una fuga activa. (2) **No es una tarea que pueda completar yo solo**: rotar
+  implica regenerar el JWT secret entero de Supabase (acción del dashboard, invalida anon+service a la vez)
+  y actualizar el env de n8n en EasyPanel — el propio runbook ya lo señala como "no accesible de forma
+  automatizada limpia desde el entorno de trabajo". Mi parte (`.env.local` + Vercel + verificación web/n8n
+  tras el cambio) solo tiene sentido después de que H genere el secreto nuevo en el dashboard. Sigue
+  pendiente, sin urgencia real, a la espera de hacerlo juntos cuando H quiera.
 - [x] **A13 (nuevo, 2026-09-01)** — `ScoreBadge` del Kanban de oportunidades (`components/dashboard/KanbanBoard.tsx`) mostraba solo un emoji de temperatura de lead (🔥/🟡/⚪) sin `aria-label` ni texto — invisible para lector de pantalla. **Resuelto**: `role="img"` + `aria-label`/`title` con el texto ("Interés alto/medio/bajo"), emoji marcado `aria-hidden`.
 - [x] **SEO-13 (nuevo, 2026-09-01)** — `/profesionales/precios` tenía 6 preguntas frecuentes visibles sin `FAQPage` JSON-LD (verificado por grep, cero coincidencias; la página hermana `/precios` sí lo tenía, con un set de preguntas ligeramente distinto — no unificadas, quedan como páginas deliberadamente separadas). **Resuelto**: preguntas extraídas a `FAQ_ITEMS` (fuente única para el bloque visible y el JSON-LD, no pueden divergir) + `<script type="application/ld+json">` con `FAQPage`/`mainEntity`, mismo patrón ya usado en `/precios` y en las landings de categoría/marca.
 - [x] **SEC-16 (nuevo, 2026-09-01)** — `/api/assistant/message`, `/session`, `/book`, `/availability` sin ningún límite de tasa (a diferencia de leads/alertas/altas, que ya lo tenían) — `message` y `book` disparan coste real (OpenAI vía n8n; lead+cita+Google Calendar+email respectivamente). **Resuelto**: nuevo `isIpEventRateLimited` en `lib/rate-limit.ts` (mismo mecanismo que `/api/track`, sin infraestructura extra — cuenta filas recientes de `analytics_events` por `ip_hash`) aplicado a los 4 endpoints con límites por severidad (`message` 60/10min, `session` 20/10min, `availability` 60/10min, `book` 5/10min). Verificado contra producción con un `ip_hash` desechable (bloqueo exacto en la 4ª petición con límite=3 de prueba, filas de test borradas después).
