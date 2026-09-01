@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { Search, Heart, Bell, GitCompareArrows, MessageSquare, ShieldCheck, Package, BarChart2, X, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -154,9 +155,9 @@ const howToDealerJsonLd = {
 export default function ComoFuncionaPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToBuyerJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToDealerJsonLd) }} />
+      <JsonLd data={faqJsonLd} />
+      <JsonLd data={howToBuyerJsonLd} />
+      <JsonLd data={howToDealerJsonLd} />
 
       {/* Hero */}
       <div className="mb-16 max-w-2xl">

@@ -10,6 +10,7 @@ import { getCategoryBrandStock, MOTO_CATEGORY_RELATIONS } from '@/lib/related-ca
 import { esGroupThousands } from '@/lib/utils'
 import FaqSection from '@/components/marketplace/FaqSection'
 import RelatedCategories from '@/components/marketplace/RelatedCategories'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const CATEGORY_VALUES = ['touring_adventure']
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -76,8 +77,8 @@ export default async function MotosTouringPage() {
   return (
     <>
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={itemListJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
 
       <div className="mb-10">
         <nav aria-label="breadcrumb" className="mb-6">

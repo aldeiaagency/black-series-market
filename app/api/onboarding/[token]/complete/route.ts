@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createHmac } from 'crypto'
 import {
   loadSetupRoom,
   normalizeStringArray,
@@ -48,14 +49,22 @@ function normalizeBoolean(value: unknown) {
   return value === true || value === 'true'
 }
 
-async function postJsonWithTimeout(url: string, body: unknown) {
+async function postJsonWithTimeout(url: string, body: unknown, secret: string) {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), 12_000)
+  const webhookBody = JSON.stringify(body)
+  const webhookTimestamp = new Date().toISOString()
+  const webhookSignature = createHmac('sha256', secret).update(webhookBody).digest('hex')
   try {
     return await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-blacklabel-event': 'setup_completed',
+        'x-blacklabel-timestamp': webhookTimestamp,
+        'x-blacklabel-signature': `sha256=${webhookSignature}`,
+      },
+      body: webhookBody,
       signal: ctrl.signal,
     })
   } finally {
@@ -202,8 +211,15 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   const recoveryUrl = passwordSetupUrl(appUrl, linkData.properties)
 
 
+  // Auditoría de seguridad 2026-09-02, P0.6: sin URL/secreto de entorno, falla cerrado en vez de
+  // caer a una URL hardcodeada (mismo principio fail-closed que lib/integrations/n8n.ts). El
+  // payload incluye PII y el enlace de recuperación de contraseña del fundador — se firma con el
+  // mismo esquema HMAC-SHA256 + timestamp que el resto de webhooks salientes del proyecto.
   const webhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
-    ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
+  const webhookSecret = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING_SECRET
+  if (!webhookUrl || !webhookSecret) {
+    return NextResponse.json({ error: 'Configuración de onboarding incompleta.' }, { status: 500 })
+  }
   const payload = {
     event: 'setup_completed',
     dealer_id: setup.dealer.id,
@@ -224,7 +240,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
 
   let webhookSent = false
   try {
-    const res = await postJsonWithTimeout(webhookUrl, payload)
+    const res = await postJsonWithTimeout(webhookUrl, payload, webhookSecret)
     webhookSent = res.ok
   } catch {
     webhookSent = false

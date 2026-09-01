@@ -2,6 +2,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganizationIdForUser, can } from '@/lib/entitlements'
 import { verifyDealerApiKeyHash } from '@/lib/dealer-api-keys'
+import { safeFetchWithSizeLimit } from '@/lib/ssrf-guard'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -125,10 +126,11 @@ async function importImagesForVehicle(
 
   for (let i = 0; i < capped.length; i++) {
     try {
-      const res = await fetch(capped[i], { signal: AbortSignal.timeout(15000) })
-      if (!res.ok) continue
-      const buf = new Uint8Array(await res.arrayBuffer())
-      if (buf.byteLength > MAX_IMAGE_BYTES || buf.byteLength === 0) continue
+      // SSRF (auditoría 2026-09-02, P0.3): valida HTTPS + IP pública (no loopback/RFC1918/
+      // link-local/metadata) antes de conectar, revalida cada redirect manualmente, y aplica
+      // el límite de tamaño en streaming en vez de cargar el body completo antes de comprobarlo.
+      const buf = await safeFetchWithSizeLimit(capped[i], MAX_IMAGE_BYTES, 15000)
+      if (!buf || buf.byteLength === 0) continue
       const ext = detectImageExt(buf.slice(0, 12))
       if (!ext) continue // no es una imagen válida (JPG/PNG/WebP) pese a lo que diga la URL
 

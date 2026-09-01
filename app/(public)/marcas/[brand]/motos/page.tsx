@@ -7,6 +7,7 @@ import VehicleCard from '@/components/marketplace/VehicleCard'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -86,9 +87,9 @@ export default async function BrandMotosPage({ params }: PageProps) {
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
       {itemListJsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+        <JsonLd data={itemListJsonLd} />
       )}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={breadcrumbJsonLd} />
 
       <div className="mb-10">
         <nav aria-label="breadcrumb" className="mb-6">

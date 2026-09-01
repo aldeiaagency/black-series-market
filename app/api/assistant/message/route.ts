@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { createHmac } from 'crypto'
 import { getClientIp, hashIdentifier, isIpEventRateLimited } from '@/lib/rate-limit'
+import { assertSafeRemoteUrl } from '@/lib/ssrf-guard'
 
 const WEBHOOK_SECRET = process.env.ASSISTANT_WEBHOOK_SECRET ?? ''
 const TIMEOUT_MS     = 5000
@@ -38,6 +39,14 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (!cfg?.enabled || !cfg.webhook_url) return degradation()
+
+  // Defensa en profundidad (auditoría 2026-09-02, P0.3): webhook_url ya es service-only desde
+  // la migración 103, pero se valida igual por si se reintroduce alguna vía de escritura.
+  try {
+    await assertSafeRemoteUrl(cfg.webhook_url as string)
+  } catch {
+    return degradation()
+  }
 
   const forward    = JSON.stringify({ session_id, dealer_id, message: sanitized, event: event || 'message' })
   const sig        = createHmac('sha256', WEBHOOK_SECRET).update(forward).digest('hex')

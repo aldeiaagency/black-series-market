@@ -15,6 +15,7 @@ import type { DealerGalleryImage } from '@/components/marketplace/DealerGallery'
 import DealerInventory, { DealerInventoryFallback } from '@/components/marketplace/DealerInventory'
 import DealerViewTracker from '@/components/marketplace/DealerViewTracker'
 import type { Metadata } from 'next'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL      = process.env.NEXT_PUBLIC_APP_URL    || 'https://blacklabelmarket.es'
 const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -233,8 +234,8 @@ export default async function DealerPage({ params }: PageProps) {
   return (
     <>
       <DealerViewTracker dealerId={dealer.id} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={jsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <div className="pt-20">
 
         {/* Cover */}

@@ -118,10 +118,15 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error(`[stripe-webhook] ${event.type} failed:`, err)
     // El procesamiento falló: quita el registro de idempotencia para no dejar el evento
-    // marcado como procesado (así solo quedan los procesados con éxito y un reintento podría
-    // reprocesarlo). Se devuelve 200 igualmente (diseño: no provocar tormenta de reintentos).
+    // marcado como procesado (así un reintento pueda reprocesarlo desde cero).
     await admin.from('processed_stripe_events').delete().eq('event_id', event.id)
-    return NextResponse.json({ received: true, error: 'handler_error' })
+    // Corrección 2026-09-02 (auditoría de seguridad, P0.5): antes se respondía 200 igual, lo que
+    // significa que Stripe NUNCA reintentaba un evento que falló de verdad (pago cobrado, alta de
+    // servicio a medias, sin segunda oportunidad). Se responde 500 para que Stripe reintente con
+    // su backoff estándar — el hallazgo real de fondo (escrituras a Supabase no transaccionales
+    // dentro de cada handler) sigue abierto y requiere una reescritura más profunda, fuera de
+    // alcance de este fix puntual; ver docs/auditoria-seguridad-completa-2026-09-02.md P0.5.
+    return NextResponse.json({ received: false, error: 'handler_error' }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })
@@ -195,7 +200,11 @@ async function handleCheckoutCompleted(
 
   // ── Upsert subscription in new table (if organization_id present) ──
   if (organizationId) {
-    await admin
+    // Corrección 2026-09-02 (P0.5): esta escritura activa el plan pagado — si falla en
+    // silencio, el cliente paga y no recibe el servicio, y el evento queda marcado como
+    // procesado sin que nadie se entere. Se comprueba el error y se lanza para que el catch
+    // superior borre el registro de idempotencia y Stripe reintente el evento.
+    const { error: subscriptionError } = await admin
       .from('subscriptions')
       .upsert({
         organization_id: organizationId,
@@ -210,6 +219,7 @@ async function handleCheckoutCompleted(
         ).toISOString(),
         updated_at: new Date().toISOString(),
       }, { onConflict: 'stripe_subscription_id' })
+    if (subscriptionError) throw new Error(`subscriptions upsert failed: ${subscriptionError.message}`)
 
     // Materializa el destacado en organización y dealer. La página pública de
     // showrooms lee dealers.is_featured, por lo que ambas columnas deben viajar juntas.
@@ -239,7 +249,9 @@ async function handleCheckoutCompleted(
 
   // ── Legacy: sync dealers table ──
   if (dealerId) {
-    await admin.from('dealers').update({
+    // Esta es la escritura que de verdad activa el servicio para el dealer (status='active',
+    // vehicle_slots, plan) — mismo criterio que el upsert de subscriptions de arriba (P0.5).
+    const { error: dealerSyncError } = await admin.from('dealers').update({
       subscription_plan: planSlug as 'essential' | 'professional' | 'elite',
       stripe_subscription_id: session.subscription as string,
       stripe_customer_id: session.customer as string,
@@ -251,6 +263,7 @@ async function handleCheckoutCompleted(
         Date.now() + (billingCycle === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000
       ).toISOString(),
     }).eq('id', dealerId)
+    if (dealerSyncError) throw new Error(`dealers sync failed: ${dealerSyncError.message}`)
 
     // Auto-configure AI assistant (workflow dedicado por dealer) for Professional and Elite plans.
     // Mismo helper que approveApplication/setDealerPlan — ver lib/integrations/n8n-assistant-provisioning.ts.

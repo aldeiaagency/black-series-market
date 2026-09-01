@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { commercialGuides } from './_data/commercialGuides'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 const HUB_IMAGE = '/images/guides/coches-premium-segunda-mano.webp'
@@ -121,8 +122,8 @@ const breadcrumbJsonLd = {
 export default function GuiasPage() {
   return (
     <div className="max-w-screen-lg mx-auto px-6 lg:px-12 pt-28 pb-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={collectionPageJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
 
       <div className="mb-14">
         <nav aria-label="breadcrumb" className="mb-6">

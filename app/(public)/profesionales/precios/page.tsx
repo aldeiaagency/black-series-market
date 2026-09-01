@@ -8,6 +8,7 @@ import {
   ELITE_LIMIT_NOTE,
   type PlanFeatureRow,
 } from '@/lib/plans-config'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -106,8 +107,8 @@ export default async function PreciosPage() {
 
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-32 pb-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <JsonLd data={webPageJsonLd} />
+      <JsonLd data={faqJsonLd} />
 
       {/* Header */}
       <div className="text-center mb-16">

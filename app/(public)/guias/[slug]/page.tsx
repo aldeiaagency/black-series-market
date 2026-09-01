@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { GuideAuthorBox, GuideFaq, GuideHeroImage, GuideToc } from '../_components/GuideSeoBlocks'
 import { commercialGuides, getCommercialGuide, guideTocItems } from '../_data/commercialGuides'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -94,9 +95,9 @@ export default async function CommercialGuidePage({ params }: PageProps) {
 
   return (
     <div className="max-w-screen-lg mx-auto px-6 lg:px-12 pt-28 pb-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={articleJsonLd} />
+      <JsonLd data={faqJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
 
       <div className="mb-12">
         <nav aria-label="breadcrumb" className="mb-6">

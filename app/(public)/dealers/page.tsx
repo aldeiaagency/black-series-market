@@ -5,6 +5,7 @@ import { createPublicClient } from '@/lib/supabase/server'
 export const revalidate = 300
 import DealerCard from '@/components/marketplace/DealerCard'
 import { MapPin, Car, Bike, CheckCircle } from 'lucide-react'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -130,8 +131,8 @@ function renderPage(
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={webPageJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
 
       {/* Header */}
       <div className="mb-10">

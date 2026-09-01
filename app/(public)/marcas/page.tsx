@@ -4,6 +4,7 @@ import { createPublicClient } from '@/lib/supabase/server'
 // ISR: catálogo público → cache CDN, revalida cada 5 min.
 export const revalidate = 300
 import Link from 'next/link'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -135,8 +136,8 @@ export default async function MarcasPage() {
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={collectionPageJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
 
       <div className="mb-12">
         <nav aria-label="breadcrumb" className="mb-6">

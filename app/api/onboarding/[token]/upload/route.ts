@@ -3,6 +3,12 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { validateSetupToken } from '@/lib/onboarding/setup-room'
 
 const BUCKET = 'vehicle-images'
+// Auditoría de seguridad 2026-09-02, P0.6: documentos/CSV de onboarding nunca deben ser
+// públicos e indefinidos (pueden incluir datos sensibles del negocio/fundador) — bucket privado
+// separado, servidos con signed URL de expiración corta en vez de getPublicUrl().
+const PRIVATE_BUCKET = 'onboarding-private'
+const PRIVATE_TYPES: UploadKind[] = ['document', 'stock_bulk', 'stock_csv']
+const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 7 // 7 días — cubre el ciclo real de revisión de admin
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const DOCUMENT_TYPES = [
   'application/pdf',
@@ -120,7 +126,10 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
       ? `covers/${validation.dealerId}/cover.${ext}`
       : `onboarding/${validation.dealerId}/${type}/${random}.${ext}`
 
-  const { error: uploadError } = await admin.storage.from(BUCKET).upload(path, file, {
+  const isPrivate = PRIVATE_TYPES.includes(type)
+  const bucket = isPrivate ? PRIVATE_BUCKET : BUCKET
+
+  const { error: uploadError } = await admin.storage.from(bucket).upload(path, file, {
     contentType: file.type || (ext === 'csv' ? 'text/csv' : 'application/octet-stream'),
     upsert: type === 'logo' || type === 'cover',
   })
@@ -128,7 +137,19 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     return NextResponse.json({ error: uploadError.message || 'Error al subir el archivo.' }, { status: 500 })
   }
 
-  const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(path)
+  let publicUrl: string
+  if (isPrivate) {
+    const { data: signed, error: signError } = await admin.storage
+      .from(bucket)
+      .createSignedUrl(path, SIGNED_URL_TTL_SECONDS)
+    if (signError || !signed) {
+      await admin.storage.from(bucket).remove([path])
+      return NextResponse.json({ error: 'No se pudo generar el enlace del archivo.' }, { status: 500 })
+    }
+    publicUrl = signed.signedUrl
+  } else {
+    publicUrl = admin.storage.from(bucket).getPublicUrl(path).data.publicUrl
+  }
 
   if (type === 'logo') await admin.from('dealers').update({ logo_url: publicUrl }).eq('id', validation.dealerId)
   if (type === 'cover') await admin.from('dealers').update({ cover_url: publicUrl }).eq('id', validation.dealerId)

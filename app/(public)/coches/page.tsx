@@ -14,6 +14,7 @@ import CreateAlertButton from '@/components/marketplace/CreateAlertButton'
 import { applyVehicleFilters } from '@/lib/vehicle-query'
 import Pagination from '@/components/marketplace/Pagination'
 import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 // FAQ de la landing de coches (solo se muestra en la vista sin filtros, para no duplicar
 // el schema en cada combinación de filtros). Respuestas factuales basadas en los datos reales
@@ -195,7 +196,7 @@ export default async function CochesPage({ searchParams }: PageProps) {
   return (
     <>
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
+      <JsonLd data={itemListJsonLd} />
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />

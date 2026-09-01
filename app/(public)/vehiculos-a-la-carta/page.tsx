@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import PrivateSearchForm from '@/components/marketplace/PrivateSearchForm'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -32,7 +33,7 @@ const EXAMPLES = [
 export default function VehiculosALaCartaPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }} />
+      <JsonLd data={webPageJsonLd} />
 
       {/* Header */}
       <div className="mb-14 max-w-2xl">

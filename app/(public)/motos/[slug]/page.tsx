@@ -6,6 +6,7 @@ import { resolveContactMode } from '@/lib/contact-mode'
 import { FUEL_LABELS, TRANSMISSION_LABELS, esGroupThousands } from '@/lib/utils'
 import { findMotoCategorySlug, findMotoCategoryLabel } from '@/lib/vehicle-categories'
 import type { Metadata } from 'next'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 // ISR: la ficha ya no escribe en el render (el tracking va por beacon) → cacheable en CDN.
 export const revalidate = 300
@@ -187,8 +188,8 @@ export default async function MotoDetailPage({ params }: PageProps) {
   return (
     <>
       <ViewTracker vehicleId={vehicle.id} dealerId={vehicle.dealer_id} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <JsonLd data={jsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <VehicleDetailContent
         vehicle={vehicle}
         similarVehicles={similarVehicles || []}

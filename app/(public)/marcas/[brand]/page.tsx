@@ -11,6 +11,7 @@ import { BRAND_EDITORIAL } from '@/lib/brand-editorial'
 import { getBrandPriceStats, buildBrandFaqItems } from '@/lib/brand-faq'
 import { esGroupThousands } from '@/lib/utils'
 import FaqSection from '@/components/marketplace/FaqSection'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -109,8 +110,8 @@ export default async function BrandPage({ params }: PageProps) {
   return (
     <>
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(brandJsonLd) }} />
+      <JsonLd data={breadcrumbJsonLd} />
+      <JsonLd data={brandJsonLd} />
       {/* Header */}
       <div className="mb-12">
         <nav aria-label="breadcrumb" className="mb-8">

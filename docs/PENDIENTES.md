@@ -4,7 +4,38 @@
 > captura, handoff/K22, advocacy/UGC), ver `agency/backlog_unificado_growth.md` — no duplicar aquí, es la
 > fuente única de eso desde 2026-08-28. Un ítem compartido: "unificar `ContactForm`/`QualifiedLeadForm`"
 > (bloque B4-B11 abajo) se relaciona con varios hallazgos de `QualifiedLeadForm` en ese otro documento.
-> Última actualización: **2026-09-01** — limpieza de documentación completa (candidatos a limpieza
+> Última actualización: **2026-09-02** — **Auditoría completa de seguridad y configuración (Codex Sol +
+> verificación cruzada de Claude), a petición explícita de H antes de escalar.** Documento completo:
+> [`docs/auditoria-seguridad-completa-2026-09-02.md`](auditoria-seguridad-completa-2026-09-02.md) (no
+> duplicado aquí). **7 hallazgos P0 reales, bloqueantes para Stripe live / más datos de terceros**: XSS
+> persistente vía JSON-LD sin escapar, exposición de columnas internas de `dealers`/`vehicles` por RLS
+> (filtra filas, no columnas), 2 vías de SSRF (importación de imágenes, `webhook_url` del asistente
+> editable por el dealer), mass assignment en escritura de vehículos (**reabre SEC-3**, dado por cerrado más
+> abajo en este documento — la corrección real sigue sin aplicarse), webhook de Stripe sin idempotencia
+> transaccional real (puede dejar pagos cobrados sin servicio provisto), onboarding con documentos en bucket
+> potencialmente público + recovery link sin firma enviado a n8n, e **inserción anónima de leads nunca
+> revocada** (**reabre SEC-4**, la migración `001_initial.sql` con `WITH CHECK (true)` nunca se elimina).
+> **Un hallazgo inicial de Codex se corrigió tras verificación externa**: Next.js 14.2.25 es técnicamente
+> vulnerable a RCE vía AVIF (CVE-2026-75604), pero Vercel confirma que las apps en su plataforma gestionada
+> están protegidas a nivel de infraestructura sin necesidad de actualizar — baja de "crítico/NO-GO" a
+> hardening recomendado. `increment_vehicle_views` (RPC anon-callable) se descartó como hallazgo: es diseño
+> intencional ya auditado en la migración 097, no un hueco. Detalle completo, fixes y consultas SQL de
+> verificación en el documento fuente.
+> **2026-09-02 (misma sesión) — 6 de 7 P0 aplicados en código, verificados con `tsc`+`lint`+`build`
+> limpios, sin desplegar todavía** (migraciones nuevas 102-104 sin `supabase db push`, código sin
+> `vercel --prod --yes` — deploy pendiente de confirmación explícita, afecta RLS/webhooks/producción
+> real). P0.1 (XSS JSON-LD), P0.3 (SSRF import+asistente), P0.4 (mass assignment vehículos, reabre y
+> cierra SEC-3), P0.6 (bucket privado de onboarding + webhook firmado — **requiere configurar
+> `N8N_WEBHOOK_FUNDADOR_ONBOARDING_SECRET` en Vercel antes de desplegar**) y P0.7 (leads INSERT
+> anónimo, reabre y cierra SEC-4) completos. P0.5 (Stripe) parcial a propósito: fix del bug más grave
+> (fallo real ya no responde 200, dispara reintento de Stripe) + las 2 escrituras que activan el
+> servicio ahora comprueban error, pero no se reescribió todo el manejador a transacciones atómicas
+> (fuera de alcance seguro sin entorno de pruebas). **P0.2 (columnas internas de `dealers`/`vehicles`
+> expuestas) deliberadamente NO aplicado** — es el de mayor riesgo (dashboard del dealer y ~40
+> páginas públicas leen las tablas base directamente; un error rompe el catálogo o el dashboard) y no
+> se puede verificar sin entorno de pruebas. Detalle y razonamiento completo en
+> `docs/auditoria-seguridad-completa-2026-09-02.md`.
+> Actualización anterior: **2026-09-01** — limpieza de documentación completa (candidatos a limpieza
 > eliminados, duplicados/incoherencias corregidos), hallazgos reales de 2 auditorías cerrados en código
 > (INC-004, WF7 dealer_id, rate-limit del asistente, cache de `gtm_id`, doble auth en `Header.tsx`) o
 > documentados como bloqueados sin autorización (ahora aplicados: ver SEC-14), Incidente #0 cerrado del todo

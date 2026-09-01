@@ -8,6 +8,7 @@ import ConsentManagedGtm from '@/components/legal/ConsentManagedGtm'
 import AcquisitionCapture from '@/components/analytics/AcquisitionCapture'
 import { createAdminClient } from '@/lib/supabase/server'
 import { rootRobotsMeta } from '@/lib/seo'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 // El GTM ID casi nunca cambia — sin cache, esta consulta se repetía en CADA request de
 // CADA página (el layout raíz se ejecuta siempre), solo para leer un valor casi estático.
@@ -125,14 +126,8 @@ export default async function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${cormorant.variable}`}>
       <body className="bg-obsidian text-bsm-text-primary antialiased">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
-        />
+        <JsonLd data={organizationJsonLd} />
+        <JsonLd data={webSiteJsonLd} />
         {/* Consent Mode v2 — defaults denied; restores prior consent from localStorage */}
         <script dangerouslySetInnerHTML={{ __html: `
 window.dataLayer=window.dataLayer||[];
