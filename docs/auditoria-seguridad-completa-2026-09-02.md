@@ -114,6 +114,41 @@ suficientes para renderizar cada página. Revisión final dirigida: `VehicleDeta
 excluida. **No verificado en vivo contra los grants ya restringidos** (requeriría desplegar
 primero) — el build/lint/tsc es la verificación disponible antes del deploy.
 
+#### Incidente real tras el deploy (mismo día, corregido en la propia verificación post-deploy)
+
+Al hacer el smoke-check en vivo tras desplegar, **las fichas de vehículo dejaron de cargar**
+(`notFound()`, ficha genérica en vez del vehículo real). Diagnosticado con `curl` directo contra la
+API REST de Supabase con la anon key: `permission denied for table dealers` (42501).
+
+**Causa real**: la migración 107 revocó el `SELECT` de tabla completa sobre `dealers`, pero **13
+policies RLS de otras 9 tablas** (`vehicles`, `leads`, `analytics_events`,
+`dealer_gallery_images`, `lead_events`, `appointments`, `analytics_daily`,
+`showroom_calendar_connections`, `lead_alerts`, `lead_handoffs`) hacen internamente
+`EXISTS(SELECT 1 FROM dealers d WHERE d.id = X.dealer_id AND d.profile_id = auth.uid())` para
+comprobar "¿es el dueño?". Postgres evalúa **todas** las policies SELECT permisivas de una tabla
+(se combinan con OR) en cada consulta, así que necesita poder evaluar esa expresión aunque la rama
+del dueño vaya a dar `false` para un anónimo — y sin privilegio `SELECT` sobre `profile_id`, la
+consulta **entera** falla, no solo esa rama. No se detectó en el build/lint/tsc previo porque esos
+no ejecutan contra los grants ya restringidos (solo existen tras aplicar la migración).
+
+**Fix (migración 108, misma sesión)**: función `is_own_dealer(dealer_id)` `SECURITY DEFINER` que
+resuelve la comprobación con los privilegios del dueño de la función, bypassando el grant del rol
+que llama. Sustituida la subconsulta directa en las 13 policies (barrido completo del patrón en
+todo el proyecto vía grep, no solo `vehicles`, que fue la primera detectada). Verificado arreglado
+con `curl` directo a la API real y con smoke-check completo del sitio en vivo (home, catálogo,
+categorías, ficha de vehículo, ficha de dealer, buscador, comparador, favoritos) — todo con
+contenido real, no vacío ni en estado de error. Redeploy adicional necesario para forzar la
+regeneración de las páginas ISR que habían quedado cacheadas en el estado roto (`revalidate = 300`
+en la mayoría de páginas públicas).
+
+**Ventana de exposición**: entre el deploy de la migración 107 y la aplicación de la 108 (~10-15
+minutos), el catálogo público habría servido fichas de vehículo como "no encontrado" a cualquier
+visitante real. Detectado y corregido en la propia verificación post-deploy de esta sesión, no
+reportado por un usuario externo. **Lección para futuras migraciones de RLS/permisos en este
+proyecto**: revocar columnas usadas por una tabla no basta con auditar los consumidores de ESA
+tabla — hay que grepear el proyecto entero por referencias cruzadas a esa columna desde políticas
+de OTRAS tablas antes de aplicar el REVOKE, no después.
+
 ---
 
 ## Veredicto ejecutivo (revisado tras contraste)
