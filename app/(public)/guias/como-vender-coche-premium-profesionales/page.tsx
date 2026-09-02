@@ -229,10 +229,10 @@ export default function GuiaVenderPremiumPage() {
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/para-profesionales" className="btn-gold text-sm px-5">
-              Ver condiciones para profesionales
+              Cómo funciona el acceso profesional
             </Link>
-            <Link href="/profesionales/precios" className="btn-outline text-sm px-5">
-              Planes y precios
+            <Link href="/profesionales/planes" className="btn-outline text-sm px-5">
+              Comparar modalidades
             </Link>
           </div>
         </div>

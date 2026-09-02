@@ -49,7 +49,7 @@ export async function createCheckoutSession(options: CheckoutOptions | string, p
       mode: 'subscription',
       allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/suscripcion?success=true`,
-      cancel_url:  `${process.env.NEXT_PUBLIC_APP_URL}/profesionales/precios?canceled=true`,
+      cancel_url:  `${process.env.NEXT_PUBLIC_APP_URL}/profesionales/planes?canceled=true`,
       metadata: {
         organization_id: organizationId,
         dealer_id: did,

@@ -14,6 +14,7 @@ export default function ContactoPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   function update(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -21,11 +22,30 @@ export default function ContactoPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setError('')
     setLoading(true)
-    // In production: call an API route that sends via Resend/Mailgun
-    await new Promise((r) => setTimeout(r, 1000))
-    setLoading(false)
-    setSent(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(
+          data.error === 'rate_limited'
+            ? 'Demasiados intentos. Espera unos minutos antes de volver a escribirnos.'
+            : 'No hemos podido enviar tu mensaje. Escríbenos directamente a hola@blacklabelmarket.es.'
+        )
+        setLoading(false)
+        return
+      }
+      setSent(true)
+    } catch {
+      setError('No hemos podido enviar tu mensaje. Escríbenos directamente a hola@blacklabelmarket.es.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -37,8 +57,12 @@ export default function ContactoPage() {
         </div>
         <h1 className="section-title mb-3">Hablemos</h1>
         <p className="text-bsm-text-muted max-w-lg">
-          ¿Tienes dudas sobre el marketplace o quieres hablar sobre una suscripción?
-          Responderemos en menos de 24 horas laborables.
+          ¿Tienes dudas sobre el marketplace, tu cuenta o cómo trabajamos? Escríbenos y te
+          respondemos en menos de 24 horas laborables. Si lo que buscas es acceso profesional
+          para tu showroom, empieza mejor por{' '}
+          <a href="/profesionales/solicitar-acceso" className="text-gold hover:text-gold-light transition-colors">
+            solicitar una valoración
+          </a>.
         </p>
       </div>
 
@@ -89,7 +113,7 @@ export default function ContactoPage() {
               <div className="w-12 h-12 border border-gold/30 flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-6 h-6 text-gold" />
               </div>
-              <h2 className="font-display text-2xl font-light mb-2">Solicitud recibida</h2>
+              <h2 className="font-display text-2xl font-light mb-2">Mensaje recibido</h2>
               <p className="text-bsm-text-muted mb-4">Nos pondremos en contacto contigo en breve.</p>
               <p className="text-xs text-bsm-text-muted">
                 Si prefieres contacto inmediato, escríbenos a{' '}
@@ -112,7 +136,7 @@ export default function ContactoPage() {
                 <label className="label-base" htmlFor="contacto-subject">Asunto</label>
                 <select id="contacto-subject" value={form.subject} onChange={(e) => update('subject', e.target.value)} className="select-base" required>
                   <option value="">Seleccionar...</option>
-                  <option value="suscripcion">Información sobre suscripción</option>
+                  <option value="suscripcion">Gestión de mi suscripción</option>
                   <option value="soporte">Soporte técnico</option>
                   <option value="editorial">Revisión editorial de vehículo</option>
                   <option value="facturacion">Facturación</option>
@@ -131,6 +155,11 @@ export default function ContactoPage() {
                   required
                 />
               </div>
+              {error && (
+                <p role="alert" className="text-sm text-red-400 bg-red-400/5 border border-red-400/20 px-4 py-3">
+                  {error}
+                </p>
+              )}
               <button type="submit" disabled={loading} className="btn-gold">
                 {loading ? 'Enviando...' : 'Enviar mensaje'}
               </button>

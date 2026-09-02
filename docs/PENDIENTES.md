@@ -4,7 +4,29 @@
 > captura, handoff/K22, advocacy/UGC), ver `agency/backlog_unificado_growth.md` — no duplicar aquí, es la
 > fuente única de eso desde 2026-08-28. Un ítem compartido: "unificar `ContactForm`/`QualifiedLeadForm`"
 > (bloque B4-B11 abajo) se relaciona con varios hallazgos de `QualifiedLeadForm` en ese otro documento.
-> Última actualización: **2026-09-02** — **Auditoría completa de seguridad y configuración (Codex Sol +
+> Última actualización: **2026-09-02** — **Embudo de acceso profesional con precios ocultos, cerrado
+> de punta a punta.** Decisión de H (2026-09-02): ocultar precios en la web y llevar todo showroom
+> interesado a un embudo de 4 etapas (informar → solicitar valoración → llamada de admisión
+> autoagendada → alta) en vez del alta directa con precio visible. Auditoría conjunta (Codex + Claude)
+> localizó cada mención de "acceso profesional" en el sitio; cambios aplicados y verificados
+> (`tsc`+`lint`+`build` limpios): formulario único `/profesionales/solicitar-acceso` (sustituye
+> `/registro` y `/profesionales/precios`, ambos con redirect 308), `/profesionales/planes` con precios
+> ocultos tras "Consulta", máquina de estados nueva (`qualified_awaiting_call` + `agreed_plan`,
+> migración 109), copy y CTAs coherentes en toda la web pública (home, como-funciona, dealers,
+> footer, guías, grupos), condiciones-profesionales reescrito para reflejar que plan y precio se
+> acuerdan en la llamada (no antes — **cambio de texto contractual, pendiente de revisión legal
+> real**), y eliminado `app/(public)/precios/page.tsx` (duplicado muerto con precios visibles que el
+> redirect ya enmascaraba). **Backend n8n sincronizado el mismo día**: WF1/WF3/WF4/WF-P2 con la
+> terminología nueva ("solicitud de valoración") y sin la promesa falsa de "24-48h → acceso al panel";
+> nuevo workflow `BLM - Cualificado, Agenda tu Llamada` (`blm/dealer-qualified`, activo, probado)
+> conectado a `N8N_WEBHOOK_DEALER_QUALIFIED`; WF-P3 (onboarding fundador) exportado y versionado por
+> primera vez. **Formulario `/contacto` dejó de ser un simulacro**: ahora llama a `/api/contact` →
+> webhook firmado HMAC → nuevo workflow `BLM - Formulario de Contacto` (probado end-to-end, ambos
+> emails confirmados en ejecución real). **Pendiente de configurar en Vercel** antes de que estos dos
+> flujos funcionen en producción: `N8N_WEBHOOK_DEALER_QUALIFIED`, `SHOWROOM_ADMISSION_CALL_BOOKING_URL`,
+> `N8N_WEBHOOK_CONTACT_FORM` y `N8N_WEBHOOK_CONTACT_FORM_SECRET` (documentados en
+> `.env.local.example`). Detalle técnico completo en el historial de la sesión, no duplicado aquí.
+> Actualización anterior: **2026-09-02** — **Auditoría completa de seguridad y configuración (Codex Sol +
 > verificación cruzada de Claude), a petición explícita de H antes de escalar.** Documento completo:
 > [`docs/auditoria-seguridad-completa-2026-09-02.md`](auditoria-seguridad-completa-2026-09-02.md) (no
 > duplicado aquí). **7 hallazgos P0 reales, bloqueantes para Stripe live / más datos de terceros**: XSS

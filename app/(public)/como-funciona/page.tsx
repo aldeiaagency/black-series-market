@@ -1,5 +1,5 @@
 ﻿import Link from 'next/link'
-import { Search, Heart, Bell, GitCompareArrows, MessageSquare, ShieldCheck, Package, BarChart2, X, ArrowRight } from 'lucide-react'
+import { Search, Heart, Bell, GitCompareArrows, MessageSquare, ShieldCheck, Package, BarChart2, PhoneCall, X, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { JsonLd } from '@/components/seo/JsonLd'
 
@@ -94,13 +94,18 @@ const BUYER_STEPS = [
 const DEALER_STEPS = [
   {
     icon: ShieldCheck,
-    title: 'Solicita acceso',
-    desc: 'En Black Label revisamos cada solicitud para mantener un estándar de reputación, presentación y calidad de servicio.',
+    title: 'Solicita la valoración',
+    desc: 'Nos cuentas sobre tu showroom y revisamos reputación, especialización y catálogo — es lo que mantiene el market como una selección, no un clasificado abierto.',
+  },
+  {
+    icon: PhoneCall,
+    title: 'Agenda tu llamada',
+    desc: 'Si encajas con los criterios, eliges tú mismo cuándo hablamos. En esa llamada vemos precio y condiciones, sin compromiso.',
   },
   {
     icon: Package,
     title: 'Publica tu inventario',
-    desc: 'Sube fichas de calidad con imágenes reales, ficha técnica completa, equipamiento y condiciones de venta. El panel de gestión te permite controlar todo el proceso.',
+    desc: 'Tras el alta, subes fichas de calidad con imágenes reales, ficha técnica completa, equipamiento y condiciones de venta.',
   },
   {
     icon: MessageSquare,
@@ -215,7 +220,7 @@ export default function ComoFuncionaPage() {
           ))}
         </div>
         <div className="mt-8">
-          <Link href="/registro" className="btn-gold px-6">Quiero publicar en Black Label</Link>
+          <Link href="/profesionales/solicitar-acceso" className="btn-gold px-6">Solicitar valoración de mi showroom</Link>
         </div>
       </section>
 
@@ -268,10 +273,10 @@ export default function ComoFuncionaPage() {
         <div className="border border-gold/20 bg-gold/3 p-8">
           <h3 className="font-display text-2xl font-light mb-3 text-bsm-text-primary">Soy profesional</h3>
           <p className="text-sm text-bsm-text-muted mb-6 leading-relaxed">
-            Solicita acceso para publicar tu inventario y llegar a compradores cualificados.
+            Solicita la valoración de tu showroom para publicar y llegar a compradores cualificados.
           </p>
-          <Link href="/registro" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
-            Quiero publicar en Black Label <ArrowRight className="w-4 h-4" />
+          <Link href="/profesionales/solicitar-acceso" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors">
+            Solicitar valoración <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>

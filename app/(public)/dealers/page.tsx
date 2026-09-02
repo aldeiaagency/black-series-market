@@ -272,12 +272,12 @@ function renderPage(
         <div>
           <h3 className="font-display text-2xl font-light mb-2">¿Eres profesional?</h3>
           <p className="text-sm text-bsm-text-muted max-w-md">
-            Solicita acceso a Black Label y publica tu inventario a compradores
-            cualificados y seleccionados especialmente para ti.
+            Black Label Market trabaja con showrooms seleccionados. Conoce cómo funciona el
+            acceso y, si encajas, publica tu inventario para compradores cualificados.
           </p>
         </div>
-        <a href="/registro" className="btn-gold flex-shrink-0 px-10 py-4">
-          Quiero publicar en Black Label
+        <a href="/para-profesionales" className="btn-gold flex-shrink-0 px-10 py-4">
+          Cómo funciona el acceso
         </a>
       </div>
     </div>

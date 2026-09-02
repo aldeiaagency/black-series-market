@@ -125,7 +125,7 @@ export default async function SuscripcionPage() {
               <p className="text-xs text-amber-400 mb-2">Has alcanzado el límite de vehículos publicados.</p>
               <div className="flex gap-3 flex-wrap">
                 <Link href="/dashboard/inventario" className="text-xs text-gold hover:underline">Archivar vehículos →</Link>
-                <Link href="/profesionales/precios" className="text-xs text-gold hover:underline">Subir de plan →</Link>
+                <Link href="/profesionales/planes" className="text-xs text-gold hover:underline">Subir de plan →</Link>
                 <Link href="#complementos" className="text-xs text-gold hover:underline">Ampliar con complementos →</Link>
               </div>
             </div>

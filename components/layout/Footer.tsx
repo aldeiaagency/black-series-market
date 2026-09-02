@@ -19,10 +19,10 @@ const EXPLORAR = [
 
 const PROFESIONALES = [
   { label: 'Para profesionales',        href: '/para-profesionales' },
-  { label: 'Publicar vehículos',        href: '/registro' },
+  { label: 'Solicitar valoración',      href: '/profesionales/solicitar-acceso' },
   { label: 'Criterios para publicar',   href: '/legal/criterios-publicacion' },
   { label: 'Condiciones profesionales', href: '/legal/condiciones-profesionales' },
-  { label: 'Planes de suscripción',     href: '/precios' },
+  { label: 'Comparar modalidades',      href: '/profesionales/planes' },
   { label: 'Contacto',                   href: '/contacto' },
 ]
 

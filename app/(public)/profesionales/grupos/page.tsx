@@ -66,9 +66,9 @@ export default function GruposPage() {
       <div className="border border-bsm-border bg-surface p-8 mb-14">
         <h2 className="font-display text-xl font-light mb-4">Cómo funciona</h2>
         <ul className="space-y-3 text-sm text-bsm-text-secondary">
-          <li className="flex gap-2"><span className="text-gold">1.</span> Nos cuentas cuántas sedes operas y cómo se reparten tu inventario y tu equipo.</li>
-          <li className="flex gap-2"><span className="text-gold">2.</span> Diseñamos una configuración a medida con visión consolidada y autonomía por sede.</li>
-          <li className="flex gap-2"><span className="text-gold">3.</span> Te preparamos una propuesta adaptada a tu estructura.</li>
+          <li className="flex gap-2"><span className="text-gold">1.</span> Nos cuentas cuántas sedes operas y cómo se reparten tu inventario y tu equipo, y valoramos el encaje del grupo con los criterios del market.</li>
+          <li className="flex gap-2"><span className="text-gold">2.</span> Si encaja, agendamos una llamada para definir estructura, modalidad y condiciones a medida.</li>
+          <li className="flex gap-2"><span className="text-gold">3.</span> Abrimos la configuración de sedes, equipos e inventario.</li>
         </ul>
       </div>
 
@@ -79,14 +79,14 @@ export default function GruposPage() {
         </p>
         <p className="text-sm text-bsm-text-secondary mb-6 max-w-lg">
           El acceso al modelo Grupo se gestiona de forma consultiva.
-          Cuéntanos tu estructura y te preparamos una propuesta.
+          Cuéntanos tu estructura y valoramos el encaje del grupo.
         </p>
         <div className="flex flex-wrap gap-4">
-          <Link href="/profesionales/solicitar-acceso?plan=grupo" className="btn-gold px-6">
-            Consultar modelo Grupo
+          <Link href="/profesionales/solicitar-acceso" className="btn-gold px-6">
+            Solicitar valoración para Grupo
           </Link>
-          <Link href="/profesionales/precios" className="btn-outline px-6">
-            Ver todos los planes →
+          <Link href="/profesionales/planes" className="btn-outline px-6">
+            Ver todas las modalidades →
           </Link>
         </div>
       </div>

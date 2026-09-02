@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getDealerAccess } from '@/lib/dealer-access'
 import Logo from '@/components/brand/Logo'
 import { Clock, Mail, MapPin, LogOut } from 'lucide-react'
 
@@ -33,8 +34,8 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
 
             <h1 className="font-display text-2xl font-light mb-2">Solicitud recibida</h1>
             <p className="text-sm text-bsm-text-muted leading-relaxed mb-6">
-              Hemos recibido tu solicitud. Nuestro equipo revisará la reputación y encaje profesional
-              antes de habilitar el acceso al market.
+              Vamos a revisar la reputación, la especialización y la presencia profesional de tu
+              showroom. Enviar esta solicitud no crea ninguna cuenta ni inicia el alta.
             </p>
 
             {/* Confirmation email */}
@@ -45,9 +46,6 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
                   Te enviaremos un email de confirmación{params.email ? <> a <span className="text-bsm-text-primary font-medium">{params.email}</span></> : null}.
                   Si no aparece en unos minutos, <span className="text-bsm-text-secondary">revisa la carpeta de spam</span>.
                 </p>
-                <p className="text-xs text-bsm-text-muted leading-relaxed">
-                  Para no perderte el correo de aprobación, <span className="text-bsm-text-secondary">añade nuestra dirección a tus contactos</span>.
-                </p>
               </div>
             </div>
 
@@ -55,9 +53,9 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
             <div className="flex items-start gap-3 p-4 bg-amber-400/5 border border-amber-400/15 text-left mb-8">
               <Clock className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-bsm-text-muted leading-relaxed">
-                Si la solicitud es aprobada, recibirás un segundo email con las instrucciones de acceso al panel profesional.
-                El proceso habitualmente tarda entre <span className="text-bsm-text-secondary">24 y 48 horas laborables</span>.
-                Hasta entonces no se crea ninguna cuenta ni se habilita el panel.
+                Si tu showroom cumple los criterios del market, te escribiremos con un enlace para
+                que elijas tú mismo el hueco de una llamada breve — ahí resolvemos precio y
+                condiciones. El alta empieza después de esa conversación, no antes.
               </p>
             </div>
 
@@ -81,13 +79,17 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
 
   if (!user) redirect('/login')
 
-  const { data: dealer } = await supabase
+  const access = await getDealerAccess(user.id)
+  if (!access) redirect('/profesionales/solicitar-acceso')
+
+  const admin = createAdminClient()
+  const { data: dealer } = await admin
     .from('dealers')
     .select('name, email, status, location_city, location_region, created_at')
-    .eq('profile_id', user.id)
+    .eq('id', access.dealerId)
     .single()
 
-  if (!dealer) redirect('/registro')
+  if (!dealer) redirect('/profesionales/solicitar-acceso')
   if (dealer.status !== 'pending') redirect('/dashboard')
 
   const registeredAt = new Date(dealer.created_at).toLocaleDateString('es-ES', {
@@ -143,8 +145,7 @@ export default async function SolicitudEnviadaPage({ searchParams }: PageProps) 
           <div className="flex items-start gap-3 p-4 bg-amber-400/5 border border-amber-400/15 text-left mb-8">
             <Mail className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-bsm-text-muted leading-relaxed">
-              Recibirás un email en <span className="text-bsm-text-primary">{user.email}</span> cuando tu perfil sea aprobado.
-              El proceso habitualmente tarda entre 24 y 48 horas laborables.
+              Recibirás un email en <span className="text-bsm-text-primary">{user.email}</span> cuando tu perfil quede aprobado y el panel esté activo.
             </p>
           </div>
 

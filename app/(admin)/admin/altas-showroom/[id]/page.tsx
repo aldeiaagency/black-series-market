@@ -6,7 +6,7 @@ import {
   ArrowLeft, CheckCircle, XCircle, Clock, Mail, Phone, RotateCw, AlertTriangle,
   MapPin, ExternalLink, Globe, Instagram, Star, FileText,
 } from 'lucide-react'
-import { setApplicationStatus, saveNotes, approveApplication, retryApprovalRepair, rejectApplication } from '../actions'
+import { setApplicationStatus, saveNotes, approveApplication, retryApprovalRepair, rejectApplication, markQualifiedAwaitingCall } from '../actions'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -16,6 +16,7 @@ const STATUS_LABEL: Record<string, string> = {
   new: 'Nueva',
   in_review: 'En revisión',
   pending_info: 'Pendiente de info',
+  qualified_awaiting_call: 'Cumple criterios · pendiente de llamada',
   approval_failed: 'Alta incompleta',
   approved: 'Aprobada',
   rejected: 'Rechazada',
@@ -25,6 +26,7 @@ const STATUS_BADGE: Record<string, string> = {
   new: 'text-gold bg-gold/10 border-gold/30',
   in_review: 'text-blue-400 bg-blue-400/10 border-blue-400/30',
   pending_info: 'text-orange-400 bg-orange-400/10 border-orange-400/30',
+  qualified_awaiting_call: 'text-purple-300 bg-purple-400/10 border-purple-400/30',
   approval_failed: 'text-red-300 bg-red-400/10 border-red-400/30',
   approved: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
   rejected: 'text-red-400 bg-red-400/10 border-red-400/30',
@@ -58,6 +60,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const isApprovalFailed = st === 'approval_failed'
   const isActionable = st !== 'approved' && st !== 'rejected' && !isApprovalFailed
   const isPendingInfo = st === 'pending_info'
+  // Nuevo embudo (2026-09-02): market_directo pasa por una llamada de admisión antes de recibir
+  // acceso — visita_agencia no, la visita presencial ya cumple ese rol. Ver actions.ts.
+  const isMarketDirecto = app.source !== 'visita_agencia'
+  const isQualifiedAwaitingCall = st === 'qualified_awaiting_call'
+  const canInviteToCall = isMarketDirecto && !isQualifiedAwaitingCall
+  const canApproveNow = !isMarketDirecto || isQualifiedAwaitingCall
   const missingPieces: string[] = Array.isArray(app.approval_missing_pieces) ? app.approval_missing_pieces : []
   const portales: string[] = Array.isArray(app.portales) ? app.portales : []
 
@@ -281,16 +289,37 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   </form>
                 )}
 
-                <form action={approveApplication}>
-                  <input type="hidden" name="id" value={app.id} />
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold transition-colors"
-                  >
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    Aprobar y crear acceso
-                  </button>
-                </form>
+                {canInviteToCall && (
+                  <form action={markQualifiedAwaitingCall}>
+                    <input type="hidden" name="id" value={app.id} />
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gold hover:bg-gold-light text-obsidian text-xs font-semibold transition-colors"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Cumple criterios · invitar a llamada
+                    </button>
+                  </form>
+                )}
+
+                {canApproveNow && (
+                  <form action={approveApplication}>
+                    <input type="hidden" name="id" value={app.id} />
+                    <button
+                      type="submit"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold transition-colors"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Aprobar y crear acceso
+                    </button>
+                  </form>
+                )}
+                {isMarketDirecto && isQualifiedAwaitingCall && (
+                  <p className="text-[11px] text-bsm-text-muted leading-relaxed">
+                    Cumple los criterios y ya se le invitó a agendar la llamada. Aprueba el acceso
+                    cuando la llamada haya tenido lugar y se hayan confirmado precio y modalidad.
+                  </p>
+                )}
 
                 <form action={rejectApplication}>
                   <input type="hidden" name="id" value={app.id} />

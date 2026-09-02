@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/motos`,   lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.9 },
     { url: `${BASE_URL}/marcas`,  lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${BASE_URL}/dealers`, lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
-    { url: `${BASE_URL}/profesionales/precios`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/profesionales/planes`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/contacto`,lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE_URL}/vehiculos-a-la-carta`,                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/como-funciona`,                        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },

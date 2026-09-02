@@ -1,312 +1,383 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useTransition, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { CURRENT_PROFESSIONAL_TERMS_VERSION } from '@/lib/legal'
 
-const PLANS = [
-  { value: 'essential',    label: 'Essential — 197 €/mes' },
-  { value: 'professional', label: 'Professional — 449 €/mes' },
-  { value: 'elite',        label: 'Elite — 899 €/mes (plazas limitadas)' },
-  { value: 'grupo',        label: 'Modelo Grupo (multi-sede)' },
-]
+const PORTALES = ['Coches.net', 'Mobile.de', 'Autoscout24', 'Wallapop', 'Motorflash', 'Otros']
 
-const VEHICLE_VOLUMES = [
-  'Menos de 15 unidades activas',
-  '15-50 unidades activas',
-  '51-100 unidades activas',
-  'Más de 100 unidades activas',
-]
-
-function SolicitarAccesoForm() {
-  const params = useSearchParams()
-  const defaultPlan = params.get('plan') ?? ''
-  const isWaitlist = params.get('waitlist') === '1'
-  const isConsulta = params.get('consulta') === '1'
-
-  const [pending, startTransition] = useTransition()
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export default function SolicitarAccesoPage() {
+  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
 
   const [form, setForm] = useState({
     name: '',
-    company: '',
     email: '',
     phone: '',
-    plan: defaultPlan,
-    volume: '',
+    company: '',
     city: '',
+    location_region: '',
+    website: '',
+    google_business_url: '',
+    instagram_url: '',
+    portales: [] as string[],
+    portal_url: '',
+    volume: '',
     message: '',
   })
   const [termsAccepted, setTermsAccepted] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+  function update(key: string, value: string) {
+    setForm((f) => ({ ...f, [key]: value }))
+  }
+
+  function togglePortal(p: string) {
+    setForm((f) => ({
+      ...f,
+      portales: f.portales.includes(p) ? f.portales.filter((x) => x !== p) : [...f.portales, p],
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  function goToStep2(e: React.FormEvent) {
     e.preventDefault()
-    setError(null)
+    setStep(2)
+  }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+
+    if (!form.website && !form.google_business_url && !form.instagram_url) {
+      setError('Necesitamos al menos una presencia pública (web, Google Business o Instagram) para poder valorar el showroom.')
+      return
+    }
     if (!termsAccepted) {
-      setError('Debes aceptar las Condiciones para Profesionales para continuar.')
+      setError('Debes aceptar la Política de Privacidad para continuar.')
       return
     }
 
-    startTransition(async () => {
-      try {
-        const res = await fetch('/api/showroom-applications', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name:    form.name,
-            email:   form.email,
-            company: form.company,
-            phone:   form.phone,
-            city:    form.city,
-            plan:    form.plan || undefined,
-            volume:  form.volume || undefined,
-            message: [
-              isWaitlist ? 'Lista de espera Elite' : '',
-              form.message,
-            ].filter(Boolean).join('\n') || undefined,
-            terms_accepted: true,
-            terms_version: CURRENT_PROFESSIONAL_TERMS_VERSION,
-          }),
-        })
-        if (!res.ok) throw new Error('Error al enviar')
-        setSent(true)
-      } catch {
-        setError('Ha ocurrido un error. Escríbenos directamente a hola@blacklabelmarket.es')
+    setLoading(true)
+
+    try {
+      const res = await fetch('/api/showroom-applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name:    form.name,
+          email:   form.email,
+          phone:   form.phone,
+          company: form.company,
+          city:    form.city,
+          location_region: form.location_region || undefined,
+          website: form.website || undefined,
+          google_business_url: form.google_business_url || undefined,
+          instagram_url: form.instagram_url || undefined,
+          portales: form.portales.length ? form.portales : undefined,
+          portal_url: form.portal_url || undefined,
+          volume:  form.volume || undefined,
+          message: form.message || undefined,
+          terms_accepted: true,
+          terms_version: CURRENT_PROFESSIONAL_TERMS_VERSION,
+        }),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError(
+          body?.error === 'missing_public_presence'
+            ? 'Necesitamos al menos una presencia pública (web, Google Business o Instagram) para poder valorar el showroom.'
+            : 'No hemos podido enviar la solicitud. Escríbenos a hola@blacklabelmarket.es y lo resolvemos directamente.'
+        )
+        setLoading(false)
+        return
       }
-    })
-  }
 
-  const title = isWaitlist
-    ? 'Lista de espera Elite'
-    : isConsulta
-    ? 'Consulta disponibilidad Elite'
-    : 'Solicitar acceso profesional'
-
-  if (sent) {
-    return (
-      <div className="max-w-screen-sm mx-auto px-6 pt-40 pb-24 text-center">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="h-px w-8 bg-gold" />
-          <span className="text-xs text-gold tracking-widest uppercase">Solicitud recibida</span>
-          <div className="h-px w-8 bg-gold" />
-        </div>
-        <h1 className="font-display text-3xl font-light text-bsm-text-primary mb-4">
-          Nos ponemos en contacto contigo
-        </h1>
-        <p className="text-sm text-bsm-text-secondary mb-8">
-          Hemos recibido tu solicitud. El equipo de Black Label Market la revisará
-          y te contactará en el menor tiempo posible.
-        </p>
-        <Link href="/" className="btn-outline px-6">
-          Volver al inicio
-        </Link>
-      </div>
-    )
+      router.push(`/solicitud-enviada?tipo=showroom`)
+    } catch {
+      setError('No hemos podido enviar la solicitud. Escríbenos a hola@blacklabelmarket.es y lo resolvemos directamente.')
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="max-w-screen-sm mx-auto px-6 pt-28 pb-24">
-      {/* Breadcrumb */}
-      <nav aria-label="breadcrumb" className="mb-10">
-        <ol className="flex items-center gap-1.5 text-xs text-bsm-text-muted">
-          <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
-          <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-          <li><Link href="/para-profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
-          <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-          <li className="text-bsm-text-secondary">Solicitar acceso</li>
-        </ol>
-      </nav>
+    <div className="min-h-screen bg-obsidian px-6 py-12 pt-28">
+      <div className="w-full max-w-lg mx-auto">
 
-      <div className="mb-10">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px w-8 bg-gold" />
-          <span className="text-xs text-gold tracking-widest uppercase">Acceso profesional</span>
+        {/* Breadcrumb */}
+        <nav aria-label="breadcrumb" className="mb-8">
+          <ol className="flex items-center gap-1.5 text-xs text-bsm-text-muted">
+            <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
+            <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+            <li><Link href="/para-profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
+            <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+            <li className="text-bsm-text-secondary">Solicitar valoración</li>
+          </ol>
+        </nav>
+
+        {/* Steps */}
+        <div className="flex items-center gap-2 mb-8">
+          {[1, 2].map((s) => (
+            <div key={s} className="flex items-center gap-2 flex-1">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-colors
+                ${step >= s ? 'bg-gold text-obsidian' : 'bg-surface border border-bsm-border text-bsm-text-muted'}`}>
+                {s}
+              </div>
+              <span className={`text-xs ${step >= s ? 'text-bsm-text-primary' : 'text-bsm-text-muted'}`}>
+                {s === 1 ? 'Contacto' : 'Tu showroom'}
+              </span>
+              {s < 2 && <div className={`flex-1 h-px ${step > s ? 'bg-gold' : 'bg-bsm-border'}`} />}
+            </div>
+          ))}
         </div>
-        <h1 className="font-display text-3xl font-light text-bsm-text-primary mb-2">{title}</h1>
-        <p className="text-sm text-bsm-text-secondary">
-          {isWaitlist
-            ? 'Cuando se libere disponibilidad Elite en tu zona, te avisamos.'
-            : 'El equipo revisará tu solicitud y te contactará para completar la verificación.'}
+
+        <div className="bg-surface border border-bsm-border p-8">
+
+          {/* ── Step 1 ── */}
+          {step === 1 && (
+            <>
+              <h1 className="font-display text-2xl font-light mb-1">Solicitar valoración</h1>
+              <p className="text-sm text-bsm-text-muted mb-8">
+                Cuéntanos quién eres. En el siguiente paso te pedimos algo más sobre tu showroom.
+              </p>
+
+              <form onSubmit={goToStep2} className="space-y-4">
+                <div>
+                  <label className="label-base" htmlFor="name">Nombre completo</label>
+                  <input
+                    id="name"
+                    value={form.name}
+                    onChange={(e) => update('name', e.target.value)}
+                    placeholder="Tu nombre y apellidos"
+                    className="input-base"
+                    autoComplete="name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label-base" htmlFor="email">Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => update('email', e.target.value)}
+                    placeholder="tu@empresa.com"
+                    className="input-base"
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label-base" htmlFor="phone">Teléfono</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => update('phone', e.target.value)}
+                    placeholder="+34 600 000 000"
+                    className="input-base"
+                    autoComplete="tel"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="label-base" htmlFor="company">Showroom / empresa</label>
+                  <input
+                    id="company"
+                    value={form.company}
+                    onChange={(e) => update('company', e.target.value)}
+                    placeholder="Nombre del concesionario o especialista"
+                    className="input-base"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="label-base" htmlFor="city">Ciudad</label>
+                    <input
+                      id="city"
+                      value={form.city}
+                      onChange={(e) => update('city', e.target.value)}
+                      placeholder="Madrid, Barcelona…"
+                      className="input-base"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="label-base" htmlFor="location_region">Provincia (opcional)</label>
+                    <input
+                      id="location_region"
+                      value={form.location_region}
+                      onChange={(e) => update('location_region', e.target.value)}
+                      placeholder="Comunidad o provincia"
+                      className="input-base"
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="btn-gold w-full justify-center mt-2">
+                  Continuar
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* ── Step 2 ── */}
+          {step === 2 && (
+            <>
+              <h1 className="font-display text-2xl font-light mb-1">Tu showroom</h1>
+              <p className="text-sm text-bsm-text-muted mb-8">
+                Con esto valoramos si tu showroom encaja con los criterios del market — reputación,
+                especialización y forma de presentar el stock.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="label-base" htmlFor="website">Web propia</label>
+                  <input
+                    id="website"
+                    type="url"
+                    value={form.website}
+                    onChange={(e) => update('website', e.target.value)}
+                    placeholder="https://tuweb.com"
+                    className="input-base"
+                  />
+                </div>
+                <div>
+                  <label className="label-base" htmlFor="google_business_url">Perfil de Google Business</label>
+                  <input
+                    id="google_business_url"
+                    type="url"
+                    value={form.google_business_url}
+                    onChange={(e) => update('google_business_url', e.target.value)}
+                    placeholder="https://g.page/tu-showroom"
+                    className="input-base"
+                  />
+                </div>
+                <div>
+                  <label className="label-base" htmlFor="instagram_url">Instagram</label>
+                  <input
+                    id="instagram_url"
+                    type="url"
+                    value={form.instagram_url}
+                    onChange={(e) => update('instagram_url', e.target.value)}
+                    placeholder="https://instagram.com/tushowroom"
+                    className="input-base"
+                  />
+                </div>
+                <p className="text-[11px] text-bsm-text-muted -mt-2">
+                  Con al menos una de las tres nos basta para empezar a valorar el showroom.
+                </p>
+
+                <div>
+                  <label className="label-base">¿Publicas ya en otros portales?</label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {PORTALES.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => togglePortal(p)}
+                        className={`px-3 py-1.5 text-xs border transition-colors
+                          ${form.portales.includes(p)
+                            ? 'border-gold text-gold bg-gold/10'
+                            : 'border-bsm-border text-bsm-text-muted hover:border-gold/40'}`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {form.portales.length > 0 && (
+                  <div>
+                    <label className="label-base" htmlFor="portal_url">Enlace a uno de tus anuncios (opcional)</label>
+                    <input
+                      id="portal_url"
+                      type="url"
+                      value={form.portal_url}
+                      onChange={(e) => update('portal_url', e.target.value)}
+                      placeholder="https://..."
+                      className="input-base"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="label-base" htmlFor="volume">Volumen aproximado de stock</label>
+                  <select
+                    id="volume"
+                    value={form.volume}
+                    onChange={(e) => update('volume', e.target.value)}
+                    className="input-base"
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="Menos de 15 unidades activas">Menos de 15 unidades</option>
+                    <option value="15-50 unidades activas">15-50 unidades</option>
+                    <option value="51-100 unidades activas">51-100 unidades</option>
+                    <option value="Más de 100 unidades activas">Más de 100 unidades</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="label-base" htmlFor="message">Algo más que debamos saber (opcional)</label>
+                  <textarea
+                    id="message"
+                    value={form.message}
+                    onChange={(e) => update('message', e.target.value)}
+                    rows={3}
+                    className="input-base resize-none"
+                    placeholder="Especialización, marcas con las que trabajas, contexto del negocio…"
+                  />
+                </div>
+
+                {error && <p className="text-sm text-red-400">{error}</p>}
+
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    required
+                    className="mt-0.5 accent-gold w-4 h-4 shrink-0"
+                  />
+                  <span className="text-xs text-bsm-text-muted leading-relaxed">
+                    He leído la{' '}
+                    <Link href="/legal/privacidad" target="_blank" className="text-gold hover:underline">
+                      política de privacidad
+                    </Link>
+                    {' '}y autorizo el uso de estos datos para valorar la solicitud y contactar conmigo.
+                  </span>
+                </label>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="btn-outline px-5"
+                  >
+                    Atrás
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading || !termsAccepted}
+                    className="btn-gold flex-1 justify-center"
+                  >
+                    {loading ? 'Enviando…' : 'Enviar para valoración'}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+
+        </div>
+
+        <p className="text-[11px] text-bsm-text-muted text-center mt-6 leading-relaxed">
+          Enviar esta solicitud no crea una cuenta ni inicia el alta. Revisamos la reputación, la
+          presencia profesional y el encaje del catálogo antes de dar el siguiente paso.
         </p>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-              Nombre *
-            </label>
-            <input
-              required
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors"
-              placeholder="Tu nombre"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-              Empresa *
-            </label>
-            <input
-              required
-              name="company"
-              value={form.company}
-              onChange={handleChange}
-              className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors"
-              placeholder="Nombre del concesionario o empresa"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-              Email *
-            </label>
-            <input
-              required
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors"
-              placeholder="tu@empresa.com"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-              Teléfono
-            </label>
-            <input
-              name="phone"
-              type="tel"
-              value={form.phone}
-              onChange={handleChange}
-              className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors"
-              placeholder="+34 600 000 000"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-            Plan de interés
-          </label>
-          <select
-            name="plan"
-            value={form.plan}
-            onChange={handleChange}
-            className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors"
-          >
-            <option value="">Selecciona un plan</option>
-            {PLANS.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-              Volumen de inventario
-            </label>
-            <select
-              name="volume"
-              value={form.volume}
-              onChange={handleChange}
-              className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors"
-            >
-              <option value="">Seleccionar</option>
-              {VEHICLE_VOLUMES.map((v) => (
-                <option key={v} value={v}>{v}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-              Ciudad principal
-            </label>
-            <input
-              name="city"
-              value={form.city}
-              onChange={handleChange}
-              className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors"
-              placeholder="Madrid, Barcelona…"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs text-bsm-text-muted uppercase tracking-widest mb-2">
-            Mensaje (opcional)
-          </label>
-          <textarea
-            name="message"
-            value={form.message}
-            onChange={handleChange}
-            rows={3}
-            className="w-full bg-surface border border-bsm-border px-4 py-3 text-sm text-bsm-text-primary focus:outline-none focus:border-gold transition-colors resize-none"
-            placeholder="Cuéntanos algo sobre tu negocio o lo que necesitas"
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-400">{error}</p>
-        )}
-
-        <label className="flex items-start gap-2.5 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={termsAccepted}
-            onChange={(e) => setTermsAccepted(e.target.checked)}
-            required
-            className="mt-0.5 accent-gold w-4 h-4 shrink-0"
-          />
-          <span className="text-xs text-bsm-text-muted leading-relaxed">
-            He leído y acepto las{' '}
-            <Link href="/legal/condiciones-profesionales" target="_blank" className="text-gold hover:underline">
-              Condiciones para Profesionales
-            </Link>
-            {' '}y la{' '}
-            <Link href="/legal/privacidad" target="_blank" className="text-gold hover:underline">política de privacidad</Link>.
-          </span>
-        </label>
-
-        <button
-          type="submit"
-          disabled={pending || !termsAccepted}
-          className="btn-gold w-full justify-center"
-        >
-          {pending ? 'Enviando…' : 'Enviar solicitud'}
-        </button>
-      </form>
     </div>
-  )
-}
-
-export default function SolicitarAccesoPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="max-w-screen-sm mx-auto px-6 pt-40 pb-24 text-center">
-          <p className="text-sm text-bsm-text-muted">Cargando…</p>
-        </div>
-      }
-    >
-      <SolicitarAccesoForm />
-    </Suspense>
   )
 }

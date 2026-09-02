@@ -105,8 +105,8 @@ export default function LoginPage() {
             </p>
             <p className="text-xs text-bsm-text-muted">
               ¿Eres concesionario?{' '}
-              <Link href="/registro" className="text-bsm-text-secondary hover:text-gold transition-colors">
-                Acceso profesional
+              <Link href="/para-profesionales" className="text-bsm-text-secondary hover:text-gold transition-colors">
+                Conocer el acceso profesional
               </Link>
             </p>
           </div>

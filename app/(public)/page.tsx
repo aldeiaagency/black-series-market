@@ -43,7 +43,7 @@ const HOME_FAQ: FaqItem[] = [
   },
   {
     q: 'Soy concesionario o compraventa, ¿cómo publico mi stock?',
-    a: 'El acceso profesional es bajo solicitud y con revisión previa de reputación. Si te aceptamos, podrás publicar tu inventario, gestionar tus oportunidades y contar con tu propio perfil de showroom. Puedes solicitar acceso desde el registro profesional y consultar los planes en la página de precios para profesionales.',
+    a: 'El acceso profesional es bajo solicitud, con revisión de reputación y una llamada donde explicamos precios y condiciones antes del alta. Puedes conocer cómo funciona el proceso y comparar las modalidades sin dejar ningún dato.',
   },
 ]
 
@@ -547,10 +547,10 @@ export default async function HomePage() {
 
             <div className="mt-6 pt-5 border-t border-[#1A1A1A]">
               <Link
-                href="/registro"
+                href="/para-profesionales"
                 className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
               >
-                Quiero publicar en Black Label <ArrowRight className="w-3 h-3" />
+                Conocer el acceso profesional <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -582,7 +582,7 @@ export default async function HomePage() {
 
         <ul className="space-y-3 mb-8">
           {[
-            'Acceso bajo solicitud, revisión de reputación y aceptación previa',
+            'Acceso bajo solicitud, revisión de reputación y una llamada antes del alta',
             'Tu stock aparece en un entorno alineado con su valor',
             'El comprador entiende mejor qué vendes y por qué merece atención',
             'Un canal exclusivo para convertir vehículos especiales en oportunidades mejor presentadas',
@@ -597,8 +597,8 @@ export default async function HomePage() {
           ))}
         </ul>
 
-        <Link href="/registro" className="btn-outline px-8 py-3 text-sm inline-flex">
-          Quiero publicar en Black Label
+        <Link href="/para-profesionales" className="btn-outline px-8 py-3 text-sm inline-flex">
+          Conocer el acceso profesional
         </Link>
       </div>
     </div>

@@ -12,28 +12,29 @@ import { JsonLd } from '@/components/seo/JsonLd'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
-// Fuente única para el FAQPage JSON-LD y el bloque visible de abajo — así no pueden divergir
-// (hallazgo de auditoría: esta página tenía las preguntas visibles pero sin marcado FAQPage).
+// Fuente única para el FAQPage JSON-LD y el bloque visible de abajo — así no pueden divergir.
+// Reescrito 2026-09-02: el precio deja de mostrarse en la web (se explica en la llamada de
+// acceso); el resto del contenido y su schema se actualizan en consecuencia.
 const FAQ_ITEMS = [
   {
     q: '¿Hay comisión por venta?',
     a: 'No. Pagas solo la suscripción mensual. No cobramos comisión cuando vendes un vehículo.',
   },
   {
-    q: '¿Puedo cambiar de plan?',
-    a: 'Sí. Un upgrade es inmediato. Un downgrade se aplica al final del periodo de facturación. Tus datos y vehículos nunca se borran.',
+    q: '¿La solicitud garantiza el acceso?',
+    a: 'No directamente. Antes de admitir un showroom revisamos su reputación, su especialización y cómo presenta el stock — es lo que mantiene el market como una selección, no un clasificado. Si encajas, te invitamos a una llamada breve para resolver dudas y ver las condiciones.',
+  },
+  {
+    q: '¿Cuándo conozco el precio y las condiciones?',
+    a: 'En esa llamada, que agendas tú cuando te vaya bien. Ahí repasamos qué modalidad encaja con tu volumen y tu forma de trabajar, y te explicamos precio, facturación e IVA con calma, no en una tabla genérica.',
+  },
+  {
+    q: '¿Puedo cambiar de plan más adelante?',
+    a: 'Sí. Un cambio a una modalidad superior se aplica de inmediato; a una inferior, al final del periodo en curso. Tu perfil y tu inventario no se tocan.',
   },
   {
     q: '¿Qué pasa si cancelo?',
-    a: 'Accedes hasta el fin del periodo pagado. Después tu perfil deja de ser público y el inventario queda archivado, no eliminado.',
-  },
-  {
-    q: '¿El pago garantiza la publicación?',
-    a: 'No. El acceso a Black Label Market requiere pasar nuestro proceso de admisión de calidad y reputación — por eso todos los showrooms publicados aparecen como verificados. Los vehículos deben pertenecer a nuestro catálogo de marcas y modelos seleccionados.',
-  },
-  {
-    q: '¿Los precios incluyen IVA?',
-    a: 'No. Todos los precios mostrados son sin IVA; se añade en el momento del pago.',
+    a: 'Mantienes acceso hasta el final del periodo pagado. Después, tu perfil deja de ser público y el inventario queda archivado, no eliminado.',
   },
   {
     q: '¿Qué es un boost?',
@@ -42,16 +43,23 @@ const FAQ_ITEMS = [
 ] as const
 
 export const metadata: Metadata = {
-  title: 'Precios y planes para profesionales — Black Label Market',
+  title: 'Planes para profesionales — Black Label Market',
   description:
-    'Essential 197 €/mes · Professional 449 €/mes · Elite 899 €/mes. Sin comisiones por venta. Sin permanencia. Precios para concesionarios y especialistas premium.',
-  alternates: { canonical: '/profesionales/precios' },
+    'Compara Essential, Professional y Elite. Sin comisiones por venta. El acceso pasa por un proceso de admisión — precio y condiciones se explican en una llamada con el equipo.',
+  alternates: { canonical: '/profesionales/planes' },
   openGraph: {
-    title: 'Precios y planes — Black Label Market',
-    description: 'Planes para concesionarios y especialistas premium en España. Sin comisión por venta.',
-    url: `${SITE_URL}/profesionales/precios`,
+    title: 'Planes para profesionales — Black Label Market',
+    description: 'Essential, Professional y Elite. Sin comisiones por venta. Acceso sujeto a admisión.',
+    url: `${SITE_URL}/profesionales/planes`,
     type: 'website',
   },
+}
+
+const ELITE_STATUS_NOTE: Record<string, string | null> = {
+  available: null,
+  low_availability: 'Quedan pocas plazas Elite disponibles en tu zona ahora mismo.',
+  waitlist: 'Elite tiene lista de espera activa en tu zona — te avisamos en cuanto se libere una plaza.',
+  closed: 'Sin plazas Elite en tu zona por ahora.',
 }
 
 function FeatureRow({ row }: { row: PlanFeatureRow }) {
@@ -83,15 +91,16 @@ function FeatureRow({ row }: { row: PlanFeatureRow }) {
   )
 }
 
-export default async function PreciosPage() {
+export default async function PlanesPage() {
   const eliteCap = await checkEliteAvailability()
+  const eliteNote = ELITE_STATUS_NOTE[eliteCap.status]
 
   const webPageJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    '@id': `${SITE_URL}/profesionales/precios`,
-    name: 'Precios y planes para profesionales — Black Label Market',
-    url: `${SITE_URL}/profesionales/precios`,
+    '@id': `${SITE_URL}/profesionales/planes`,
+    name: 'Planes para profesionales — Black Label Market',
+    url: `${SITE_URL}/profesionales/planes`,
     inLanguage: 'es-ES',
   }
 
@@ -118,24 +127,25 @@ export default async function PreciosPage() {
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
             <li><Link href="/para-profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-            <li className="text-bsm-text-secondary">Precios</li>
+            <li className="text-bsm-text-secondary">Planes</li>
           </ol>
         </nav>
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />
-          <span className="text-xs text-gold tracking-widest uppercase">Planes para concesionarios</span>
+          <span className="text-xs text-gold tracking-widest uppercase">Modalidades para profesionales</span>
           <div className="h-px w-8 bg-gold" />
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary mb-4">
           Tu inventario premium, donde merece estar
         </h1>
         <p className="text-bsm-text-secondary max-w-xl mx-auto text-sm leading-relaxed">
-          Sin comisiones por venta. Sin permanencia.
+          Sin comisiones por venta. El acceso pasa por un proceso de admisión — precio y
+          condiciones se explican en una llamada con el equipo, no en esta página.
         </p>
       </div>
 
       {/* Plan cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {PLANS.map((plan) => {
           const isElite = plan.limited
           const isPopular = plan.popular
@@ -162,42 +172,39 @@ export default async function PreciosPage() {
                 <h2 className="font-medium text-bsm-text-primary text-xl mb-1">{plan.name}</h2>
                 <p className="text-xs text-bsm-text-muted mb-4">{plan.tagline}</p>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="font-display text-5xl font-light text-bsm-text-primary">{plan.monthlyPrice}€</span>
-                  <span className="text-bsm-text-muted text-sm">/mes</span>
+                  <span className="font-display text-2xl font-light text-bsm-text-primary">Consulta</span>
                 </div>
-                <p className="text-xs text-bsm-text-muted">+ IVA</p>
+                <p className="text-xs text-bsm-text-muted">Precio y condiciones, en la llamada de acceso</p>
                 {isElite && (
                   <p className="text-[11px] text-bsm-text-muted mt-2 leading-relaxed border-t border-bsm-border pt-2">
                     {ELITE_LIMIT_NOTE}
+                    {eliteNote && <span className="block mt-1 text-gold/80">{eliteNote}</span>}
                   </p>
                 )}
               </div>
 
               {/* Ficha completa del plan */}
-              <ul className="flex-1 mb-8">
+              <ul className="flex-1">
                 {PLAN_FEATURES[plan.slug].map((row) => (
                   <FeatureRow key={row.label} row={row} />
                 ))}
               </ul>
-
-              {isElite ? (
-                <Link
-                  href={eliteCap.ctaHref}
-                  className={`w-full justify-center text-center ${eliteCap.status === 'closed' ? 'btn-outline opacity-60 pointer-events-none' : 'btn-gold'}`}
-                >
-                  {eliteCap.ctaLabel}
-                </Link>
-              ) : (
-                <Link
-                  href={`/profesionales/solicitar-acceso?plan=${plan.slug}`}
-                  className={`w-full justify-center text-center ${isPopular ? 'btn-gold' : 'btn-outline'}`}
-                >
-                  Solicitar {plan.name}
-                </Link>
-              )}
             </div>
           )
         })}
+      </div>
+
+      {/* CTA único — la modalidad se elige tras valorar el showroom, no aquí */}
+      <div className="border border-bsm-border bg-surface p-8 mb-20 text-center max-w-2xl mx-auto">
+        <h3 className="font-display text-xl font-light mb-2">Primero valoramos el encaje del showroom</h3>
+        <p className="text-sm text-bsm-text-secondary mb-6 leading-relaxed">
+          Envíanos la información de tu showroom. Si cumple los criterios del market, te
+          invitamos a una llamada donde vemos juntos qué modalidad encaja mejor y resolvemos
+          precio y condiciones.
+        </p>
+        <Link href="/profesionales/solicitar-acceso" className="btn-gold px-8">
+          Solicitar valoración de mi showroom
+        </Link>
       </div>
 
       {/* Multi-sede */}
@@ -206,14 +213,12 @@ export default async function PreciosPage() {
           <p className="text-xs text-gold tracking-widest uppercase mb-1">Varias sedes</p>
           <h3 className="font-display text-2xl font-light mb-2">¿Operas más de una sede?</h3>
           <p className="text-sm text-bsm-text-secondary max-w-lg">
-            Cuenta matriz Elite + 50% del precio base por cada sede adicional, con las condiciones de
-            Elite en cada una (100 vehículos, 10 usuarios, 3 boosts, stock automatizado) y visión
-            consolidada para la dirección del grupo. <strong className="text-bsm-text-primary">Desde 1.348,50 €/mes</strong> (2 sedes) —
-            a partir de 4 sedes, condiciones a medida.
+            Para grupos con varias sedes preparamos una configuración adaptada a tu estructura,
+            tu inventario y tu equipo, sobre la base de la modalidad Elite en cada sede.
           </p>
         </div>
-        <Link href="/profesionales/solicitar-acceso?plan=grupo" className="btn-outline px-6 whitespace-nowrap flex-shrink-0">
-          Contactar →
+        <Link href="/profesionales/grupos" className="btn-outline px-6 whitespace-nowrap flex-shrink-0">
+          Conocer el modelo Grupo →
         </Link>
       </div>
 
@@ -230,7 +235,7 @@ export default async function PreciosPage() {
 
       {/* CTA final */}
       <div className="mt-16 text-center">
-        <p className="text-sm text-bsm-text-muted mb-4">¿Tienes dudas antes de solicitar acceso?</p>
+        <p className="text-sm text-bsm-text-muted mb-4">¿Tienes dudas antes de solicitar la valoración?</p>
         <Link href="mailto:hola@blacklabelmarket.es" className="text-gold hover:text-gold-light transition-colors text-sm">
           hola@blacklabelmarket.es →
         </Link>

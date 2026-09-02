@@ -9,7 +9,17 @@ const nextConfig = {
       },
       {
         source: '/precios',
-        destination: '/profesionales/precios',
+        destination: '/profesionales/planes',
+        permanent: true,
+      },
+      {
+        source: '/profesionales/precios',
+        destination: '/profesionales/planes',
+        permanent: true,
+      },
+      {
+        source: '/registro',
+        destination: '/profesionales/solicitar-acceso',
         permanent: true,
       },
       {

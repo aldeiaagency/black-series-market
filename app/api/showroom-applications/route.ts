@@ -62,6 +62,14 @@ const schema = z.object({
   youtube_url: z.string().trim().url().max(300).optional(),
   tiktok_url: z.string().trim().url().max(300).optional(),
   linkedin_url: z.string().trim().url().max(300).optional(),
+  // Campos del formulario unificado de solicitud (2026-09-02, fusión con el antiguo /registro):
+  // señales de presencia/reputación que el propio solicitante aporta, además de las que investiga
+  // la pre-visita de agencia. `location_region` ya existía en la tabla (039) pero no se aceptaba
+  // desde este formulario público.
+  location_region: z.string().trim().max(120).optional(),
+  google_business_url: z.string().trim().url().max(300).optional(),
+  portales: z.array(z.string().trim().max(60)).max(10).optional(),
+  portal_url: z.string().trim().url().max(300).optional(),
   // Inferidas con evidencia observable (p. ej. taller propio → own_workshop), no autodeclaradas.
   specialties: z.array(z.enum(SPECIALTY_VALUES)).max(8).optional(),
   services: z.array(z.enum(SERVICE_VALUES)).max(8).optional(),
@@ -111,8 +119,19 @@ export async function POST(req: NextRequest) {
     name, email, company, phone, whatsapp, city, plan, volume, message, logo_url, profile_description, source, website,
     address, years_in_business, instagram_url, facebook_url, youtube_url, tiktok_url, linkedin_url, specialties, services,
     terms_accepted, terms_version, source_prospecto_id,
+    location_region, google_business_url, portales, portal_url,
   } = parsed.data
 
+  // El formulario público unificado exige al menos una presencia pública verificable — es la
+  // señal que más ayuda a la auditoría de admisión (WF1). Las altas de agencia (visita_agencia)
+  // ya llegan con esta investigación hecha aparte, no se les exige aquí.
+  if (source !== 'visita_agencia' && !website && !google_business_url && !instagram_url) {
+    return NextResponse.json({ ok: false, error: 'missing_public_presence' }, { status: 400 })
+  }
+
+  // "Plan de interés" ya no se pide en el formulario público (los precios dejan de mostrarse antes
+  // de la llamada de admisión) — plan queda solo por compatibilidad con altas antiguas/agencia que
+  // todavía puedan mandarlo. La modalidad real se registra en agreed_plan tras la llamada.
   const fullMessage = [
     plan    ? `Plan de interés: ${plan}` : null,
     volume  ? `Volumen inventario: ${volume}` : null,
@@ -132,7 +151,7 @@ export async function POST(req: NextRequest) {
     .from('showroom_applications')
     .select('id', { count: 'exact', head: true })
     .eq('email', email)
-    .in('status', ['new', 'in_review', 'pending_info', 'approval_failed'])
+    .in('status', ['new', 'in_review', 'pending_info', 'qualified_awaiting_call', 'approval_failed'])
 
   if ((count ?? 0) > 0) {
     return NextResponse.json({ ok: true, duplicate: true })
@@ -147,7 +166,11 @@ export async function POST(req: NextRequest) {
       phone,
       whatsapp:      whatsapp ?? null,
       location_city: city,
+      location_region: location_region ?? null,
       plan_interest: plan ?? null,
+      google_business_url: google_business_url ?? null,
+      portales:      portales ?? null,
+      portal_url:    portal_url ?? null,
       message:       fullMessage || null,
       logo_url:      logo_url ?? null,
       profile_description: profile_description ?? null,

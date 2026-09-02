@@ -31,6 +31,7 @@ const WEBHOOK_URL =
 const WEBHOOK_SECRET = (process.env.N8N_WEBHOOK_SECRET || '').replace(/^﻿/, '')
 const POST_TIMEOUT_MS = 2500
 const SHOWROOM_APPLICATION_EVENT = 'showroom_application.created'
+const CONTACT_FORM_EVENT = 'contact_form.submitted'
 
 /**
  * Records a business event and (best-effort, non-blocking) forwards it to n8n.
@@ -180,6 +181,98 @@ export async function notifyShowroomApplicationCreated(
         headers: {
           'content-type': 'application/json',
           'x-blacklabel-event': SHOWROOM_APPLICATION_EVENT,
+          'x-blacklabel-timestamp': webhookTimestamp,
+          'x-blacklabel-signature': `sha256=${webhookSignature}`,
+        },
+        body: webhookBody,
+        signal: controller.signal,
+      })
+    } finally {
+      clearTimeout(timeout)
+    }
+
+    if (outboxId) {
+      const admin = createAdminClient()
+      if (res.ok) {
+        await admin
+          .from('integration_events')
+          .update({ status: 'sent', sent_at: new Date().toISOString(), attempts: 1 })
+          .eq('id', outboxId)
+      } else {
+        await admin
+          .from('integration_events')
+          .update({ status: 'failed', attempts: 1, last_error: `HTTP ${res.status}` })
+          .eq('id', outboxId)
+      }
+    }
+  } catch (err) {
+    if (outboxId) {
+      try {
+        const admin = createAdminClient()
+        await admin
+          .from('integration_events')
+          .update({ status: 'failed', attempts: 1, last_error: String(err).slice(0, 500) })
+          .eq('id', outboxId)
+      } catch {
+        // Delivery/outbox update failures must never surface to the user.
+      }
+    }
+  }
+}
+
+/**
+ * /contacto es un formulario público sin autenticación, igual que /api/showroom-applications:
+ * misma protección (outbox + webhook firmado HMAC), mismo motivo (evitar envíos falsificados
+ * hacia n8n). Workflow versionado en n8n-workflows/wf-contact-form.json.
+ */
+export async function notifyContactFormSubmitted(
+  payload: Record<string, unknown>,
+): Promise<void> {
+  let outboxId: string | null = null
+
+  try {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('integration_events')
+      .insert({
+        event_type: CONTACT_FORM_EVENT,
+        entity_type: 'contact_message',
+        entity_id: null,
+        payload,
+        status: 'pending',
+      })
+      .select('id')
+      .single()
+    outboxId = data?.id ?? null
+  } catch {
+    // Outbox failures must not block the public contact form.
+  }
+
+  const webhookUrl = (process.env.N8N_WEBHOOK_CONTACT_FORM || '').replace(/^﻿/, '')
+  if (!webhookUrl) return
+
+  const webhookSecret = (process.env.N8N_WEBHOOK_CONTACT_FORM_SECRET || '').replace(/^﻿/, '')
+  if (!webhookSecret) {
+    console.warn('N8N_WEBHOOK_CONTACT_FORM is configured but N8N_WEBHOOK_CONTACT_FORM_SECRET is missing. Skipping webhook.')
+    return
+  }
+
+  const webhookBody = JSON.stringify(payload)
+  const webhookTimestamp = new Date().toISOString()
+  const webhookSignature = createHmac('sha256', webhookSecret)
+    .update(webhookBody)
+    .digest('hex')
+
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), POST_TIMEOUT_MS)
+    let res: Response
+    try {
+      res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-blacklabel-event': CONTACT_FORM_EVENT,
           'x-blacklabel-timestamp': webhookTimestamp,
           'x-blacklabel-signature': `sha256=${webhookSignature}`,
         },

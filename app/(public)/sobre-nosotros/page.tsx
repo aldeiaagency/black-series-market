@@ -195,9 +195,10 @@ export default function SobreNosotrosPage() {
               y un sistema aprueba automáticamente.
             </p>
             <p>
-              El profesional solicita acceso, nosotros revisamos su reputación online, el tipo de stock que trabaja
-              y la calidad de cómo lo presenta. Miramos cómo trata a sus clientes, qué tipo de negocio es y si
-              encaja con lo que Black Label quiere ofrecer. Si cumple el estándar, accede al marketplace. Si no
+              El profesional solicita una valoración, nosotros revisamos su reputación online, el tipo de stock que
+              trabaja y la calidad de cómo lo presenta. Miramos cómo trata a sus clientes, qué tipo de negocio es y
+              si encaja con lo que Black Label quiere ofrecer. Si cumple el estándar, le invitamos a una llamada
+              para explicarle las condiciones y confirmar juntos ese encaje — solo entonces empieza el alta. Si no
               está en el nivel correcto todavía, se lo explicamos sin rodeos.
             </p>
             <p>

@@ -658,7 +658,7 @@ Black Label Market podrá aplicar selecciones editoriales en espacios específic
   'condiciones-profesionales': {
     title: 'Condiciones para profesionales',
     content: `
-Versión: 20 de julio de 2026
+Versión: 2 de septiembre de 2026
 
 **Objeto**
 
@@ -675,7 +675,7 @@ La solicitud de acceso constituye una solicitud de contratación y no obliga a K
 
 **Contratación electrónica**
 
-El procedimiento de contratación comprende: identificación del profesional, elección o confirmación del plan, revisión de la información y condiciones económicas, aceptación de los documentos contractuales y comunicación de activación. Antes de enviar la aceptación, el profesional podrá volver a los pasos anteriores y corregir los datos introducidos.
+El procedimiento de contratación comprende: solicitud de valoración por el profesional, revisión por Black Label Market, llamada de admisión en la que se acuerdan el plan y las condiciones económicas aplicables, aceptación de los documentos contractuales y comunicación de activación. Antes de enviar la aceptación, el profesional podrá solicitar aclaraciones o corregir los datos facilitados.
 
 El contrato se formaliza en castellano. KAZAWEB, S.L.U. archivará la versión aceptada y remitirá al profesional una confirmación en soporte duradero que incluirá la versión de las Condiciones y la información económica del plan. El profesional podrá solicitar posteriormente una copia escribiendo a hola@blacklabelmarket.es.
 
@@ -755,7 +755,7 @@ Tras finalizar el contrato, el profesional podrá solicitar una copia de los dat
 
 **Planes, facturación y renovación**
 
-Los servicios incluidos, límites, precio, periodicidad de facturación y fecha de inicio serán los mostrados al profesional inmediatamente antes de contratar y constarán en la confirmación de contratación. Los precios dirigidos a profesionales se expresan sin IVA, que se añadirá al tipo legal aplicable.
+Los servicios incluidos, límites, precio, periodicidad de facturación y fecha de inicio son los acordados con el profesional durante el proceso de admisión —incluida la llamada previa a la activación— y constarán en la confirmación de contratación remitida antes de efectuar cualquier cobro. Los precios dirigidos a profesionales se expresan sin IVA, que se añadirá al tipo legal aplicable.
 
 Salvo indicación expresa en la orden del plan, la cuota se factura por anticipado al comienzo de cada período. El pago se gestiona mediante Stripe y está sujeto a los medios de pago disponibles en su interfaz.
 
@@ -901,8 +901,8 @@ export default async function LegalPage({ params }: PageProps) {
               Si trabajas con vehículos premium, deportivos, clásicos o especiales y crees que tu selección encaja con Black Label Market, solicita acceso profesional. Cada solicitud se revisa de forma individual.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link href="/registro" className="btn-gold px-6 whitespace-nowrap">
-                Solicitar acceso profesional
+              <Link href="/profesionales/solicitar-acceso" className="btn-gold px-6 whitespace-nowrap">
+                Solicitar valoración
               </Link>
               <Link href="/para-profesionales" className="btn-outline px-6 whitespace-nowrap">
                 Ver qué incluye →
@@ -915,7 +915,7 @@ export default async function LegalPage({ params }: PageProps) {
             <div>
               <p className="text-xs text-gold tracking-widest uppercase mb-1">¿Tienes dudas?</p>
               <p className="text-sm text-bsm-text-secondary">
-                Escríbenos antes de registrarte. Revisamos tu perfil y te decimos si encaja.
+                Escríbenos antes de solicitar. Te decimos si tu perfil encaja.
               </p>
             </div>
             <Link

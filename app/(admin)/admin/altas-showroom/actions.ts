@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { createHmac } from 'crypto'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { findAuthUserByEmail, type AdminClient } from '@/lib/supabase/admin-helpers'
 import { slugify } from '@/lib/utils'
@@ -8,24 +9,18 @@ import { assertAdmin } from '@/lib/admin-auth'
 import { provisionDealerAssistant } from '@/lib/integrations/n8n-assistant-provisioning'
 import { generateSetupToken, setupTokenExpiresAt } from '@/lib/onboarding/setup-room'
 
-function passwordSetupUrl(
-  appUrl: string,
-  properties: { hashed_token: string; verification_type: string },
-) {
-  const params = new URLSearchParams({
-    token_hash: properties.hashed_token,
-    type: properties.verification_type,
-    next: '/reset-password',
-  })
-  return `${appUrl}/auth/confirm?${params.toString()}`
-}
 
 // Plan que se concede durante el trial: el que el showroom pidió en la solicitud.
 // `grupo` (multi-sede, contacto manual) y valores no reconocidos caen a 'essential'.
 const TRIAL_PLANS = ['essential', 'professional', 'elite'] as const
 type TrialPlan = (typeof TRIAL_PLANS)[number]
-function resolveTrialPlan(app: { plan_interest?: string | null; message?: string | null }): TrialPlan {
-  let p = (app.plan_interest ?? '').toLowerCase().trim()
+function resolveTrialPlan(app: { agreed_plan?: string | null; plan_interest?: string | null; message?: string | null }): TrialPlan {
+  // Prioridad: modalidad acordada en la llamada de admisión (decisión informada, con precio ya
+  // conocido) > plan_interest declarado antes de la llamada (referencia orientativa) > mensaje libre.
+  let p = (app.agreed_plan ?? '').toLowerCase().trim()
+  if (!(TRIAL_PLANS as readonly string[]).includes(p)) {
+    p = (app.plan_interest ?? '').toLowerCase().trim()
+  }
   if (!(TRIAL_PLANS as readonly string[]).includes(p)) {
     // Solicitudes antiguas guardaban el plan dentro del texto del mensaje.
     const m = (app.message ?? '').match(/plan de inter[eé]s:\s*([a-zñ]+)/i)
@@ -115,14 +110,26 @@ async function verifyApprovalPieces(
   return missing
 }
 
-async function postJsonWithTimeout(url: string, body: unknown) {
+async function postJsonWithTimeout(url: string, body: unknown, secret: string) {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), 12_000)
+  // Auditoría de seguridad 2026-09-02 (P0.6): firma HMAC igual que el resto de webhooks salientes
+  // del proyecto — este emisor apuntaba al mismo webhook que app/api/onboarding/[token]/complete/
+  // route.ts sin firmar y sin exigir el secreto; se había corregido uno de los dos emisores, no
+  // este. Mismo esquema: timestamp + sha256=hmac(secret, body).
+  const webhookBody = JSON.stringify(body)
+  const webhookTimestamp = new Date().toISOString()
+  const webhookSignature = createHmac('sha256', secret).update(webhookBody).digest('hex')
   try {
     return await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-blacklabel-event': 'setup_completed',
+        'x-blacklabel-timestamp': webhookTimestamp,
+        'x-blacklabel-signature': `sha256=${webhookSignature}`,
+      },
+      body: webhookBody,
       signal: ctrl.signal,
     })
   } finally {
@@ -209,6 +216,52 @@ export async function setApplicationStatus(formData: FormData) {
   revalidateAll(id)
 }
 
+// Nuevo paso del embudo (precios ocultos + llamada de admisión, 2026-09-02): la solicitud cumple
+// los criterios del market pero todavía NO recibe acceso — se le invita a auto-agendar una llamada
+// (Google Calendar) donde se explican precios y condiciones reales. Solo `market_directo`; la
+// visita presencial de la agencia ya cubre ese rol para `visita_agencia`.
+export async function markQualifiedAwaitingCall(formData: FormData) {
+  await assertAdmin()
+  const id = formData.get('id') as string
+  if (!id) return
+
+  const admin = createAdminClient()
+  const { data: application } = await admin
+    .from('showroom_applications')
+    .select('dealer_name, full_name, email, phone, source')
+    .eq('id', id)
+    .single()
+
+  if (!application || application.source === 'visita_agencia') return
+
+  await admin
+    .from('showroom_applications')
+    .update({ status: 'qualified_awaiting_call', updated_at: new Date().toISOString() })
+    .eq('id', id)
+
+  // Enlace de auto-agenda: placeholder hasta conectar el Google Calendar del market. El env var
+  // vacío no bloquea marcar la solicitud como cualificada — solo el envío del email queda pendiente.
+  const bookingUrl = process.env.SHOWROOM_ADMISSION_CALL_BOOKING_URL
+  const webhookUrl = process.env.N8N_WEBHOOK_DEALER_QUALIFIED
+  if (webhookUrl) {
+    fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        application_id: id,
+        dealer_name: application.dealer_name,
+        full_name: application.full_name,
+        email: application.email,
+        phone: application.phone,
+        booking_url: bookingUrl ?? null,
+        admin_url: `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom/${id}`,
+      }),
+    }).catch(() => {})
+  }
+
+  revalidateAll(id)
+}
+
 export async function saveNotes(formData: FormData) {
   await assertAdmin()
   const id = formData.get('id') as string
@@ -236,7 +289,14 @@ export async function approveApplication(formData: FormData) {
     .eq('id', id)
     .single()
 
-  if (!application || !['new', 'in_review', 'pending_info', 'approval_failed'].includes(application.status)) return
+  if (!application) return
+  // Nuevo embudo (2026-09-02): market_directo solo puede aprobarse tras pasar por la llamada de
+  // admisión (markQualifiedAwaitingCall) — sin eso no ha conocido precio ni condiciones todavía.
+  // visita_agencia no cambia: la visita presencial ya cumplió ese rol antes de esta solicitud.
+  const requiredStatuses = application.source === 'visita_agencia'
+    ? ['new', 'in_review', 'pending_info', 'approval_failed']
+    : ['qualified_awaiting_call', 'approval_failed']
+  if (!requiredStatuses.includes(application.status)) return
 
   // El programa fundador concede Elite por contrato; no debe degradarse a
   // Essential si el watcher de visitas omite el plan_interest opcional.
@@ -263,7 +323,6 @@ export async function approveApplication(formData: FormData) {
 
   const existingAuthUser = existingProfile ? null : await findAuthUserByEmail(admin, application.email)
   let userId: string | null = existingProfile?.id ?? existingAuthUser?.id ?? null
-  let setupUrl: string
 
   if (userId) {
     await admin.from('profiles').upsert(
@@ -271,12 +330,15 @@ export async function approveApplication(formData: FormData) {
       { onConflict: 'id' },
     )
 
-    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+    // Valida que el sistema de auth puede generar credenciales para este usuario ya existente
+    // (misma comprobación fail-closed de antes) — el enlace en sí ya no se usa: el embudo nuevo
+    // genera el de recuperación fresco al completar la sala de configuración, no aquí.
+    const { error: linkError } = await admin.auth.admin.generateLink({
       type: 'recovery',
       email: application.email,
       options: { redirectTo: `${appUrl}/reset-password` },
     })
-    if (linkError || !linkData.properties) {
+    if (linkError) {
       await markApprovalFailed(admin, {
         applicationId: id,
         dealerId: application.dealer_id ?? null,
@@ -285,7 +347,6 @@ export async function approveApplication(formData: FormData) {
       revalidateAll(id)
       return
     }
-    setupUrl = passwordSetupUrl(appUrl, linkData.properties)
   } else {
     // generateLink(invite) crea el usuario sin contraseña y devuelve un enlace
     // de un solo uso; el email lo entrega n8n dentro de la bienvenida.
@@ -310,7 +371,6 @@ export async function approveApplication(formData: FormData) {
     }
 
     userId = authData.user.id
-    setupUrl = passwordSetupUrl(appUrl, authData.properties)
     await admin.from('profiles').upsert(
       { id: userId, email: application.email, full_name: application.full_name, role: 'dealer' },
       { onConflict: 'id' }
@@ -464,21 +524,21 @@ export async function approveApplication(formData: FormData) {
     return
   }
   await admin.rpc('sync_dealer_profile_publication', { p_dealer_id: dealerId })
-  let founderSetupUrl: string | null = null
-  if (application.source === 'visita_agencia') {
-    const { token, tokenHash } = generateSetupToken()
-    const { error: tokenError } = await admin.from('dealer_setup_tokens').insert({
-      dealer_id: dealerId,
-      token_hash: tokenHash,
-      expires_at: setupTokenExpiresAt(),
-    })
-    if (tokenError) {
-      await markApprovalFailed(admin, { applicationId: id, dealerId, missing: ['setup_room_token'] })
-      revalidateAll(id)
-      return
-    }
-    founderSetupUrl = `${appUrl}/configurar/${encodeURIComponent(token)}`
+  // Nuevo embudo (2026-09-02): la sala de configuración ya no es exclusiva de visita_agencia.
+  // market_directo llega aquí solo después de la llamada de admisión (ver guardia de arriba), así
+  // que también recibe el mismo onboarding asistido — ya no hay una vía "autoservicio directo".
+  const { token, tokenHash } = generateSetupToken()
+  const { error: tokenError } = await admin.from('dealer_setup_tokens').insert({
+    dealer_id: dealerId,
+    token_hash: tokenHash,
+    expires_at: setupTokenExpiresAt(),
+  })
+  if (tokenError) {
+    await markApprovalFailed(admin, { applicationId: id, dealerId, missing: ['setup_room_token'] })
+    revalidateAll(id)
+    return
   }
+  const founderSetupUrl = `${appUrl}/configurar/${encodeURIComponent(token)}`
 
   const { data: approvedApplication, error: approvalUpdateError } = await admin
     .from('showroom_applications')
@@ -503,16 +563,27 @@ export async function approveApplication(formData: FormData) {
   const loginUrl = `${appUrl}/login`
   const dashboardUrl = `${appUrl}/dashboard`
 
-  // Un solo email de bienvenida por alta — nunca los dos. WF2 (bienvenida genérica, autoservicio)
-  // y WF-P3 (bienvenida fundador, white-glove) pedían cosas contradictorias sobre el stock cuando
-  // se disparaban ambos para la misma alta. Se separan por origen: visita_agencia -> WF-P3
-  // (sala de configuracion); market_directo -> WF2 (self-serve, sin promesa de onboarding asistido).
-  if (application.source === 'visita_agencia') {
-    // WF-P3: invitación fundador a completar la sala de configuración.
-    // El enlace de credenciales se genera fresco cuando el fundador envía la configuración.
+  // Nuevo embudo (2026-09-02): un único email de invitación a la sala de configuración para
+  // cualquier alta aprobada, sea fundador (visita_agencia) o showroom que pasó la llamada de
+  // admisión (market_directo) — ambos reciben ahora el mismo onboarding asistido, ya no hay una
+  // vía de autoservicio directo. `is_founder` en el payload permite que n8n adapte el tono si hace
+  // falta, sin ser dos webhooks distintos con copy contradictorio entre sí.
+  {
     const { data: dealerForOnboarding } = await admin.from('dealers').select('slug').eq('id', dealerId).single()
+    // Auditoría de seguridad 2026-09-02 (P0.6): sin URL/secreto de entorno, falla cerrado en vez
+    // de caer a una URL hardcodeada — mismo principio que app/api/onboarding/[token]/complete.
     const fundadorWebhookUrl = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING
-      ?? 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/fundador-onboarding'
+    const fundadorWebhookSecret = process.env.N8N_WEBHOOK_FUNDADOR_ONBOARDING_SECRET
+    if (!fundadorWebhookUrl || !fundadorWebhookSecret) {
+      await markApprovalNotificationFailed(admin, {
+        applicationId: id,
+        dealerId,
+        missing: ['founder_setup_notification'],
+      })
+      revalidateAll(id)
+      revalidatePath('/admin/dealers')
+      return
+    }
     const founderPayload = {
       nombre: application.dealer_name,
       email: application.email,
@@ -522,14 +593,15 @@ export async function approveApplication(formData: FormData) {
       setup_url: founderSetupUrl,
       login_url: loginUrl,
       dashboard_url: dashboardUrl,
+      is_founder: application.source === 'visita_agencia',
       // Cierra la trazabilidad de vuelta al Prospecto de Airtable que originó esta visita
       // (hallazgo de auditoría 2026-08-17). NULL si la alta no vino de una visita con Prospecto
-      // enlazado (no debería ocurrir en la rama visita_agencia, pero no se asume).
+      // enlazado, o si es una alta market_directo.
       prospecto_id: application.source_prospecto_id ?? null,
     }
     let founderNotificationSent = false
     try {
-      const res = await postJsonWithTimeout(fundadorWebhookUrl, founderPayload)
+      const res = await postJsonWithTimeout(fundadorWebhookUrl, founderPayload, fundadorWebhookSecret)
       founderNotificationSent = res.ok
     } catch {
       founderNotificationSent = false
@@ -543,26 +615,6 @@ export async function approveApplication(formData: FormData) {
       revalidateAll(id)
       revalidatePath('/admin/dealers')
       return
-    }
-  } else {
-    // WF2: bienvenida genérica autoservicio (altas directas del market, no fundador).
-    const webhookUrl = process.env.N8N_WEBHOOK_DEALER_APPROVED
-    if (webhookUrl) {
-      fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          application_id: id,
-          dealer_id: dealerId,
-          dealer_name: application.dealer_name,
-          full_name: application.full_name,
-          email: application.email,
-          password_setup_url: setupUrl,
-          login_url: loginUrl,
-          dashboard_url: dashboardUrl,
-          approved_at: new Date().toISOString(),
-        }),
-      }).catch(() => {})
     }
   }
 
