@@ -22,10 +22,15 @@
 > conectado a `N8N_WEBHOOK_DEALER_QUALIFIED`; WF-P3 (onboarding fundador) exportado y versionado por
 > primera vez. **Formulario `/contacto` dejó de ser un simulacro**: ahora llama a `/api/contact` →
 > webhook firmado HMAC → nuevo workflow `BLM - Formulario de Contacto` (probado end-to-end, ambos
-> emails confirmados en ejecución real). **Pendiente de configurar en Vercel** antes de que estos dos
-> flujos funcionen en producción: `N8N_WEBHOOK_DEALER_QUALIFIED`, `SHOWROOM_ADMISSION_CALL_BOOKING_URL`,
-> `N8N_WEBHOOK_CONTACT_FORM` y `N8N_WEBHOOK_CONTACT_FORM_SECRET` (documentados en
-> `.env.local.example`). Detalle técnico completo en el historial de la sesión, no duplicado aquí.
+> emails confirmados en ejecución real). **Desplegado a producción y verificado del todo (mismo día,
+> más tarde)**: `N8N_WEBHOOK_DEALER_QUALIFIED`, `N8N_WEBHOOK_CONTACT_FORM` y
+> `N8N_WEBHOOK_CONTACT_FORM_SECRET` (secreto aleatorio nuevo) dadas de alta en Vercel producción,
+> redeploy hecho, y una petición real contra `blacklabelmarket.es/api/contact` confirmada con
+> ejecución exitosa en n8n (id 6180). Solo queda pendiente `SHOWROOM_ADMISSION_CALL_BOOKING_URL`, y a
+> propósito: no tiene valor real todavía porque el Google Calendar del market sigue sin conectar (ver
+> fila 1 de "Camino al 100%" — es un bloque de trabajo aparte). Sin ella el email de "cumples
+> criterios" se sigue enviando igual, solo que pide responder por correo en vez de dar el enlace de
+> autoagenda. Detalle técnico completo en el historial de la sesión, no duplicado aquí.
 > Actualización anterior: **2026-09-02** — **Auditoría completa de seguridad y configuración (Codex Sol +
 > verificación cruzada de Claude), a petición explícita de H antes de escalar.** Documento completo:
 > [`docs/auditoria-seguridad-completa-2026-09-02.md`](auditoria-seguridad-completa-2026-09-02.md) (no
