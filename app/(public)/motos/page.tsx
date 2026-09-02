@@ -15,6 +15,7 @@ import { applyVehicleFilters } from '@/lib/vehicle-query'
 import Pagination from '@/components/marketplace/Pagination'
 import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 // FAQ de la landing de motos (solo en la vista sin filtros). Respuestas factuales basadas en
 // los datos reales de la ficha (carnet, electrónica, financiación, cobertura).
@@ -73,7 +74,7 @@ async function MotoList({ params }: { params: Record<string, string> }) {
   const supabase = createPublicClient()
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string, { count: 'exact' })
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
     .eq('vehicle_type', 'motorcycle')
@@ -86,15 +87,11 @@ async function MotoList({ params }: { params: Record<string, string> }) {
 
   const page  = Math.max(1, parseInt(params.page || '1'))
   const limit = 24
-  const { data: rawVehicles, count } = await query.range((page - 1) * limit, page * limit - 1)
-
-  const planRank = (plan: string | null | undefined) =>
-    plan === 'elite' ? 2 : plan === 'professional' ? 1 : 0
-  const vehicles = rawVehicles
-    ? [...rawVehicles].sort((a: any, b: any) =>
-        planRank(b.dealer?.subscription_plan) - planRank(a.dealer?.subscription_plan)
-      )
-    : rawVehicles
+  // Auditoría de seguridad 2026-09-02 (P0.2): antes reordenaba dentro de la página por
+  // subscription_plan (elite > professional > essential) — esa columna deja de ser pública.
+  // El orden "featured" ya prioriza is_featured a nivel de BD (SORT_MAP arriba), que cubre el
+  // caso Elite; se pierde el desempate professional > essential dentro de una misma página.
+  const { data: vehicles, count } = await query.range((page - 1) * limit, page * limit - 1)
 
   if (!vehicles?.length) {
     // Hereda los filtros ya aplicados en la búsqueda — evita que el comprador tenga que

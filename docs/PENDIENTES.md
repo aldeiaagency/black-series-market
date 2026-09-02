@@ -30,10 +30,17 @@
 > anónimo, reabre y cierra SEC-4) completos. P0.5 (Stripe) parcial a propósito: fix del bug más grave
 > (fallo real ya no responde 200, dispara reintento de Stripe) + las 2 escrituras que activan el
 > servicio ahora comprueban error, pero no se reescribió todo el manejador a transacciones atómicas
-> (fuera de alcance seguro sin entorno de pruebas). **P0.2 (columnas internas de `dealers`/`vehicles`
-> expuestas) deliberadamente NO aplicado** — es el de mayor riesgo (dashboard del dealer y ~40
-> páginas públicas leen las tablas base directamente; un error rompe el catálogo o el dashboard) y no
-> se puede verificar sin entorno de pruebas. Detalle y razonamiento completo en
+> (fuera de alcance seguro sin entorno de pruebas).
+> **P0.2 (columnas internas de `dealers`/`vehicles` expuestas) — ✅ cerrado en sesión siguiente
+> (2026-09-02)**: mapa completo de consumidores (Codex), migrados los 7 puntos que dependían de
+> `profile_id`/`subscription_plan` públicos (nueva ruta `/api/me/profile`, nueva RPC
+> `get_own_dealer_summary()`, `getDealerAccess()` en vez de lectura directa, ranking por
+> `is_featured` en vez de plan), reescritos ~34 `select('*')` públicos a listas explícitas
+> (`lib/public-columns.ts` — hallazgo crítico: `select=*` FALLA con column-level security, no se
+> estrecha solo, verificado contra doc oficial de Supabase antes de aplicar nada), y solo entonces
+> `REVOKE`+`GRANT` por columnas (migración 107). De paso, migración 105 cierra un hueco de fila en
+> `dealer_gallery_images` (faltaba exigir `profile_status='published'`). **Con esto, los 7 P0 de la
+> auditoría están completos** (P0.5 sigue parcial a propósito). Detalle completo en
 > `docs/auditoria-seguridad-completa-2026-09-02.md`.
 > Actualización anterior: **2026-09-01** — limpieza de documentación completa (candidatos a limpieza
 > eliminados, duplicados/incoherencias corregidos), hallazgos reales de 2 auditorías cerrados en código

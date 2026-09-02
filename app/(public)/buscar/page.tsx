@@ -5,6 +5,7 @@ import SearchBar from '@/components/marketplace/SearchBar'
 import CloseSearchButton from '@/components/marketplace/CloseSearchButton'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 export const metadata: Metadata = {
   title: 'Buscar vehículos — Black Label Market',
@@ -20,7 +21,7 @@ async function SearchResults({ q, tipo }: { q: string; tipo?: string }) {
 
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)', { count: 'exact' })
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string, { count: 'exact' })
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
     .or(`brand_name.ilike.%${q}%,model_name.ilike.%${q}%`)

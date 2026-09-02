@@ -1,7 +1,19 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getPermissions } from '@/lib/permissions'
 
 const BUCKET = 'vehicle-images'
+
+// Auditoría de seguridad 2026-09-02 (P0.2): las 3 rutas de abajo leían `dealers.profile_id`
+// directo, columna que deja de ser accesible por `authenticated` (allowlist pública).
+// getDealerAccess resuelve con service role — mejora colateral: ahora reconoce también a
+// miembros del equipo con permiso de editar perfil (canEditProfile), no solo al dueño directo.
+async function resolveGalleryDealerId(userId: string): Promise<string | null> {
+  const access = await getDealerAccess(userId)
+  if (!access || !getPermissions(access.role).canEditProfile) return null
+  return access.dealerId
+}
 
 // ---------------------------------------------------------------------------
 // GET — list gallery images for the authenticated dealer
@@ -11,15 +23,14 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  const { data: dealer } = await supabase
-    .from('dealers').select('id').eq('profile_id', user.id).single()
-  if (!dealer) return NextResponse.json({ error: 'Sin perfil de showroom' }, { status: 403 })
+  const dealerId = await resolveGalleryDealerId(user.id)
+  if (!dealerId) return NextResponse.json({ error: 'Sin perfil de showroom' }, { status: 403 })
 
   const admin = createAdminClient()
   const { data: rows } = await admin
     .from('dealer_gallery_images')
     .select('id, storage_path, position')
-    .eq('dealer_id', dealer.id)
+    .eq('dealer_id', dealerId)
     .order('position', { ascending: true })
 
   const images = (rows ?? []).map((row: { id: string; storage_path: string; position: number }) => ({
@@ -44,9 +55,8 @@ export async function DELETE(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  const { data: dealer } = await supabase
-    .from('dealers').select('id').eq('profile_id', user.id).single()
-  if (!dealer) return NextResponse.json({ error: 'Sin perfil de showroom' }, { status: 403 })
+  const dealerId = await resolveGalleryDealerId(user.id)
+  if (!dealerId) return NextResponse.json({ error: 'Sin perfil de showroom' }, { status: 403 })
 
   const admin = createAdminClient()
 
@@ -59,7 +69,7 @@ export async function DELETE(req: NextRequest) {
 
   if (!image) return NextResponse.json({ error: 'Imagen no encontrada' }, { status: 404 })
   // Explicit ownership check — belt-and-suspenders on top of RLS
-  if (image.dealer_id !== dealer.id) {
+  if (image.dealer_id !== dealerId) {
     return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
   }
 
@@ -71,7 +81,7 @@ export async function DELETE(req: NextRequest) {
     .from('dealer_gallery_images')
     .delete()
     .eq('id', id)
-    .eq('dealer_id', dealer.id) // double-check in query
+    .eq('dealer_id', dealerId) // double-check in query
 
   if (error) return NextResponse.json({ error: 'Error al eliminar la imagen' }, { status: 500 })
 
@@ -87,9 +97,8 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  const { data: dealer } = await supabase
-    .from('dealers').select('id').eq('profile_id', user.id).single()
-  if (!dealer) return NextResponse.json({ error: 'Sin perfil de showroom' }, { status: 403 })
+  const dealerId = await resolveGalleryDealerId(user.id)
+  if (!dealerId) return NextResponse.json({ error: 'Sin perfil de showroom' }, { status: 403 })
 
   let body: { order?: { id: string; position: number }[] }
   try {
@@ -110,7 +119,7 @@ export async function PATCH(req: NextRequest) {
   const { data: owned } = await admin
     .from('dealer_gallery_images')
     .select('id')
-    .eq('dealer_id', dealer.id)
+    .eq('dealer_id', dealerId)
     .in('id', ids)
 
   if (!owned || owned.length !== ids.length) {
@@ -120,7 +129,7 @@ export async function PATCH(req: NextRequest) {
   // Update each position individually (gallery max=6, so N updates is negligible)
   await Promise.all(
     order.map(({ id, position }) =>
-      admin.from('dealer_gallery_images').update({ position }).eq('id', id).eq('dealer_id', dealer.id),
+      admin.from('dealer_gallery_images').update({ position }).eq('id', id).eq('dealer_id', dealerId),
     ),
   )
 

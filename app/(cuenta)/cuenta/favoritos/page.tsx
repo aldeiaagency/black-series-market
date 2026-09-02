@@ -4,6 +4,7 @@ import { Heart, Bell, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import VehicleCard from '@/components/marketplace/VehicleCard'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 export const metadata = { title: 'Vehículos guardados — Black Label Market' }
 
@@ -36,7 +37,7 @@ export default async function CuentaFavoritosPage() {
   if (vehicleIds.length > 0) {
     const { data } = await supabase
       .from('vehicles')
-      .select('*, dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)')
+      .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers(name, slug, location_city, logo_url, is_verified)`) as string)
       .in('id', vehicleIds)
     // Preserve recency order
     const idIndex = Object.fromEntries(vehicleIds.map((id, i) => [id, i]))

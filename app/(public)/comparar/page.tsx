@@ -5,6 +5,7 @@ import { formatPrice, formatMileage, FUEL_LABELS, TRANSMISSION_LABELS, DRIVE_LAB
 import type { Vehicle } from '@/lib/types'
 import type { Metadata } from 'next'
 import CompareExpandToggle from '@/components/marketplace/CompareExpandToggle'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 export const metadata: Metadata = {
   title: 'Comparar vehículos — Black Label Market',
@@ -94,12 +95,12 @@ export default async function CompararPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   const { data: rawVehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city)')
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city)`) as string)
     .in('id', vehicleIds)
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
 
-  const vehicles = (rawVehicles as (Vehicle & { dealer: any })[]) || []
+  const vehicles = (rawVehicles as unknown as (Vehicle & { dealer: any })[]) || []
 
   if (vehicles.length < 2) {
     return (

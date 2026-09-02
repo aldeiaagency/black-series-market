@@ -12,6 +12,7 @@ import { getBrandPriceStats, buildBrandFaqItems } from '@/lib/brand-faq'
 import { esGroupThousands } from '@/lib/utils'
 import FaqSection from '@/components/marketplace/FaqSection'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -58,7 +59,7 @@ export default async function BrandPage({ params }: PageProps) {
 
   const { data: vehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url)')
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url)`) as string)
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
     .ilike('brand_name', brandData.name)

@@ -7,6 +7,7 @@ import { FUEL_LABELS, TRANSMISSION_LABELS, esGroupThousands } from '@/lib/utils'
 import { findMotoCategorySlug, findMotoCategoryLabel } from '@/lib/vehicle-categories'
 import type { Metadata } from 'next'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { VEHICLE_PUBLIC_COLUMNS, DEALER_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 // ISR: la ficha ya no escribe en el render (el tracking va por beacon) → cacheable en CDN.
 export const revalidate = 300
@@ -65,12 +66,13 @@ export default async function MotoDetailPage({ params }: PageProps) {
 
   const { data: vehicle } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(*), brand:brands(slug)')
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(${DEALER_PUBLIC_COLUMNS}), brand:brands(slug)`) as string)
     .eq('slug', slug)
     .eq('vehicle_type', 'motorcycle')
     .in('status', ['active', 'paused', 'sold'])
     .eq('dealer.profile_status', 'published')
     .single()
+    .returns<any>()
 
   // draft/pending_review/expired → 404; sold/paused → visible with adapted CTAs
   if (!vehicle || ['draft', 'pending_review', 'expired'].includes(vehicle.status)) notFound()
@@ -78,13 +80,15 @@ export default async function MotoDetailPage({ params }: PageProps) {
   if (!vehicle.dealer || !['trial', 'active'].includes(vehicle.dealer.status)) notFound()
 
   // La vista se registra desde el cliente (ViewTracker → /api/track) para no escribir en el render.
-  const contactMode = vehicle.dealer?.profile_id
-    ? await resolveContactMode(vehicle.dealer.profile_id)
+  // Auditoría de seguridad 2026-09-02 (P0.2): usa dealer_id (columna pública del propio
+  // vehículo), no dealer.profile_id — esa columna deja de leerse en queries públicas.
+  const contactMode = vehicle.dealer_id
+    ? await resolveContactMode(vehicle.dealer_id)
     : 'classic'
 
   let simQuery = supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string)
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
     .eq('vehicle_type', 'motorcycle')
@@ -95,17 +99,18 @@ export default async function MotoDetailPage({ params }: PageProps) {
       .gte('price', Math.round(vehicle.price * 0.6))
       .lte('price', Math.round(vehicle.price * 1.4))
   }
-  const { data: similarVehicles } = await simQuery.limit(3)
+  const { data: similarVehicles } = await simQuery.limit(3).returns<any[]>()
 
   const { data: dealerVehicles } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string)
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
     .eq('dealer_id', vehicle.dealer_id)
     .eq('vehicle_type', 'motorcycle')
     .neq('id', vehicle.id)
     .limit(3)
+    .returns<any[]>()
 
   const fullName = `${vehicle.brand_name} ${vehicle.model_name} ${vehicle.year}${vehicle.version ? ' ' + vehicle.version : ''}`
   const canonicalUrl = `${SITE_URL}/motos/${vehicle.slug}`

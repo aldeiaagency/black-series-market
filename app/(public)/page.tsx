@@ -7,6 +7,7 @@ import VehicleCard from '@/components/marketplace/VehicleCard'
 import DealerCard from '@/components/marketplace/DealerCard'
 import SearchBar from '@/components/marketplace/SearchBar'
 import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
+import { VEHICLE_PUBLIC_COLUMNS, DEALER_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 // Preguntas frecuentes de la home. Objetivo doble: (1) resolver las dudas iniciales del
 // comprador y (2) posicionar (SEO/GEO) con respuestas citables — definición del servicio,
@@ -70,7 +71,7 @@ export default async function HomePage() {
     await Promise.all([
       supabase
         .from('vehicles')
-        .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
+        .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string)
         .eq('status', 'active')
         .eq('dealer.profile_status', 'published')
         .eq('is_featured', true)
@@ -79,14 +80,14 @@ export default async function HomePage() {
         .limit(8),
       supabase
         .from('vehicles')
-        .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)')
+        .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string)
         .eq('status', 'active')
         .eq('dealer.profile_status', 'published')
         .order('published_at', { ascending: false })
         .limit(8),
       supabase
         .from('dealers')
-        .select('*')
+        .select(DEALER_PUBLIC_COLUMNS)
         .eq('status', 'active')
         .eq('profile_status', 'published')
         .eq('is_featured', true)

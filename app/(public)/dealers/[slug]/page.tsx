@@ -34,7 +34,7 @@ const VEHICLE_CARD_COLUMNS = [
   'mileage_km', 'iva_deducible', 'location_province', 'license_type',
   'national_delivery', 'price', 'price_on_request', 'currency', 'title', 'images',
   'is_featured', 'featured_until', 'published_at',
-  'dealer:dealers(name, slug, location_city, logo_url, is_verified, subscription_plan)',
+  'dealer:dealers(name, slug, location_city, logo_url, is_verified)',
 ].join(', ')
 
 // `select()` con una lista de columnas construida en runtime impide que supabase-js

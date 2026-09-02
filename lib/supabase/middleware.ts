@@ -145,13 +145,12 @@ async function updateAuthenticatedSession(
   if (pathname.startsWith('/dashboard')) {
     if (!user) return NextResponse.redirect(new URL('/login', request.url))
 
-    // ¿Dueño directo?
-    const { data: dealer, error: dealerError } = await supabase
-      .from('dealers')
-      .select('status')
-      .eq('profile_id', user.id)
-      .maybeSingle()
+    // ¿Dueño directo? Auditoría de seguridad 2026-09-02 (P0.2): usa la RPC get_own_dealer_summary
+    // en vez de `.eq('profile_id', ...)` — profile_id deja de ser una columna legible por
+    // `authenticated` (allowlist pública), así que el filtro directo dejaría de funcionar.
+    const { data: dealerRows, error: dealerError } = await supabase.rpc('get_own_dealer_summary')
     if (dealerError) throw new Error(dealerError.message)
+    const dealer = dealerRows?.[0] ?? null
 
     if (dealer) {
       if (dealer.status === 'pending') {
@@ -218,12 +217,10 @@ async function updateAuthenticatedSession(
       return NextResponse.redirect(new URL('/admin', request.url))
     }
 
-    const { data: dealer, error: dealerError } = await supabase
-      .from('dealers')
-      .select('id, status')
-      .eq('profile_id', user.id)
-      .maybeSingle()
+    // Auditoría de seguridad 2026-09-02 (P0.2): misma RPC que arriba, ver comentario.
+    const { data: dealerRows2, error: dealerError } = await supabase.rpc('get_own_dealer_summary')
     if (dealerError) throw new Error(dealerError.message)
+    const dealer = dealerRows2?.[0] ?? null
 
     if (dealer) {
       if (dealer.status === 'pending') {

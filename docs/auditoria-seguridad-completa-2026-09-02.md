@@ -36,8 +36,13 @@ incluido en este "aplica" — son las acciones de mayor blast-radius (RLS, webho
   `lib/json-ld.ts` (escapa `<`, U+2028, U+2029). Sweep mecánico verificado en los 40 archivos que
   usaban el patrón vulnerable — 0 residuos. Pendiente, no bloqueante: quitar `unsafe-inline` de la
   CSP (P2, cambio de arquitectura mayor, requiere nonce por request).
-- **P0.2 (columnas internas de `dealers`/`vehicles` expuestas) — ⏸️ NO aplicado, a propósito.**
-  Ver nota abajo — es el único de los 7 que no se tocó.
+- **P0.2 (columnas internas de `dealers`/`vehicles` expuestas) — ✅ hecho (sesión siguiente,
+  2026-09-02).** Ver "Cierre de P0.2" más abajo — se hizo con el mapa completo de consumidores
+  reales (Codex), migrando primero los 7 puntos que necesitaban `profile_id`/`subscription_plan`,
+  reescribiendo los ~34 `select('*')` contra `dealers`/`vehicles` a listas explícitas (hallazgo
+  crítico: `select=*` FALLA con error bajo column-level security, no se estrecha solo — verificado
+  contra la documentación oficial de Supabase antes de aplicar nada), y solo entonces revocando el
+  SELECT de tabla completo. Build, lint y tsc limpios contra el schema real antes del deploy.
 - **P0.3 (SSRF) — ✅ hecho.** `lib/ssrf-guard.ts` (HTTPS + IP pública, sin loopback/RFC1918/
   link-local/metadata, redirects revalidados manualmente, límite de tamaño en streaming) aplicado a
   la importación de imágenes (`vehicles/import/route.ts`). El vector del asistente se cerró en el
@@ -65,25 +70,49 @@ incluido en este "aplica" — son las acciones de mayor blast-radius (RLS, webho
   Verificado que no existe ningún INSERT cliente/anónimo real a `leads` en todo el código — el único
   camino real (`/api/leads`) usa el service role, no se ve afectado.
 
-### Por qué P0.2 no se tocó
+### Cierre de P0.2 (2026-09-02, sesión siguiente)
 
-Es el cambio de mayor riesgo de los 7: cerrar la exposición de columnas exige revocar el `SELECT`
-que hoy tiene `anon`/`authenticated` sobre las tablas base y sustituirlo por vistas públicas con
-columnas explícitas — pero **el propio dashboard del dealer lee su fila completa directamente desde
-el navegador** (`dashboard/perfil/page.tsx:66`, `supabase.from('dealers').select('*').eq('profile_id',
-...)`, rol `authenticated`, sin pasar por ninguna API) y **las ~40 páginas públicas** también leen
-`vehicles`/`dealers` directamente con la anon key vía `createPublicClient()` (no son llamadas REST
-externas evitables, son el propio renderizado server-side de la web). Revocar sin más rompe una de
-las dos cosas; la alternativa segura (GRANT a nivel de columna, específico por rol, construido
-rastreando qué columna necesita cada uno de los ~16 archivos del dashboard que usan `createClient()`
-más las ~40 páginas públicas) es factible pero no se puede verificar con seguridad sin desplegar
-contra un entorno de pruebas — y un error aquí rompe o el catálogo público completo (ingreso) o el
-dashboard de los showrooms ya onboardeados (confianza). Dado que H pidió explícitamente "no me
-gustaría tener problemas en este aspecto", se prefirió dejarlo señalado con precisión en vez de
-aplicar un cambio de RLS de producción sin poder probarlo. Recomendación: abordarlo en una sesión
-dedicada, con Codex construyendo el allowlist completo de columnas por consumidor real (una pasada
-de auditoría de los 16+40 archivos) antes de tocar ningún GRANT/REVOKE, y verificar contra
-producción (o un branch de Supabase si el plan lo permite) antes de dar por cerrado.
+Se abordó en una sesión dedicada, en el orden seguro planteado inicialmente:
+
+1. **Mapa completo de consumidores reales (Codex, solo lectura)**: cada uso de `createClient()`
+   (dashboard/cuenta) y `createPublicClient()` (páginas públicas) contra `dealers`/`vehicles`,
+   columna por columna, distinguiendo lo que la query pide de lo que el componente consume de
+   verdad. Resultado: **ningún consumidor público necesita más columnas que otro** — el propio
+   dueño gestiona su perfil completo por rutas service-role, no por lectura directa ampliada.
+2. **Migrados los 7 puntos que dependían de `profile_id` o `subscription_plan` públicos**:
+   `dashboard/perfil/page.tsx` → nueva ruta `GET /api/me/profile` (service role);
+   `Header.tsx`/`middleware.ts` → nueva RPC `get_own_dealer_summary()` (`SECURITY DEFINER`,
+   resuelve `auth.uid()` internamente, nunca expone `profile_id`); `inventario/actions.ts` y
+   `api/gallery/route.ts` (×3) → `getDealerAccess()` con service role (mejora colateral: ahora
+   reconocen también a miembros del equipo, no solo al dueño directo — con el permiso correcto
+   revalidado, `canEditInventory`/`canEditProfile`); `resolveContactMode` → recibe `dealer_id` en
+   vez de `dealer.profile_id`, con `getOrganizationIdForDealer()` nueva; ranking público por
+   `subscription_plan` (coches/motos/dealers listados, `/api/featured-dealers`) → sustituido por
+   `is_featured` (pierde el desempate professional > essential dentro de una misma página; el
+   caso elite, que es is_featured=true, sigue funcionando igual).
+3. **Hallazgo crítico verificado antes de tocar nada**: `select=*` contra una tabla con
+   column-level security **falla con error**, no se estrecha a las columnas permitidas —
+   confirmado contra la documentación oficial de Supabase (no es el comportamiento que se había
+   asumido inicialmente). Esto obligó a reescribir los ~34 `select('*', ...)`/`select('*')` reales
+   contra `dealers`/`vehicles` en páginas públicas a listas explícitas
+   (`lib/public-columns.ts`: `VEHICLE_PUBLIC_COLUMNS`, `DEALER_PUBLIC_COLUMNS`, coinciden
+   exactamente con los `GRANT` de la migración 107) — `brands`, `models` y `search_alerts` no son
+   tablas restringidas, sus `select('*')` se dejaron tal cual.
+4. **Hueco adicional encontrado de paso**: la policy pública de `dealer_gallery_images` no exigía
+   `dealers.profile_status='published'` — un dealer en trial/active pero con perfil aún no
+   publicado tenía su galería consultable igual (migración 105).
+5. **Migración final (107)**: `REVOKE SELECT` de tabla completa + `GRANT SELECT (columnas)` para
+   `anon`/`authenticated` en `dealers`, `vehicles` y `dealer_gallery_images`. Las escrituras
+   (INSERT/UPDATE) no se tocan — siguen protegidas por RLS como antes, que evalúa `profile_id`
+   internamente sin necesitar que el rol tenga SELECT sobre esa columna.
+
+**Verificado**: `tsc --noEmit`, `next lint` y `next build` completos limpios — el build ejecuta de
+verdad las ~90 páginas SSG/ISR contra el schema real de producción (con los grants todavía sin
+restringir en el momento del build), confirmando que las columnas explícitas elegidas son
+suficientes para renderizar cada página. Revisión final dirigida: `VehicleDetailContent.tsx`,
+`DealerCard.tsx`, `DealerInlineCard.tsx` y `VehicleCard.tsx` no referencian ninguna columna
+excluida. **No verificado en vivo contra los grants ya restringidos** (requeriría desplegar
+primero) — el build/lint/tsc es la verificación disponible antes del deploy.
 
 ---
 

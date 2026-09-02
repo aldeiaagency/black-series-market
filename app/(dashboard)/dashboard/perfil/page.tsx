@@ -60,10 +60,12 @@ export default function PerfilPage() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      const { data } = await supabase.from('dealers').select('*').eq('profile_id', user.id).single()
+      // Auditoría de seguridad 2026-09-02 (P0.2): antes leía la tabla dealers directo con
+      // profile_id + select('*'); ahora pasa por /api/me/profile (service role).
+      const res = await fetch('/api/me/profile')
+      if (res.status === 401) { router.push('/login'); return }
+      if (!res.ok) return
+      const { dealer: data } = await res.json()
       setDealer(data)
       setForm(data || {})
       setLogoUrl(data?.logo_url || null)

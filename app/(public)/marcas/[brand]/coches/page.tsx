@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -49,7 +50,7 @@ export default async function BrandCochesPage({ params }: PageProps) {
 
   const { data: vehicles, count } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string, { count: 'exact' })
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
     .ilike('brand_name', brandData.name)
@@ -57,6 +58,7 @@ export default async function BrandCochesPage({ params }: PageProps) {
     .order('is_featured', { ascending: false })
     .order('published_at', { ascending: false })
     .limit(48)
+    .returns<any[]>()
 
   const itemListJsonLd = vehicles?.length
     ? {

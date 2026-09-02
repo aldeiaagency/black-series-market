@@ -11,6 +11,7 @@ import { esGroupThousands } from '@/lib/utils'
 import FaqSection from '@/components/marketplace/FaqSection'
 import RelatedCategories from '@/components/marketplace/RelatedCategories'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 const CATEGORY_VALUES = ['touring_adventure']
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
@@ -36,7 +37,7 @@ export default async function MotosTouringPage() {
   const supabase = createPublicClient()
   const { data: vehicles, count } = await supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string, { count: 'exact' })
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
     .eq('vehicle_type', 'motorcycle')
@@ -44,6 +45,7 @@ export default async function MotosTouringPage() {
     .order('is_featured', { ascending: false })
     .order('published_at', { ascending: false })
     .limit(48)
+    .returns<any[]>()
 
   const [stats, brandStock] = await Promise.all([
     getCategoryStats(supabase, 'motorcycle', CATEGORY_VALUES),

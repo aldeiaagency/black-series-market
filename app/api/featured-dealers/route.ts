@@ -19,18 +19,20 @@ export async function GET(req: Request) {
   const dealerIds = Array.from(new Set(vehicles.map((v: { dealer_id: string }) => v.dealer_id)))
 
   // Step 2: fetch those dealers with featured metadata
+  // Auditoría de seguridad 2026-09-02 (P0.2): quitado subscription_plan del select — is_featured
+  // ya lo refleja siempre (el webhook de Stripe fija is_featured=true exactamente cuando el plan
+  // es elite), así que la comprobación era redundante, no una necesidad real.
   const { data: dealers } = await supabase
     .from('dealers')
-    .select('id, name, slug, location_city, location_region, is_featured, subscription_plan')
+    .select('id, name, slug, location_city, location_region, is_featured')
     .eq('status', 'active')
     .eq('profile_status', 'published')
     .in('id', dealerIds)
     .order('name')
 
-  // Mark featured: is_featured OR elite plan
   const result = (dealers || []).map((d: any) => ({
     ...d,
-    isFeatured: d.is_featured === true || d.subscription_plan === 'elite',
+    isFeatured: d.is_featured === true,
   }))
 
   // Sort: featured first, then alphabetical

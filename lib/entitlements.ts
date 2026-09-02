@@ -332,3 +332,19 @@ export async function getOrganizationIdForUser(userId: string): Promise<string |
 
   return data?.organization_id ?? null
 }
+
+/**
+ * Returns the organization_id for a given dealer_id — resolución directa sin depender de
+ * dealers.profile_id (auditoría de seguridad 2026-09-02, P0.2: resolveContactMode se llama
+ * desde fichas públicas, que ya no leen profile_id).
+ */
+export async function getOrganizationIdForDealer(dealerId: string): Promise<string | null> {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('organizations')
+    .select('id')
+    .eq('dealer_id', dealerId)
+    .maybeSingle()
+
+  return data?.id ?? null
+}

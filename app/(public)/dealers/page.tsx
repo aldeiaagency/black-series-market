@@ -6,6 +6,7 @@ export const revalidate = 300
 import DealerCard from '@/components/marketplace/DealerCard'
 import { MapPin, Car, Bike, CheckCircle } from 'lucide-react'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { DEALER_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
@@ -69,11 +70,12 @@ export default async function DealersPage({ searchParams }: PageProps) {
   // 3. Query principal — featured siempre primero por ORDER BY
   let query = supabase
     .from('dealers')
-    .select('*, vehicles(status, vehicle_type)')
+    .select((`${DEALER_PUBLIC_COLUMNS}, vehicles(status, vehicle_type)`) as string)
     .in('status', ['trial', 'active'])
     .eq('profile_status', 'published')
+    // Auditoría de seguridad 2026-09-02 (P0.2): quitado el desempate por subscription_plan —
+    // esa columna deja de ser pública. is_featured ya cubre la prioridad de Elite.
     .order('is_featured', { ascending: false })
-    .order('subscription_plan', { ascending: false })
     .order('name', { ascending: true })
 
   if (params.zona) query = query.ilike('location_region', `%${params.zona}%`)

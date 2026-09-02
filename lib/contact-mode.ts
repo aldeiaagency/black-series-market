@@ -1,5 +1,5 @@
 import 'server-only'
-import { getOrganizationIdForUser, getEntitlements } from './entitlements'
+import { getOrganizationIdForDealer, getEntitlements } from './entitlements'
 import type { ContactMode } from '@/components/marketplace/VehicleDetailContent'
 
 /**
@@ -15,9 +15,9 @@ import type { ContactMode } from '@/components/marketplace/VehicleDetailContent'
  * Cuando se conecte la IA y la feature pase a 'operative', el modo real toma el relevo
  * automáticamente, sin tocar más código.
  */
-export async function resolveContactMode(dealerProfileId: string): Promise<ContactMode> {
+export async function resolveContactMode(dealerId: string): Promise<ContactMode> {
   try {
-    const orgId = await getOrganizationIdForUser(dealerProfileId)
+    const orgId = await getOrganizationIdForDealer(dealerId)
     if (!orgId) return 'classic'
     const ent  = await getEntitlements(orgId)
     const feat = ent?.features['lead_qualification_assistant']

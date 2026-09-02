@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { getOrganizationIdForUser, can } from '@/lib/entitlements'
+import { getDealerAccess } from '@/lib/dealer-access'
+import { getPermissions } from '@/lib/permissions'
 
 export type UpdateStatusResult = { ok: true } | { ok: false; error: string }
 
@@ -14,13 +16,19 @@ export async function updateVehicleStatus(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'No autorizado' }
 
-  const { data: dealer } = await supabase
-    .from('dealers')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
-
-  if (!dealer) return { ok: false, error: 'Perfil de concesionario no encontrado' }
+  // Auditoría de seguridad 2026-09-02 (P0.2): antes leía `dealers.profile_id` directo, columna
+  // que deja de ser accesible por `authenticated` (allowlist pública). getDealerAccess resuelve
+  // con service role — mejora colateral: ahora también funciona para miembros del equipo, no
+  // solo el dueño directo.
+  const access = await getDealerAccess(user.id)
+  if (!access) return { ok: false, error: 'Perfil de concesionario no encontrado' }
+  // getDealerAccess también resuelve miembros del equipo, no solo el dueño — hay que volver a
+  // comprobar el permiso de inventario explícitamente (antes lo garantizaba implícitamente ser
+  // el dueño directo).
+  if (!getPermissions(access.role).canEditInventory) {
+    return { ok: false, error: 'No tienes permisos para gestionar el inventario.' }
+  }
+  const dealer = { id: access.dealerId }
 
   // Pre-chequeo de plan al activar (mensaje limpio). El trigger en BD es la barrera real.
   if (status === 'active') {

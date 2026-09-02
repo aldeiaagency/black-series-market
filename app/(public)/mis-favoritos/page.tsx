@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import VehicleCard from '@/components/marketplace/VehicleCard'
 import { useFavorites } from '@/hooks/useFavorites'
 import type { Vehicle } from '@/lib/types'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 export default function MisFavoritosPage() {
   const { favorites, mounted, isAuthenticated } = useFavorites()
@@ -24,12 +25,12 @@ export default function MisFavoritosPage() {
     const supabase = createClient()
     supabase
       .from('vehicles')
-      .select('*, dealer:dealers!inner(name, slug, location_city, logo_url)')
+      .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url)`) as string)
       .in('id', favorites)
       .eq('status', 'active')
       .eq('dealer.profile_status', 'published')
       .then(({ data }) => {
-        setVehicles((data as Vehicle[]) || [])
+        setVehicles((data as unknown as Vehicle[]) || [])
         setLoading(false)
       })
   }, [mounted, favorites])

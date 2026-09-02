@@ -76,7 +76,7 @@ export default function Header() {
       setUser(user)
       if (user && user.id !== lastCheckedUserId) {
         lastCheckedUserId = user.id
-        checkDealer(user.id, supabase)
+        checkDealer()
       }
     })
 
@@ -86,7 +86,7 @@ export default function Header() {
       if (u) {
         if (u.id !== lastCheckedUserId) {
           lastCheckedUserId = u.id
-          checkDealer(u.id, supabase)
+          checkDealer()
         }
       } else {
         lastCheckedUserId = null
@@ -97,9 +97,13 @@ export default function Header() {
     return () => subscription.unsubscribe()
   }, [])
 
-  async function checkDealer(userId: string, supabase: ReturnType<typeof createClient>) {
-    const { data } = await supabase.from('dealers').select('id').eq('profile_id', userId).maybeSingle()
-    setIsDealer(!!data)
+  async function checkDealer() {
+    // Auditoría de seguridad 2026-09-02 (P0.2): antes leía `dealers.profile_id` directo, columna
+    // que deja de ser accesible por `authenticated` (allowlist pública). /api/me/showroom ya
+    // resuelve dueño Y miembro de equipo con service role — mejora colateral: los miembros de
+    // equipo (antes no reconocidos por este check) ahora también cuentan como "isDealer".
+    const res = await fetch('/api/me/showroom')
+    setIsDealer(res.ok)
   }
 
   // Close user menu on outside click

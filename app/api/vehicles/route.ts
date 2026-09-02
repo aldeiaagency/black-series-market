@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions } from '@/lib/permissions'
 import { sanitizeVehiclePayload } from '@/lib/vehicle-write'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 // Crear un vehículo (dueño o miembro con permiso de inventario). El dealer_id se fuerza
 // al showroom del usuario, nunca se confía en el del payload.
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('vehicles')
-    .select('*, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified, subscription_plan)', { count: 'exact' })
+    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string, { count: 'exact' })
     .eq('status', 'active')
     .eq('dealer.profile_status', 'published')
 
