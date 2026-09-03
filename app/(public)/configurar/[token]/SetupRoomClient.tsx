@@ -86,11 +86,10 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
     documents: [] as FileRef[],
   })
   const [stock, setStock] = useState({
-    mode: 'feed_url',
+    mode: 'vehicle_by_vehicle',
     feed_url: '',
     notes: '',
     csv_files: [] as FileRef[],
-    bulk_files: [] as FileRef[],
   })
   const [appointments, setAppointments] = useState({
     weekly: Object.fromEntries(DAYS.map((d) => [d.key, rangesToStr(DEFAULT_RULES.weekly[d.key])])) as Record<string, string>,
@@ -224,7 +223,6 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
   const galleryRef = useRef<HTMLInputElement>(null)
   const documentRef = useRef<HTMLInputElement>(null)
   const csvRef = useRef<HTMLInputElement>(null)
-  const stockBulkRef = useRef<HTMLInputElement>(null)
   const vehiclePhotoRef = useRef<HTMLInputElement>(null)
 
   const initial = useMemo(() => (profile.name || dealer.name || 'B')[0]?.toUpperCase(), [profile.name, dealer.name])
@@ -272,7 +270,6 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
       if (type === 'cover') setAssets((prev) => ({ ...prev, cover_url: uploaded[0]?.url ?? prev.cover_url }))
       if (type === 'document') setAssets((prev) => ({ ...prev, documents: [...prev.documents, ...uploaded] }))
       if (type === 'stock_csv') setStock((prev) => ({ ...prev, csv_files: [...prev.csv_files, ...uploaded], mode: 'csv' }))
-      if (type === 'stock_bulk') setStock((prev) => ({ ...prev, bulk_files: [...prev.bulk_files, ...uploaded], mode: 'loose_files' }))
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'No se pudo subir el archivo.')
     } finally {
@@ -486,7 +483,7 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
           <section className="border border-bsm-border bg-surface p-6">
             <h2 className="mb-1 font-display text-2xl font-light">Stock inicial</h2>
             <p className="mb-6 text-sm text-bsm-text-muted">Elige la vía más cómoda para preparar las primeras unidades.</p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-3">
               <ModeButton
                 active={stock.mode === 'vehicle_by_vehicle'}
                 title="Vehículo a vehículo"
@@ -502,7 +499,6 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                 onClick={() => setStock((s) => ({ ...s, mode: 'feed_url' }))}
               />
               <ModeButton active={stock.mode === 'csv'} title="CSV" text="Plantilla compatible con el alta masiva del dashboard. El equipo la sube por ti, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'csv' }))} />
-              <ModeButton active={stock.mode === 'loose_files'} title="Archivos sueltos" text="Fotos o carpetas de material sin organizar, para que el equipo las estructure y suba por ti, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'loose_files' }))} />
             </div>
             <div className="mt-5 space-y-4">
               {stock.mode === 'vehicle_by_vehicle' && (
@@ -584,12 +580,6 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                 <UploadPanel title="CSV de stock" icon={<FileText className="h-4 w-4" />} onClick={() => csvRef.current?.click()} busy={uploading === 'stock_csv'} action="Subir CSV">
                   <input ref={csvRef} type="file" accept=".csv,text/csv" className="sr-only" onChange={(e) => uploadFiles(e.target.files, 'stock_csv')} />
                   <FileList files={stock.csv_files} />
-                </UploadPanel>
-              )}
-              {stock.mode === 'loose_files' && (
-                <UploadPanel title="Fotos y archivos de stock" icon={<UploadCloud className="h-4 w-4" />} onClick={() => stockBulkRef.current?.click()} busy={uploading === 'stock_bulk'} action="Añadir imágenes">
-                  <input ref={stockBulkRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" onChange={(e) => uploadFiles(e.target.files, 'stock_bulk')} />
-                  <FileList files={stock.bulk_files} />
                 </UploadPanel>
               )}
               <TextArea label="Notas para el equipo" value={stock.notes} onChange={(v) => setStock((s) => ({ ...s, notes: v }))} rows={3} />

@@ -7,7 +7,7 @@ const BUCKET = 'vehicle-images'
 // públicos e indefinidos (pueden incluir datos sensibles del negocio/fundador) — bucket privado
 // separado, servidos con signed URL de expiración corta en vez de getPublicUrl().
 const PRIVATE_BUCKET = 'onboarding-private'
-const PRIVATE_TYPES: UploadKind[] = ['document', 'stock_bulk', 'stock_csv']
+const PRIVATE_TYPES: UploadKind[] = ['document', 'stock_csv']
 const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 7 // 7 días — cubre el ciclo real de revisión de admin
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const DOCUMENT_TYPES = [
@@ -18,13 +18,12 @@ const DOCUMENT_TYPES = [
 const CSV_TYPES = ['text/csv', 'application/csv', 'application/vnd.ms-excel', 'text/plain']
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 const MAX_DOCUMENT_SIZE = 20 * 1024 * 1024
-const MAX_STOCK_IMAGE_SIZE = 15 * 1024 * 1024
 const GALLERY_MAX = 6
 
 // vehicle_photo: fotos de fichas reales publicadas desde la sala (alta vehículo a vehículo) —
-// van al mismo bucket público que usa el resto del catálogo, nunca al bucket privado de material
-// en bruto (stock_bulk), porque estas SÍ deben quedar visibles de forma estable en la ficha.
-type UploadKind = 'logo' | 'cover' | 'gallery' | 'document' | 'stock_bulk' | 'stock_csv' | 'vehicle_photo'
+// van al mismo bucket público que usa el resto del catálogo. Retirado 'stock_bulk' (archivos
+// sueltos): la sala ya no ofrece ese modo, sustituido por el alta vehículo a vehículo real.
+type UploadKind = 'logo' | 'cover' | 'gallery' | 'document' | 'stock_csv' | 'vehicle_photo'
 
 function imageExtFromBytes(head: Uint8Array): 'jpg' | 'png' | 'webp' | null {
   if (head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return 'jpg'
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   }
 
   const type = (req.nextUrl.searchParams.get('type') || '') as UploadKind
-  if (!['logo', 'cover', 'gallery', 'document', 'stock_bulk', 'stock_csv', 'vehicle_photo'].includes(type)) {
+  if (!['logo', 'cover', 'gallery', 'document', 'stock_csv', 'vehicle_photo'].includes(type)) {
     return NextResponse.json({ error: 'Tipo de subida no permitido.' }, { status: 400 })
   }
 
@@ -103,7 +102,6 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
       return NextResponse.json({ error: 'Formato no permitido. Usa JPG, PNG o WebP.' }, { status: 400 })
     }
     ext = imageExtFromBytes(head)
-    maxSize = type === 'stock_bulk' ? MAX_STOCK_IMAGE_SIZE : MAX_IMAGE_SIZE
     if (!ext) return NextResponse.json({ error: 'El archivo no es una imagen válida (JPG, PNG o WebP).' }, { status: 400 })
   }
 

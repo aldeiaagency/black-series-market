@@ -15,7 +15,9 @@ import { normalizeRules, normalizeSettings } from '@/lib/booking'
 
 const SPECIALTIES = ['sport', 'classic', 'premium', 'motorcycle', 'import', 'suv', 'supercar', 'custom'] as const
 const SERVICES = ['financing', 'trade_in', 'warranty', 'transport_nat', 'transport_intl', 'own_workshop', 'detailing', 'home_delivery'] as const
-const STOCK_MODES = ['feed_url', 'csv', 'loose_files'] as const
+// 'loose_files' retirado (2026-09-03): la sala ya no ofrece archivos sueltos sin estructurar,
+// sustituido por el alta vehículo a vehículo real (app/api/onboarding/[token]/vehicles).
+const STOCK_MODES = ['feed_url', 'csv'] as const
 
 type UploadedFileRef = {
   url: string
@@ -163,7 +165,6 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
       feed_url: stockFeedUrl,
       notes: normalizeText(stock.notes, 700),
       csv_files: normalizeFiles(stock.csv_files),
-      bulk_files: normalizeFiles(stock.bulk_files),
     },
   }
 
