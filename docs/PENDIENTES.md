@@ -149,7 +149,61 @@ founders con cuidado mientras se resuelve en paralelo.
 > **Backlog, no bloqueante:** `dealers.is_verified` y su checklist en `admin/dealers/[id]` quedan
 > desacoplados de lo que ve el comprador — decidir si se elimina el toggle/checklist o se reconvierte en
 > seguimiento interno de calidad, sin urgencia.
->
+
+> **⏳ Pendiente — construir la materialización real del badge "Destacado" para fundadores (hallazgo del
+> simulacro E2E de alta, 2026-09-03; decisión de negocio corregida el mismo día).** `approveApplication`
+> (`admin/altas-showroom/actions.ts`) da a todo fundador (`source=visita_agencia`) `subscription_plan='elite'`
+> incondicionalmente, con `status='trial'`. Elite trae `showroom_featured: 'destacado'` en
+> `lib/plans-config.ts` (línea ~220), y `lib/entitlements.ts` resuelve ese flag solo mirando
+> `subscription_plan` — nunca `dealers.status`. **Decisión de H (2026-09-03): esto es el comportamiento
+> correcto, no un bug.** Los fundadores deben llevar la etiqueta "Destacado" desde el primer día, precisamente
+> porque usan Elite desde el alta (no hace falta esperar a `status='active'`) — es parte del trato
+> preferente del programa fundador (ver `guion_visita.md` §3: "el showroom aparece destacado y con
+> prioridad"). Corrige una nota anterior de este mismo documento que planteaba lo contrario.
+> **Estado real hoy: sin construir.** El badge "Destacado" que renderiza `/dealers` y la home lee la columna
+> `dealers.is_featured` (mecanismo antiguo, no conectado a entitlements; `approveApplication` no la setea,
+> queda en su default `FALSE`) — verificado contra Karboceramic (dealer de prueba E2E, trial+elite): sin
+> badge destacado pese a ser fundador Elite. Existe además una segunda columna, `organizations.is_featured`
+> (migración `024_organizations.sql`, comentario "materializado desde entitlements"), **sin ningún
+> trigger/job que la materialice** — columna muerta hoy. **Falta construir**: la materialización real desde
+> `subscription_plan`/`showroom_featured` hacia `dealers.is_featured` (o migrar el front a leer
+> `organizations.is_featured` y materializar esa), disparada al aprobar el alta o en el cron que corresponda
+> — sin condición de `status`, ya que fundador+trial+elite debe salir destacado igual que fundador+activo+elite.
+
+> **⏳ Pendiente — la sala de configuración no ofrece alta de stock vehículo a vehículo (hallazgo del
+> simulacro E2E de alta, 2026-09-03).** `SetupRoomClient.tsx` solo ofrece 3 modos de stock: `feed_url`
+> (URL de feed/portal), `csv` (plantilla) y `loose_files`/"Archivos sueltos" — este último explícitamente
+> significa "fotos o carpetas para que el equipo las suba" (copy propio del componente y del email de
+> WF-P3), **no** una entrada estructurada por vehículo. Un fundador sin feed ni CSV que quiera cargar
+> coches uno a uno dentro de la sala no tiene esa opción — su única salida es "archivos sueltos", que
+> produce fotos sin estructura si nadie del equipo las procesa después manualmente. La entrada
+> vehículo-a-vehículo real (wizard de 5 pasos) sí existe, pero solo **después** del alta, dentro del
+> dashboard del dealer (`/dashboard/publicar`) — no está enlazada ni mencionada desde la sala de
+> configuración. **Falta decidir**: ¿añadir un 4º modo de stock en la sala misma, o redirigir/explicar
+> claramente que ese caso debe resolverse desde el dashboard tras crear la contraseña (el email de
+> `setup_completed` ya da acceso al dashboard antes de publicar la ficha pública, así que técnicamente
+> ya se podría)?
+
+> **⏳ Pendiente — no existe un email de bienvenida/agenda de onboarding al publicar el perfil (hallazgo
+> del mismo simulacro, 2026-09-03).** Verificado el ciclo completo de emails de `wf-p3-onboarding-fundador.json`
+> (nodo "Validar input"): `setup_required` (invitación a la sala), `setup_completed` (contraseña +
+> aviso de que el equipo revisará perfil/logo/fotos antes de publicar la ficha — **esto sí existe y ya
+> cubre el margen de revisión que se preguntó**) y `profile_published` (aviso de que la ficha ya está
+> publicada, con enlace a la ficha pública). **Ninguno de los tres incluye enlace para agendar una
+> llamada de bienvenida/onboarding** — el payload que dispara `profile_published`
+> (`publishDealerProfile` en `admin/dealers/[id]/page.tsx`) solo lleva `dealer_id`, `dealer_name`,
+> `email`, `dealer_slug`, `public_url`, sin ningún campo de reserva de cita. Relacionado con el bloque
+> "Reserva de cita del agente" ya documentado (Fase A, OAuth real de Google Calendar, pendiente) — falta
+> decidir si el enlace de bienvenida debe ser una cita con el propio Black Series (onboarding comercial)
+> o con el sistema de citas del showroom (que hoy tampoco tiene Google Calendar conectado, solo
+> disponibilidad manual — ver hallazgo siguiente).
+
+> **⏳ Pendiente — confirmado: la sala de configuración no permite conectar Google Calendar real (mismo
+> simulacro, 2026-09-03).** `SetupRoomClient.tsx` no tiene ningún control de conexión OAuth — el paso de
+> citas solo permite definir disponibilidad manual (`showroom_calendar_connections` con
+> `provider='manual'`, ver `app/api/onboarding/[token]/complete/route.ts`). Coincide con el estado ya
+> conocido de "Fase A (Google OAuth real) documentada y pendiente" — sin construir todavía.
+
 > **Moderación de vehículos a futuro (no construido, solo referencia de diseño — H pide no explicar
 > públicamente el mecanismo en ningún sitio):** el comentario de `lib/vehicle-write.ts` (decisión 2026-07-17)
 > ya declara la intención de sustituir la moderación manual por un futuro "agente de auditoría

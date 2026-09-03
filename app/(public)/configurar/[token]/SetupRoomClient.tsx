@@ -1,10 +1,13 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
-import { AlertTriangle, CalendarClock, Check, FileText, ImagePlus, Loader2, UploadCloud } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, CalendarClock, Check, FileText, ImagePlus, Loader2, Trash2, UploadCloud } from 'lucide-react'
 import type { SetupRoomData } from '@/lib/onboarding/setup-room'
 import { DEFAULT_RULES, DEFAULT_SETTINGS, rangesToStr, parseRanges } from '@/lib/booking'
 import type { BookingSettings, Weekday, TimeRange } from '@/lib/booking'
+import { createClient } from '@/lib/supabase/client'
+import { FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/utils'
+import { brandSlugsForType } from '@/lib/brand-types'
 
 const DAYS: { key: Weekday; label: string }[] = [
   { key: 'mon', label: 'Lunes' }, { key: 'tue', label: 'Martes' }, { key: 'wed', label: 'Miércoles' },
@@ -105,12 +108,124 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [retryableSubmit, setRetryableSubmit] = useState(false)
 
+  // Alta vehículo a vehículo: publica de verdad al pulsar "Añadir vehículo" (no espera al envío
+  // final de la sala) — así el gate automático de publicación del perfil puede dispararse en
+  // cuanto haya una unidad con foto, dejando el perfil listo para revisión sin depender de que el
+  // equipo procese fotos sueltas a mano.
+  type AddedVehicle = { id: string; brand_name: string; model_name: string; year: number; price: number | null; images: { url: string; order: number }[]; status: string }
+  const [vehicles, setVehicles] = useState<AddedVehicle[]>([])
+  const [vehiclesLoaded, setVehiclesLoaded] = useState(false)
+  const [allBrands, setAllBrands] = useState<{ id: string; name: string; slug: string }[]>([])
+  const emptyVehicleForm = {
+    vehicle_type: 'car' as 'car' | 'motorcycle',
+    brand_name: '', model_name: '', year: '', mileage_km: '', price: '',
+    fuel_type: '', transmission: '', description: '',
+    images: [] as FileRef[],
+  }
+  const [vehicleForm, setVehicleForm] = useState(emptyVehicleForm)
+  const [addingVehicle, setAddingVehicle] = useState(false)
+  const [vehicleError, setVehicleError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from('brands').select('id, name, slug').eq('is_active', true).order('name')
+      .then(({ data }) => setAllBrands(data ?? []))
+  }, [])
+
+  useEffect(() => {
+    if (vehiclesLoaded) return
+    fetch(`/api/onboarding/${encodeURIComponent(token)}/vehicles`)
+      .then((r) => r.json())
+      .then((json) => { if (Array.isArray(json.data)) setVehicles(json.data) })
+      .finally(() => setVehiclesLoaded(true))
+  }, [token, vehiclesLoaded])
+
+  async function uploadVehiclePhotos(files: FileList | null) {
+    if (!files?.length) return
+    setVehicleError(null)
+    setUploading('vehicle_photo')
+    try {
+      const uploaded: FileRef[] = []
+      for (const file of Array.from(files)) {
+        const fd = new FormData()
+        fd.append('file', file)
+        const res = await fetch(`/api/onboarding/${encodeURIComponent(token)}/upload?type=vehicle_photo`, { method: 'POST', body: fd })
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json.error || 'No se pudo subir la foto.')
+        uploaded.push(json)
+      }
+      setVehicleForm((prev) => ({ ...prev, images: [...prev.images, ...uploaded] }))
+    } catch (err) {
+      setVehicleError(err instanceof Error ? err.message : 'No se pudo subir la foto.')
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  async function addVehicle() {
+    setVehicleError(null)
+    if (!vehicleForm.brand_name || !vehicleForm.model_name || !vehicleForm.year || !vehicleForm.mileage_km) {
+      setVehicleError('Completa marca, modelo, año y kilometraje.')
+      return
+    }
+    if (vehicleForm.images.length === 0) {
+      setVehicleError('Añade al menos una foto del vehículo.')
+      return
+    }
+    setAddingVehicle(true)
+    try {
+      const res = await fetch(`/api/onboarding/${encodeURIComponent(token)}/vehicles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vehicle_type: vehicleForm.vehicle_type,
+          brand_name: vehicleForm.brand_name,
+          model_name: vehicleForm.model_name,
+          year: Number(vehicleForm.year),
+          mileage_km: Number(vehicleForm.mileage_km),
+          price: vehicleForm.price ? Number(vehicleForm.price) : null,
+          price_on_request: !vehicleForm.price,
+          fuel_type: vehicleForm.fuel_type || null,
+          transmission: vehicleForm.transmission || null,
+          description: vehicleForm.description || null,
+          images: vehicleForm.images.map((f, i) => ({ url: f.url, order: i })),
+          status: 'active',
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'No se pudo publicar el vehículo.')
+      setVehicles((prev) => [...prev, {
+        id: json.id, brand_name: vehicleForm.brand_name, model_name: vehicleForm.model_name,
+        year: Number(vehicleForm.year), price: vehicleForm.price ? Number(vehicleForm.price) : null,
+        images: vehicleForm.images.map((f, i) => ({ url: f.url, order: i })), status: 'active',
+      }])
+      setVehicleForm(emptyVehicleForm)
+    } catch (err) {
+      setVehicleError(err instanceof Error ? err.message : 'No se pudo publicar el vehículo.')
+    } finally {
+      setAddingVehicle(false)
+    }
+  }
+
+  async function removeVehicle(id: string) {
+    setVehicles((prev) => prev.filter((v) => v.id !== id))
+    try {
+      await fetch(`/api/onboarding/${encodeURIComponent(token)}/vehicles?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+    } catch {}
+  }
+
+  const brandOptions = useMemo(() => {
+    const activeSlugs = brandSlugsForType(vehicleForm.vehicle_type)
+    return allBrands.filter((b) => activeSlugs.has(b.slug))
+  }, [allBrands, vehicleForm.vehicle_type])
+
   const logoRef = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
   const galleryRef = useRef<HTMLInputElement>(null)
   const documentRef = useRef<HTMLInputElement>(null)
   const csvRef = useRef<HTMLInputElement>(null)
   const stockBulkRef = useRef<HTMLInputElement>(null)
+  const vehiclePhotoRef = useRef<HTMLInputElement>(null)
 
   const initial = useMemo(() => (profile.name || dealer.name || 'B')[0]?.toUpperCase(), [profile.name, dealer.name])
 
@@ -371,7 +486,13 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
           <section className="border border-bsm-border bg-surface p-6">
             <h2 className="mb-1 font-display text-2xl font-light">Stock inicial</h2>
             <p className="mb-6 text-sm text-bsm-text-muted">Elige la vía más cómoda para preparar las primeras unidades.</p>
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <ModeButton
+                active={stock.mode === 'vehicle_by_vehicle'}
+                title="Vehículo a vehículo"
+                text="Publica tú mismo cada unidad, con su ficha y fotos propias — recomendado si no tienes feed ni CSV. Queda publicado al momento, sin esperar a que nadie lo procese."
+                onClick={() => setStock((s) => ({ ...s, mode: 'vehicle_by_vehicle' }))}
+              />
               <ModeButton
                 active={stock.mode === 'feed_url'}
                 title="Feed o portal"
@@ -381,9 +502,83 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                 onClick={() => setStock((s) => ({ ...s, mode: 'feed_url' }))}
               />
               <ModeButton active={stock.mode === 'csv'} title="CSV" text="Plantilla compatible con el alta masiva del dashboard. El equipo la sube por ti, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'csv' }))} />
-              <ModeButton active={stock.mode === 'loose_files'} title="Archivos sueltos" text="Fotos o carpetas de material para que el equipo las suba, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'loose_files' }))} />
+              <ModeButton active={stock.mode === 'loose_files'} title="Archivos sueltos" text="Fotos o carpetas de material sin organizar, para que el equipo las estructure y suba por ti, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'loose_files' }))} />
             </div>
             <div className="mt-5 space-y-4">
+              {stock.mode === 'vehicle_by_vehicle' && (
+                <div className="space-y-5">
+                  {vehicles.length > 0 && (
+                    <ul className="space-y-2">
+                      {vehicles.map((v) => (
+                        <li key={v.id} className="flex items-center justify-between gap-3 border border-bsm-border bg-obsidian/50 px-3 py-2 text-sm">
+                          <div className="flex items-center gap-3">
+                            {v.images[0]?.url && <img src={v.images[0].url} alt="" className="h-10 w-14 object-cover" />}
+                            <span className="text-bsm-text-primary">{v.brand_name} {v.model_name} · {v.year}</span>
+                            <span className="text-xs text-bsm-text-muted">{v.price ? `${v.price.toLocaleString('es-ES')} €` : 'Precio a consultar'}</span>
+                            <span className="text-xs text-emerald-400">Publicado</span>
+                          </div>
+                          <button type="button" onClick={() => removeVehicle(v.id)} className="text-bsm-text-muted hover:text-red-400">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <div className="border border-bsm-border bg-obsidian/50 p-5">
+                    <p className="mb-4 text-sm font-medium text-bsm-text-primary">Añadir vehículo</p>
+                    <div className="mb-4 flex gap-2">
+                      {([['car', 'Coche'], ['motorcycle', 'Moto']] as const).map(([v, l]) => (
+                        <label key={v} className="flex items-center justify-center px-4 py-2 border border-bsm-border text-sm text-bsm-text-muted cursor-pointer has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5">
+                          <input type="radio" name="vehicle_type" value={v} checked={vehicleForm.vehicle_type === v} onChange={() => setVehicleForm((prev) => ({ ...prev, vehicle_type: v, brand_name: '' }))} className="sr-only" />
+                          {l}
+                        </label>
+                      ))}
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="label-base">Marca</span>
+                        <select className="input-base" value={vehicleForm.brand_name} onChange={(e) => setVehicleForm((prev) => ({ ...prev, brand_name: e.target.value }))}>
+                          <option value="">Selecciona marca</option>
+                          {brandOptions.map((b) => <option key={b.slug} value={b.name}>{b.name}</option>)}
+                        </select>
+                      </label>
+                      <Field label="Modelo" value={vehicleForm.model_name} onChange={(v) => setVehicleForm((prev) => ({ ...prev, model_name: v }))} placeholder="Ej. 911 Carrera S" />
+                      <Field label="Año" value={vehicleForm.year} onChange={(v) => setVehicleForm((prev) => ({ ...prev, year: v }))} type="number" placeholder="2022" />
+                      <Field label="Kilometraje" value={vehicleForm.mileage_km} onChange={(v) => setVehicleForm((prev) => ({ ...prev, mileage_km: v }))} type="number" placeholder="12000" />
+                      <Field label="Precio (vacío = a consultar)" value={vehicleForm.price} onChange={(v) => setVehicleForm((prev) => ({ ...prev, price: v }))} type="number" placeholder="89000" />
+                      <label className="block">
+                        <span className="label-base">Combustible</span>
+                        <select className="input-base" value={vehicleForm.fuel_type} onChange={(e) => setVehicleForm((prev) => ({ ...prev, fuel_type: e.target.value }))}>
+                          <option value="">Selecciona</option>
+                          {Object.entries(FUEL_LABELS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                        </select>
+                      </label>
+                      <label className="block">
+                        <span className="label-base">Cambio</span>
+                        <select className="input-base" value={vehicleForm.transmission} onChange={(e) => setVehicleForm((prev) => ({ ...prev, transmission: e.target.value }))}>
+                          <option value="">Selecciona</option>
+                          {Object.entries(TRANSMISSION_LABELS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                        </select>
+                      </label>
+                    </div>
+                    <div className="mt-4">
+                      <TextArea label="Descripción breve (opcional)" value={vehicleForm.description} onChange={(v) => setVehicleForm((prev) => ({ ...prev, description: v }))} rows={2} placeholder="Estado, historial, extras destacados..." />
+                    </div>
+                    <div className="mt-4">
+                      <UploadPanel title="Fotos del vehículo" icon={<ImagePlus className="h-4 w-4" />} onClick={() => vehiclePhotoRef.current?.click()} busy={uploading === 'vehicle_photo'} action="Añadir fotos">
+                        <input ref={vehiclePhotoRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" onChange={(e) => uploadVehiclePhotos(e.target.files)} />
+                        <FileList files={vehicleForm.images} />
+                      </UploadPanel>
+                    </div>
+                    {vehicleError && <p className="mt-3 text-xs text-red-400">{vehicleError}</p>}
+                    <button type="button" onClick={addVehicle} disabled={addingVehicle} className="btn-gold mt-4 px-5 py-2.5 text-sm">
+                      {addingVehicle ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      Añadir vehículo
+                    </button>
+                  </div>
+                </div>
+              )}
               {stock.mode === 'feed_url' && <Field label="URL de feed o portal" value={stock.feed_url} onChange={(v) => setStock((s) => ({ ...s, feed_url: v }))} type="url" placeholder="https://..." />}
               {stock.mode === 'csv' && (
                 <UploadPanel title="CSV de stock" icon={<FileText className="h-4 w-4" />} onClick={() => csvRef.current?.click()} busy={uploading === 'stock_csv'} action="Subir CSV">

@@ -206,6 +206,9 @@ async function publishDealerProfile(formData: FormData) {
         email,
         dealer_slug: dealer.slug,
         public_url: `${appUrl}/dealers/${dealer.slug}`,
+        // Mismo mecanismo que la llamada de admisión (markQualifiedAwaitingCall): vacío hasta
+        // conectar el Google Calendar del market, sin bloquear el envío del email mientras tanto.
+        booking_url: process.env.SHOWROOM_ADMISSION_CALL_BOOKING_URL ?? null,
       }
 
       try {

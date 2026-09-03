@@ -21,7 +21,10 @@ const MAX_DOCUMENT_SIZE = 20 * 1024 * 1024
 const MAX_STOCK_IMAGE_SIZE = 15 * 1024 * 1024
 const GALLERY_MAX = 6
 
-type UploadKind = 'logo' | 'cover' | 'gallery' | 'document' | 'stock_bulk' | 'stock_csv'
+// vehicle_photo: fotos de fichas reales publicadas desde la sala (alta vehículo a vehículo) —
+// van al mismo bucket público que usa el resto del catálogo, nunca al bucket privado de material
+// en bruto (stock_bulk), porque estas SÍ deben quedar visibles de forma estable en la ficha.
+type UploadKind = 'logo' | 'cover' | 'gallery' | 'document' | 'stock_bulk' | 'stock_csv' | 'vehicle_photo'
 
 function imageExtFromBytes(head: Uint8Array): 'jpg' | 'png' | 'webp' | null {
   if (head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return 'jpg'
@@ -66,7 +69,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   }
 
   const type = (req.nextUrl.searchParams.get('type') || '') as UploadKind
-  if (!['logo', 'cover', 'gallery', 'document', 'stock_bulk', 'stock_csv'].includes(type)) {
+  if (!['logo', 'cover', 'gallery', 'document', 'stock_bulk', 'stock_csv', 'vehicle_photo'].includes(type)) {
     return NextResponse.json({ error: 'Tipo de subida no permitido.' }, { status: 400 })
   }
 
