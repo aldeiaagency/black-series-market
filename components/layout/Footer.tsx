@@ -13,6 +13,7 @@ const EXPLORAR = [
   { label: 'Vehículos a la carta',          href: '/vehiculos-a-la-carta' },
   { label: 'Guías del mercado',             href: '/guias' },
   { label: 'Glosario premium',              href: '/glosario' },
+  { label: 'Selección mensual',             href: '/seleccion-mensual' },
   { label: 'Cómo funciona',                 href: '/como-funciona' },
   { label: 'Sobre nosotros',               href: '/sobre-nosotros' },
 ]

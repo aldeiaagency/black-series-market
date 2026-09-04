@@ -29,6 +29,13 @@ export default function SolicitarAccesoPage() {
     message: '',
   })
   const [termsAccepted, setTermsAccepted] = useState(false)
+  // Corrección 2026-09-04 (hallazgo Codex, simulación E2E alta online): antes este único checkbox
+  // solo mencionaba la política de privacidad, pero el sistema trataba su aceptación como si
+  // cubriera también las Condiciones para Profesionales (approveApplication copiaba
+  // terms_accepted/terms_version al dealer como aceptación real). Ahora el checkbox cubre
+  // explícitamente ambos documentos, y el registro en comunicaciones comerciales — que antes se
+  // asumía sin pedirlo — pasa a ser un opt-in aparte, no marcado por defecto.
+  const [marketingOptIn, setMarketingOptIn] = useState(false)
 
   function update(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -50,12 +57,19 @@ export default function SolicitarAccesoPage() {
     e.preventDefault()
     setError('')
 
-    if (!form.website && !form.google_business_url && !form.instagram_url) {
-      setError('Necesitamos al menos una presencia pública (web, Google Business o Instagram) para poder valorar el showroom.')
+    // Corrección 2026-09-04 (hallazgo Codex, simulación E2E alta online): un showroom que solo
+    // vende en portales (Coches.net, Autoscout24...) sin web/GBP/Instagram propios se quedaba sin
+    // forma de enviar la solicitud — portal_url/portales no contaban como presencia pública
+    // aunque el propio formulario los pide un paso antes. Segmento real del ICP (compraventas sin
+    // web propia), no un caso de borde.
+    if (!form.website && !form.google_business_url && !form.instagram_url && form.portales.length === 0) {
+      setError('Necesitamos al menos una presencia pública (web, Google Business, Instagram o un portal donde publiques) para poder valorar el showroom.')
       return
     }
     if (!termsAccepted) {
-      setError('Debes aceptar la Política de Privacidad para continuar.')
+      // Corrección 2026-09-05 (hallazgo Codex): el mensaje se quedó desactualizado tras ampliar
+      // el checkbox a privacidad + condiciones profesionales — seguía mencionando solo la primera.
+      setError('Debes aceptar la Política de Privacidad y las Condiciones para Profesionales para continuar.')
       return
     }
 
@@ -81,6 +95,7 @@ export default function SolicitarAccesoPage() {
           message: form.message || undefined,
           terms_accepted: true,
           terms_version: CURRENT_PROFESSIONAL_TERMS_VERSION,
+          marketing_opt_in: marketingOptIn,
         }),
       })
 
@@ -88,7 +103,7 @@ export default function SolicitarAccesoPage() {
         const body = await res.json().catch(() => ({}))
         setError(
           body?.error === 'missing_public_presence'
-            ? 'Necesitamos al menos una presencia pública (web, Google Business o Instagram) para poder valorar el showroom.'
+            ? 'Necesitamos al menos una presencia pública (web, Google Business, Instagram o un portal donde publiques) para poder valorar el showroom.'
             : 'No hemos podido enviar la solicitud. Escríbenos a hola@blacklabelmarket.es y lo resolvemos directamente.'
         )
         setLoading(false)
@@ -268,7 +283,7 @@ export default function SolicitarAccesoPage() {
                   />
                 </div>
                 <p className="text-[11px] text-bsm-text-muted -mt-2">
-                  Con al menos una de las tres nos basta para empezar a valorar el showroom.
+                  Con al menos una de las tres, o con un portal donde ya publiques (lo indicas justo debajo), nos basta para empezar a valorar el showroom.
                 </p>
 
                 <div>
@@ -347,7 +362,23 @@ export default function SolicitarAccesoPage() {
                     <Link href="/legal/privacidad" target="_blank" className="text-gold hover:underline">
                       política de privacidad
                     </Link>
-                    {' '}y autorizo el uso de estos datos para valorar la solicitud y contactar conmigo.
+                    {' '}y las{' '}
+                    <Link href="/legal/condiciones-profesionales" target="_blank" className="text-gold hover:underline">
+                      condiciones para profesionales
+                    </Link>
+                    , y autorizo el uso de estos datos para valorar la solicitud y contactar conmigo.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={marketingOptIn}
+                    onChange={(e) => setMarketingOptIn(e.target.checked)}
+                    className="mt-0.5 accent-gold w-4 h-4 shrink-0"
+                  />
+                  <span className="text-xs text-bsm-text-muted leading-relaxed">
+                    Además, quiero recibir novedades y contenido de Black Label Market por email (opcional — puedes darte de baja cuando quieras).
                   </span>
                 </label>
 

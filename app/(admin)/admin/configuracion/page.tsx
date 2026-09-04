@@ -1,12 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CheckCircle, Save, ChevronDown } from 'lucide-react'
+import { CheckCircle, Save, ChevronDown, AlertTriangle } from 'lucide-react'
 
 type SectionKey = 'email' | 'seo' | 'social_links'
 
 export default function AdminConfiguracionPage() {
   const [saved, setSaved] = useState<SectionKey | null>(null)
+  // Hallazgo 2026-09-05 (mapeo operativo, rol admin): handleSave no comprobaba res.ok — un fallo
+  // real (403/500) mostraba igualmente "Guardado", porque fetch no lanza por un status de error.
+  const [saveError, setSaveError] = useState<SectionKey | null>(null)
   const [saving, setSaving] = useState(false)
   const [openSection, setOpenSection] = useState<SectionKey>('social_links')
 
@@ -49,14 +52,19 @@ export default function AdminConfiguracionPage() {
   async function handleSave(section: SectionKey) {
     const valueMap: Record<SectionKey, any> = { email, seo, social_links: socialLinks }
     setSaving(true)
+    setSaveError(null)
     try {
-      await fetch('/api/admin/config', {
+      const res = await fetch('/api/admin/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: section, value: valueMap[section] }),
       })
+      if (!res.ok) throw new Error('save_failed')
       setSaved(section)
       setTimeout(() => setSaved(null), 2500)
+    } catch {
+      setSaveError(section)
+      setTimeout(() => setSaveError(null), 4000)
     } finally {
       setSaving(false)
     }
@@ -126,9 +134,9 @@ export default function AdminConfiguracionPage() {
                       </label>
                     </div>
                     <div className="flex justify-end">
-                      <button onClick={() => handleSave('email')} disabled={saving} className="btn-gold flex items-center gap-2">
-                        {saved === 'email' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                        {saved === 'email' ? 'Guardado' : 'Guardar emails'}
+                      <button onClick={() => handleSave('email')} disabled={saving} className={`flex items-center gap-2 ${saveError === 'email' ? 'btn-outline border-red-400/50 text-red-400' : 'btn-gold'}`}>
+                        {saveError === 'email' ? <AlertTriangle className="w-4 h-4" /> : saved === 'email' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                        {saveError === 'email' ? 'Error al guardar' : saved === 'email' ? 'Guardado' : 'Guardar emails'}
                       </button>
                     </div>
                   </div>
@@ -163,9 +171,9 @@ export default function AdminConfiguracionPage() {
                       Los cambios de Analytics/GTM requieren actualizar las variables de entorno en el servidor y redesplegar.
                     </div>
                     <div className="flex justify-end">
-                      <button onClick={() => handleSave('seo')} disabled={saving} className="btn-gold flex items-center gap-2">
-                        {saved === 'seo' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                        {saved === 'seo' ? 'Guardado' : 'Guardar SEO'}
+                      <button onClick={() => handleSave('seo')} disabled={saving} className={`flex items-center gap-2 ${saveError === 'seo' ? 'btn-outline border-red-400/50 text-red-400' : 'btn-gold'}`}>
+                        {saveError === 'seo' ? <AlertTriangle className="w-4 h-4" /> : saved === 'seo' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                        {saveError === 'seo' ? 'Error al guardar' : saved === 'seo' ? 'Guardado' : 'Guardar SEO'}
                       </button>
                     </div>
                   </div>
@@ -188,9 +196,9 @@ export default function AdminConfiguracionPage() {
                       </div>
                     ))}
                     <div className="flex justify-end">
-                      <button onClick={() => handleSave('social_links')} disabled={saving} className="btn-gold flex items-center gap-2">
-                        {saved === 'social_links' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                        {saved === 'social_links' ? 'Guardado' : 'Guardar redes'}
+                      <button onClick={() => handleSave('social_links')} disabled={saving} className={`flex items-center gap-2 ${saveError === 'social_links' ? 'btn-outline border-red-400/50 text-red-400' : 'btn-gold'}`}>
+                        {saveError === 'social_links' ? <AlertTriangle className="w-4 h-4" /> : saved === 'social_links' ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                        {saveError === 'social_links' ? 'Error al guardar' : saved === 'social_links' ? 'Guardado' : 'Guardar redes'}
                       </button>
                     </div>
                   </div>

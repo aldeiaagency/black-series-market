@@ -4,6 +4,9 @@ import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions } from '@/lib/permissions'
 import { sanitizeVehiclePayload } from '@/lib/vehicle-write'
 import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
+import { reviewVehicleIntake } from '@/lib/vehicle-intake/review'
+import { normalizeVin } from '@/lib/vehicle-intake/dedupe'
+import { buildAiColumns, resolveStatus } from '@/lib/vehicle-intake/intake'
 
 // Crear un vehículo (dueño o miembro con permiso de inventario). El dealer_id se fuerza
 // al showroom del usuario, nunca se confía en el del payload.
@@ -28,10 +31,37 @@ export async function POST(request: NextRequest) {
   const clean = sanitizeVehiclePayload(payload)
   clean.dealer_id = access.dealerId
 
+  // Pipeline de intake (migración 110): revisa la ficha contra la guía de marca antes de
+  // publicar. El dealer está presente en el wizard — nunca se auto-aplica la sugerencia de
+  // texto (allowAutoSafe=false), solo se guarda para que la vea y decida. Un bloqueo real sí
+  // fuerza pending_review por encima de lo que pidiera el formulario.
+  const originalDescription = typeof clean.description === 'string' ? clean.description : null
+  const hasPhotos = Array.isArray(clean.images) && clean.images.length > 0
+  const review = await reviewVehicleIntake({
+    vehicle_type: clean.vehicle_type as 'car' | 'motorcycle' | undefined,
+    brand_name: String(clean.brand_name ?? ''),
+    model_name: String(clean.model_name ?? ''),
+    version: clean.version as string | null | undefined,
+    year: Number(clean.year),
+    mileage_km: Number(clean.mileage_km),
+    price: clean.price as number | null | undefined,
+    price_on_request: clean.price_on_request as boolean | undefined,
+    fuel_type: clean.fuel_type as string | null | undefined,
+    transmission: clean.transmission as string | null | undefined,
+    description: originalDescription,
+    images: hasPhotos ? (clean.images as { url: string; order: number }[]) : undefined,
+  })
+
+  clean.status = resolveStatus(clean.status === 'draft' ? 'draft' : 'active', hasPhotos, review)
+  clean.vin_normalized = normalizeVin(clean.vin as string | null | undefined)
+  clean.intake_source = 'wizard'
+  clean.ai_applied_mode = 'none'
+  Object.assign(clean, buildAiColumns(review, originalDescription))
+
   const admin = createAdminClient()
   const { data, error } = await admin.from('vehicles').insert(clean).select('id').single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ id: data.id })
+  return NextResponse.json({ id: data.id, review })
 }
 
 export async function GET(request: NextRequest) {

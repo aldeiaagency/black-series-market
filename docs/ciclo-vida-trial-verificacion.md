@@ -16,7 +16,7 @@
 | Pieza | Dónde | Estado |
 |---|---|---|
 | Perfil/listado/vehículos visibles durante el trial (no solo cuando hay stock) | Migración `067_trial_dealers_public_visibility.sql` (RLS) + `app/(public)/dealers/[slug]/page.tsx`, `app/(public)/dealers/page.tsx`, `app/(public)/coches/[slug]/page.tsx`, `app/(public)/motos/[slug]/page.tsx` | ✅ desplegado y verificado en producción |
-| Reloj de trial (`trial_ends_at`, 30 días desde la aprobación) | Migración `068_trial_lifecycle_fields.sql` + `app/(admin)/admin/altas-showroom/actions.ts` | ✅ desplegado |
+| Reloj de trial (`trial_ends_at`, 90 días desde la aprobación — 30 originalmente, ampliado 2026-09-05 para la promoción de lanzamiento) | Migración `068_trial_lifecycle_fields.sql` + `app/(admin)/admin/altas-showroom/actions.ts` | ✅ desplegado |
 | Banner "Prueba activa hasta [fecha]" en el dashboard | `app/(dashboard)/dashboard/page.tsx` | ✅ desplegado y verificado visualmente |
 | Fix: "Activa tu plan de suscripción" del checklist de primeros pasos aparecía siempre como hecho (comparaba un valor que nunca existe en esa columna) | `app/(dashboard)/dashboard/page.tsx` (`hasPlan`) | ✅ corregido |
 | Función `trial_dealer_stats(dealer_id)` — vistas/leads/vehículos activos durante el trial | Migración `069_trial_dealer_stats_rpc.sql` | ✅ desplegado |
@@ -40,10 +40,11 @@ Marcar cada punto según se vaya confirmando con el primer showroom real que pas
 - [ ] El checklist "Primeros pasos" NO marca "Activa tu plan de suscripción" como hecho hasta que el dealer pague de verdad (`status='active'`).
 
 ### 2.3 Secuencia de emails (revisar contenido — ver §3 más abajo para el texto exacto)
-- [ ] Día 3 — check-in. Revisar tono y que el enlace al perfil sea correcto.
-- [ ] Día 10 — aprovechar el plan. Revisar que mencione el plan correcto (`essential`/`professional`/`elite`).
-- [ ] Día 21 — recordatorio con días restantes + primeras cifras reales (vistas/contactos).
-- [ ] Día 28 — resumen final (vistas/contactos/vehículos) + CTA a elegir plan. Es el más importante de revisar: las cifras deben ser reales, no genéricas.
+> Días reescalados 2026-09-05 (30→90 días de trial, misma proporción del ciclo: 10%/33%/70%/93%).
+- [ ] Día 9 — check-in. Revisar tono y que el enlace al perfil sea correcto.
+- [ ] Día 30 — aprovechar el plan. Revisar que mencione el plan correcto (`essential`/`professional`/`elite`).
+- [ ] Día 63 — recordatorio con días restantes + primeras cifras reales (vistas/contactos).
+- [ ] Día 84 — resumen final (vistas/contactos/vehículos) + CTA a elegir plan. Es el más importante de revisar: las cifras deben ser reales, no genéricas.
 - [ ] Confirmar que, tras enviar la etapa 4, el sistema no vuelve a enviar nada (fin de la secuencia).
 
 ### 2.4 Black Audit / Diagnóstico Anti-Fuga (Elite: incluido de serie, 1/semestre)
@@ -56,7 +57,7 @@ Marcar cada punto según se vaya confirmando con el primer showroom real que pas
 
 Remitente en los 4: `Black Label Market <hola@blacklabelmarket.es>`. SMTP: credencial "Hostinger SMTP BLM".
 
-### Día 3 — check-in
+### Día 9 — check-in
 **Asunto:** `[Nombre showroom], ¿qué tal las primeras impresiones de Black Label Market?`
 ```
 Buenas,
@@ -71,7 +72,7 @@ Un saludo,
 Black Label Market
 ```
 
-### Día 10 — aprovechar el plan
+### Día 30 — aprovechar el plan
 **Asunto:** `Sacadle partido a vuestro plan [plan] en Black Label Market`
 ```
 Buenas,
@@ -86,7 +87,7 @@ Un saludo,
 Black Label Market
 ```
 
-### Día 21 — recordatorio con cifras
+### Día 63 — recordatorio con cifras
 **Asunto:** `Vuestra prueba en Black Label Market termina en [N] días`
 ```
 Buenas,
@@ -101,7 +102,7 @@ Un saludo,
 Black Label Market
 ```
 
-### Día 28 — resumen final + conversión
+### Día 84 — resumen final + conversión
 **Asunto:** `Vuestra prueba en Black Label Market termina en [N] días`
 ```
 Buenas,
@@ -135,10 +136,10 @@ Para forzar una etapa concreta en un dealer de prueba, actualizar su `trial_ends
 
 | Etapa que se quiere probar | `trial_ends_at` a fijar |
 |---|---|
-| Día 3 | `now() + 27 días` |
-| Día 10 | `now() + 20 días` |
-| Día 21 | `now() + 9 días` |
-| Día 28 | `now() + 2 días` |
+| Día 9 | `now() + 81 días` |
+| Día 30 | `now() + 60 días` |
+| Día 63 | `now() + 27 días` |
+| Día 84 | `now() + 6 días` |
 
 Después de cada prueba, resetear `trial_email_stage = 0` si se quiere repetir la secuencia completa desde cero.
 

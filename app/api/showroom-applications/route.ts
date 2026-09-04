@@ -78,6 +78,9 @@ const schema = z.object({
   // y se resuelven en el primer acceso al dashboard (ver app/(auth)/aceptar-condiciones).
   terms_accepted: z.literal(true).optional(),
   terms_version: z.string().trim().max(20).optional(),
+  // Opt-in aparte para comunicaciones comerciales (2026-09-04, hallazgo Codex) — no implícito en
+  // terms_accepted, que solo cubre privacidad + condiciones profesionales.
+  marketing_opt_in: z.boolean().optional(),
 }).strict()
 
 export async function POST(req: NextRequest) {
@@ -119,13 +122,18 @@ export async function POST(req: NextRequest) {
     name, email, company, phone, whatsapp, city, plan, volume, message, logo_url, profile_description, source, website,
     address, years_in_business, instagram_url, facebook_url, youtube_url, tiktok_url, linkedin_url, specialties, services,
     terms_accepted, terms_version, source_prospecto_id,
-    location_region, google_business_url, portales, portal_url,
+    location_region, google_business_url, portales, portal_url, marketing_opt_in,
   } = parsed.data
 
   // El formulario público unificado exige al menos una presencia pública verificable — es la
   // señal que más ayuda a la auditoría de admisión (WF1). Las altas de agencia (visita_agencia)
   // ya llegan con esta investigación hecha aparte, no se les exige aquí.
-  if (source !== 'visita_agencia' && !website && !google_business_url && !instagram_url) {
+  // Corrección 2026-09-04 (hallazgo Codex, simulación E2E alta online): portales (Coches.net,
+  // Autoscout24...) no contaban como presencia pública aunque el propio formulario los pide un
+  // paso antes — dejaba sin vía de entrada a compraventas sin web/GBP/Instagram propios, un
+  // segmento real del ICP.
+  const hasPortalPresence = (portales && portales.length > 0) || !!portal_url
+  if (source !== 'visita_agencia' && !website && !google_business_url && !instagram_url && !hasPortalPresence) {
     return NextResponse.json({ ok: false, error: 'missing_public_presence' }, { status: 400 })
   }
 
@@ -188,6 +196,7 @@ export async function POST(req: NextRequest) {
       services:           services ?? null,
       terms_accepted_version: terms_accepted ? (terms_version ?? null) : null,
       terms_accepted_at:      terms_accepted ? new Date().toISOString() : null,
+      marketing_opt_in:       marketing_opt_in ?? false,
       status:        'new',
     })
     .select('id')
@@ -209,6 +218,7 @@ export async function POST(req: NextRequest) {
     message:       fullMessage || null,
     source:        source ?? 'market_directo',
     source_prospecto_id: source_prospecto_id ?? null,
+    marketing_opt_in: marketing_opt_in ?? false,
     admin_url:     `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom/${data.id}`,
   }).catch(() => {})
 

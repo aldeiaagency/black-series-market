@@ -12,6 +12,7 @@ import {
   sanitizeHttpUrl,
 } from '@/lib/onboarding/setup-room'
 import { normalizeRules, normalizeSettings } from '@/lib/booking'
+import { processOnboardingCsv } from '@/lib/vehicle-intake/onboarding-csv'
 
 const SPECIALTIES = ['sport', 'classic', 'premium', 'motorcycle', 'import', 'suv', 'supercar', 'custom'] as const
 const SERVICES = ['financing', 'trade_in', 'warranty', 'transport_nat', 'transport_intl', 'own_workshop', 'detailing', 'home_delivery'] as const
@@ -195,6 +196,19 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     return NextResponse.json({ error: 'No se pudo guardar el contexto del asistente.' }, { status: 500 })
   }
 
+  // Sustituye al botón manual "Procesar stock inicial con IA" (retirado 2026-09-04) y al webhook
+  // de n8n al que llamaba: si el fundador subió un CSV en la sala, se procesa aquí mismo con el
+  // pipeline de intake (migración 110) — misma revisión de calidad y deduplicación que el resto
+  // de canales. No bloquea el alta: un fallo de lectura o parseo se registra y sigue.
+  let csvIntakeSummary: Awaited<ReturnType<typeof processOnboardingCsv>> = null
+  if (stockMode === 'csv' && setupContext.stock.csv_files.length) {
+    try {
+      csvIntakeSummary = await processOnboardingCsv(admin, setup.dealer.id, setupContext.stock.csv_files)
+    } catch (error) {
+      console.error('processOnboardingCsv failed', { dealerId: setup.dealer.id, error })
+    }
+  }
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
   const email = setup.dealer.profile?.email || setup.dealer.email || setup.application?.email
   if (!appUrl || !email) {
@@ -236,6 +250,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     admin_url: `${appUrl}/admin/dealers/${setup.dealer.id}`,
     public_preview_url: `${appUrl}/dealers/${setup.dealer.slug}`,
     setup_context: setupContext,
+    csv_intake: csvIntakeSummary,
     completed_at: new Date().toISOString(),
   }
 
@@ -266,5 +281,8 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
   revalidatePath('/admin/dealers')
   revalidatePath(`/dealers/${setup.dealer.slug}`)
 
-  return NextResponse.json({ ok: true, webhook_sent: true })
+  // csvIntakeSummary ya se mandaba a n8n dentro del payload del webhook, pero nunca volvía al
+  // propio navegador — si el CSV tenía filas rechazadas, el fundador no se enteraba de ninguna
+  // forma (hallazgo 2026-09-04, simulación E2E showroom-vs-administrador con Codex).
+  return NextResponse.json({ ok: true, webhook_sent: true, csv_intake: csvIntakeSummary })
 }

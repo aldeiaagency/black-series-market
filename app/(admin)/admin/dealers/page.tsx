@@ -14,6 +14,23 @@ const PLAN_BADGE: Record<string, string> = {
   professional: 'text-gold', elite: 'text-emerald-400',
 }
 
+// trial_expired no es un status real de dealers.status (ver .eq('status','trial').lt('trial_ends_at', ...)
+// más abajo) — DEALER_STATUS_LABELS no tiene entrada para él, así que su label de chip va aparte.
+const STATUS_CHIP_LABELS: Record<string, string> = {
+  trial_expired: 'Trial vencido',
+}
+
+// Visibilidad pasiva de trial_ends_at (sin SLA/umbral inventado, sin acción automática — ver contexto
+// de la tarea). d.status === 'trial' && d.trial_ends_at ya se comprueba en el call site.
+function trialExpiryLabel(trialEndsAt: string): { text: string; expired: boolean } {
+  const days = Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)
+  if (days < 0) {
+    const n = Math.abs(days)
+    return { text: `vencido hace ${n} día${n !== 1 ? 's' : ''}`, expired: true }
+  }
+  return { text: `vence en ${days} día${days !== 1 ? 's' : ''}`, expired: false }
+}
+
 export default async function AdminDealersPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = createAdminClient()
@@ -38,7 +55,11 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
     .order('status', { ascending: true })
     .order('created_at', { ascending: false })
 
-  if (params.status) query = query.eq('status', params.status)
+  if (params.status === 'trial_expired') {
+    query = query.eq('status', 'trial').lt('trial_ends_at', new Date().toISOString())
+  } else if (params.status) {
+    query = query.eq('status', params.status)
+  }
   if (params.plan)   query = query.eq('subscription_plan', params.plan)
   if (params.search) query = query.ilike('name', `%${params.search}%`)
 
@@ -96,14 +117,14 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
 
       {/* Status filter */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {['all', 'pending', 'trial', 'active', 'suspended'].map((s) => (
+        {['all', 'pending', 'trial', 'active', 'suspended', 'trial_expired'].map((s) => (
           <Link key={s} href={statusHref(s === 'all' ? '' : s)}
             className={`text-xs px-3 py-1.5 border transition-colors capitalize ${
               (params.status === s || (!params.status && s === 'all'))
                 ? 'border-bsm-border-light text-bsm-text-primary bg-surface-elevated'
                 : 'border-bsm-border text-bsm-text-muted hover:border-bsm-border-light'
             }`}>
-            {s === 'all' ? 'Cualquier estado' : DEALER_STATUS_LABELS[s as keyof typeof DEALER_STATUS_LABELS] || s}
+            {s === 'all' ? 'Cualquier estado' : STATUS_CHIP_LABELS[s] || DEALER_STATUS_LABELS[s as keyof typeof DEALER_STATUS_LABELS] || s}
           </Link>
         ))}
       </div>
@@ -121,6 +142,7 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
           <tbody>
             {(dealers || []).map((d: any) => {
               const plan = d.subscription_plan || 'trial'
+              const trialInfo = d.status === 'trial' && d.trial_ends_at ? trialExpiryLabel(d.trial_ends_at) : null
               return (
                 <tr key={d.id} className="table-row">
                   <td className="px-4 py-3 font-medium text-bsm-text-primary">{d.name}</td>
@@ -136,6 +158,11 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
                     <span className={`badge text-[10px] ${d.status === 'active' ? 'badge-active' : d.status === 'pending' ? 'badge-pending' : 'badge-muted'}`}>
                       {DEALER_STATUS_LABELS[d.status as keyof typeof DEALER_STATUS_LABELS]}
                     </span>
+                    {trialInfo && (
+                      <div className={`text-[10px] mt-1 ${trialInfo.expired ? 'text-amber-400' : 'text-bsm-text-muted'}`}>
+                        {trialInfo.text}
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-bsm-text-muted text-xs">
                     {new Date(d.created_at).toLocaleDateString('es-ES')}
@@ -162,6 +189,7 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
       <div className="lg:hidden space-y-3">
         {(dealers || []).map((d: any) => {
           const plan = d.subscription_plan || 'trial'
+          const trialInfo = d.status === 'trial' && d.trial_ends_at ? trialExpiryLabel(d.trial_ends_at) : null
           return (
             <Link
               key={d.id}
@@ -173,9 +201,16 @@ export default async function AdminDealersPage({ searchParams }: PageProps) {
                   <div className="font-medium text-bsm-text-primary truncate">{d.name}</div>
                   <div className="text-xs text-bsm-text-muted truncate">{d.profile?.email}</div>
                 </div>
-                <span className={`badge text-[10px] shrink-0 ${d.status === 'active' ? 'badge-active' : d.status === 'pending' ? 'badge-pending' : 'badge-muted'}`}>
-                  {DEALER_STATUS_LABELS[d.status as keyof typeof DEALER_STATUS_LABELS]}
-                </span>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className={`badge text-[10px] ${d.status === 'active' ? 'badge-active' : d.status === 'pending' ? 'badge-pending' : 'badge-muted'}`}>
+                    {DEALER_STATUS_LABELS[d.status as keyof typeof DEALER_STATUS_LABELS]}
+                  </span>
+                  {trialInfo && (
+                    <span className={`text-[10px] ${trialInfo.expired ? 'text-amber-400' : 'text-bsm-text-muted'}`}>
+                      {trialInfo.text}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-y-1.5 text-xs text-bsm-text-muted">
                 <div>{d.location_city || '—'}</div>

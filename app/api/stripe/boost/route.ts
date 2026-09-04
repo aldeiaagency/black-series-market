@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 
 const BOOST_PRICE_EUR = 4900 // €49 in cents
@@ -12,10 +12,20 @@ export async function POST(req: NextRequest) {
   const { vehicleId } = await req.json()
   if (!vehicleId) return NextResponse.json({ error: 'Vehículo no especificado.' }, { status: 400 })
 
-  const { data: dealer } = await supabase
+  // Corrección 2026-09-04: la migración 107 (P0.2) revocó la lectura directa de
+  // dealers.profile_id Y de stripe_customer_id para 'authenticated' — este .eq('profile_id', ...)
+  // llevaba desde el 2026-09-02 sin devolver nunca fila, bloqueando la compra de boosts para
+  // cualquier dealer. La RPC confirma de quién es el dealer; el admin client lee el resto de
+  // columnas ya con esa propiedad verificada.
+  const { data: dealerRows } = await supabase.rpc('get_own_dealer_summary')
+  const dealerId = dealerRows?.[0]?.id ?? null
+  if (!dealerId) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
+
+  const admin = createAdminClient()
+  const { data: dealer } = await admin
     .from('dealers')
     .select('id, stripe_customer_id, email')
-    .eq('profile_id', user.id)
+    .eq('id', dealerId)
     .single()
   if (!dealer) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
 

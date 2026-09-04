@@ -36,7 +36,7 @@ export default async function AdminShowroomApplicationsPage({ searchParams }: Pa
 
   let query = admin
     .from('showroom_applications')
-    .select('id, dealer_name, full_name, email, location_city, location_region, status, created_at, website, google_business_url, instagram_url, portales, portal_url')
+    .select('id, dealer_name, full_name, email, location_city, location_region, status, created_at, qualified_at, website, google_business_url, instagram_url, portales, portal_url')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -54,7 +54,10 @@ export default async function AdminShowroomApplicationsPage({ searchParams }: Pa
     counts[item.status] = (counts[item.status] || 0) + 1
   }
   const total = (allForCounts || []).length
-  const pending = (counts['new'] || 0) + (counts['in_review'] || 0) + (counts['approval_failed'] || 0)
+  // qualified_awaiting_call incluido 2026-09-04 (hallazgo Codex): quedaba fuera del contador
+  // principal aunque son solicitudes que siguen requiriendo seguimiento del admin (agendar/cerrar
+  // la llamada de admisión), no un estado "en reposo".
+  const pending = (counts['new'] || 0) + (counts['in_review'] || 0) + (counts['approval_failed'] || 0) + (counts['qualified_awaiting_call'] || 0)
 
   return (
     <div className="p-8 space-y-6">
@@ -152,6 +155,13 @@ export default async function AdminShowroomApplicationsPage({ searchParams }: Pa
 
               {/* Time */}
               <span className="flex-shrink-0 text-xs text-bsm-text-muted">{timeAgo(app.created_at)}</span>
+
+              {/* Esperando llamada: visibilidad pasiva del tiempo en qualified_awaiting_call (docs/PENDIENTES.md) */}
+              {st === 'qualified_awaiting_call' && app.qualified_at && (
+                <span className="flex-shrink-0 text-xs text-bsm-text-muted">
+                  esperando llamada · {timeAgo(app.qualified_at)}
+                </span>
+              )}
 
               <ArrowRight className="w-3.5 h-3.5 text-bsm-text-muted/40 group-hover:text-gold transition-colors flex-shrink-0" />
             </Link>

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 
-// Barrido de expiración de boosts. Vercel Cron lo llama cada hora.
+// Barrido de expiración de boosts. Vercel Cron lo llama una vez al día (03:30 UTC, ver
+// vercel.json) — corregido 2026-09-05, el comentario decía "cada hora" sin serlo nunca
+// realmente (hallazgo del mapeo operativo). Un boost puede seguir destacado hasta ~24h después
+// de vencer; si se necesita expiración más fina, es una decisión de negocio sobre la
+// programación del cron, no un bug de este archivo.
 // Un boost dura BOOST_DURATION_DAYS; al vencer hay que:
 //   1. cerrar la activación (status 'expired') para contabilidad,
 //   2. revertir el destacado del vehículo (is_featured=false, featured_until=null),

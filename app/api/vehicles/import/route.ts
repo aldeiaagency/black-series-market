@@ -2,7 +2,13 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrganizationIdForUser, can } from '@/lib/entitlements'
 import { verifyDealerApiKeyHash } from '@/lib/dealer-api-keys'
-import { safeFetchWithSizeLimit } from '@/lib/ssrf-guard'
+import { intakeVehiclesBulk, type BulkIntakeRow } from '@/lib/vehicle-intake/intake'
+import type { IntakeSource } from '@/lib/vehicle-intake/types'
+import { splitImageUrls } from '@/lib/vehicle-intake/csv-parse'
+import {
+  toVehicleType, toFuel, toTrans, toBool, toInt, toDecimal, generateSlug, importImagesForVehicle,
+} from '@/lib/vehicle-intake/normalize'
+import { randomUUID } from 'crypto'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -23,195 +29,43 @@ interface ImportRow {
   body_type?: string
   description?: string
   vin?: string
-  /** URLs públicas (feed del dealer) — se descargan y alojan en nuestro Storage, nunca se hotlinkean. */
-  image_urls?: string[]
-  /**
-   * Señal de solo-degradación: fuerza pending_review en esta fila aunque la petición use
-   * FEED_SYNC_API_KEY (autoApprove=true). Nunca hace lo contrario (no puede convertir una fila
-   * en auto-aprobada si la petición no lo era). La usa el paso de reescritura IA del sync de feed
-   * cuando no tiene datos suficientes para redactar la ficha con criterio.
-   */
-  needs_review?: boolean
+  /** Id de anuncio propio del feed/DMS del dealer, cuando lo ofrece — clave de deduplicación
+   * preferente tras el VIN (lib/vehicle-intake/dedupe.ts) para que la sync diaria actualice en
+   * vez de duplicar. */
+  external_ref?: string
+  /** URLs públicas (feed del dealer, o celda de CSV separada por "|") — se descargan y alojan en
+   * nuestro Storage, nunca se hotlinkean. Un CSV parseado en el cliente entrega texto plano, no
+   * array; splitImageUrls() (lib/vehicle-intake/csv-parse.ts) normaliza ambas formas. */
+  image_urls?: string[] | string
 }
 
 interface RowError { row: number; message: string }
 
-// ── Value normalisers ──────────────────────────────────────────────────────────
-
-const FUEL_MAP: Record<string, string> = {
-  gasolina: 'gasoline', gasoline: 'gasoline',
-  diesel: 'diesel', diésel: 'diesel', 'dièsel': 'diesel',
-  eléctrico: 'electric', electrico: 'electric', electric: 'electric',
-  híbrido: 'hybrid', hibrido: 'hybrid', hybrid: 'hybrid',
-  'híbrido enchufable': 'plugin_hybrid', 'plugin hybrid': 'plugin_hybrid', plugin_hybrid: 'plugin_hybrid',
-  hidrógeno: 'hydrogen', hidrogeno: 'hydrogen', hydrogen: 'hydrogen',
-  otro: 'other', other: 'other',
-}
-
-const TRANS_MAP: Record<string, string> = {
-  manual: 'manual',
-  automático: 'automatic', automatico: 'automatic', auto: 'automatic', automatic: 'automatic',
-  'semi-automático': 'semi_automatic', semiautomático: 'semi_automatic', semi_automatic: 'semi_automatic',
-  dct: 'dct', cvt: 'cvt',
-}
-
-function toVehicleType(v?: string): 'car' | 'motorcycle' {
-  if (!v) return 'car'
-  const s = v.toLowerCase().trim()
-  return ['moto', 'motorcycle', 'motocicleta', 'moto_clasica'].includes(s) ? 'motorcycle' : 'car'
-}
-
-function toFuel(v?: string): string | null {
-  if (!v) return null
-  return FUEL_MAP[v.toLowerCase().trim()] ?? null
-}
-
-function toTrans(v?: string): string | null {
-  if (!v) return null
-  return TRANS_MAP[v.toLowerCase().trim()] ?? null
-}
-
-function toBool(v?: string | boolean): boolean {
-  if (typeof v === 'boolean') return v
-  if (!v) return false
-  return ['si', 'sí', 'yes', 'true', '1'].includes(String(v).toLowerCase().trim())
-}
-
-function toInt(v?: string | number): number | null {
-  if (v === '' || v === null || v === undefined) return null
-  const n = parseInt(String(v).replace(/[^\d]/g, ''), 10)
-  return isNaN(n) ? null : n
-}
-
-function toDecimal(v?: string | number): number | null {
-  if (v === '' || v === null || v === undefined) return null
-  const n = parseFloat(String(v).replace(/[^\d.,]/g, '').replace(',', '.'))
-  return isNaN(n) ? null : n
-}
-
-function generateSlug(brand: string, model: string, year: number): string {
-  const base = `${brand} ${model} ${year}`
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-  return `${base}-${Math.random().toString(36).slice(2, 7)}`
-}
-
-// ── Image handling (feed → nuestro Storage, nunca hotlink) ─────────────────────
-
-const IMAGE_BUCKET = 'vehicle-images'
-const MAX_IMAGES_PER_VEHICLE = 12
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024 // 10 MB, mismo límite que /api/upload
-
-function detectImageExt(bytes: Uint8Array): 'jpg' | 'png' | 'webp' | null {
-  // SEC-7: mismos magic bytes que /api/upload — nunca fiarse del Content-Type que declare la URL externa.
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'jpg'
-  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'png'
-  if (
-    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
-    bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50
-  ) return 'webp'
-  return null
-}
-
-async function importImagesForVehicle(
-  admin: ReturnType<typeof createAdminClient>,
-  dealerId: string,
-  vehicleId: string,
-  urls: string[],
-): Promise<{ url: string; order: number }[]> {
-  const results: { url: string; order: number }[] = []
-  const capped = urls.slice(0, MAX_IMAGES_PER_VEHICLE)
-
-  for (let i = 0; i < capped.length; i++) {
-    try {
-      // SSRF (auditoría 2026-09-02, P0.3): valida HTTPS + IP pública (no loopback/RFC1918/
-      // link-local/metadata) antes de conectar, revalida cada redirect manualmente, y aplica
-      // el límite de tamaño en streaming en vez de cargar el body completo antes de comprobarlo.
-      const buf = await safeFetchWithSizeLimit(capped[i], MAX_IMAGE_BYTES, 15000)
-      if (!buf || buf.byteLength === 0) continue
-      const ext = detectImageExt(buf.slice(0, 12))
-      if (!ext) continue // no es una imagen válida (JPG/PNG/WebP) pese a lo que diga la URL
-
-      const path = `${dealerId}/${vehicleId}/${i}-${Date.now()}.${ext}`
-      const contentType = ext === 'jpg' ? 'image/jpeg' : ext === 'png' ? 'image/png' : 'image/webp'
-      const { error: uploadError } = await admin.storage.from(IMAGE_BUCKET).upload(path, buf, {
-        contentType,
-        upsert: true,
-      })
-      if (uploadError) continue
-
-      const { data: { publicUrl } } = admin.storage.from(IMAGE_BUCKET).getPublicUrl(path)
-      results.push({ url: publicUrl, order: i })
-    } catch {
-      // Imagen individual fallida (timeout, URL caída, etc.) — no bloquea el resto del vehículo.
-      continue
-    }
-  }
-
-  return results
-}
-
-// ── Mejora de descripciones por IA (solo import manual/CSV — el path de feed-sync ya tiene su
-// propio paso de reescritura IA antes de llegar aquí, no se duplica el coste). Nunca bloquea el
-// import: si el webhook falla o tarda, las filas siguen con la descripción que traían (o vacía).
-const AI_ENHANCE_WEBHOOK = 'https://aldeia-n8n.giuxk6.easypanel.host/webhook/bsa/mejorar-vehiculos-csv'
-const AI_ENHANCE_TIMEOUT_MS = 20000
-const AI_ENHANCE_MIN_DESCRIPTION_LENGTH = 40
-
-async function enhanceDescriptionsWithAI(rows: ImportRow[]): Promise<ImportRow[]> {
-  const candidates = rows
-    .map((r, index) => ({ r, index }))
-    .filter(({ r }) => r.brand_name && r.model_name && (!r.description || r.description.toString().trim().length < AI_ENHANCE_MIN_DESCRIPTION_LENGTH))
-
-  if (!candidates.length) return rows
-
-  try {
-    const res = await fetch(AI_ENHANCE_WEBHOOK, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rows: candidates.map(({ r, index }) => ({ index, ...r })) }),
-      signal: AbortSignal.timeout(AI_ENHANCE_TIMEOUT_MS),
-    })
-    if (!res.ok) return rows
-    const data = await res.json().catch(() => null) as { descriptions?: { index: number; description: string }[] } | null
-    if (!data?.descriptions?.length) return rows
-
-    const next = [...rows]
-    for (const { index, description } of data.descriptions) {
-      if (next[index] && description) next[index] = { ...next[index], description }
-    }
-    return next
-  } catch {
-    return rows
-  }
-}
-
 // ── Core import logic (shared between API key and session auth) ────────────────
+//
+// Corrección 2026-09-04 (pipeline de intake, migración 110): antes, este import insertaba a
+// ciegas fila a fila (sin dedupe: repetir un CSV o correr la sync diaria dos veces duplicaba el
+// catálogo entero) y mejoraba descripciones vía un webhook de n8n sin reglas de marca ni de
+// veracidad. Ambas cosas se sustituyen por intakeVehiclesBulk() (lib/vehicle-intake/intake.ts):
+// revisa cada fila contra la guía de marca (con reglas duras anti-invención), deduplica por
+// VIN → external_ref → aproximación, e inserta o actualiza en un único paso, dejando trazabilidad
+// en vehicle_import_batches. Esta función solo se ocupa ahora de lo específico del formato CSV/
+// feed: validar campos obligatorios, normalizar valores y descargar/alojar imágenes.
 
 async function runImport(
   rows: ImportRow[],
   dealerId: string,
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  autoApprove: boolean,
-): Promise<{ inserted: number; errors: RowError[]; draftNoPhotos: number }> {
-  const errors: RowError[] = []
-  let inserted = 0
-  let draftNoPhotos = 0
+  source: Extract<IntakeSource, 'csv_dashboard' | 'feed_sync'>,
+): Promise<{ inserted: number; updated: number; errors: RowError[]; draftNoPhotos: number; pendingReview: number }> {
   const admin = createAdminClient()
-
-  // El path de feed-sync (autoApprove) ya reescribe descripciones con IA antes de llamar a este
-  // endpoint — no se repite aquí. Solo se aplica al import manual (dashboard CSV o IMPORT_API_KEY).
-  if (!autoApprove) {
-    rows = await enhanceDescriptionsWithAI(rows)
-  }
+  const errors: RowError[] = []
+  const bulkRows: BulkIntakeRow[] = []
+  const rowNumberByBulkIndex: number[] = []
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
     const rowNum = i + 1
 
-    // Validate required fields
     if (!r.brand_name?.toString().trim()) {
       errors.push({ row: rowNum, message: 'Campo "marca" obligatorio' }); continue
     }
@@ -227,59 +81,59 @@ async function runImport(
       errors.push({ row: rowNum, message: `Kilometraje inválido: ${r.mileage_km}` }); continue
     }
 
-    const slug = generateSlug(r.brand_name.trim(), r.model_name.trim(), year)
+    const brand = r.brand_name.trim()
+    const model = r.model_name.trim()
 
-    // Cliente admin: dealerId ya se validó (ownership por sesión, o slug por API key de confianza)
-    // antes de llegar aquí — el insert en sí no depende de RLS de usuario final.
-    const { data: inserted_row, error } = await admin.from('vehicles').insert({
-      dealer_id:       dealerId,
-      slug,
-      vehicle_type:    toVehicleType(r.vehicle_type?.toString()),
-      brand_name:      r.brand_name.trim(),
-      model_name:      r.model_name.trim(),
-      version:         r.version?.toString().trim() || null,
-      year,
-      mileage_km:      mileage,
-      price:           toDecimal(r.price),
-      price_on_request: toBool(r.price_on_request),
-      fuel_type:       toFuel(r.fuel_type?.toString()),
-      transmission:    toTrans(r.transmission?.toString()),
-      power_hp:        toInt(r.power_hp),
-      color_exterior:  r.color_exterior?.toString().trim() || null,
-      color_interior:  r.color_interior?.toString().trim() || null,
-      body_type:       r.body_type?.toString().trim() || null,
-      description:     r.description?.toString().trim() || null,
-      vin:             r.vin?.toString().trim() || null,
-      // Decisión 2026-07-17: se retira la moderación previa a publicación para cualquier vía de
-      // import (manual, IMPORT_API_KEY o FEED_SYNC_API_KEY) — el catálogo cerrado de marcas/modelos
-      // y, en el futuro, un agente de auditoría post-publicación asumen ese control. needs_review
-      // sigue siendo la única señal automática (no humana) que degrada una fila a pending_review:
-      // la usa el paso de reescritura IA cuando no tiene confianza suficiente en los datos de esa
-      // fila concreta (feed-sync hoy; el import manual podría marcarla en el futuro).
-      status:          r.needs_review ? 'pending_review' : 'active',
-    }).select('id').single()
-
-    if (error || !inserted_row) {
-      errors.push({ row: rowNum, message: error?.message || 'Error al insertar' })
-      continue
-    }
-    inserted++
-
-    const images = r.image_urls?.length
-      ? await importImagesForVehicle(admin, dealerId, inserted_row.id, r.image_urls)
+    // Namespace de Storage para las fotos de esta fila. No tiene por qué coincidir con el id
+    // final en `vehicles` (intakeVehiclesBulk puede resolver esta fila como UPDATE de un
+    // vehículo ya existente vía dedupe) — solo necesita ser único y estable para esta fila.
+    const storageNamespace = randomUUID()
+    const imageUrls = splitImageUrls(r.image_urls)
+    const images = imageUrls.length
+      ? await importImagesForVehicle(admin, dealerId, storageNamespace, imageUrls)
       : []
 
-    if (images.length) {
-      await admin.from('vehicles').update({ images }).eq('id', inserted_row.id)
-    } else {
-      // Nunca se publica un vehículo sin al menos una foto real: se deja en borrador para que
-      // el showroom las complete desde el dashboard, en vez de auto-aprobarlo vacío.
-      await admin.from('vehicles').update({ status: 'draft' }).eq('id', inserted_row.id)
-      draftNoPhotos++
-    }
+    rowNumberByBulkIndex.push(rowNum)
+    bulkRows.push({
+      slug: generateSlug(brand, model, year),
+      vehicle_type: toVehicleType(r.vehicle_type?.toString()),
+      brand_name: brand,
+      model_name: model,
+      version: r.version?.toString().trim() || null,
+      year,
+      mileage_km: mileage,
+      price: toDecimal(r.price),
+      price_on_request: toBool(r.price_on_request),
+      fuel_type: toFuel(r.fuel_type?.toString()),
+      transmission: toTrans(r.transmission?.toString()),
+      power_hp: toInt(r.power_hp),
+      color_exterior: r.color_exterior?.toString().trim() || null,
+      color_interior: r.color_interior?.toString().trim() || null,
+      body_type: r.body_type?.toString().trim() || null,
+      description: r.description?.toString().trim() || null,
+      vin: r.vin?.toString().trim() || null,
+      external_ref: r.external_ref?.toString().trim() || null,
+      images,
+    })
   }
 
-  return { inserted, errors, draftNoPhotos }
+  const result = await intakeVehiclesBulk(admin, dealerId, source, bulkRows)
+
+  // Los índices de fila de intakeVehiclesBulk corren sobre bulkRows, no sobre `rows` original
+  // (algunas filas se descartaron antes por formato) — se traducen de vuelta para que el error
+  // siga señalando la fila real del CSV/feed subido.
+  for (const f of result.failed) {
+    const originalRow = rowNumberByBulkIndex[f.row - 1]
+    errors.push({ row: originalRow ?? f.row, message: f.reason })
+  }
+
+  return {
+    inserted: result.inserted,
+    updated: result.updated,
+    errors,
+    draftNoPhotos: result.draftCount,
+    pendingReview: result.pendingCount,
+  }
 }
 
 // ── Route handler ─────────────────────────────────────────────────────────────
@@ -317,7 +171,9 @@ export async function POST(req: NextRequest) {
 
   const supabase = await createClient()
   let dealerId: string | null = null
-  let autoApprove = false
+  // Único dato que decide `source` es CON QUÉ CLAVE autenticó la petición, nunca algo leído del
+  // body — es lo que queda escrito en vehicle_import_batches.source e intake_source por fila.
+  let source: Extract<IntakeSource, 'csv_dashboard' | 'feed_sync'> = 'csv_dashboard'
 
   // Auth method 1 - API key (for n8n / external automation)
   const authHeader = req.headers.get('authorization') ?? ''
@@ -327,11 +183,11 @@ export async function POST(req: NextRequest) {
     const feedSyncKey = process.env.FEED_SYNC_API_KEY
 
     // Dos niveles de confianza con la MISMA forma de auth, para no reabrir SEC-3:
-    // - IMPORT_API_KEY: uso general (white-glove manual) -> siempre pending_review.
-    // - FEED_SYNC_API_KEY: exclusivo del workflow de sincronizacion de feed -> unico caso con auto-aprobacion.
-    //   autoApprove nunca se lee del body; solo se activa si el token coincide con esta clave concreta.
+    // - IMPORT_API_KEY / dealer_api_keys: uso general (white-glove manual o integración propia
+    //   del dealer) -> mismo trato que un CSV subido a mano (source='csv_dashboard').
+    // - FEED_SYNC_API_KEY: exclusivo del workflow de sincronización de feed diario.
     if (feedSyncKey && token === feedSyncKey) {
-      autoApprove = true
+      source = 'feed_sync'
 
       // Caller must provide dealer_slug to identify the target dealer
       const slug = body.dealer_slug as string | undefined
@@ -374,10 +230,14 @@ export async function POST(req: NextRequest) {
       }
     }
   } else {
-    // Auth method 2 — Supabase session (dashboard upload). Siempre pending_review: input directo del dealer.
+    // Auth method 2 — Supabase session (dashboard upload). source se queda en su default 'csv_dashboard'.
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Sesión no válida. Inicia sesión de nuevo.' }, { status: 401 })
-    const { data: dealer } = await supabase.from('dealers').select('id').eq('profile_id', user.id).single()
+    // Corrección 2026-09-04: la migración 107 (P0.2) revocó la lectura directa de
+    // dealers.profile_id para 'authenticated' — este .eq('profile_id', ...) llevaba desde el
+    // 2026-09-02 sin devolver nunca fila, bloqueando la importación CSV del dashboard.
+    const { data: dealerRows } = await supabase.rpc('get_own_dealer_summary')
+    const dealer = dealerRows?.[0] ?? null
     if (!dealer) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
 
     // Plan gating: la importación por CSV es de Professional en adelante.
@@ -394,6 +254,6 @@ export async function POST(req: NextRequest) {
   }
 
   if (!dealerId) return NextResponse.json({ error: 'No se pudo identificar el showroom.' }, { status: 403 })
-  const result = await runImport(body.rows as ImportRow[], dealerId, supabase, autoApprove)
+  const result = await runImport(body.rows as ImportRow[], dealerId, source)
   return NextResponse.json(result, { status: 200 })
 }

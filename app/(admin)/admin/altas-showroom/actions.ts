@@ -110,7 +110,7 @@ async function verifyApprovalPieces(
   return missing
 }
 
-async function postJsonWithTimeout(url: string, body: unknown, secret: string) {
+async function postJsonWithTimeout(url: string, body: { event: string } & Record<string, unknown>, secret?: string) {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), 12_000)
   // Auditoría de seguridad 2026-09-02 (P0.6): firma HMAC igual que el resto de webhooks salientes
@@ -118,17 +118,31 @@ async function postJsonWithTimeout(url: string, body: unknown, secret: string) {
   // route.ts sin firmar y sin exigir el secreto; se había corregido uno de los dos emisores, no
   // este. Mismo esquema: timestamp + sha256=hmac(secret, body).
   const webhookBody = JSON.stringify(body)
-  const webhookTimestamp = new Date().toISOString()
-  const webhookSignature = createHmac('sha256', secret).update(webhookBody).digest('hex')
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    // Corrección 2026-09-04: quedó fijo en 'setup_completed' desde el principio, aunque el
+    // único emisor que usa esta función siempre manda event='setup_required' — n8n lee el
+    // body, no la cabecera, así que no rompía nada hoy, pero era una cabecera que mentía
+    // sobre el propio evento que llevaba dentro (hallazgo de Codex, simulación E2E).
+    'x-blacklabel-event': body.event,
+  }
+  // secret es opcional (2026-09-04, simulación E2E alta online): el lado n8n que recibe estos
+  // webhooks NO verifica realmente la firma HMAC todavía — el sandbox de los nodos Code de n8n
+  // bloquea require("crypto"), ver nota en el nodo "Validar firma y payload" de WF1. Firmar aquí
+  // cuando hay secreto configurado no hace daño y deja el emisor listo para cuando se implemente
+  // la verificación real (nodo nativo n8n-nodes-base.crypto, pendiente — ver docs/PENDIENTES.md);
+  // no lo exigimos (fail-closed) para no bloquear un pipeline en producción por una firma que hoy
+  // nadie comprueba al otro lado.
+  if (secret) {
+    const webhookTimestamp = new Date().toISOString()
+    const webhookSignature = createHmac('sha256', secret).update(webhookBody).digest('hex')
+    headers['x-blacklabel-timestamp'] = webhookTimestamp
+    headers['x-blacklabel-signature'] = `sha256=${webhookSignature}`
+  }
   try {
     return await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-blacklabel-event': 'setup_completed',
-        'x-blacklabel-timestamp': webhookTimestamp,
-        'x-blacklabel-signature': `sha256=${webhookSignature}`,
-      },
+      headers,
       body: webhookBody,
       signal: ctrl.signal,
     })
@@ -228,26 +242,37 @@ export async function markQualifiedAwaitingCall(formData: FormData) {
   const admin = createAdminClient()
   const { data: application } = await admin
     .from('showroom_applications')
-    .select('dealer_name, full_name, email, phone, source')
+    .select('dealer_name, full_name, email, phone, source, status, admin_notes')
     .eq('id', id)
     .single()
 
   if (!application || application.source === 'visita_agencia') return
-
-  await admin
-    .from('showroom_applications')
-    .update({ status: 'qualified_awaiting_call', updated_at: new Date().toISOString() })
-    .eq('id', id)
+  // Gate añadido 2026-09-04 (hallazgo Codex, simulación E2E alta online): antes el botón "Cumple
+  // criterios" era clicable en cualquier estado no cualificado, incluido 'new' — un admin podía
+  // invitar a la llamada antes de que el informe automático de WF1 (Firecrawl+Claude) llegara
+  // siquiera a admin_notes. La vista por defecto de /admin/altas-showroom enseña 'new'
+  // directamente (no solo tras la notificación por Slack/email del informe), así que el riesgo
+  // era real, no solo teórico.
+  if (application.status !== 'in_review') return
 
   // Enlace de auto-agenda: placeholder hasta conectar el Google Calendar del market. El env var
   // vacío no bloquea marcar la solicitud como cualificada — solo el envío del email queda pendiente.
   const bookingUrl = process.env.SHOWROOM_ADMISSION_CALL_BOOKING_URL
   const webhookUrl = process.env.N8N_WEBHOOK_DEALER_QUALIFIED
-  if (webhookUrl) {
-    fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  const webhookSecret = process.env.N8N_WEBHOOK_DEALER_QUALIFIED_SECRET
+
+  // Corrección 2026-09-04 (hallazgo Codex): antes era fetch().catch(()=>{}) sin esperar la
+  // respuesta ni registrar el fallo — el admin veía "cumple criterios" como si la invitación
+  // hubiera salido aunque n8n o el SMTP fallaran en silencio. Ahora se espera la respuesta y, si
+  // falla, queda constancia en admin_notes (mismo campo que ya lee el admin, sin migración
+  // nueva) para que se contacte al showroom manualmente.
+  let notifyError: string | null = null
+  if (!webhookUrl) {
+    notifyError = 'N8N_WEBHOOK_DEALER_QUALIFIED no está configurado en Vercel.'
+  } else {
+    try {
+      const res = await postJsonWithTimeout(webhookUrl, {
+        event: 'dealer_qualified',
         application_id: id,
         dealer_name: application.dealer_name,
         full_name: application.full_name,
@@ -255,9 +280,25 @@ export async function markQualifiedAwaitingCall(formData: FormData) {
         phone: application.phone,
         booking_url: bookingUrl ?? null,
         admin_url: `${process.env.NEXT_PUBLIC_APP_URL}/admin/altas-showroom/${id}`,
-      }),
-    }).catch(() => {})
+      }, webhookSecret)
+      if (!res.ok) notifyError = `n8n respondió ${res.status}`
+    } catch (err) {
+      notifyError = err instanceof Error ? err.message : 'fetch falló'
+    }
   }
+
+  const now = new Date().toISOString()
+  await admin
+    .from('showroom_applications')
+    .update({
+      status: 'qualified_awaiting_call',
+      admin_notes: notifyError
+        ? `${(application.admin_notes ?? '').trim()}\n\n---\n[Aviso automático ${now}]\nNo se pudo notificar la invitación a llamada: ${notifyError}\nContactar al showroom manualmente.`.trim()
+        : application.admin_notes,
+      qualified_at: now,
+      updated_at: now,
+    })
+    .eq('id', id)
 
   revalidateAll(id)
 }
@@ -297,6 +338,23 @@ export async function approveApplication(formData: FormData) {
     ? ['new', 'in_review', 'pending_info', 'approval_failed']
     : ['qualified_awaiting_call', 'approval_failed']
   if (!requiredStatuses.includes(application.status)) return
+
+  // Corrección 2026-09-04 (simulación E2E alta online, hallazgo antes de la propia simulación de
+  // Codex): resolveTrialPlan() ya sabía leer agreed_plan con prioridad sobre plan_interest, pero
+  // no existía ningún formulario en todo el admin que lo escribiera — cada market_directo
+  // aprobado caía siempre a 'essential' por defecto, sin importar qué modalidad se hubiera
+  // acordado realmente en la llamada de admisión. El selector nuevo en la página de detalle manda
+  // este campo; se persiste aquí antes de resolver el plan.
+  if (application.source !== 'visita_agencia') {
+    const agreedPlanInput = String(formData.get('agreed_plan') ?? '').trim().toLowerCase()
+    // Corrección 2026-09-05 (hallazgo Codex): el <select required> del cliente no es un contrato
+    // real — si agreed_plan llega ausente o inválido, antes se aprobaba igual y resolveTrialPlan()
+    // caía en silencio a plan_interest/mensaje/essential, sin reflejar lo acordado en la llamada.
+    // Ahora se exige en servidor, igual que ya se exige requiredStatuses arriba.
+    if (!(TRIAL_PLANS as readonly string[]).includes(agreedPlanInput)) return
+    application.agreed_plan = agreedPlanInput
+    await admin.from('showroom_applications').update({ agreed_plan: agreedPlanInput }).eq('id', id)
+  }
 
   // El programa fundador concede Elite por contrato; no debe degradarse a
   // Essential si el watcher de visitas omite el plan_interest opcional.
@@ -390,6 +448,14 @@ export async function approveApplication(formData: FormData) {
 
   if (existingDealer) {
     dealerId = existingDealer.id
+    // Corrección 2026-09-05 (hallazgo Codex): esta rama reutiliza el dealer creado en un intento
+    // previo (reintento tras approval_failed, típicamente) pero nunca sincronizaba plan/destacado
+    // con el trialPlan resuelto en ESTE intento — si el admin corrigió agreed_plan al reintentar,
+    // el dealer se quedaba con el plan equivocado de la primera vez en silencio.
+    await admin.from('dealers').update({
+      subscription_plan: trialPlan,
+      is_featured: trialPlan === 'elite',
+    }).eq('id', dealerId)
   } else {
     const slug = `${slugify(application.dealer_name)}-${Math.random().toString(36).slice(2, 8)}`
     const { data: dealer, error: dealerError } = await admin
@@ -428,12 +494,18 @@ export async function approveApplication(formData: FormData) {
         // Aprobar la cuenta no equivale a verificar reputacion ni a publicar el perfil.
         is_verified: false,
         profile_status: 'draft',
+        // 2026-09-04: materializa is_featured en la aprobación (cierra gap "Destacado" de docs/PENDIENTES.md) — sin condición de status.
+        is_featured: trialPlan === 'elite',
         is_founder: application.source === 'visita_agencia',
-        // Fundador no es un trial de 30 dias: depende de un gate global de
+        // Fundador no es un trial con fecha fija: depende de un gate global de
         // monetizacion con preaviso, nunca de una fecha individual.
+        // 2026-09-05: trial de market_directo ampliado de 30 a 90 dias (3 meses) — promocion de
+        // lanzamiento, decision de H. Ver tambien "Calcular etapa" en el workflow n8n "BLM - 8.
+        // Trial drip y conversion" (n8n-workflows/wf8-trial-drip.json), que recalcula dias
+        // transcurridos asumiendo esta misma duracion — cambiar ambos siempre juntos.
         trial_ends_at: application.source === 'visita_agencia'
           ? null
-          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       })
       .select('id')
       .single()

@@ -19,6 +19,15 @@
 // Decisión 2026-07-17: se retira la moderación manual previa a publicación (el catálogo cerrado
 // de marcas/modelos y, en el futuro, un agente de auditoría post-publicación asumen ese control).
 // El cliente puede dejar el vehículo en 'draft' o publicarlo directamente ('active').
+//
+// Corrección 2026-09-04 (pipeline de intake, migración 110): este saneo forzaba CUALQUIER status
+// no-draft a 'active', incluido 'pending_review' — el valor que el propio servidor calcula
+// (lib/vehicle-intake/intake.ts, resolveStatus()) cuando la revisión de IA encuentra un bloqueo
+// real. Sin este fix, ese bloqueo quedaba pisado aquí mismo y el vehículo se publicaba igual.
+// pending_review nunca lo puede fijar el dealer por su cuenta con intención maliciosa: es un
+// estado MÁS restrictivo que 'active', no un salto de privilegio, así que dejarlo pasar es seguro.
+
+import { publicBrandName } from '@/lib/brand-types'
 
 // Únicos campos que el dealer puede fijar. Todo lo que no esté aquí se descarta, aunque venga en
 // el payload. Sincronizar con el `form` de `dashboard/publicar/page.tsx` si se añade un campo ahí.
@@ -48,6 +57,9 @@ export function sanitizeVehiclePayload<T extends Record<string, unknown>>(payloa
   for (const f of ALLOWED_VEHICLE_FIELDS) {
     if (Object.prototype.hasOwnProperty.call(payload, f)) clean[f] = payload[f]
   }
-  if (clean.status !== 'draft') clean.status = 'active'
+  if (clean.status !== 'draft' && clean.status !== 'pending_review') clean.status = 'active'
+  // 'BMW Motorrad' es la marca correcta al elegirla en el desplegable (catálogo de motos), pero
+  // la ficha publicada debe mostrar 'BMW' — ver lib/brand-types.ts.
+  if (typeof clean.brand_name === 'string') clean.brand_name = publicBrandName(clean.brand_name)
   return clean as T
 }

@@ -11,8 +11,12 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Sesión no válida. Inicia sesión de nuevo.' }, { status: 401 })
 
-  const { data: dealer } = await supabase
-    .from('dealers').select('id').eq('profile_id', user.id).single()
+  // Corrección 2026-09-04: la migración 107 (P0.2) revocó la lectura directa de
+  // dealers.profile_id para 'authenticated' — este .eq('profile_id', ...) llevaba desde el
+  // 2026-09-02 sin devolver nunca fila, bloqueando la subida de fotos a cualquier dealer que
+  // pasara por esta ruta. Hallado en el simulacro E2E Karboceramic.
+  const { data: dealerRows } = await supabase.rpc('get_own_dealer_summary')
+  const dealer = dealerRows?.[0] ?? null
   if (!dealer) return NextResponse.json({ error: 'No tienes un perfil de showroom activo.' }, { status: 403 })
 
   const formData = await req.formData()

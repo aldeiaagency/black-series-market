@@ -24,3 +24,17 @@ export const MOTO_BRAND_SLUGS = new Set([
 export function brandSlugsForType(vehicleType: 'car' | 'motorcycle'): Set<string> {
   return vehicleType === 'motorcycle' ? MOTO_BRAND_SLUGS : CAR_BRAND_SLUGS
 }
+
+// El catálogo distingue 'BMW Motorrad' de 'BMW' (modelos de moto y coche viven en catálogos
+// separados, slugs 'bmw-motorrad' vs 'bmw') — útil al elegir marca, pero la ficha publicada de
+// una moto BMW nunca debe mostrar "BMW Motorrad": es la misma marca de cara al comprador
+// (hallazgo 2026-09-04, simulacro E2E Karboceramic). Se aplica en el momento de guardar la
+// ficha (lib/vehicle-write.ts, lib/vehicle-intake/intake.ts), no en el propio desplegable — ahí
+// "BMW Motorrad" sigue siendo la etiqueta correcta para no confundir con el catálogo de coches.
+const PUBLIC_BRAND_NAME_OVERRIDES: Record<string, string> = {
+  'BMW Motorrad': 'BMW',
+}
+
+export function publicBrandName(name: string): string {
+  return PUBLIC_BRAND_NAME_OVERRIDES[name] ?? name
+}

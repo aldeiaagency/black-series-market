@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -9,7 +9,7 @@ import {
   EQUIPMENT_CATEGORIES, VEHICLE_CONDITION_LABELS,
   slugify, vehicleSlug,
 } from '@/lib/utils'
-import { CheckCircle, ChevronRight } from 'lucide-react'
+import { AlertTriangle, CheckCircle, ChevronRight } from 'lucide-react'
 import ImageUploader from '@/components/dashboard/ImageUploader'
 import { CAR_CATEGORIES_PUBLIC } from '@/lib/vehicle-categories'
 import { brandSlugsForType } from '@/lib/brand-types'
@@ -50,6 +50,7 @@ export default function PublicarPage() {
   const [customModelMode, setCustomModelMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [resolvedPendingReview, setResolvedPendingReview] = useState(false)
   const [error, setError] = useState('')
   const [showCatInfo, setShowCatInfo] = useState(false)
   const [showBodyTypeInfo, setShowBodyTypeInfo] = useState(false)
@@ -224,8 +225,10 @@ export default function PublicarPage() {
 
   async function handleSave(publish = false) {
     setError('')
+    setResolvedPendingReview(false)
     setLoading(true)
 
+    const wasPendingReview = form.status === 'pending_review'
     const slug = vehicleSlug(form.brand_name, form.model_name, form.year, editId || crypto.randomUUID())
 
     const payload = {
@@ -278,7 +281,14 @@ export default function PublicarPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      if (!res.ok) err = (await res.json().catch(() => ({}))).error || 'Error al guardar.'
+      const patchJson = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        err = patchJson.error || 'Error al guardar.'
+      } else if (wasPendingReview && patchJson.status && patchJson.status !== 'pending_review') {
+        // El aviso de la IA (ficha bloqueada) que tenía este vehículo se ha resuelto con este
+        // guardado — se refleja en el mensaje de confirmación de más abajo.
+        setResolvedPendingReview(true)
+      }
     } else {
       const res = await fetch('/api/vehicles', {
         method: 'POST',
@@ -312,6 +322,14 @@ export default function PublicarPage() {
   const bodyTypes = form.vehicle_type === 'car' ? BODY_TYPES_CAR : BODY_TYPES_MOTO
   const activeSlugs = brandSlugsForType(form.vehicle_type === 'motorcycle' ? 'motorcycle' : 'car')
   const brandOptions = allBrands.filter((b) => activeSlugs.has(b.slug))
+
+  // Motivo de bloqueo de la revisión de IA (lib/vehicle-intake/), si lo hay — mismo campo
+  // (ai_review_json.issues[]) que ya usa la sala de configuración para lo mismo. Solo tiene
+  // sentido mostrarlo mientras el vehículo siga en pending_review.
+  const blockingIssue = useMemo(() => {
+    const issues = form.ai_review_json?.issues
+    return Array.isArray(issues) ? (issues.find((i: { blocking?: boolean; message?: string }) => i?.blocking)?.message ?? null) : null
+  }, [form.ai_review_json])
 
   return (
     <div className="p-8 max-w-3xl">
@@ -739,6 +757,31 @@ export default function PublicarPage() {
 
             <div>
               <label className="label-base">Descripción del vehículo</label>
+              {form.status === 'pending_review' && (blockingIssue || form.ai_suggested_description) && (
+                <div className="mb-3 border border-gold/20 bg-gold/5 p-3">
+                  {blockingIssue && (
+                    <p className="flex items-start gap-2 text-xs text-gold">
+                      <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      {blockingIssue}
+                    </p>
+                  )}
+                  {form.ai_suggested_description && (
+                    <div className={`flex items-start justify-between gap-3 ${blockingIssue ? 'mt-2' : ''}`}>
+                      <p className="text-xs leading-5 text-bsm-text-muted">
+                        <span className="text-bsm-text-secondary">Sugerencia de descripción: </span>
+                        {form.ai_suggested_description}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => update('description', form.ai_suggested_description)}
+                        className="shrink-0 whitespace-nowrap text-xs text-gold hover:text-gold-light"
+                      >
+                        Usar esta sugerencia
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               <textarea
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
@@ -902,7 +945,9 @@ export default function PublicarPage() {
             {saved && (
               <div className="flex items-center gap-2 text-emerald-400 text-sm">
                 <CheckCircle className="w-4 h-4" />
-                Vehículo guardado. Redirigiendo al inventario...
+                {resolvedPendingReview
+                  ? 'Aviso resuelto: el vehículo ya está publicado. Redirigiendo al inventario...'
+                  : 'Vehículo guardado. Redirigiendo al inventario...'}
               </div>
             )}
 

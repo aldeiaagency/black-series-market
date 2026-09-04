@@ -48,7 +48,7 @@ Migración `074_calendar_google_oauth_tokens.sql` añadió a `showroom_calendar_
 servían: `provider='google_calendar'`, `status` (pending→connected→error/disconnected),
 `external_account_email`, `calendar_ref` (calendar id), `last_synced_at`.
 
-### 3. Flujo de conexión (dashboard) — hecho
+### 3. Flujo de conexión (dashboard y sala de configuración) — hecho
 - En **Dashboard → Citas**, junto a la disponibilidad manual (que sigue siendo la
   plantilla de horario base), sección "Google Calendar" con botón **"Conectar"** →
   `GET /api/calendar/google/connect` (redirige a Google con `state` firmado HMAC =
@@ -59,6 +59,18 @@ servían: `provider='google_calendar'`, `status` (pending→connected→error/di
   Google devuelve `invalid_grant` → `status='error'` + `error_message`, la UI lo
   muestra con opción de reconectar. Botón "Desconectar" revoca en Google (best-effort)
   y limpia los tokens.
+- **2026-09-04 (simulacro E2E Karboceramic):** `GET /api/calendar/google/connect` ya
+  aceptaba `?setup_token=` para venir desde la sala pública tokenizada sin sesión (el
+  callback tampoco depende de sesión, el `state` lleva `dealerId` + `returnTo`) — todo
+  el backend estaba listo, pero **la sala de configuración (`/configurar/[token]`) no
+  tenía ningún botón que lo usara**, así que un fundador solo podía conectarlo desde
+  Dashboard → Citas, al que no tiene acceso hasta enviar la propia sala. Añadida la
+  misma sección "Google Calendar" dentro de "Horario de citas" en
+  `SetupRoomClient.tsx`, con el mismo gate de plan (Elite/Grupo) que el resto de esa
+  sección. Como conectar navega fuera de la SPA (ida y vuelta real a Google), se
+  guarda un borrador del resto del formulario (perfil/activos/asistente/citas) en
+  `localStorage` justo antes de salir y se restaura una vez al volver, para no perder
+  lo que el fundador ya hubiera escrito.
 
 ### 4. Disponibilidad y reserva — hecho
 - `computeSlots` pasó de excluir por instante exacto a excluir por **solapamiento de

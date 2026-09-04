@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-09-04T17:28:12.868Z",
+  "createdAt": "2026-07-14T14:07:40.671Z",
+  "id": "PSlOwTTdIJ1X98ON",
   "name": "BLM - 8. Trial drip y conversión",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "id": "td-note-01",
@@ -104,7 +110,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const resp = $input.first().json;\nconst d = Array.isArray(resp) ? resp : [resp];\n// El nodo anterior ya entrega un item por dealer (ver 'Un item por dealer').\nconst dealer = $json;\nif (!dealer || !dealer.trial_ends_at) return [];\n\nconst finTrial = new Date(dealer.trial_ends_at);\nconst hoy = new Date();\nconst diasRestantes = Math.ceil((finTrial.getTime() - hoy.getTime()) / 86400000);\nconst diasTranscurridos = 30 - diasRestantes;\n\nlet objetivo = 0;\nif (diasTranscurridos >= 28) objetivo = 4;\nelse if (diasTranscurridos >= 21) objetivo = 3;\nelse if (diasTranscurridos >= 10) objetivo = 2;\nelse if (diasTranscurridos >= 3) objetivo = 1;\n\nconst etapaActual = parseInt(dealer.trial_email_stage || 0) || 0;\nif (objetivo <= etapaActual) return [];\n\nreturn [{ json: {\n  dealerId: dealer.id,\n  nombre: dealer.name,\n  slug: dealer.slug,\n  email: dealer.email,\n  plan: dealer.subscription_plan,\n  etapa: objetivo,\n  diasRestantes: diasRestantes,\n  finTrial: dealer.trial_ends_at\n} }];"
+        "jsCode": "const resp = $input.first().json;\nconst d = Array.isArray(resp) ? resp : [resp];\n// El nodo anterior ya entrega un item por dealer (ver 'Un item por dealer').\nconst dealer = $json;\nif (!dealer || !dealer.trial_ends_at) return [];\n\nconst finTrial = new Date(dealer.trial_ends_at);\nconst hoy = new Date();\nconst diasRestantes = Math.ceil((finTrial.getTime() - hoy.getTime()) / 86400000);\n// 2026-09-05: trial ampliado de 30 a 90 dias (promocion de lanzamiento, decision de H) --\n// cambiar siempre junto con la duracion real en approveApplication (altas-showroom/actions.ts).\n// Umbrales reescalados proporcionalmente sobre el mismo ciclo de 4 etapas (10%/33%/70%/93%):\n// dia 3->9, dia 10->30, dia 21->63, dia 28->84.\nconst diasTranscurridos = 90 - diasRestantes;\n\nlet objetivo = 0;\nif (diasTranscurridos >= 84) objetivo = 4;\nelse if (diasTranscurridos >= 63) objetivo = 3;\nelse if (diasTranscurridos >= 30) objetivo = 2;\nelse if (diasTranscurridos >= 9) objetivo = 1;\n\nconst etapaActual = parseInt(dealer.trial_email_stage || 0) || 0;\nif (objetivo <= etapaActual) return [];\n\nreturn [{ json: {\n  dealerId: dealer.id,\n  nombre: dealer.name,\n  slug: dealer.slug,\n  email: dealer.email,\n  plan: dealer.subscription_plan,\n  etapa: objetivo,\n  diasRestantes: diasRestantes,\n  finTrial: dealer.trial_ends_at\n} }];\n"
       }
     },
     {
@@ -343,5 +349,406 @@
   },
   "settings": {
     "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Cada dia 10:00": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "ebe6bbdf-1e9f-40b2-8d91-3897b95756a1",
+  "activeVersionId": "ebe6bbdf-1e9f-40b2-8d91-3897b95756a1",
+  "versionCounter": 6,
+  "triggerCount": 2,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-07-14T14:07:40.671Z",
+      "createdAt": "2026-07-14T14:07:40.671Z",
+      "role": "workflow:owner",
+      "workflowId": "PSlOwTTdIJ1X98ON",
+      "projectId": "c8xbzCksq6uUNqeh",
+      "project": {
+        "updatedAt": "2026-06-23T09:12:18.878Z",
+        "createdAt": "2026-06-21T22:11:28.384Z",
+        "id": "c8xbzCksq6uUNqeh",
+        "name": "Jose Torres <aldeiatools@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-09-04T17:28:12.871Z",
+    "createdAt": "2026-09-04T17:28:12.871Z",
+    "versionId": "ebe6bbdf-1e9f-40b2-8d91-3897b95756a1",
+    "workflowId": "PSlOwTTdIJ1X98ON",
+    "nodes": [
+      {
+        "id": "td-note-01",
+        "name": "Uso y variables",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          0,
+          -320
+        ],
+        "parameters": {
+          "content": "## BLM - 8. Trial drip y conversion\\n\\nSecuencia de 4 emails durante el periodo de prueba (30 dias desde la aprobacion, dealers.trial_ends_at): dia 3 (check-in), dia 10 (aprovechar el plan), dia 21 (recordatorio con dias restantes), dia 28 (resumen de rendimiento + CTA fuerte a elegir plan). Se detiene solo cuando trial_email_stage llega a 4 o el dealer deja de estar en trial (status pasa a active/suspended).\\n\\nDoble trigger: cron diario 10:00 + webhook bsa/trial-drip-run-now para pruebas manuales.\\n\\nRequiere migracion 068 (dealers.trial_ends_at, dealers.trial_email_stage) aplicada en produccion.",
+          "height": 260,
+          "width": 640,
+          "color": 7
+        }
+      },
+      {
+        "id": "td-cron",
+        "name": "Cada dia 10:00",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          200
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 10 * * *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "td-webhook",
+        "name": "Webhook - Ejecutar ahora",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          400
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "bsa/trial-drip-run-now",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "webhookId": "5d452b10-737e-4883-80a0-ce4acbf1cdff"
+      },
+      {
+        "id": "td-get-dealers",
+        "name": "Obtener dealers en trial",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          280,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $env.SUPABASE_URL }}/rest/v1/dealers?status=eq.trial&trial_ends_at=not.is.null&trial_email_stage=lt.4&select=id,name,slug,email,subscription_plan,trial_ends_at,trial_email_stage",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "td-split",
+        "name": "Un item por dealer",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          500,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const items = $input.first().json;\nconst arr = Array.isArray(items) ? items : [items];\nreturn arr.map(d => ({ json: d }));"
+        }
+      },
+      {
+        "id": "td-calc",
+        "name": "Calcular etapa",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const resp = $input.first().json;\nconst d = Array.isArray(resp) ? resp : [resp];\n// El nodo anterior ya entrega un item por dealer (ver 'Un item por dealer').\nconst dealer = $json;\nif (!dealer || !dealer.trial_ends_at) return [];\n\nconst finTrial = new Date(dealer.trial_ends_at);\nconst hoy = new Date();\nconst diasRestantes = Math.ceil((finTrial.getTime() - hoy.getTime()) / 86400000);\n// 2026-09-05: trial ampliado de 30 a 90 dias (promocion de lanzamiento, decision de H) --\n// cambiar siempre junto con la duracion real en approveApplication (altas-showroom/actions.ts).\n// Umbrales reescalados proporcionalmente sobre el mismo ciclo de 4 etapas (10%/33%/70%/93%):\n// dia 3->9, dia 10->30, dia 21->63, dia 28->84.\nconst diasTranscurridos = 90 - diasRestantes;\n\nlet objetivo = 0;\nif (diasTranscurridos >= 84) objetivo = 4;\nelse if (diasTranscurridos >= 63) objetivo = 3;\nelse if (diasTranscurridos >= 30) objetivo = 2;\nelse if (diasTranscurridos >= 9) objetivo = 1;\n\nconst etapaActual = parseInt(dealer.trial_email_stage || 0) || 0;\nif (objetivo <= etapaActual) return [];\n\nreturn [{ json: {\n  dealerId: dealer.id,\n  nombre: dealer.name,\n  slug: dealer.slug,\n  email: dealer.email,\n  plan: dealer.subscription_plan,\n  etapa: objetivo,\n  diasRestantes: diasRestantes,\n  finTrial: dealer.trial_ends_at\n} }];\n"
+        }
+      },
+      {
+        "id": "td-stats",
+        "name": "Obtener stats",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          940,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/trial_dealer_stats",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({ p_dealer_id: $json.dealerId }) }}"
+        }
+      },
+      {
+        "id": "td-compose",
+        "name": "Componer email",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1160,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const items = $('Calcular etapa').all();\nconst statsItems = $input.all();\nconst MAIL_FROM = 'Black Label Market <hola@blacklabelmarket.es>';\nconst PERFIL_BASE = 'https://blacklabelmarket.es/dealers/';\nconst SUSCRIPCION = 'https://blacklabelmarket.es/dashboard/suscripcion';\n\nfunction nf(n) { return new Intl.NumberFormat('es-ES').format(n || 0); }\n\nconst salida = [];\nfor (let i = 0; i < items.length; i++) {\n  const e = items[i].json;\n  if (!e.email || e.email.indexOf('@') < 1) continue;\n\n  const stats = statsItems[i] ? statsItems[i].json : { vistas: 0, leads: 0, vehiculosActivos: 0 };\n  const perfilUrl = PERFIL_BASE + e.slug;\n  let subject, html;\n\n  if (e.etapa === 1) {\n    subject = e.nombre + ', ¿qué tal las primeras impresiones de Black Label Market?';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Lleváis unos días con vuestro perfil ya publicado (<a href=\"' + perfilUrl + '\">' + perfilUrl + '</a>). Si os falta terminar de completar el perfil o subir stock, es el momento — cuanto antes esté todo, antes empiezan a llegar contactos.</p>' +\n      '<p>Cualquier duda sobre cómo funciona el panel, respondednos a este correo.</p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else if (e.etapa === 2) {\n    subject = 'Sacadle partido a vuestro plan ' + (e.plan || '') + ' en Black Label Market';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Con stock publicado, dos cosas que suelen marcar la diferencia: mantener las fichas con fotos y precio actualizados, y usar los <strong>boosts</strong> para destacar el vehículo que más queréis mover esta semana.</p>' +\n      '<p>Vuestro panel: <a href=\"https://blacklabelmarket.es/dashboard\">blacklabelmarket.es/dashboard</a></p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else if (e.etapa === 3) {\n    subject = 'Vuestra prueba en Black Label Market termina en ' + e.diasRestantes + ' días';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Quedan ' + e.diasRestantes + ' días de prueba. Hasta ahora, vuestro perfil ha tenido <strong>' + nf(stats.vistas) + ' visitas</strong> y habéis recibido <strong>' + nf(stats.leads) + ' contactos</strong> a través del market.</p>' +\n      '<p>Para que el perfil siga activo sin interrupción, podéis elegir vuestro plan cuando queráis, sin esperar al último día: <a href=\"' + SUSCRIPCION + '\">' + SUSCRIPCION + '</a></p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  } else {\n    subject = 'Vuestra prueba en Black Label Market termina en ' + Math.max(e.diasRestantes, 0) + ' días';\n    html = '<p>Buenas ' + e.nombre + ',</p>' +\n      '<p>Resumen de vuestro periodo de prueba: <strong>' + nf(stats.vistas) + ' visitas</strong> al perfil, <strong>' + nf(stats.leads) + ' contactos</strong> recibidos, <strong>' + nf(stats.vehiculosActivos) + ' vehículos</strong> activos publicados.</p>' +\n      '<p>Para que vuestro perfil y stock sigan visibles sin interrupción, elegid vuestro plan aquí: <a href=\"' + SUSCRIPCION + '\">' + SUSCRIPCION + '</a></p>' +\n      '<p>Si necesitáis más tiempo o tenéis dudas sobre qué plan os encaja, respondednos a este correo — lo hablamos.</p>' +\n      '<p>Un saludo,<br>Black Label Market</p>';\n  }\n\n  salida.push({ json: {\n    dealerId: e.dealerId, etapa: e.etapa, nombre: e.nombre,\n    email: e.email, emailFrom: MAIL_FROM, emailSubject: subject, emailHtml: html\n  } });\n}\nreturn salida;"
+        }
+      },
+      {
+        "id": "td-email",
+        "name": "Email - Trial drip",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1380,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "fromEmail": "={{ $json.emailFrom }}",
+          "toEmail": "={{ $json.email }}",
+          "subject": "={{ $json.emailSubject }}",
+          "emailType": "html",
+          "html": "={{ $json.emailHtml }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "webhookId": "e747c0ac-6ce4-4f57-9aff-1167de3f2c70"
+      },
+      {
+        "id": "td-mark",
+        "name": "Marcar etapa",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1600,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "method": "PATCH",
+          "url": "={{ $env.SUPABASE_URL }}/rest/v1/dealers?id=eq.{{ $('Componer email').item.json.dealerId }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ JSON.stringify({ trial_email_stage: $('Componer email').item.json.etapa }) }}"
+        }
+      },
+      {
+        "id": "td-digest",
+        "name": "Preparar digest",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1820,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const items = $('Componer email').all().map(i => i.json);\nif (!items.length) return [];\nconst porEtapa = { 1: 'día 3 (check-in)', 2: 'día 10 (aprovechar plan)', 3: 'día 21 (recordatorio)', 4: 'día 28 (conversión + resumen)' };\nconst lineas = items.map(e => '- ' + e.nombre + ': etapa ' + porEtapa[e.etapa]);\nreturn [{ json: { slackPayload: { text: '*Trial drip enviado hoy: ' + items.length + '*\\n' + lineas.join('\\n') } } }];",
+          "mode": "runOnceForAllItems"
+        }
+      }
+    ],
+    "connections": {
+      "Cada dia 10:00": {
+        "main": [
+          [
+            {
+              "node": "Obtener dealers en trial",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook - Ejecutar ahora": {
+        "main": [
+          [
+            {
+              "node": "Obtener dealers en trial",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Obtener dealers en trial": {
+        "main": [
+          [
+            {
+              "node": "Un item por dealer",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Un item por dealer": {
+        "main": [
+          [
+            {
+              "node": "Calcular etapa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calcular etapa": {
+        "main": [
+          [
+            {
+              "node": "Obtener stats",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Obtener stats": {
+        "main": [
+          [
+            {
+              "node": "Componer email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Componer email": {
+        "main": [
+          [
+            {
+              "node": "Email - Trial drip",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Email - Trial drip": {
+        "main": [
+          [
+            {
+              "node": "Marcar etapa",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Marcar etapa": {
+        "main": [
+          [
+            {
+              "node": "Preparar digest",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar digest": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Torres",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-09-04T17:28:13.048Z",
+        "id": 963,
+        "workflowId": "PSlOwTTdIJ1X98ON",
+        "versionId": "ebe6bbdf-1e9f-40b2-8d91-3897b95756a1",
+        "event": "activated",
+        "userId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    ]
   }
 }

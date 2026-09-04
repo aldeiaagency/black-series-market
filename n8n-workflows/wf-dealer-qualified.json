@@ -1,12 +1,21 @@
 {
+  "updatedAt": "2026-09-04T18:07:30.919Z",
+  "createdAt": "2026-09-02T08:20:34.850Z",
+  "id": "bsVx5XsjTxpxlVUd",
   "name": "BLM - Cualificado, Agenda tu Llamada",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "id": "wfq-note-01",
       "name": "Notas - WF Cualificado",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [0, -220],
+      "position": [
+        0,
+        -220
+      ],
       "parameters": {
         "content": "## BLM - Cualificado, Agenda tu Llamada\n\nTrigger: `N8N_WEBHOOK_DEALER_QUALIFIED` en Vercel\nWebhook path: `blm/dealer-qualified`\n\nEste workflow se dispara cuando el admin marca una solicitud\n`market_directo` como 'Cumple criterios' en el panel de altas\n(`markQualifiedAwaitingCall` en admin/altas-showroom/actions.ts).\n\nEnvía al showroom el enlace de auto-agenda de la llamada de\nadmisión (precio y condiciones se explican en esa llamada, no\nantes). Si `SHOWROOM_ADMISSION_CALL_BOOKING_URL` todavía no está\nconfigurado en Vercel, `booking_url` llega null y el email pide\nresponder por correo para proponer horario en su lugar.\n\nNo aplica a solicitudes `visita_agencia`: ya tuvieron la\nconversación equivalente en persona (ver el `if` en actions.ts).",
         "height": 260,
@@ -19,22 +28,31 @@
       "name": "Webhook - Dealer Qualified",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "blm/dealer-qualified",
         "responseMode": "responseNode",
-        "options": {}
-      }
+        "options": {
+          "rawBody": true
+        }
+      },
+      "webhookId": "a7ab4e05-4f3d-41ae-a3fd-f34050186a2d"
     },
     {
       "id": "wfq-node-02-validate",
       "name": "Validar payload cualificado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    phone:          body.phone || null,\n    booking_url:    body.booking_url || null,\n    admin_url:      body.admin_url || ''\n  }\n}];"
+        "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\n// Verificacion HMAC real (2026-09-05): mismo esquema y mismo motivo que WF1 (BLM - 1. Nueva\n// Solicitud Showroom) -- antes este webhook no comprobaba firma en absoluto, solo la forma del\n// payload. El hash se calcula en el nodo nativo \"Crypto - HMAC firma\" justo antes de este\n// (HMAC-SHA256 sobre el body crudo binario), aqui solo se compara contra la cabecera.\nconst sig = getHeader(headers, 'x-blacklabel-signature');\nif (!sig || !sig.startsWith('sha256=')) return [{ json: { ok: false, missing: ['x-blacklabel-signature'] } }];\nconst expectedSig = String(input.computed_signature || '').toLowerCase();\nconst providedSig = sig.slice(7).toLowerCase();\nif (!expectedSig || expectedSig !== providedSig) return [{ json: { ok: false, missing: ['invalid_signature'] } }];\n\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    phone:          body.phone || null,\n    booking_url:    body.booking_url || null,\n    admin_url:      body.admin_url || ''\n  }\n}];"
       }
     },
     {
@@ -42,7 +60,10 @@
       "name": "Payload válido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [480, 300],
+      "position": [
+        480,
+        300
+      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -55,7 +76,10 @@
               "id": "ok",
               "leftValue": "={{ $json.ok }}",
               "rightValue": true,
-              "operator": { "type": "boolean", "operation": "true" }
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
             }
           ],
           "combinator": "and"
@@ -67,11 +91,16 @@
       "name": "Responder 202 - Aceptado",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [720, 200],
+      "position": [
+        720,
+        200
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM - Cualificado, Agenda tu Llamada', application_id: $json.application_id } }}",
-        "options": { "responseCode": 202 }
+        "options": {
+          "responseCode": 202
+        }
       }
     },
     {
@@ -79,11 +108,16 @@
       "name": "Responder 400 - Inválido",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [720, 420],
+      "position": [
+        720,
+        420
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { ok: false, missing: $json.missing } }}",
-        "options": { "responseCode": 400 }
+        "options": {
+          "responseCode": 400
+        }
       }
     },
     {
@@ -91,7 +125,10 @@
       "name": "Preparar email agenda llamada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 200],
+      "position": [
+        960,
+        200
+      ],
       "parameters": {
         "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $input.first().json;\nconst MAIL_FROM = $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>';\n\nconst callToAction = d.booking_url\n  ? `<p><a href=\"${d.booking_url}\">Reservar la llamada</a></p>`\n  : `<p>Respondednos a este email y os proponemos horario directamente.</p>`;\n\nconst emailHtml = `<p>Hola ${d.full_name},</p>\n<p><strong>${d.dealer_name}</strong> encaja con los criterios de Black Label Market.</p>\n<p>El siguiente paso es una llamada breve en la que os explicamos cómo funciona la plataforma, resolvemos precio y condiciones, y dejamos cerrados los detalles del alta. Elegid vosotros el hueco que mejor os venga:</p>\n${callToAction}\n<p>Un saludo,<br>Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: 'El siguiente paso: agenda tu llamada',\n      html: emailHtml + legalFooter\n    }\n  }\n}];"
       }
@@ -101,8 +138,10 @@
       "name": "Email - Agenda llamada al showroom",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [1200, 200],
-      "continueOnFail": true,
+      "position": [
+        1200,
+        200
+      ],
       "parameters": {
         "fromEmail": "={{ $json.emailPayload.from }}",
         "toEmail": "={{ $json.emailPayload.to[0] }}",
@@ -111,29 +150,476 @@
         "html": "={{ $json.emailPayload.html }}"
       },
       "credentials": {
-        "smtp": { "id": "89HQYy0shv3FbifN", "name": "Hostinger SMTP BLM" }
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "f84e46d6-b77b-42aa-9fd0-9600a4cb7b27",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "wfq-node-crypto-hmac",
+      "name": "Crypto - HMAC firma",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        120,
+        420
+      ],
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "secret": "REDACTED_SEE_VERCEL_N8N_LIVE_DO_NOT_COMMIT_REAL_VALUE",
+        "dataPropertyName": "computed_signature"
       }
+    },
+    {
+      "id": "wfq-node-alert-email-fail",
+      "name": "Aviso interno - fallo de envio",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1200,
+        360
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "parameters": {
+        "fromEmail": "={{ $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>' }}",
+        "toEmail": "marketing@blackseriesagency.es",
+        "subject": "=Fallo de envio: invitacion a llamada no entregada ({{ $json.dealer_name || 'sin nombre' }})",
+        "html": "=<p>El email de invitacion a llamada de admision no se pudo enviar.</p><p><strong>Showroom:</strong> {{ $json.dealer_name || 'desconocido' }}<br><strong>Contacto:</strong> {{ $json.full_name || '' }} ({{ $json.email || 'sin email' }})<br><strong>Application ID:</strong> {{ $json.application_id || 'desconocido' }}</p><p>Revisar y contactar manualmente si hace falta: {{ $json.admin_url || 'https://blacklabelmarket.es/admin/altas-showroom' }}</p>",
+        "options": {}
+      },
+      "webhookId": "67012ed7-6d95-4feb-9e3f-5b4d25e5c7a4"
     }
   ],
   "connections": {
     "Webhook - Dealer Qualified": {
-      "main": [[{ "node": "Validar payload cualificado", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Crypto - HMAC firma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validar payload cualificado": {
-      "main": [[{ "node": "Payload válido?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Payload válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Payload válido?": {
       "main": [
-        [{ "node": "Responder 202 - Aceptado", "type": "main", "index": 0 }],
-        [{ "node": "Responder 400 - Inválido", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Responder 202 - Aceptado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 400 - Inválido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Responder 202 - Aceptado": {
-      "main": [[{ "node": "Preparar email agenda llamada", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar email agenda llamada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar email agenda llamada": {
-      "main": [[{ "node": "Email - Agenda llamada al showroom", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Email - Agenda llamada al showroom",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto - HMAC firma": {
+      "main": [
+        [
+          {
+            "node": "Validar payload cualificado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Agenda llamada al showroom": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Aviso interno - fallo de envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": {}
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "ee5c6e52-80c6-4e64-981a-5d5cce088419",
+  "activeVersionId": "ee5c6e52-80c6-4e64-981a-5d5cce088419",
+  "versionCounter": 4,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-09-02T08:20:34.850Z",
+      "createdAt": "2026-09-02T08:20:34.850Z",
+      "role": "workflow:owner",
+      "workflowId": "bsVx5XsjTxpxlVUd",
+      "projectId": "c8xbzCksq6uUNqeh",
+      "project": {
+        "updatedAt": "2026-06-23T09:12:18.878Z",
+        "createdAt": "2026-06-21T22:11:28.384Z",
+        "id": "c8xbzCksq6uUNqeh",
+        "name": "Jose Torres <aldeiatools@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-09-04T18:07:30.924Z",
+    "createdAt": "2026-09-04T18:07:30.924Z",
+    "versionId": "ee5c6e52-80c6-4e64-981a-5d5cce088419",
+    "workflowId": "bsVx5XsjTxpxlVUd",
+    "nodes": [
+      {
+        "id": "wfq-note-01",
+        "name": "Notas - WF Cualificado",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          0,
+          -220
+        ],
+        "parameters": {
+          "content": "## BLM - Cualificado, Agenda tu Llamada\n\nTrigger: `N8N_WEBHOOK_DEALER_QUALIFIED` en Vercel\nWebhook path: `blm/dealer-qualified`\n\nEste workflow se dispara cuando el admin marca una solicitud\n`market_directo` como 'Cumple criterios' en el panel de altas\n(`markQualifiedAwaitingCall` en admin/altas-showroom/actions.ts).\n\nEnvía al showroom el enlace de auto-agenda de la llamada de\nadmisión (precio y condiciones se explican en esa llamada, no\nantes). Si `SHOWROOM_ADMISSION_CALL_BOOKING_URL` todavía no está\nconfigurado en Vercel, `booking_url` llega null y el email pide\nresponder por correo para proponer horario en su lugar.\n\nNo aplica a solicitudes `visita_agencia`: ya tuvieron la\nconversación equivalente en persona (ver el `if` en actions.ts).",
+          "height": 260,
+          "width": 460,
+          "color": 3
+        }
+      },
+      {
+        "id": "wfq-node-01-webhook",
+        "name": "Webhook - Dealer Qualified",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "blm/dealer-qualified",
+          "responseMode": "responseNode",
+          "options": {
+            "rawBody": true
+          }
+        },
+        "webhookId": "a7ab4e05-4f3d-41ae-a3fd-f34050186a2d"
+      },
+      {
+        "id": "wfq-node-02-validate",
+        "name": "Validar payload cualificado",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === 'object' && input.body !== null) ? input.body : input;\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\n// Verificacion HMAC real (2026-09-05): mismo esquema y mismo motivo que WF1 (BLM - 1. Nueva\n// Solicitud Showroom) -- antes este webhook no comprobaba firma en absoluto, solo la forma del\n// payload. El hash se calcula en el nodo nativo \"Crypto - HMAC firma\" justo antes de este\n// (HMAC-SHA256 sobre el body crudo binario), aqui solo se compara contra la cabecera.\nconst sig = getHeader(headers, 'x-blacklabel-signature');\nif (!sig || !sig.startsWith('sha256=')) return [{ json: { ok: false, missing: ['x-blacklabel-signature'] } }];\nconst expectedSig = String(input.computed_signature || '').toLowerCase();\nconst providedSig = sig.slice(7).toLowerCase();\nif (!expectedSig || expectedSig !== providedSig) return [{ json: { ok: false, missing: ['invalid_signature'] } }];\n\nconst required = ['application_id', 'dealer_name', 'full_name', 'email'];\nconst missing = required.filter(f => !body[f]);\n\nif (missing.length) return [{ json: { ok: false, missing } }];\n\nreturn [{\n  json: {\n    ok: true,\n    application_id: body.application_id,\n    dealer_name:    body.dealer_name,\n    full_name:      body.full_name,\n    email:          body.email,\n    phone:          body.phone || null,\n    booking_url:    body.booking_url || null,\n    admin_url:      body.admin_url || ''\n  }\n}];"
+        }
+      },
+      {
+        "id": "wfq-node-03-if",
+        "name": "Payload válido?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "ok",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "wfq-node-04-respond",
+        "name": "Responder 202 - Aceptado",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          720,
+          200
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM - Cualificado, Agenda tu Llamada', application_id: $json.application_id } }}",
+          "options": {
+            "responseCode": 202
+          }
+        }
+      },
+      {
+        "id": "wfq-node-respond-bad",
+        "name": "Responder 400 - Inválido",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          720,
+          420
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { ok: false, missing: $json.missing } }}",
+          "options": {
+            "responseCode": 400
+          }
+        }
+      },
+      {
+        "id": "wfq-node-05-prepare",
+        "name": "Preparar email agenda llamada",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          960,
+          200
+        ],
+        "parameters": {
+          "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $input.first().json;\nconst MAIL_FROM = $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>';\n\nconst callToAction = d.booking_url\n  ? `<p><a href=\"${d.booking_url}\">Reservar la llamada</a></p>`\n  : `<p>Respondednos a este email y os proponemos horario directamente.</p>`;\n\nconst emailHtml = `<p>Hola ${d.full_name},</p>\n<p><strong>${d.dealer_name}</strong> encaja con los criterios de Black Label Market.</p>\n<p>El siguiente paso es una llamada breve en la que os explicamos cómo funciona la plataforma, resolvemos precio y condiciones, y dejamos cerrados los detalles del alta. Elegid vosotros el hueco que mejor os venga:</p>\n${callToAction}\n<p>Un saludo,<br>Black Label Market</p>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from: MAIL_FROM, to: [d.email],\n      subject: 'El siguiente paso: agenda tu llamada',\n      html: emailHtml + legalFooter\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "wfq-node-06-email",
+        "name": "Email - Agenda llamada al showroom",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          200
+        ],
+        "parameters": {
+          "fromEmail": "={{ $json.emailPayload.from }}",
+          "toEmail": "={{ $json.emailPayload.to[0] }}",
+          "subject": "={{ $json.emailPayload.subject }}",
+          "emailType": "html",
+          "html": "={{ $json.emailPayload.html }}"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "webhookId": "f84e46d6-b77b-42aa-9fd0-9600a4cb7b27",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "id": "wfq-node-crypto-hmac",
+        "name": "Crypto - HMAC firma",
+        "type": "n8n-nodes-base.crypto",
+        "typeVersion": 1,
+        "position": [
+          120,
+          420
+        ],
+        "parameters": {
+          "action": "hmac",
+          "type": "SHA256",
+          "binaryData": true,
+          "binaryPropertyName": "data",
+          "secret": "ee5e2818f0c2da83409c1233abfb68bb95818d5ad9e41a11239b4081005b55c5",
+          "dataPropertyName": "computed_signature"
+        }
+      },
+      {
+        "id": "wfq-node-alert-email-fail",
+        "name": "Aviso interno - fallo de envio",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          360
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "parameters": {
+          "fromEmail": "={{ $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>' }}",
+          "toEmail": "marketing@blackseriesagency.es",
+          "subject": "=Fallo de envio: invitacion a llamada no entregada ({{ $json.dealer_name || 'sin nombre' }})",
+          "html": "=<p>El email de invitacion a llamada de admision no se pudo enviar.</p><p><strong>Showroom:</strong> {{ $json.dealer_name || 'desconocido' }}<br><strong>Contacto:</strong> {{ $json.full_name || '' }} ({{ $json.email || 'sin email' }})<br><strong>Application ID:</strong> {{ $json.application_id || 'desconocido' }}</p><p>Revisar y contactar manualmente si hace falta: {{ $json.admin_url || 'https://blacklabelmarket.es/admin/altas-showroom' }}</p>",
+          "options": {}
+        },
+        "webhookId": "67012ed7-6d95-4feb-9e3f-5b4d25e5c7a4"
+      }
+    ],
+    "connections": {
+      "Webhook - Dealer Qualified": {
+        "main": [
+          [
+            {
+              "node": "Crypto - HMAC firma",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar payload cualificado": {
+        "main": [
+          [
+            {
+              "node": "Payload válido?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Payload válido?": {
+        "main": [
+          [
+            {
+              "node": "Responder 202 - Aceptado",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Responder 400 - Inválido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Responder 202 - Aceptado": {
+        "main": [
+          [
+            {
+              "node": "Preparar email agenda llamada",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar email agenda llamada": {
+        "main": [
+          [
+            {
+              "node": "Email - Agenda llamada al showroom",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Crypto - HMAC firma": {
+        "main": [
+          [
+            {
+              "node": "Validar payload cualificado",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Email - Agenda llamada al showroom": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Aviso interno - fallo de envio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Torres",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-09-04T18:07:31.078Z",
+        "id": 967,
+        "workflowId": "bsVx5XsjTxpxlVUd",
+        "versionId": "ee5c6e52-80c6-4e64-981a-5d5cce088419",
+        "event": "activated",
+        "userId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    ]
+  }
 }

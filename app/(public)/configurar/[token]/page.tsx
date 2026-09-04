@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ token: string }>
+  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string }>
 }
 
 function InvalidSetupLink() {
@@ -31,8 +32,9 @@ function InvalidSetupLink() {
   )
 }
 
-export default async function ConfigurarShowroomPage({ params }: Props) {
+export default async function ConfigurarShowroomPage({ params, searchParams }: Props) {
   const { token } = await params
+  const { calendar_connected, calendar_error } = await searchParams
   const admin = createAdminClient()
   const setup = await loadSetupRoom(admin, token)
 
@@ -50,11 +52,48 @@ export default async function ConfigurarShowroomPage({ params }: Props) {
         .maybeSingle()
     : { data: null }
 
+  // Google Calendar (Fase A, docs/agente-cita-fase-A-google-calendar.md) — mismo dato que
+  // Dashboard → Citas, leído aquí para poder conectarlo desde la sala tokenizada antes de que
+  // el fundador tenga sesión (2026-09-04, hallazgo del simulacro E2E Karboceramic: el botón
+  // solo existía en el dashboard, al que no se tiene acceso hasta enviar esta misma sala).
+  const { data: googleConn } = await admin
+    .from('showroom_calendar_connections')
+    .select('status, external_account_email, error_message')
+    .eq('dealer_id', setup.dealer.id)
+    .eq('provider', 'google_calendar')
+    .maybeSingle()
+
+  const google = {
+    configured: !!process.env.GOOGLE_OAUTH_CLIENT_ID,
+    status: (googleConn?.status ?? null) as 'connected' | 'disconnected' | 'error' | 'pending' | null,
+    email: googleConn?.external_account_email ?? null,
+    errorMessage: googleConn?.error_message ?? null,
+  }
+
+  // Fotos de instalaciones ya subidas (dealer_gallery_images se escribe al momento de cada
+  // subida, no en el envío final — ver app/api/onboarding/[token]/upload/route.ts). El cliente
+  // arrancaba siempre con la galería vacía, así que si el fundador cerraba la pestaña y volvía,
+  // parecía que sus fotos se habían perdido aunque siguieran guardadas (hallazgo 2026-09-04).
+  const { data: galleryRows } = await admin
+    .from('dealer_gallery_images')
+    .select('id, storage_path')
+    .eq('dealer_id', setup.dealer.id)
+    .order('position', { ascending: true })
+  const initialGallery = (galleryRows ?? []).map((row) => ({
+    url: admin.storage.from('vehicle-images').getPublicUrl(row.storage_path).data.publicUrl,
+    path: row.storage_path,
+    type: 'gallery',
+  }))
+
   return (
     <SetupRoomClient
       token={token}
       setup={setup}
       feedSyncAvailable={Boolean(feedSyncFeature)}
+      google={google}
+      calendarConnectedFlag={calendar_connected === '1'}
+      calendarErrorFlag={calendar_error ?? null}
+      initialGallery={initialGallery}
     />
   )
 }

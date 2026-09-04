@@ -4,7 +4,276 @@
 > captura, handoff/K22, advocacy/UGC), ver `agency/backlog_unificado_growth.md` — no duplicar aquí, es la
 > fuente única de eso desde 2026-08-28. Un ítem compartido: "unificar `ContactForm`/`QualifiedLeadForm`"
 > (bloque B4-B11 abajo) se relaciona con varios hallazgos de `QualifiedLeadForm` en ese otro documento.
-> Última actualización: **2026-09-02** — **Embudo de acceso profesional con precios ocultos, cerrado
+> Última actualización: **2026-09-05 (octava ronda, la misma tarde)** — **Resuelta la inconsistencia de
+> privacidad de `admin/contactos` dejada abierta en la ronda anterior, por instrucción explícita de H
+> ("arregla los bugs") sin especificar dirección — se tomó la opción más conservadora: corregir la
+> afirmación falsa en vez de retirar una función de soporte ya en uso.** El texto decía que el detalle de
+> contacto (nombre/email/teléfono) "no está accesible aquí por política de privacidad RGPD" — falso:
+> `admin/dealers/[id]` sí consulta y muestra `buyer_name`/`buyer_email` (líneas 314, 761-762). Restringir
+> esa vista habría sido la corrección alternativa, pero es una decisión de política de privacidad real
+> (qué puede ver soporte y por qué) que no corresponde tomar sin H, y quitar una función que ya funciona
+> por una lectura propia de RGPD no verificada es más arriesgado que corregir un texto que sobre-promete.
+> Nuevo texto en `app/(admin)/admin/contactos/page.tsx`: explica que esta vista es agregada por diseño
+> (confirmado leyendo la query de la página: solo trae `status`/`dealer_id`, nunca `buyer_name`/`buyer_email`)
+> y que el detalle sigue existiendo, tanto en el panel del showroom como en la ficha del dealer para
+> soporte — ya no afirma un bloqueo RGPD que no existe. Desplegado y verificado (`status:"ok"`,
+> `readyState:"READY"`, alias `blacklabelmarket.es` confirmado). **Si H decide que la política real debe
+> ser la restrictiva (soporte no debería ver PII de comprador), la reversión es acotada**: quitar el
+> `select` de `buyer_name`/`buyer_email` y su render en `admin/dealers/[id]:314,761-762`, y el texto de
+> `contactos` vuelve a ser cierto tal cual quedó redactado.
+> Última actualización anterior: **2026-09-05 (séptima ronda, la misma tarde)** — **Rol de administrador
+> del mapeo operativo, tercero y último. 2 bugs reales cerrados, 1 inconsistencia real de
+> privacidad detectada y dejada sin tocar a propósito (decisión de negocio, no bug), 1
+> "hallazgo" de Codex descartado por contrastarlo con una decisión de negocio ya registrada.**
+> **Cerrados**: (1) el cron de expiración de boosts (`app/api/cron/expire-boosts/route.ts`) tenía
+> un comentario que decía "cada hora" cuando `vercel.json` lo programa una vez al día a las 03:30
+> UTC — corregido el comentario para reflejar la realidad; no se tocó la programación real
+> (cambiar la frecuencia es una decisión de negocio sobre coste/precisión, no un bug de
+> documentación). (2) `admin/configuracion`: `handleSave()` no comprobaba `res.ok` — un fallo real
+> (403/500) mostraba igualmente "Guardado" porque `fetch` no lanza por un status de error. Ahora
+> el botón muestra "Error al guardar" en rojo si la llamada falla.
+> **Descartado, no era un bug**: Codex marcó como inconsistencia que el badge "Verificado" se
+> muestre siempre sin consultar `dealer.is_verified` — es exactamente la decisión de negocio de H
+> del 2026-08-27 (todo perfil publicado está verificado por defecto, sin condición aparte), ya
+> registrada en este mismo documento. Corregido sin necesidad de verificarlo de nuevo.
+> **Real, verificado, sin tocar — decisión de negocio pendiente**: `admin/contactos` afirma en el
+> propio texto de la pantalla que los datos individuales de contacto (nombre/email/teléfono) "no
+> están accesibles aquí por política de privacidad RGPD" — pero `admin/dealers/[id]` sí consulta y
+> muestra `buyer_name`/`buyer_email` directamente. O el texto de `contactos` es una promesa falsa,
+> o `dealers/[id]` expone algo que no debería — no se puede resolver sin saber cuál de las dos
+> páginas refleja la política real. **No corregido a propósito, requiere decisión de H.**
+> **Confirmado, no corregido (proceso, no bug)**: "vehículos a la carta" en el lado admin
+> (`/admin/solicitudes`) tiene una vista centralizada real, pero sigue siendo concierge manual de
+> punta a punta — sin matching, sin notificación de vuelta al comprador, sin trazabilidad de si el
+> dealer respondió. Complementos manuales (`stock_sync`, `diagnóstico_antifuga`) confirmado que el
+> "activar" del admin no ejecuta trabajo real — solo marca estado; el trabajo de verdad ocurre
+> fuera del producto. Fallos reales de los 2 crons (`cleanup-leads`, `expire-boosts`) no avisan a
+> nadie — mismo patrón de silencio que ya se cerró para los emails de n8n, pero de menor prioridad
+> aquí (limpieza interna, no comunicación con un fundador o comprador real).
+> Con esto, el mapeo operativo de los 3 roles (showroom, visitante, admin) queda completo.
+> Última actualización anterior: **2026-09-05 (sexta ronda el mismo día)** — **Mapeo operativo de los 3
+> roles (showroom, visitante, admin) con Codex, empezado hoy — primeros dos roles completos, 3
+> bugs reales encontrados y cerrados antes de seguir con el tercero.** Mismo método que las
+> simulaciones de alta: Codex traza el código (con la MISMA limitación de siempre — su shell no
+> pudo leer el working tree local, leyó el remoto de GitHub, que va detrás de cambios reales sin
+> subir) y cada hallazgo se verifica contra el código/sistema real antes de aceptarlo. **3 bugs
+> reales, corregidos:**
+> 1. **`pending_review` fuera del alta no tenía ninguna forma de resolverse** — ni el dealer desde
+>    su dashboard normal ni el admin veían el motivo del bloqueo ni la sugerencia de la IA, solo
+>    una etiqueta fija. La única UI de resolución que existía era la de la sala de configuración
+>    del alta (construida el 2026-09-04), nunca llevada al uso diario. Cerrado en
+>    `app/api/vehicles/[id]/route.ts` (el PATCH re-ejecuta `reviewVehicleIntake()` solo cuando el
+>    estado actual ya es `pending_review`, cero llamadas extra de IA en ediciones normales) y
+>    `app/(dashboard)/dashboard/publicar/page.tsx` (mismo patrón visual de aviso + "Usar esta
+>    sugerencia" que ya existía en la sala de configuración). **El lado admin
+>    (`/admin/vehiculos`) queda deliberadamente fuera de esta ronda** — el dealer ya puede
+>    resolverlo solo, que es lo que quita carga real a Black Series; hacerlo también visible en
+>    admin es un huequito menor, no bloqueante.
+> 2. **El matcher de alertas (WF6) enlazaba siempre a `/coches/...`** aunque el vehículo que
+>    hiciera match fuera una moto — `vehicle.vehicleType` ya estaba disponible en el mismo nodo
+>    (se usa para filtrar), solo faltaba usarlo también en la URL. Corregido en el workflow n8n
+>    real (`Filtrar alertas coincidentes`), sin desplegar Vercel — puramente n8n. No se probó en
+>    vivo disparando el workflow real a propósito: habría mandado un email real a un comprador con
+>    una alerta real. Verificado por inspección — el cambio es un ternario que cae a 'coches' para
+>    cualquier valor que no sea exactamente 'motorcycle', igual que el comportamiento anterior.
+> 3. **La página de newsletter (`/seleccion-mensual`) existe y funciona de verdad** (llama a
+>    `/api/newsletter/subscribe`, endpoint real) **pero no estaba enlazada desde ningún sitio** —
+>    ni footer ni home. Un visitante real nunca la habría encontrado sin conocer la URL exacta.
+>    Añadido el enlace al footer (columna "Explorar"), visible en todo el sitio.
+> Última actualización anterior: **2026-09-05 (quinta ronda el mismo día)** — **Cerrados los dos puntos
+> ciegos operativos señalados al repasar la operativa diaria del market con H: trials vencidos
+> sin visibilidad, y fallos de envío de email sin ninguna señal.** (1) **Visibilidad de trials
+> vencidos** — nueva tila "Trials vencidos" en `/admin` (cuenta `dealers` con `status='trial'` y
+> `trial_ends_at` ya pasado) enlazando a un filtro nuevo `?status=trial_expired` en
+> `/admin/dealers`, que en las dos vistas (tabla de escritorio y tarjetas móvil) muestra "vencido
+> hace N días" (aviso) o "vence en N días" (informativo) junto al badge de estado. **Deliberadamente
+> pasivo** — no auto-suspende ni cambia ningún dealer, no inventa un plazo de gracia: solo hace
+> visible lo que antes era invisible, mismo criterio que `qualified_at` (ronda 2 de hoy).
+> Construido por un subagente en paralelo, verificado con tsc/lint/build y con una revisión propia
+> del diff real antes de darlo por bueno. (2) **Alertas de fallo de email real** en los tres
+> workflows n8n que enviaban con `continueOnFail:true` (silencio total si el SMTP fallaba,
+> hallazgo de la ronda 3 de hoy): `BLM - Cualificado, Agenda tu Llamada`, `BSA - P3. Onboarding
+> fundador` y `BLM - Formulario de Contacto` (sus 2 nodos de email). Cambiado a
+> `onError:continueErrorOutput` con una rama nueva que manda un aviso interno a
+> marketing@blackseriesagency.es con el contexto (a quién iba dirigido, qué evento, enlace al
+> admin) en vez de desaparecer sin dejar rastro. **Verificación con hallazgo real e importante en
+> el propio proceso de comprobarlo**: un fallo de credencial SMTP inexistente NO enruta a la rama
+> de error (es una capa de fallo distinta, anterior a la ejecución del nodo) — solo un fallo real
+> del servidor (probado con una credencial SMTP apuntando a un host inalcanzable, error
+> `ENOTFOUND` real) enruta correctamente. Irrelevante para los nodos reales (su credencial
+> `Hostinger SMTP BLM` existe y funciona, probado con envíos reales hoy mismo), pero deja
+> constancia de que "verificar el mecanismo una vez" no basta si el mecanismo tiene más de un modo
+> de fallo — hubo que probar el modo de fallo correcto, no cualquiera. **Limitación conocida y
+> aceptada**: esto capta fallos de infraestructura (servidor caído, timeout, credencial rota) pero
+> no rebotes silenciosos de un destinatario inválido que el servidor SMTP acepta y solo rechaza
+> después, fuera de la vista de n8n — no hay forma barata de cerrar ese caso sin webhooks de
+> bounce del proveedor de correo, fuera de alcance hoy.
+> Actualización anterior: **2026-09-05 (cuarta ronda el mismo día)** — **Decisión de negocio de H:
+> trial de `market_directo` ampliado de 30 a 90 días (promoción de lanzamiento).** No afecta a
+> `visita_agencia` (fundadores no tienen fecha de trial — dependen del gate global de
+> monetización, `trial_ends_at` siempre `null`; confirmado que la secuencia de drip ya los excluye
+> por construcción, `trial_ends_at=not.is.null` en la query del workflow — no había bug ahí, solo
+> una explicación imprecisa mía en un resumen anterior). Cambiados los dos únicos sitios donde la
+> duración de 30 días estaba codificada (verificado con grep que no hay ningún otro): `trial_ends_at`
+> en `approveApplication` (`admin/altas-showroom/actions.ts`) y el recálculo de días transcurridos
+> en el nodo "Calcular etapa" del workflow n8n `BLM - 8. Trial drip y conversión`
+> (`n8n-workflows/wf8-trial-drip.json`). Los 4 emails del drip se reescalaron proporcionalmente al
+> mismo ciclo (10%/33%/70%/93%): día 3→9, 10→30, 21→63, 28→84 — decisión de H entre 3 alternativas
+> presentadas. Verificado con una simulación local de todos los umbrales y casos de idempotencia
+> (no reenvío de una etapa ya aplicada) antes de tocar producción — deliberadamente no se disparó
+> el workflow real para no arriesgar enviar emails a dealers reales en trial ahora mismo. Ningún
+> copy público ni de email menciona "30 días" en ningún sitio (ambos usan `[N] días` dinámico), así
+> que no hizo falta tocar ningún texto visible — actualizado sí el documento de referencia interno
+> `docs/ciclo-vida-trial-verificacion.md` (tabla de días y de cómo forzar cada etapa para pruebas).
+> Actualización anterior: **2026-09-05 (tercera ronda el mismo día)** — **Nueva simulación Codex
+> cubriendo los dos canales de alta a la vez (visita_agencia + market_directo), buscando
+> específicamente regresiones del propio día. 6 hallazgos reales, corregidos y verificados en
+> vivo.** (1) **`setup_required` (workflow P3) hablaba siempre de "fundador" y de un perfil
+> "pre-rellenado con los datos investigados antes de la visita"**, aunque desde 2026-09-02 este
+> mismo workflow atiende también a `market_directo` (perfil vacío, sin visita) — corregido:
+> `is_founder` se computa en "Validar input" y ramifica el copy completo (asunto, cuerpo,
+> taskType interno) sin tocar el texto ya correcto para fundadores. (2) **Hallazgo propio, más
+> grave, encontrado al investigar el (1)**: el bloque de conteo/registro de fundadores en Airtable
+> más abajo en el mismo workflow ("IF - Es perfil publicado" → contar activos → calcular plaza →
+> registrar entrada) solo comprobaba `event === 'profile_published'`, **sin comprobar
+> `is_founder`** — cualquier `market_directo` publicado se habría contado y registrado como
+> fundador real, contaminando el recuento que usa el gate de monetización del programa fundador.
+> Corregido añadiendo `isFounder === true` como segunda condición AND. Verificado con 3 envíos
+> reales contra n8n (`setup_required`×2 confirmando el copy correcto en cada rama, y
+> `profile_published` con `is_founder:false` confirmando que el bloque de Airtable NO se ejecuta)
+> — deliberadamente **no** se probó `profile_published` + `is_founder:true` en vivo porque
+> habría creado una entrada falsa real en el Airtable de fundadores, exactamente lo que el fix
+> evita. (3) Misma corrección de email: **"queda visible al momento" seguía siendo una promesa
+> incondicional** pese a que la sala de configuración ya se había suavizado — alineado a "se
+> revisa al momento y normalmente queda publicada sin esperas; si a alguna le falta un dato clave
+> os lo decimos ahí mismo", en ambas ramas founder/no-founder. (4) El error de "Debes aceptar la
+> Política de Privacidad" quedó desactualizado tras ampliar el checkbox — ahora menciona también
+> las Condiciones para Profesionales. (5) **`agreed_plan` ahora se exige también en servidor** —
+> antes solo el `<select required>` del cliente lo garantizaba; si llegaba ausente/inválido,
+> `approveApplication` aprobaba igual y `resolveTrialPlan()` caía en silencio a `essential`. (6)
+> La rama de reutilización de dealer existente (reintentos tras `approval_failed`) no
+> sincronizaba `subscription_plan`/`is_featured` con el plan resuelto en el intento actual —
+> corregido para que un reintento con `agreed_plan` corregido no deje el plan viejo en silencio.
+> **Confirmado como real pero sin corregir, documentado como decisión pendiente**: el patrón
+> "fail-closed" de `markQualifiedAwaitingCall` y de P3 solo verifica que n8n validó el
+> webhook/payload — el nodo "Responder 202" de ambos workflows se dispara **antes** de intentar el
+> envío del email real, y el nodo de email tiene `continueOnFail: true` en los dos. Si el SMTP
+> falla de verdad, la app de todos modos no registra ningún error. Arreglarlo de verdad requiere
+> una arquitectura de confirmación por callback (como `webhooks/*-result`, que sí verifica bien
+> hoy) — más una feature nueva que un bug fix, no abordado esta ronda.
+> Actualización anterior: **2026-09-05 (más tarde el mismo día)** — **Cuarto webhook cerrado
+> (`BLM - Formulario de Contacto`) y nueva indicación de tiempo de espera para
+> `qualified_awaiting_call`.** Mismo tratamiento HMAC que los tres anteriores — `rawBody:true`
+> (tampoco lo tenía), nodo `Crypto - HMAC firma`, comparación real insertada en "Validar firma y
+> payload" (antes solo comprobaba formato), secreto `N8N_WEBHOOK_CONTACT_FORM_SECRET` rotado,
+> verificado con las tres pruebas de aceptar/rechazar + una petición real de punta a punta contra
+> `/api/contact` en producción (confirmada con éxito en n8n, exec 7221). **Incidente en el
+> despliegue**: el primer intento de `vercel --prod` completó el build pero falló en el paso de
+> promoción ("Not authorized", con exit code 0 pese al fallo — no confiar solo en el código de
+> salida del wrapper, comprobar siempre el JSON de salida). Dejaba una ventana real, aunque de
+> bajo impacto, en la que el sitio en vivo firmaba con el secreto antiguo mientras n8n ya exigía
+> el nuevo — el formulario seguía funcionando para el visitante (`await
+> notifyContactFormSubmitted().catch(()=>{})`, nunca bloqueante) y nada se perdía (outbox
+> `integration_events` se escribe siempre antes del intento de webhook), pero el email interno de
+> aviso habría fallado en silencio durante esa ventana. Cerrada con un reintento inmediato,
+> verificado como `READY` de verdad antes de continuar.
+> **`qualified_at`** (migración 114, columna nueva) — `markQualifiedAwaitingCall` ahora registra
+> cuándo una solicitud `market_directo` entra en `qualified_awaiting_call`; el admin (lista y
+> detalle) muestra desde entonces "esperando llamada · hace N días" — visibilidad pasiva, sin
+> umbrales de alerta inventados ni recordatorio automático (nadie ha fijado un SLA todavía).
+> **Alcance investigado, sin tocar por decisión de H — el asistente IA (chat comprador) queda
+> pendiente aparte.** `WF7 — Agente IA Cualificador BLM` (`8DgPnmyTWKn71tuc`) es a la vez la
+> plantilla de la que se clonan los asistentes dedicados y el workflow compartido en vivo que usan
+> hoy 3 dealers (fallback cuando el clonado por-dealer falla); dos dealers más tienen su propio
+> clon activo (`H5fxbIECmlewL9BI`, `y2z9nvpOrateQG3B`). Su nodo de validación no comprueba firma
+> en absoluto — el más desprotegido de todos los revisados hoy, ni siquiera el chequeo débil de
+> formato que tenían los otros cuatro. Se dejó aparte porque sirve conversaciones reales de
+> compradores en curso ahora mismo (mayor superficie de interrupción que el embudo de alta,
+> tráfico ocasional) y porque cada clon lleva una variante distinta del nodo de validación
+> (chequeo anti-suplantación de `dealer_id` inyectado por dealer en `cloneAssistantWorkflow`,
+> `lib/integrations/n8n-assistant-provisioning.ts`) — no se puede parchear a ciegas igual en los
+> tres. Mismo patrón ya probado cuatro veces, listo para aplicar como tarea propia: `rawBody:true`
+> en el webhook, nodo Crypto en modo binario, comparación real en "Parsear y validar request",
+> secreto `ASSISTANT_WEBHOOK_SECRET` rotado, y actualizar `cloneAssistantWorkflow` para que los
+> clones futuros nazcan ya con el fix (hoy clona el nodo de validación de la plantilla tal cual).
+> Actualización anterior: **2026-09-05** — **Dos bugs pendientes cerrados sin intervención manual de H
+> (delegado entre Claude y Codex), ambos verificados en vivo contra producción real, no solo por
+> código.** (1) **Badge "Destacado" de fundador ya se materializa** — `approveApplication` añade
+> `is_featured: trialPlan === 'elite'` al crear el dealer (mismo criterio que `setDealerPlan` ya usaba
+> en otro sitio del admin), cerrando el gap documentado más abajo en este mismo archivo. (2)
+> **Verificación HMAC real de firma en los dos webhooks Vercel→n8n de la parte de alta** — el hallazgo
+> de ayer (nodo "Validar firma y payload" de WF1: el sandbox de los nodos Code de n8n bloquea
+> `require("crypto")`, así que nunca se comprobaba el valor real de la firma) está resuelto en los dos
+> workflows que dependían de ella: `BLM - 1. Nueva Solicitud Showroom` (WF1) y
+> `BLM - Cualificado, Agenda tu Llamada`. Solución: nodo nativo `n8n-nodes-base.crypto` (HMAC-SHA256,
+> modo binario sobre el body crudo — `rawBody:true` del webhook, evita cualquier diferencia de
+> reserialización JSON) insertado justo antes del nodo de validación existente, que ahora compara el
+> hash calculado contra la cabecera `x-blacklabel-signature` en vez de solo comprobar su formato.
+> **Hallazgo adicional durante la implementación**: el webhook de `dealer-qualified` no tenía
+> `rawBody:true` activado (a diferencia de WF1) — sin eso el nodo Crypto no tenía nada que firmar;
+> corregido en el mismo cambio. Ambos secretos (`N8N_WEBHOOK_DEALER_SIGNUP_SECRET`,
+> `N8N_WEBHOOK_DEALER_QUALIFIED_SECRET`) se rotaron a valores nuevos generados para la ocasión —nunca
+> se leyó el valor antiguo existente, evitando exponerlo— dados de alta en Vercel producción y en el
+> nodo Crypto correspondiente. **Verificado en producción real, no solo con datos sintéticos**: tres
+> pares de pruebas de aceptar/rechazar contra los webhooks reales antes de cualquier cambio de
+> aplicación real, más dos solicitudes de prueba completas de punta a punta a través del sitio público
+> y el panel admin real (firma correcta → acepta y procesa; firma incorrecta/ausente → rechaza),
+> datos de prueba eliminados después. Diseño verificado empíricamente contra la instancia real de n8n
+> (workflow de prueba desechable, borrado) antes de tocar los workflows de producción — no se
+> construyó a ciegas contra la respuesta de Codex, que tenía detalles correctos pero no 100%
+> verificables sin probarlos (p. ej. no anticipó el `rawBody` que faltaba en `dealer-qualified`).
+> **Actualización el mismo día (2026-09-05, más tarde) — replicado también en el tercer webhook.**
+> `BSA - P3. Onboarding fundador` (`N8N_WEBHOOK_FUNDADOR_ONBOARDING`, único workflow que recibe los
+> tres eventos `setup_required`/`setup_completed`/`profile_published`, cada uno desde un emisor
+> Vercel distinto pero con el mismo esquema de firma) tenía el hueco más grande de los tres: su nodo
+> "Validar input" no comprobaba la firma en absoluto, ni siquiera el chequeo débil de formato que
+> tenía WF1 antes de ayer. Mismo tratamiento — `rawBody:true` (tampoco lo tenía, igual que
+> `dealer-qualified`), nodo `Crypto - HMAC firma`, comprobación insertada al principio de "Validar
+> input" sin tocar el resto de su lógica (construye 3 variantes de email). Secreto
+> `N8N_WEBHOOK_FUNDADOR_ONBOARDING_SECRET` rotado igual que los otros dos. Verificado con las mismas
+> tres pruebas de aceptar/rechazar contra el workflow real (firma correcta → pasa a la siguiente
+> validación; incorrecta/ausente → rechazada con el error esperado). Nota de proceso: el primer
+> intento de aplicar el cambio fue bloqueado por el clasificador de permisos (a diferencia de los
+> otros dos, que pasaron sin aviso) — se confirmó con H antes de reintentar, dado que este es el
+> workflow que más contenido de email construye, no solo validación.
+> **Con esto, los tres webhooks Vercel→n8n de todo el embudo de alta (visita_agencia +
+> market_directo, de principio a fin) tienen verificación HMAC real.** Fuera de ese embudo pueden
+> quedar otros webhooks salientes del proyecto sin auditar (no se ha hecho un barrido del resto del
+> repo) — si aparece uno nuevo, mismo patrón: `rawBody:true` en el webhook, nodo `Crypto - HMAC
+> firma` en modo binario, comparación contra `x-blacklabel-signature` en el nodo de validación
+> existente, secreto rotado (nunca leído del valor antiguo) y verificado con pruebas de
+> aceptar/rechazar antes de dar por cerrado.
+> Actualización anterior: **2026-09-04** — **Simulación E2E del alta `market_directo` (solicitud online),
+> mismo método que el simulacro `visita_agencia` del día anterior: Codex hace de fundador real
+> encontrando el formulario público por su cuenta, Claude verifica/corrige contra el sistema real.**
+> Un hallazgo previo a la simulación (código): `resolveTrialPlan()` sabía priorizar `agreed_plan`, pero
+> ningún control del admin lo escribía — toda aprobación `market_directo` caía a `essential` sin
+> importar lo acordado en la llamada. Corregido: selector `agreed_plan` (essential/professional/elite)
+> en `admin/altas-showroom/[id]`, desplegado y verificado. **6 hallazgos reales de la simulación,
+> aplicados y desplegados**: (1-2, consentimiento) el checkbox del formulario solo mencionaba la
+> política de privacidad pero el sistema trataba la aceptación como cobertura también de las
+> Condiciones para Profesionales, y el email de WF1 prometía registro en lista de comunicaciones sin
+> consentimiento específico — checkbox reescrito para cubrir ambos documentos + checkbox aparte
+> opt-in (no marcado por defecto) para comunicaciones comerciales, `marketing_opt_in` nuevo
+> (migración 113) propagado hasta WF1 (email condicional, editado y verificado en el workflow vivo);
+> (3) `portal_url`/`portales` no contaban como presencia pública válida — dejaba sin vía de alta a
+> compraventas sin web/GBP/Instagram propios (segmento real del ICP), corregido en cliente y servidor;
+> (4) el botón "Cumple criterios · invitar a llamada" no estaba bloqueado hasta que llegaba el informe
+> automático de WF1 — gate añadido (server + UI) a `status === 'in_review'`; (5) el webhook de
+> invitación a llamada era fire-and-forget sin firma ni comprobación de éxito — ahora se espera la
+> respuesta y, si falla, queda constancia en `admin_notes` para seguimiento manual; (6) el contador
+> "pendiente de revisión" del admin excluía `qualified_awaiting_call`.
+> **Hallazgo estructural más grande, sin cerrar — requiere su propio bloque de trabajo:** el nodo
+> "Validar firma y payload" de WF1 documenta que la verificación HMAC real de `x-blacklabel-signature`
+> **nunca se implementó** — el sandbox de los nodos Code de n8n bloquea `require("crypto")`. La
+> mitigación actual (header de evento + ventana de frescura de 5 min) no es firma criptográfica real.
+> Esto afecta a **todos** los webhooks Vercel→n8n de este proyecto, no solo al de `dealer-qualified`
+> tocado hoy (que se dejó firmando desde Vercel, pero no fail-closed, para no bloquear producción por
+> una firma que hoy nadie verifica al otro lado — ver `N8N_WEBHOOK_DEALER_QUALIFIED_SECRET` en
+> `.env.local.example`). Fix real pendiente: nodo nativo `n8n-nodes-base.crypto` (HMAC-SHA256) sobre
+> el body crudo, en vez de intentarlo en un nodo Code — no aplicado esta sesión por el riesgo de
+> editar en ciego la validación de un workflow en producción sin poder probar el ciclo completo.
+> Actualización anterior: **2026-09-02** — **Embudo de acceso profesional con precios ocultos, cerrado
 > de punta a punta.** Decisión de H (2026-09-02): ocultar precios en la web y llevar todo showroom
 > interesado a un embudo de 4 etapas (informar → solicitar valoración → llamada de admisión
 > autoagendada → alta) en vez del alta directa con precio visible. Auditoría conjunta (Codex + Claude)
@@ -150,39 +419,22 @@ founders con cuidado mientras se resuelve en paralelo.
 > desacoplados de lo que ve el comprador — decidir si se elimina el toggle/checklist o se reconvierte en
 > seguimiento interno de calidad, sin urgencia.
 
-> **⏳ Pendiente — construir la materialización real del badge "Destacado" para fundadores (hallazgo del
-> simulacro E2E de alta, 2026-09-03; decisión de negocio corregida el mismo día).** `approveApplication`
-> (`admin/altas-showroom/actions.ts`) da a todo fundador (`source=visita_agencia`) `subscription_plan='elite'`
-> incondicionalmente, con `status='trial'`. Elite trae `showroom_featured: 'destacado'` en
-> `lib/plans-config.ts` (línea ~220), y `lib/entitlements.ts` resuelve ese flag solo mirando
-> `subscription_plan` — nunca `dealers.status`. **Decisión de H (2026-09-03): esto es el comportamiento
-> correcto, no un bug.** Los fundadores deben llevar la etiqueta "Destacado" desde el primer día, precisamente
-> porque usan Elite desde el alta (no hace falta esperar a `status='active'`) — es parte del trato
-> preferente del programa fundador (ver `guion_visita.md` §3: "el showroom aparece destacado y con
-> prioridad"). Corrige una nota anterior de este mismo documento que planteaba lo contrario.
-> **Estado real hoy: sin construir.** El badge "Destacado" que renderiza `/dealers` y la home lee la columna
-> `dealers.is_featured` (mecanismo antiguo, no conectado a entitlements; `approveApplication` no la setea,
-> queda en su default `FALSE`) — verificado contra Karboceramic (dealer de prueba E2E, trial+elite): sin
-> badge destacado pese a ser fundador Elite. Existe además una segunda columna, `organizations.is_featured`
-> (migración `024_organizations.sql`, comentario "materializado desde entitlements"), **sin ningún
-> trigger/job que la materialice** — columna muerta hoy. **Falta construir**: la materialización real desde
-> `subscription_plan`/`showroom_featured` hacia `dealers.is_featured` (o migrar el front a leer
-> `organizations.is_featured` y materializar esa), disparada al aprobar el alta o en el cron que corresponda
-> — sin condición de `status`, ya que fundador+trial+elite debe salir destacado igual que fundador+activo+elite.
+> **✅ Resuelto (2026-09-05) — el badge "Destacado" ya se materializa al aprobar el alta.**
+> `approveApplication` (`admin/altas-showroom/actions.ts`) ahora setea `is_featured: trialPlan ===
+> 'elite'` en el `insert` de `dealers`, mismo criterio que `setDealerPlan` ya usaba en
+> `admin/dealers/[id]/page.tsx`. Cubre a cualquier dealer cuyo plan resuelto sea Elite, no solo
+> fundadores — un `market_directo` que acuerde Elite en la llamada de admisión también sale
+> destacado desde el alta, sin condición de `status`, coherente con la decisión de H del
+> 2026-09-03 registrada aquí abajo. **Sigue sin tocar** (fuera de alcance, no bloqueante):
+> `organizations.is_featured` sigue siendo una columna muerta sin materializar — el frontend
+> (`/dealers`, home) lee `dealers.is_featured`, ya corregido, así que no es urgente.
 
-> **⏳ Pendiente — la sala de configuración no ofrece alta de stock vehículo a vehículo (hallazgo del
-> simulacro E2E de alta, 2026-09-03).** `SetupRoomClient.tsx` solo ofrece 3 modos de stock: `feed_url`
-> (URL de feed/portal), `csv` (plantilla) y `loose_files`/"Archivos sueltos" — este último explícitamente
-> significa "fotos o carpetas para que el equipo las suba" (copy propio del componente y del email de
-> WF-P3), **no** una entrada estructurada por vehículo. Un fundador sin feed ni CSV que quiera cargar
-> coches uno a uno dentro de la sala no tiene esa opción — su única salida es "archivos sueltos", que
-> produce fotos sin estructura si nadie del equipo las procesa después manualmente. La entrada
-> vehículo-a-vehículo real (wizard de 5 pasos) sí existe, pero solo **después** del alta, dentro del
-> dashboard del dealer (`/dashboard/publicar`) — no está enlazada ni mencionada desde la sala de
-> configuración. **Falta decidir**: ¿añadir un 4º modo de stock en la sala misma, o redirigir/explicar
-> claramente que ese caso debe resolverse desde el dashboard tras crear la contraseña (el email de
-> `setup_completed` ya da acceso al dashboard antes de publicar la ficha pública, así que técnicamente
-> ya se podría)?
+> **✅ Resuelto (construido más tarde en la misma sesión, 2026-09-03) — la sala de configuración SÍ
+> ofrece alta de stock vehículo a vehículo.** La nota original de este bloque quedó obsoleta: hoy
+> `SetupRoomClient.tsx` tiene un modo `vehicle_by_vehicle` de primera clase (sustituyó a "archivos
+> sueltos", no se añadió al lado) — formulario completo con marca/modelo/versión en cascada, fotos,
+> revisión de calidad por IA al momento y publicación normalmente sin esperas. Verificado leyendo el
+> componente en vivo el 2026-09-04, no solo esta nota.
 
 > **⏳ Pendiente — no existe un email de bienvenida/agenda de onboarding al publicar el perfil (hallazgo
 > del mismo simulacro, 2026-09-03).** Verificado el ciclo completo de emails de `wf-p3-onboarding-fundador.json`
@@ -198,11 +450,15 @@ founders con cuidado mientras se resuelve en paralelo.
 > o con el sistema de citas del showroom (que hoy tampoco tiene Google Calendar conectado, solo
 > disponibilidad manual — ver hallazgo siguiente).
 
-> **⏳ Pendiente — confirmado: la sala de configuración no permite conectar Google Calendar real (mismo
-> simulacro, 2026-09-03).** `SetupRoomClient.tsx` no tiene ningún control de conexión OAuth — el paso de
-> citas solo permite definir disponibilidad manual (`showroom_calendar_connections` con
-> `provider='manual'`, ver `app/api/onboarding/[token]/complete/route.ts`). Coincide con el estado ya
-> conocido de "Fase A (Google OAuth real) documentada y pendiente" — sin construir todavía.
+> **✅ Resuelto (construido más tarde en la misma sesión, 2026-09-03) — la sala de configuración SÍ
+> tiene el control de conexión de Google Calendar real.** La nota original quedó obsoleta: hoy
+> `SetupRoomClient.tsx` tiene la sección `google.configured && (...)` con enlace "Conectar"/"Reconectar"
+> a `/api/calendar/google/connect?setup_token=...`, con guardado de borrador antes de salir por el
+> ida-y-vuelta de OAuth. **Matiz que sigue vigente**: el botón existe pero no hace nada real todavía
+> porque faltan las credenciales `GOOGLE_OAUTH_CLIENT_ID`/`GOOGLE_OAUTH_CLIENT_SECRET` en Vercel (ver
+> nota fechada 2026-09-04 en "Pendientes en Vercel", más abajo — es la misma pieza, no un hallazgo
+> nuevo). Disponibilidad manual (`provider='manual'`) sigue existiendo como alternativa, no como único
+> camino.
 
 > **Moderación de vehículos a futuro (no construido, solo referencia de diseño — H pide no explicar
 > públicamente el mecanismo en ningún sitio):** el comentario de `lib/vehicle-write.ts` (decisión 2026-07-17)
@@ -620,8 +876,17 @@ N8N_MCP_URL, N8N_MCP_AUTHORIZATION
 **Pendientes en Vercel (necesitan valor real):**
 ```
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ESSENTIAL, STRIPE_PRICE_PROFESSIONAL, STRIPE_PRICE_ELITE
+GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET
 ```
 (STRIPE_* tienen placeholders — se activan en Fase B)
+**GOOGLE_OAUTH_CLIENT_ID/SECRET** (2026-09-04): único paso pendiente de la Fase A de Google
+Calendar (`docs/agente-cita-fase-A-google-calendar.md`) — todo el código (conexión, tokens
+cifrados, freebusy, creación de eventos, botón ya añadido en dashboard y en la sala de
+configuración) está construido y desplegado. Falta crear el proyecto + OAuth 2.0 Client (Web) en
+Google Cloud Console — lo tiene que hacer H, no es generable por código. Detalle de scopes y
+redirect URI en ese mismo doc. `GOOGLE_OAUTH_STATE_SECRET`/`GOOGLE_TOKEN_ENCRYPTION_KEY` ya están
+configurados. Hasta entonces, el botón "Conectar Google Calendar" permanece oculto (comportamiento
+esperado, no un bug).
 ~~R2_*~~ — **no aplica**: la subida de imágenes usa Supabase Storage, no Cloudflare R2.
 
 ---

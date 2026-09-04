@@ -64,7 +64,11 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   // acceso — visita_agencia no, la visita presencial ya cumple ese rol. Ver actions.ts.
   const isMarketDirecto = app.source !== 'visita_agencia'
   const isQualifiedAwaitingCall = st === 'qualified_awaiting_call'
-  const canInviteToCall = isMarketDirecto && !isQualifiedAwaitingCall
+  // Gate 2026-09-04 (hallazgo Codex, simulación E2E alta online): antes visible en cualquier
+  // estado no cualificado, incluido 'new' — permitía invitar a la llamada antes de que llegara
+  // el informe automático de WF1 a admin_notes. Restringido a in_review (mismo gate en el
+  // servidor, ver markQualifiedAwaitingCall en actions.ts).
+  const canInviteToCall = isMarketDirecto && st === 'in_review'
   const canApproveNow = !isMarketDirecto || isQualifiedAwaitingCall
   const missingPieces: string[] = Array.isArray(app.approval_missing_pieces) ? app.approval_missing_pieces : []
   const portales: string[] = Array.isArray(app.portales) ? app.portales : []
@@ -303,8 +307,27 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 )}
 
                 {canApproveNow && (
-                  <form action={approveApplication}>
+                  <form action={approveApplication} className="space-y-2">
                     <input type="hidden" name="id" value={app.id} />
+                    {isMarketDirecto && (
+                      <div>
+                        <label className="block text-[11px] text-bsm-text-muted mb-1" htmlFor="agreed_plan">
+                          Modalidad acordada en la llamada
+                        </label>
+                        <select
+                          id="agreed_plan"
+                          name="agreed_plan"
+                          defaultValue={app.agreed_plan ?? ''}
+                          required
+                          className="w-full bg-obsidian border border-bsm-border text-xs text-bsm-text-primary px-3 py-2"
+                        >
+                          <option value="" disabled>Selecciona el plan confirmado</option>
+                          <option value="essential">Essential</option>
+                          <option value="professional">Professional</option>
+                          <option value="elite">Elite</option>
+                        </select>
+                      </div>
+                    )}
                     <button
                       type="submit"
                       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold transition-colors"
@@ -315,10 +338,17 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   </form>
                 )}
                 {isMarketDirecto && isQualifiedAwaitingCall && (
-                  <p className="text-[11px] text-bsm-text-muted leading-relaxed">
-                    Cumple los criterios y ya se le invitó a agendar la llamada. Aprueba el acceso
-                    cuando la llamada haya tenido lugar y se hayan confirmado precio y modalidad.
-                  </p>
+                  <>
+                    <p className="text-[11px] text-bsm-text-muted leading-relaxed">
+                      Cumple los criterios y ya se le invitó a agendar la llamada. Aprueba el acceso
+                      cuando la llamada haya tenido lugar y se hayan confirmado precio y modalidad.
+                    </p>
+                    {app.qualified_at && (
+                      <p className="text-[11px] text-bsm-text-muted leading-relaxed">
+                        Esperando llamada · {timeAgo(app.qualified_at)}.
+                      </p>
+                    )}
+                  </>
                 )}
 
                 <form action={rejectApplication}>

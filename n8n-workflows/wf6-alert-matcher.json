@@ -1,14 +1,23 @@
 {
+  "updatedAt": "2026-09-04T19:08:39.537Z",
+  "createdAt": "2026-06-22T09:11:54.302Z",
+  "id": "uI8BWHYkQsyg2TWw",
   "name": "WF6 — Matcher de Alertas BLM",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "id": "wf6-sticky",
       "name": "Notas — WF6",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [60, 60],
+      "position": [
+        60,
+        60
+      ],
       "parameters": {
-        "content": "## BLM — 6. Matcher de Alertas\n\nWebhook path: `blm/alert-matcher`\n\nLlamado desde WF5 cuando un vehículo es aprobado.\n\n**Flujo:**\n1. Recibe vehicleId + datos básicos del vehículo\n2. Obtiene detalles completos del vehículo desde Supabase (incluye mileage_km)\n3. Carga todas las alertas activas\n4. Excluye las que no tienen ningún criterio real (brand/model/budget_max/year_min/km_max todos vacíos) — evita avisos irrelevantes a toda la base\n5. Filtra las que coinciden (marca, modelo, año, precio, km, tipo)\n6. Envía email a cada comprador con vehículo matching (vía SMTP Hostinger, credencial `Hostinger SMTP BLM`, no Resend pese al nombre del nodo)\n7. Actualiza last_matched_at en la alerta\n\n**Nota 2026-08-29**: en producción, los nodos 'Cargar alertas activas' y 'Actualizar last_matched_at' tienen la URL/token de Supabase escritos directamente en el nodo (no vía `$env.*`) — no replicado aquí a propósito, para no escribir credenciales reales en el repo. Ver `registro_decisiones.md`.\n\n**Variables necesarias:**\n- `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` (referencia — producción hoy usa valores fijos en 2 nodos, ver nota arriba)\n- `MARKET_URL`",
+        "content": "## BLM — 6. Matcher de Alertas\n\nWebhook path: `blm/alert-matcher`\n\nLlamado desde WF5 cuando un vehículo es aprobado.\n\n**Flujo:**\n1. Recibe vehicleId + datos básicos del vehículo\n2. Obtiene detalles completos del vehículo desde Supabase\n3. Carga todas las alertas activas\n4. Filtra las que coinciden (marca, modelo, año, precio, tipo)\n5. Envía email a cada comprador con vehículo matching\n6. Actualiza last_matched_at en la alerta\n\n**Variables necesarias:**\n- `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`\n- `RESEND_API_KEY`, `MAIL_FROM`\n- `MARKET_URL`",
         "height": 320,
         "width": 300
       }
@@ -18,7 +27,10 @@
       "name": "Webhook — Alert Matcher",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [400, 300],
+      "position": [
+        400,
+        300
+      ],
       "webhookId": "blm-alert-matcher",
       "parameters": {
         "httpMethod": "POST",
@@ -32,7 +44,10 @@
       "name": "Extraer datos del vehículo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [620, 300],
+      "position": [
+        620,
+        300
+      ],
       "parameters": {
         "jsCode": "const raw = $input.first().json;\nconst body = raw.body || raw;\nconst data = body.data || body;\n\nconst vehicleId    = data.vehicleId || data.entityId || body.vehicleId || body.entityId || null;\nconst brand        = (data.brand  || '').toLowerCase().trim();\nconst model        = (data.model  || '').toLowerCase().trim();\nconst year         = parseInt(data.year)  || null;\nconst vehicleTitle = data.vehicle_title   || [data.brand, data.model, data.year].filter(Boolean).join(' ');\nconst vehicleSlug  = data.vehicle_slug    || null;\nconst vehicleType  = data.vehicle_type    || null;\nconst price        = data.price !== undefined ? Number(data.price) : null;\n\nif (!vehicleId) throw new Error('vehicleId ausente en payload');\n\nreturn [{ json: { vehicleId, brand, model, year, vehicleTitle, vehicleSlug, vehicleType, price } }];"
       }
@@ -42,23 +57,41 @@
       "name": "Supabase — Obtener vehículo completo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [840, 300],
+      "position": [
+        840,
+        300
+      ],
       "parameters": {
         "method": "GET",
         "url": "={{ $env.SUPABASE_URL }}/rest/v1/vehicles",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" }
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            }
           ]
         },
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "id",     "value": "=eq.{{ $json.vehicleId }}" },
-            { "name": "select", "value": "id,brand_name,model_name,year,price,vehicle_type,slug,mileage_km" },
-            { "name": "limit",  "value": "1" }
+            {
+              "name": "id",
+              "value": "=eq.{{ $json.vehicleId }}"
+            },
+            {
+              "name": "select",
+              "value": "id,brand_name,model_name,year,price,vehicle_type,slug,mileage_km"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
           ]
         },
         "options": {}
@@ -69,7 +102,10 @@
       "name": "Combinar datos del vehículo",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1060, 300],
+      "position": [
+        1060,
+        300
+      ],
       "parameters": {
         "jsCode": "// Merge data from previous node (extract) + supabase response\nconst extracted = $('Extraer datos del vehículo').first().json;\nconst dbRows    = $input.all();\nconst db        = Array.isArray(dbRows) && dbRows.length > 0 ? dbRows[0].json : {};\n\nconst vehicleId    = extracted.vehicleId;\nconst brand        = (db.brand_name  || extracted.brand  || '').toLowerCase().trim();\nconst model        = (db.model_name  || extracted.model  || '').toLowerCase().trim();\nconst year         = db.year         || extracted.year   || null;\nconst price        = db.price        !== undefined ? Number(db.price) : (extracted.price !== null ? Number(extracted.price) : null);\nconst mileageKm    = db.mileage_km   !== undefined ? Number(db.mileage_km) : null;\nconst vehicleType  = db.vehicle_type || extracted.vehicleType || 'car';\nconst vehicleSlug  = db.slug         || extracted.vehicleSlug || null;\nconst vehicleTitle = extracted.vehicleTitle || [db.brand_name, db.model_name, db.year].filter(Boolean).join(' ');\n\nreturn [{ json: { vehicleId, brand, model, year, price, mileageKm, vehicleType, vehicleSlug, vehicleTitle } }];"
       }
@@ -79,24 +115,45 @@
       "name": "Supabase — Cargar alertas activas",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1280, 300],
+      "position": [
+        1280,
+        300
+      ],
       "parameters": {
         "method": "GET",
-        "url": "={{ $env.SUPABASE_URL }}/rest/v1/search_alerts",
+        "url": "https://iylppoaitwnmbwjaubuy.supabase.co/rest/v1/search_alerts",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Prefer",        "value": "count=exact" }
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+            },
+            {
+              "name": "Prefer",
+              "value": "count=exact"
+            }
           ]
         },
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "is_active", "value": "eq.true" },
-            { "name": "select",    "value": "id,email,phone,vehicle_type,brand,model,budget_max,year_min,km_max,location" },
-            { "name": "limit",     "value": "500" }
+            {
+              "name": "is_active",
+              "value": "eq.true"
+            },
+            {
+              "name": "select",
+              "value": "id,email,phone,vehicle_type,brand,model,budget_max,year_min,km_max,location"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
           ]
         },
         "options": {}
@@ -107,9 +164,12 @@
       "name": "Filtrar alertas coincidentes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 300],
+      "position": [
+        1500,
+        300
+      ],
       "parameters": {
-        "jsCode": "const vehicle = $('Combinar datos del vehículo').first().json;\nconst alerts  = $input.all().map(i => i.json);\n\nfunction parseNumeric(val) {\n  if (!val) return null;\n  // Handle Spanish format: 150.000 or 150000 or '150000€'\n  return parseInt(String(val).replace(/[.\\s]/g, '').replace(/[^0-9]/g, ''), 10) || null;\n}\n\n// Una alerta sin ningún criterio real (solo tipo/plazo/email, todo lo demás en blanco) coincide\n// técnicamente con cualquier vehículo nuevo — eso genera avisos irrelevantes que empujan bajas.\n// Se excluye del matching por completo hasta que el comprador afine al menos un criterio real.\nfunction hasConfirmedCriteria(a) {\n  return Boolean(\n    (a.brand && a.brand.trim()) ||\n    (a.model && a.model.trim()) ||\n    parseNumeric(a.budget_max) ||\n    (a.year_min) ||\n    parseNumeric(a.km_max)\n  );\n}\n\nconst matched = alerts.filter(a => {\n  if (!hasConfirmedCriteria(a)) return false;\n  // vehicle_type: 'any' matches all, otherwise must match\n  if (a.vehicle_type && a.vehicle_type !== 'any' && a.vehicle_type !== vehicle.vehicleType) return false;\n  // brand: must match (case-insensitive) if set\n  if (a.brand && a.brand.toLowerCase().trim() !== vehicle.brand) return false;\n  // model: must match if set\n  if (a.model && a.model.toLowerCase().trim() !== vehicle.model) return false;\n  // budget_max: vehicle price must be <= budget\n  if (a.budget_max && vehicle.price !== null) {\n    const maxBudget = parseNumeric(a.budget_max);\n    if (maxBudget && vehicle.price > maxBudget) return false;\n  }\n  // year_min: vehicle year must be >= year_min\n  if (a.year_min && vehicle.year !== null && vehicle.year < a.year_min) return false;\n  // km_max: vehicle mileage must be <= km_max\n  if (a.km_max && vehicle.mileageKm !== null) {\n    const maxKm = parseNumeric(a.km_max);\n    if (maxKm && vehicle.mileageKm > maxKm) return false;\n  }\n  return true;\n});\n\nif (matched.length === 0) return [];\n\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nreturn matched.map(a => ({\n  json: {\n    alertId:       a.id,\n    email:         a.email,\n    vehicleId:     vehicle.vehicleId,\n    vehicleTitle:  vehicle.vehicleTitle,\n    vehicleUrl:    vehicle.vehicleSlug ? `${MARKET_URL}/coches/${vehicle.vehicleSlug}` : MARKET_URL,\n    price:         vehicle.price,\n    brand:         vehicle.brand,\n    model:         vehicle.model,\n    year:          vehicle.year,\n  }\n}));"
+        "jsCode": "const vehicle = $('Combinar datos del vehículo').first().json;\nconst alerts  = $input.all().map(i => i.json);\n\nfunction parseNumeric(val) {\n  if (!val) return null;\n  // Handle Spanish format: 150.000 or 150000 or '150000€'\n  return parseInt(String(val).replace(/[.\\s]/g, '').replace(/[^0-9]/g, ''), 10) || null;\n}\n\n// Una alerta sin ningún criterio real (solo tipo/plazo/email, todo lo demás en blanco) coincide\n// técnicamente con cualquier vehículo nuevo — eso genera avisos irrelevantes que empujan bajas.\n// Se excluye del matching por completo hasta que el comprador afine al menos un criterio real.\nfunction hasConfirmedCriteria(a) {\n  return Boolean(\n    (a.brand && a.brand.trim()) ||\n    (a.model && a.model.trim()) ||\n    parseNumeric(a.budget_max) ||\n    (a.year_min) ||\n    parseNumeric(a.km_max)\n  );\n}\n\nconst matched = alerts.filter(a => {\n  if (!hasConfirmedCriteria(a)) return false;\n  // vehicle_type: 'any' matches all, otherwise must match\n  if (a.vehicle_type && a.vehicle_type !== 'any' && a.vehicle_type !== vehicle.vehicleType) return false;\n  // brand: must match (case-insensitive) if set\n  if (a.brand && a.brand.toLowerCase().trim() !== vehicle.brand) return false;\n  // model: must match if set\n  if (a.model && a.model.toLowerCase().trim() !== vehicle.model) return false;\n  // budget_max: vehicle price must be <= budget\n  if (a.budget_max && vehicle.price !== null) {\n    const maxBudget = parseNumeric(a.budget_max);\n    if (maxBudget && vehicle.price > maxBudget) return false;\n  }\n  // year_min: vehicle year must be >= year_min\n  if (a.year_min && vehicle.year !== null && vehicle.year < a.year_min) return false;\n  // km_max: vehicle mileage must be <= km_max\n  if (a.km_max && vehicle.mileageKm !== null) {\n    const maxKm = parseNumeric(a.km_max);\n    if (maxKm && vehicle.mileageKm > maxKm) return false;\n  }\n  return true;\n});\n\nif (matched.length === 0) return [];\n\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nreturn matched.map(a => ({\n  json: {\n    alertId:       a.id,\n    email:         a.email,\n    vehicleId:     vehicle.vehicleId,\n    vehicleTitle:  vehicle.vehicleTitle,\n    vehicleUrl:    vehicle.vehicleSlug ? `${MARKET_URL}/${vehicle.vehicleType === 'motorcycle' ? 'motos' : 'coches'}/${vehicle.vehicleSlug}` : MARKET_URL,\n    price:         vehicle.price,\n    brand:         vehicle.brand,\n    model:         vehicle.model,\n    year:          vehicle.year,\n  }\n}));"
       }
     },
     {
@@ -117,7 +177,10 @@
       "name": "Preparar email de alerta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1720, 300],
+      "position": [
+        1720,
+        300
+      ],
       "parameters": {
         "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $input.first().json;\nconst MAIL_FROM  = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\n\nconst priceText = d.price ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(d.price) : 'Consultar precio';\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"es\">\n<head><meta charset=\"UTF-8\"><style>\n  body { font-family: Arial, sans-serif; color: #1a1a1a; margin: 0; padding: 0; }\n  .container { max-width: 580px; margin: 0 auto; padding: 32px 24px; }\n  .header { color: #C6A64B; font-size: 22px; font-weight: 700; margin-bottom: 8px; }\n  .subtitle { color: #555; font-size: 14px; margin-bottom: 24px; }\n  .vehicle-card { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 24px; }\n  .vehicle-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }\n  .vehicle-price { color: #C6A64B; font-size: 16px; font-weight: 700; margin-bottom: 16px; }\n  .cta { display: inline-block; background: #C6A64B; color: #0B0B0B; text-decoration: none; padding: 12px 28px; border-radius: 4px; font-weight: 700; font-size: 15px; }\n  .footer { margin-top: 32px; font-size: 12px; color: #888; }\n</style></head>\n<body>\n<div class=\"container\">\n  <div class=\"header\">¡Encontramos un vehículo para ti!</div>\n  <div class=\"subtitle\">Hemos encontrado un vehículo que coincide con tu alerta de búsqueda en Black Label Market.</div>\n  <div class=\"vehicle-card\">\n    <div class=\"vehicle-title\">${d.vehicleTitle}</div>\n    <div class=\"vehicle-price\">${priceText}</div>\n    <a href=\"${d.vehicleUrl}\" class=\"cta\">Ver vehículo →</a>\n  </div>\n  <p>Si ya no te interesa esta búsqueda, puedes <a href=\"${MARKET_URL}/cuenta/alertas\">gestionar tus alertas aquí</a>.</p>\n  <div class=\"footer\">Black Label Market · ${MARKET_URL}</div>\n</div>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from:    MAIL_FROM,\n      to:      [d.email],\n      subject: `¡Encontramos tu ${d.vehicleTitle}! - Black Label Market`,\n      html: html + legalFooter\n    }\n  }\n}];"
       }
@@ -127,7 +190,10 @@
       "name": "Resend — Email al comprador",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [1940, 300],
+      "position": [
+        1940,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
         "fromEmail": "={{ $json.emailPayload ? $json.emailPayload.from : \"\" }}",
@@ -137,66 +203,559 @@
         "html": "={{ $json.emailPayload ? $json.emailPayload.html : \"\" }}"
       },
       "credentials": {
-        "smtp": { "id": "89HQYy0shv3FbifN", "name": "Hostinger SMTP BLM" }
-      }
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "5f25d126-2c1e-4d45-9bea-60dd70cc37ef"
     },
     {
       "id": "wf6-update-alert",
       "name": "Supabase — Actualizar last_matched_at",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2160, 300],
+      "position": [
+        2160,
+        300
+      ],
       "parameters": {
         "method": "PATCH",
-        "url": "={{ $env.SUPABASE_URL }}/rest/v1/search_alerts",
+        "url": "https://iylppoaitwnmbwjaubuy.supabase.co/rest/v1/search_alerts",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" },
-            { "name": "Prefer",        "value": "return=minimal" }
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
           ]
         },
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "id", "value": "=eq.{{ $('Filtrar alertas coincidentes').item.json.alertId }}" }
+            {
+              "name": "id",
+              "value": "=eq.{{ $('Filtrar alertas coincidentes').item.json.alertId }}"
+            }
           ]
         },
         "sendBody": true,
         "contentType": "raw",
         "body": "={ \"last_matched_at\": \"{{ new Date().toISOString() }}\", \"matched_vehicle_ids\": \"{\\\"{{ $('Filtrar alertas coincidentes').item.json.vehicleId }}\\\"}\" }",
-        "options": { "response": { "response": { "neverError": true } } }
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
       }
     }
   ],
   "connections": {
     "Webhook — Alert Matcher": {
-      "main": [[{ "node": "Extraer datos del vehículo", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Extraer datos del vehículo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Extraer datos del vehículo": {
-      "main": [[{ "node": "Supabase — Obtener vehículo completo", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Supabase — Obtener vehículo completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Supabase — Obtener vehículo completo": {
-      "main": [[{ "node": "Combinar datos del vehículo", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Combinar datos del vehículo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Combinar datos del vehículo": {
-      "main": [[{ "node": "Supabase — Cargar alertas activas", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Supabase — Cargar alertas activas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Supabase — Cargar alertas activas": {
-      "main": [[{ "node": "Filtrar alertas coincidentes", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Filtrar alertas coincidentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Filtrar alertas coincidentes": {
-      "main": [[{ "node": "Preparar email de alerta", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar email de alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar email de alerta": {
-      "main": [[{ "node": "Resend — Email al comprador", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Resend — Email al comprador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Resend — Email al comprador": {
-      "main": [[{ "node": "Supabase — Actualizar last_matched_at", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Supabase — Actualizar last_matched_at",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
-  "tags": []
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "1963951e-b6da-419a-b8d9-1b4591d66524",
+  "activeVersionId": "1963951e-b6da-419a-b8d9-1b4591d66524",
+  "versionCounter": 7,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-06-22T09:11:54.302Z",
+      "createdAt": "2026-06-22T09:11:54.302Z",
+      "role": "workflow:owner",
+      "workflowId": "uI8BWHYkQsyg2TWw",
+      "projectId": "c8xbzCksq6uUNqeh",
+      "project": {
+        "updatedAt": "2026-06-23T09:12:18.878Z",
+        "createdAt": "2026-06-21T22:11:28.384Z",
+        "id": "c8xbzCksq6uUNqeh",
+        "name": "Jose Torres <aldeiatools@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-09-04T19:08:39.540Z",
+    "createdAt": "2026-09-04T19:08:39.540Z",
+    "versionId": "1963951e-b6da-419a-b8d9-1b4591d66524",
+    "workflowId": "uI8BWHYkQsyg2TWw",
+    "nodes": [
+      {
+        "id": "wf6-sticky",
+        "name": "Notas — WF6",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          60,
+          60
+        ],
+        "parameters": {
+          "content": "## BLM — 6. Matcher de Alertas\n\nWebhook path: `blm/alert-matcher`\n\nLlamado desde WF5 cuando un vehículo es aprobado.\n\n**Flujo:**\n1. Recibe vehicleId + datos básicos del vehículo\n2. Obtiene detalles completos del vehículo desde Supabase\n3. Carga todas las alertas activas\n4. Filtra las que coinciden (marca, modelo, año, precio, tipo)\n5. Envía email a cada comprador con vehículo matching\n6. Actualiza last_matched_at en la alerta\n\n**Variables necesarias:**\n- `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`\n- `RESEND_API_KEY`, `MAIL_FROM`\n- `MARKET_URL`",
+          "height": 320,
+          "width": 300
+        }
+      },
+      {
+        "id": "wf6-webhook",
+        "name": "Webhook — Alert Matcher",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          400,
+          300
+        ],
+        "webhookId": "blm-alert-matcher",
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "blm/alert-matcher",
+          "responseMode": "onReceived",
+          "options": {}
+        }
+      },
+      {
+        "id": "wf6-extract",
+        "name": "Extraer datos del vehículo",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          620,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const raw = $input.first().json;\nconst body = raw.body || raw;\nconst data = body.data || body;\n\nconst vehicleId    = data.vehicleId || data.entityId || body.vehicleId || body.entityId || null;\nconst brand        = (data.brand  || '').toLowerCase().trim();\nconst model        = (data.model  || '').toLowerCase().trim();\nconst year         = parseInt(data.year)  || null;\nconst vehicleTitle = data.vehicle_title   || [data.brand, data.model, data.year].filter(Boolean).join(' ');\nconst vehicleSlug  = data.vehicle_slug    || null;\nconst vehicleType  = data.vehicle_type    || null;\nconst price        = data.price !== undefined ? Number(data.price) : null;\n\nif (!vehicleId) throw new Error('vehicleId ausente en payload');\n\nreturn [{ json: { vehicleId, brand, model, year, vehicleTitle, vehicleSlug, vehicleType, price } }];"
+        }
+      },
+      {
+        "id": "wf6-get-vehicle",
+        "name": "Supabase — Obtener vehículo completo",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          840,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $env.SUPABASE_URL }}/rest/v1/vehicles",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+              },
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id",
+                "value": "=eq.{{ $json.vehicleId }}"
+              },
+              {
+                "name": "select",
+                "value": "id,brand_name,model_name,year,price,vehicle_type,slug,mileage_km"
+              },
+              {
+                "name": "limit",
+                "value": "1"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "wf6-merge-vehicle",
+        "name": "Combinar datos del vehículo",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1060,
+          300
+        ],
+        "parameters": {
+          "jsCode": "// Merge data from previous node (extract) + supabase response\nconst extracted = $('Extraer datos del vehículo').first().json;\nconst dbRows    = $input.all();\nconst db        = Array.isArray(dbRows) && dbRows.length > 0 ? dbRows[0].json : {};\n\nconst vehicleId    = extracted.vehicleId;\nconst brand        = (db.brand_name  || extracted.brand  || '').toLowerCase().trim();\nconst model        = (db.model_name  || extracted.model  || '').toLowerCase().trim();\nconst year         = db.year         || extracted.year   || null;\nconst price        = db.price        !== undefined ? Number(db.price) : (extracted.price !== null ? Number(extracted.price) : null);\nconst mileageKm    = db.mileage_km   !== undefined ? Number(db.mileage_km) : null;\nconst vehicleType  = db.vehicle_type || extracted.vehicleType || 'car';\nconst vehicleSlug  = db.slug         || extracted.vehicleSlug || null;\nconst vehicleTitle = extracted.vehicleTitle || [db.brand_name, db.model_name, db.year].filter(Boolean).join(' ');\n\nreturn [{ json: { vehicleId, brand, model, year, price, mileageKm, vehicleType, vehicleSlug, vehicleTitle } }];"
+        }
+      },
+      {
+        "id": "wf6-get-alerts",
+        "name": "Supabase — Cargar alertas activas",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1280,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://iylppoaitwnmbwjaubuy.supabase.co/rest/v1/search_alerts",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+              },
+              {
+                "name": "Prefer",
+                "value": "count=exact"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "is_active",
+                "value": "eq.true"
+              },
+              {
+                "name": "select",
+                "value": "id,email,phone,vehicle_type,brand,model,budget_max,year_min,km_max,location"
+              },
+              {
+                "name": "limit",
+                "value": "500"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "wf6-filter",
+        "name": "Filtrar alertas coincidentes",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1500,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const vehicle = $('Combinar datos del vehículo').first().json;\nconst alerts  = $input.all().map(i => i.json);\n\nfunction parseNumeric(val) {\n  if (!val) return null;\n  // Handle Spanish format: 150.000 or 150000 or '150000€'\n  return parseInt(String(val).replace(/[.\\s]/g, '').replace(/[^0-9]/g, ''), 10) || null;\n}\n\n// Una alerta sin ningún criterio real (solo tipo/plazo/email, todo lo demás en blanco) coincide\n// técnicamente con cualquier vehículo nuevo — eso genera avisos irrelevantes que empujan bajas.\n// Se excluye del matching por completo hasta que el comprador afine al menos un criterio real.\nfunction hasConfirmedCriteria(a) {\n  return Boolean(\n    (a.brand && a.brand.trim()) ||\n    (a.model && a.model.trim()) ||\n    parseNumeric(a.budget_max) ||\n    (a.year_min) ||\n    parseNumeric(a.km_max)\n  );\n}\n\nconst matched = alerts.filter(a => {\n  if (!hasConfirmedCriteria(a)) return false;\n  // vehicle_type: 'any' matches all, otherwise must match\n  if (a.vehicle_type && a.vehicle_type !== 'any' && a.vehicle_type !== vehicle.vehicleType) return false;\n  // brand: must match (case-insensitive) if set\n  if (a.brand && a.brand.toLowerCase().trim() !== vehicle.brand) return false;\n  // model: must match if set\n  if (a.model && a.model.toLowerCase().trim() !== vehicle.model) return false;\n  // budget_max: vehicle price must be <= budget\n  if (a.budget_max && vehicle.price !== null) {\n    const maxBudget = parseNumeric(a.budget_max);\n    if (maxBudget && vehicle.price > maxBudget) return false;\n  }\n  // year_min: vehicle year must be >= year_min\n  if (a.year_min && vehicle.year !== null && vehicle.year < a.year_min) return false;\n  // km_max: vehicle mileage must be <= km_max\n  if (a.km_max && vehicle.mileageKm !== null) {\n    const maxKm = parseNumeric(a.km_max);\n    if (maxKm && vehicle.mileageKm > maxKm) return false;\n  }\n  return true;\n});\n\nif (matched.length === 0) return [];\n\nconst MARKET_URL = process.env.MARKET_URL || 'https://blacklabelmarket.es';\n\nreturn matched.map(a => ({\n  json: {\n    alertId:       a.id,\n    email:         a.email,\n    vehicleId:     vehicle.vehicleId,\n    vehicleTitle:  vehicle.vehicleTitle,\n    vehicleUrl:    vehicle.vehicleSlug ? `${MARKET_URL}/${vehicle.vehicleType === 'motorcycle' ? 'motos' : 'coches'}/${vehicle.vehicleSlug}` : MARKET_URL,\n    price:         vehicle.price,\n    brand:         vehicle.brand,\n    model:         vehicle.model,\n    year:          vehicle.year,\n  }\n}));"
+        }
+      },
+      {
+        "id": "wf6-prepare-email",
+        "name": "Preparar email de alerta",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1720,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $input.first().json;\nconst MAIL_FROM  = 'Black Label Market <hola@blacklabelmarket.es>';\nconst MARKET_URL = 'https://blacklabelmarket.es';\n\nconst priceText = d.price ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(d.price) : 'Consultar precio';\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"es\">\n<head><meta charset=\"UTF-8\"><style>\n  body { font-family: Arial, sans-serif; color: #1a1a1a; margin: 0; padding: 0; }\n  .container { max-width: 580px; margin: 0 auto; padding: 32px 24px; }\n  .header { color: #C6A64B; font-size: 22px; font-weight: 700; margin-bottom: 8px; }\n  .subtitle { color: #555; font-size: 14px; margin-bottom: 24px; }\n  .vehicle-card { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 24px; }\n  .vehicle-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }\n  .vehicle-price { color: #C6A64B; font-size: 16px; font-weight: 700; margin-bottom: 16px; }\n  .cta { display: inline-block; background: #C6A64B; color: #0B0B0B; text-decoration: none; padding: 12px 28px; border-radius: 4px; font-weight: 700; font-size: 15px; }\n  .footer { margin-top: 32px; font-size: 12px; color: #888; }\n</style></head>\n<body>\n<div class=\"container\">\n  <div class=\"header\">¡Encontramos un vehículo para ti!</div>\n  <div class=\"subtitle\">Hemos encontrado un vehículo que coincide con tu alerta de búsqueda en Black Label Market.</div>\n  <div class=\"vehicle-card\">\n    <div class=\"vehicle-title\">${d.vehicleTitle}</div>\n    <div class=\"vehicle-price\">${priceText}</div>\n    <a href=\"${d.vehicleUrl}\" class=\"cta\">Ver vehículo →</a>\n  </div>\n  <p>Si ya no te interesa esta búsqueda, puedes <a href=\"${MARKET_URL}/cuenta/alertas\">gestionar tus alertas aquí</a>.</p>\n  <div class=\"footer\">Black Label Market · ${MARKET_URL}</div>\n</div>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    ...d,\n    emailPayload: {\n      from:    MAIL_FROM,\n      to:      [d.email],\n      subject: `¡Encontramos tu ${d.vehicleTitle}! - Black Label Market`,\n      html: html + legalFooter\n    }\n  }\n}];"
+        }
+      },
+      {
+        "id": "wf6-send-email",
+        "name": "Resend — Email al comprador",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1940,
+          300
+        ],
+        "continueOnFail": true,
+        "parameters": {
+          "fromEmail": "={{ $json.emailPayload ? $json.emailPayload.from : \"\" }}",
+          "toEmail": "={{ $json.emailPayload ? $json.emailPayload.to[0] : \"\" }}",
+          "subject": "={{ $json.emailPayload ? $json.emailPayload.subject : \"(skip)\" }}",
+          "emailType": "html",
+          "html": "={{ $json.emailPayload ? $json.emailPayload.html : \"\" }}"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "webhookId": "5f25d126-2c1e-4d45-9bea-60dd70cc37ef"
+      },
+      {
+        "id": "wf6-update-alert",
+        "name": "Supabase — Actualizar last_matched_at",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2160,
+          300
+        ],
+        "parameters": {
+          "method": "PATCH",
+          "url": "https://iylppoaitwnmbwjaubuy.supabase.co/rest/v1/search_alerts",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+              },
+              {
+                "name": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5bHBwb2FpdHdubWJ3amF1YnV5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ1MjM0NCwiZXhwIjoyMDk1MDI4MzQ0fQ.jId-UzpvEGXEvzrXbwPmO_HwmBqkOK36fAk8t_T7gEw"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Prefer",
+                "value": "return=minimal"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "id",
+                "value": "=eq.{{ $('Filtrar alertas coincidentes').item.json.alertId }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "raw",
+          "body": "={ \"last_matched_at\": \"{{ new Date().toISOString() }}\", \"matched_vehicle_ids\": \"{\\\"{{ $('Filtrar alertas coincidentes').item.json.vehicleId }}\\\"}\" }",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook — Alert Matcher": {
+        "main": [
+          [
+            {
+              "node": "Extraer datos del vehículo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extraer datos del vehículo": {
+        "main": [
+          [
+            {
+              "node": "Supabase — Obtener vehículo completo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase — Obtener vehículo completo": {
+        "main": [
+          [
+            {
+              "node": "Combinar datos del vehículo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Combinar datos del vehículo": {
+        "main": [
+          [
+            {
+              "node": "Supabase — Cargar alertas activas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase — Cargar alertas activas": {
+        "main": [
+          [
+            {
+              "node": "Filtrar alertas coincidentes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filtrar alertas coincidentes": {
+        "main": [
+          [
+            {
+              "node": "Preparar email de alerta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar email de alerta": {
+        "main": [
+          [
+            {
+              "node": "Resend — Email al comprador",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Resend — Email al comprador": {
+        "main": [
+          [
+            {
+              "node": "Supabase — Actualizar last_matched_at",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Torres",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-09-04T19:08:39.653Z",
+        "id": 978,
+        "workflowId": "uI8BWHYkQsyg2TWw",
+        "versionId": "1963951e-b6da-419a-b8d9-1b4591d66524",
+        "event": "activated",
+        "userId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    ]
+  }
 }

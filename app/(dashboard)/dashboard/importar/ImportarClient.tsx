@@ -4,121 +4,7 @@ import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { Upload, FileText, CheckCircle, AlertCircle, Download, X, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-// ── CSV parser (no external library) ──────────────────────────────────────────
-
-function parseCSVLine(line: string): string[] {
-  const fields: string[] = []
-  let cur = ''
-  let inQ = false
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]
-    if (ch === '"') {
-      if (inQ && line[i + 1] === '"') { cur += '"'; i++ }
-      else inQ = !inQ
-    } else if ((ch === ',' || ch === ';') && !inQ) {
-      fields.push(cur.trim())
-      cur = ''
-    } else {
-      cur += ch
-    }
-  }
-  fields.push(cur.trim())
-  return fields
-}
-
-function parseCSV(text: string): { headers: string[]; rows: Record<string, string>[] } {
-  const clean = text.replace(/^﻿/, '').trim()
-  const lines = clean.split('\n').map(l => l.replace(/\r$/, '')).filter(Boolean)
-  if (lines.length < 2) return { headers: [], rows: [] }
-  const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, '_').trim())
-  const rows = lines.slice(1).map(line => {
-    const vals = parseCSVLine(line)
-    return Object.fromEntries(headers.map((h, i) => [h, vals[i] ?? '']))
-  })
-  return { headers, rows }
-}
-
-// CSV header aliases → API field names
-const ALIAS: Record<string, string> = {
-  tipo: 'vehicle_type', tipo_vehiculo: 'vehicle_type',
-  marca: 'brand_name',
-  modelo: 'model_name',
-  version: 'version',
-  ano: 'year', anio: 'year', year: 'year', año: 'year',
-  km: 'mileage_km', kilometros: 'mileage_km', kilometraje: 'mileage_km',
-  precio: 'price', price: 'price',
-  precio_consultar: 'price_on_request',
-  combustible: 'fuel_type',
-  cambio: 'transmission', transmision: 'transmission',
-  potencia_cv: 'power_hp', cv: 'power_hp', potencia: 'power_hp',
-  potencia_kw: 'power_kw',
-  par_nm: 'torque_nm', par_motor: 'torque_nm',
-  cilindrada: 'displacement_cc', cilindrada_cc: 'displacement_cc',
-  cilindros: 'cylinders',
-  traccion: 'drive_type', drive_type: 'drive_type',
-  color: 'color_exterior', color_exterior: 'color_exterior',
-  color_interior: 'color_interior',
-  tapiceria: 'upholstery', tapicería: 'upholstery',
-  carroceria: 'body_type', carrocería: 'body_type', body_type: 'body_type',
-  condicion: 'condition_type', estado_vehiculo: 'condition_type',
-  año_matriculacion: 'registration_year', ano_matriculacion: 'registration_year',
-  puertas: 'doors',
-  plazas: 'seats',
-  etiqueta_dgt: 'dgt_label',
-  num_propietarios: 'num_owners', propietarios: 'num_owners',
-  iva_deducible: 'iva_deducible',
-  descripcion: 'description', description: 'description',
-  vin: 'vin', bastidor: 'vin',
-  negociable: 'is_negotiable',
-  financiacion: 'financing_available', financiación: 'financing_available',
-  garantia: 'has_warranty', garantía: 'has_warranty',
-  meses_garantia: 'warranty_months',
-  prueba: 'has_test_drive',
-}
-
-function normaliseRow(raw: Record<string, string>): Record<string, string> {
-  const out: Record<string, string> = {}
-  for (const [k, v] of Object.entries(raw)) {
-    const mapped = ALIAS[k] ?? k
-    out[mapped] = v
-  }
-  return out
-}
-
-function validateRow(r: Record<string, string>): string | null {
-  if (!r.brand_name?.trim()) return 'Falta marca'
-  if (!r.model_name?.trim()) return 'Falta modelo'
-  const y = parseInt(r.year ?? '')
-  if (!y || y < 1900 || y > new Date().getFullYear() + 2) return `Año inválido (${r.year})`
-  const km = parseInt((r.mileage_km ?? '').replace(/\D/g, ''))
-  if (isNaN(km) || km < 0) return `Km inválidos (${r.mileage_km})`
-  return null
-}
-
-// ── CSV template (29 columns) ──────────────────────────────────────────────────
-
-const TEMPLATE_HEADERS = [
-  'tipo', 'marca', 'modelo', 'version', 'año', 'km',
-  'precio', 'precio_consultar', 'combustible', 'cambio', 'traccion',
-  'potencia_cv', 'potencia_kw', 'par_nm', 'cilindrada', 'cilindros',
-  'carroceria', 'condicion', 'color', 'color_interior', 'tapiceria',
-  'puertas', 'plazas', 'etiqueta_dgt', 'año_matriculacion', 'num_propietarios',
-  'iva_deducible', 'descripcion', 'vin',
-].join(',')
-
-const TEMPLATE_EXAMPLE = [
-  'coche', 'Ferrari', '488 GTB', 'Spider', '2019', '12000',
-  '280000', '', 'gasolina', 'automatico', 'rwd',
-  '670', '493', '760', '3902', '8',
-  'Coupé', 'seminuevo', 'Rojo Corsa', 'Negro', 'Cuero Nappa',
-  '2', '2', 'C', '2017', '1',
-  'no', 'Ferrari 488 GTB en perfecto estado con libro de revisiones.', '',
-].join(',')
-
-const TEMPLATE_CSV = `${TEMPLATE_HEADERS}\n${TEMPLATE_EXAMPLE}\n`
+import { parseCSV, normaliseRow, validateRow, TEMPLATE_CSV } from '@/lib/vehicle-intake/csv-parse'
 
 function downloadTemplate() {
   const blob = new Blob([TEMPLATE_CSV], { type: 'text/csv;charset=utf-8;' })
@@ -162,6 +48,8 @@ const COLUMNS = [
   { name: 'iva_deducible',   req: false, note: 'si / no' },
   { name: 'descripcion',     req: false, note: 'texto libre' },
   { name: 'vin',             req: false, note: 'número de bastidor (17 chars)' },
+  { name: 'fotos',           req: false, note: 'URLs separadas por "|" — se descargan y alojan automáticamente' },
+  { name: 'id_externo',      req: false, note: 'id de tu sistema/DMS, si lo tienes — evita duplicados al reimportar' },
 ]
 
 // ── Component ──────────────────────────────────────────────────────────────────

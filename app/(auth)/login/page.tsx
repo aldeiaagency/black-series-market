@@ -27,12 +27,14 @@ export default function LoginPage() {
       return
     }
 
-    // Route by role: dealer → dashboard, buyer → homepage
-    const { data: dealer } = await supabase
-      .from('dealers')
-      .select('id')
-      .eq('profile_id', data.user.id)
-      .maybeSingle()
+    // Route by role: dealer → dashboard, buyer → homepage.
+    // Corrección 2026-09-04: la auditoría de seguridad P0.2 (2026-09-02) revocó la lectura directa
+    // de dealers.profile_id para 'authenticated' y migró middleware.ts a esta misma RPC — esta
+    // página se quedó con el .eq('profile_id', ...) viejo, que desde entonces no devolvía nunca
+    // ninguna fila (sin error visible), así que todo dealer que iniciaba sesión aquí caía siempre
+    // a home en vez de a su dashboard. Hallado en el simulacro E2E Karboceramic.
+    const { data: dealerRows } = await supabase.rpc('get_own_dealer_summary')
+    const dealer = dealerRows?.[0] ?? null
 
     router.push(dealer ? '/dashboard' : '/')
     router.refresh()

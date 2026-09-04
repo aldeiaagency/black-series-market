@@ -1,12 +1,21 @@
 {
+  "updatedAt": "2026-09-04T18:11:58.207Z",
+  "createdAt": "2026-09-02T10:02:56.191Z",
+  "id": "VRI8UD5vNuIN0mdt",
   "name": "BLM - Formulario de Contacto",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "id": "wfc-note-01",
       "name": "Notas - WF Contacto",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [0, -220],
+      "position": [
+        0,
+        -220
+      ],
       "parameters": {
         "content": "## BLM - Formulario de Contacto\n\nTrigger: `N8N_WEBHOOK_CONTACT_FORM` en Vercel (app/api/contact/route.ts)\nWebhook path: `blm/contact`\n\n`/contacto` es público y sin autenticación, igual que el alta de\nshowroom (WF1) — mismo esquema de firma: cabeceras\n`x-blacklabel-event` / `x-blacklabel-timestamp` /\n`x-blacklabel-signature` con el secreto\n`N8N_WEBHOOK_CONTACT_FORM_SECRET`. Verificación real hoy: nombre\ndel evento + ventana anti-replay de 5 min (la verificación HMAC\ncompleta tiene la misma limitación documentada que WF1 — sandbox\nde n8n bloquea require('crypto') en nodos Code; ver SEC-14 en\ndocs/PENDIENTES.md).\n\nEnvía: (1) acuse de recibo al remitente, (2) aviso interno a\nmarketing@blackseriesagency.es con el mensaje completo.",
         "height": 280,
@@ -19,22 +28,31 @@
       "name": "Webhook - Contact Form",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "blm/contact",
         "responseMode": "responseNode",
-        "options": {}
-      }
+        "options": {
+          "rawBody": true
+        }
+      },
+      "webhookId": "63ba6c24-2309-47bc-b955-77fe3a162c85"
     },
     {
       "id": "wfc-node-02-validate",
       "name": "Validar firma y payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === \"object\" && input.body !== null) ? input.body : {};\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\nconst event = getHeader(headers, \"x-blacklabel-event\");\nconst ts    = getHeader(headers, \"x-blacklabel-timestamp\");\nconst sig   = getHeader(headers, \"x-blacklabel-signature\");\n\nif (event !== \"contact_form.submitted\") return [{ json: { ok: false, error: \"Evento invalido: \" + (event || \"missing\") } }];\nif (!ts)  return [{ json: { ok: false, error: \"Falta x-blacklabel-timestamp\" } }];\nif (!sig || !sig.startsWith(\"sha256=\")) return [{ json: { ok: false, error: \"Falta x-blacklabel-signature\" } }];\n\n// Ventana de frescura anti-replay (mismo patron que WF1): rechaza timestamps fuera de +/-5 min.\nconst tsMs = Date.parse(ts);\nif (!Number.isFinite(tsMs)) return [{ json: { ok: false, error: \"x-blacklabel-timestamp invalido\" } }];\nconst skewMs = Math.abs(Date.now() - tsMs);\nconst MAX_SKEW_MS = 5 * 60 * 1000;\nif (skewMs > MAX_SKEW_MS) return [{ json: { ok: false, error: \"timestamp fuera de ventana\" } }];\n\nconst p = body;\nconst required = [\"name\", \"email\", \"subject\", \"message\"];\nconst missing = required.filter(f => !p[f]);\nif (missing.length) return [{ json: { ok: false, error: \"Payload incompleto: \" + missing.join(\", \") } }];\n\nreturn [{ json: { ok: true, name: p.name, email: p.email, subject: p.subject, message: p.message } }];"
+        "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === \"object\" && input.body !== null) ? input.body : {};\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\nconst event = getHeader(headers, \"x-blacklabel-event\");\nconst ts    = getHeader(headers, \"x-blacklabel-timestamp\");\nconst sig   = getHeader(headers, \"x-blacklabel-signature\");\n\nif (event !== \"contact_form.submitted\") return [{ json: { ok: false, error: \"Evento invalido: \" + (event || \"missing\") } }];\nif (!ts)  return [{ json: { ok: false, error: \"Falta x-blacklabel-timestamp\" } }];\nif (!sig || !sig.startsWith(\"sha256=\")) return [{ json: { ok: false, error: \"Falta x-blacklabel-signature\" } }];\n\n// Verificacion HMAC real (2026-09-05): antes solo se comprobaba formato/presencia de la firma,\n// nunca su valor -- mismo patron ya aplicado a WF1, dealer-qualified y onboarding fundador (ver\n// docs/PENDIENTES.md). El hash se calcula en el nodo nativo \"Crypto - HMAC firma\" justo antes de\n// este (HMAC-SHA256 sobre el body crudo binario, rawBody:true del webhook).\nconst expectedSig = String(input.computed_signature || \"\").toLowerCase();\nconst providedSig = sig.slice(7).toLowerCase();\nif (!expectedSig || expectedSig !== providedSig) return [{ json: { ok: false, error: \"Firma invalida\" } }];\n\n// Ventana de frescura anti-replay (mismo patron que WF1): rechaza timestamps fuera de +/-5 min.\nconst tsMs = Date.parse(ts);\nif (!Number.isFinite(tsMs)) return [{ json: { ok: false, error: \"x-blacklabel-timestamp invalido\" } }];\nconst skewMs = Math.abs(Date.now() - tsMs);\nconst MAX_SKEW_MS = 5 * 60 * 1000;\nif (skewMs > MAX_SKEW_MS) return [{ json: { ok: false, error: \"timestamp fuera de ventana\" } }];\n\nconst p = body;\nconst required = [\"name\", \"email\", \"subject\", \"message\"];\nconst missing = required.filter(f => !p[f]);\nif (missing.length) return [{ json: { ok: false, error: \"Payload incompleto: \" + missing.join(\", \") } }];\n\nreturn [{ json: { ok: true, name: p.name, email: p.email, subject: p.subject, message: p.message } }];"
       }
     },
     {
@@ -42,7 +60,10 @@
       "name": "Payload válido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [480, 300],
+      "position": [
+        480,
+        300
+      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -55,7 +76,10 @@
               "id": "ok",
               "leftValue": "={{ $json.ok }}",
               "rightValue": true,
-              "operator": { "type": "boolean", "operation": "true" }
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
             }
           ],
           "combinator": "and"
@@ -67,11 +91,16 @@
       "name": "Responder 202 - Aceptado",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [720, 200],
+      "position": [
+        720,
+        200
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM - Formulario de Contacto' } }}",
-        "options": { "responseCode": 202 }
+        "options": {
+          "responseCode": 202
+        }
       }
     },
     {
@@ -79,11 +108,16 @@
       "name": "Responder 400 - Inválido",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [720, 420],
+      "position": [
+        720,
+        420
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { ok: false, error: $json.error } }}",
-        "options": { "responseCode": 400 }
+        "options": {
+          "responseCode": 400
+        }
       }
     },
     {
@@ -91,7 +125,10 @@
       "name": "Preparar emails contacto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 200],
+      "position": [
+        960,
+        200
+      ],
       "parameters": {
         "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $input.first().json;\nconst MAIL_FROM   = $env.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = 'marketing@blackseriesagency.es';\n\nconst subjectLabels = {\n  suscripcion: 'Gestión de mi suscripción',\n  soporte: 'Soporte técnico',\n  editorial: 'Revisión editorial de vehículo',\n  facturacion: 'Facturación',\n  otro: 'Otro',\n};\nconst subjectLabel = subjectLabels[d.subject] || d.subject;\n\nconst messageHtml = String(d.message)\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n  .replace(/\\n/g, '<br>');\n\nconst confirmEmailHtml = `<p>Hola ${d.name},</p>\n<p>Hemos recibido tu mensaje. Te respondemos en menos de 24 horas laborables.</p>\n<p>Un saludo,<br>Black Label Market</p>`;\n\nconst internalEmailHtml = `<h2>Nuevo mensaje de contacto</h2>\n<p><strong>Nombre:</strong> ${d.name}</p>\n<p><strong>Email:</strong> ${d.email}</p>\n<p><strong>Asunto:</strong> ${subjectLabel}</p>\n<blockquote style=\"border-left:3px solid #c9a227;padding-left:12px;margin:16px 0;color:#555\">${messageHtml}</blockquote>`;\n\nreturn [{\n  json: {\n    ...d,\n    confirmEmail: { from: MAIL_FROM, to: [d.email], subject: 'Hemos recibido tu mensaje - Black Label Market', html: confirmEmailHtml + legalFooter },\n    internalEmail: { from: MAIL_FROM, to: [ADMIN_EMAIL], subject: `Contacto: ${subjectLabel} — ${d.name}`, html: internalEmailHtml }\n  }\n}];"
       }
@@ -101,8 +138,10 @@
       "name": "Email - Confirmación al remitente",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [1200, 120],
-      "continueOnFail": true,
+      "position": [
+        1200,
+        120
+      ],
       "parameters": {
         "fromEmail": "={{ $json.confirmEmail.from }}",
         "toEmail": "={{ $json.confirmEmail.to[0] }}",
@@ -111,16 +150,23 @@
         "html": "={{ $json.confirmEmail.html }}"
       },
       "credentials": {
-        "smtp": { "id": "89HQYy0shv3FbifN", "name": "Hostinger SMTP BLM" }
-      }
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "0222ae53-219a-4d93-beeb-498da2c8e869",
+      "onError": "continueErrorOutput"
     },
     {
       "id": "wfc-node-07-email-internal",
       "name": "Email - Aviso interno",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
-      "position": [1200, 300],
-      "continueOnFail": true,
+      "position": [
+        1200,
+        300
+      ],
       "parameters": {
         "fromEmail": "={{ $json.internalEmail.from }}",
         "toEmail": "={{ $json.internalEmail.to[0] }}",
@@ -129,32 +175,583 @@
         "html": "={{ $json.internalEmail.html }}"
       },
       "credentials": {
-        "smtp": { "id": "89HQYy0shv3FbifN", "name": "Hostinger SMTP BLM" }
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "webhookId": "45a12fc0-0509-462a-9328-13108caa22e7",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "wfcf-node-crypto-hmac",
+      "name": "Crypto - HMAC firma",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        110,
+        420
+      ],
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "secret": "REDACTED_SEE_VERCEL_N8N_LIVE_DO_NOT_COMMIT_REAL_VALUE",
+        "dataPropertyName": "computed_signature"
       }
+    },
+    {
+      "id": "wfcf-alert-avisointernofalloconfirmacionremitente",
+      "name": "Aviso interno - fallo confirmacion remitente",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1200,
+        280
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "parameters": {
+        "fromEmail": "={{ $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>' }}",
+        "toEmail": "marketing@blackseriesagency.es",
+        "subject": "=Fallo de envio: confirmacion al remitente ({{ $json.name || $json.email || \"sin datos\" }})",
+        "html": "=<p>Un email del formulario de contacto (confirmacion al remitente) no se pudo enviar.</p><p><strong>Nombre:</strong> {{ $json.name || 'desconocido' }}<br><strong>Email:</strong> {{ $json.email || 'desconocido' }}<br><strong>Asunto:</strong> {{ $json.subject || 'desconocido' }}</p>",
+        "options": {}
+      },
+      "webhookId": "e21b71f4-39c4-411b-9a25-ab93207b5e52"
+    },
+    {
+      "id": "wfcf-alert-avisointernofalloavisointerno",
+      "name": "Aviso interno - fallo aviso interno",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1200,
+        460
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "89HQYy0shv3FbifN",
+          "name": "Hostinger SMTP BLM"
+        }
+      },
+      "parameters": {
+        "fromEmail": "={{ $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>' }}",
+        "toEmail": "marketing@blackseriesagency.es",
+        "subject": "=Fallo de envio: aviso interno del formulario de contacto ({{ $json.name || $json.email || \"sin datos\" }})",
+        "html": "=<p>Un email del formulario de contacto (aviso interno del formulario de contacto) no se pudo enviar.</p><p><strong>Nombre:</strong> {{ $json.name || 'desconocido' }}<br><strong>Email:</strong> {{ $json.email || 'desconocido' }}<br><strong>Asunto:</strong> {{ $json.subject || 'desconocido' }}</p>",
+        "options": {}
+      },
+      "webhookId": "56cc73dc-0202-4a49-864d-d24b719e3786"
     }
   ],
   "connections": {
     "Webhook - Contact Form": {
-      "main": [[{ "node": "Validar firma y payload", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Crypto - HMAC firma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validar firma y payload": {
-      "main": [[{ "node": "Payload válido?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Payload válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Payload válido?": {
       "main": [
-        [{ "node": "Responder 202 - Aceptado", "type": "main", "index": 0 }],
-        [{ "node": "Responder 400 - Inválido", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Responder 202 - Aceptado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 400 - Inválido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Responder 202 - Aceptado": {
-      "main": [[{ "node": "Preparar emails contacto", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Preparar emails contacto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar emails contacto": {
-      "main": [[
-        { "node": "Email - Confirmación al remitente", "type": "main", "index": 0 },
-        { "node": "Email - Aviso interno", "type": "main", "index": 0 }
-      ]]
+      "main": [
+        [
+          {
+            "node": "Email - Confirmación al remitente",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email - Aviso interno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto - HMAC firma": {
+      "main": [
+        [
+          {
+            "node": "Validar firma y payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Confirmación al remitente": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Aviso interno - fallo confirmacion remitente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email - Aviso interno": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Aviso interno - fallo aviso interno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": {}
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "2753cea2-9002-4403-b2f9-f463456e6ff1",
+  "activeVersionId": "2753cea2-9002-4403-b2f9-f463456e6ff1",
+  "versionCounter": 3,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-09-02T10:02:56.191Z",
+      "createdAt": "2026-09-02T10:02:56.191Z",
+      "role": "workflow:owner",
+      "workflowId": "VRI8UD5vNuIN0mdt",
+      "projectId": "c8xbzCksq6uUNqeh",
+      "project": {
+        "updatedAt": "2026-06-23T09:12:18.878Z",
+        "createdAt": "2026-06-21T22:11:28.384Z",
+        "id": "c8xbzCksq6uUNqeh",
+        "name": "Jose Torres <aldeiatools@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-09-04T18:11:58.211Z",
+    "createdAt": "2026-09-04T18:11:58.211Z",
+    "versionId": "2753cea2-9002-4403-b2f9-f463456e6ff1",
+    "workflowId": "VRI8UD5vNuIN0mdt",
+    "nodes": [
+      {
+        "id": "wfc-note-01",
+        "name": "Notas - WF Contacto",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          0,
+          -220
+        ],
+        "parameters": {
+          "content": "## BLM - Formulario de Contacto\n\nTrigger: `N8N_WEBHOOK_CONTACT_FORM` en Vercel (app/api/contact/route.ts)\nWebhook path: `blm/contact`\n\n`/contacto` es público y sin autenticación, igual que el alta de\nshowroom (WF1) — mismo esquema de firma: cabeceras\n`x-blacklabel-event` / `x-blacklabel-timestamp` /\n`x-blacklabel-signature` con el secreto\n`N8N_WEBHOOK_CONTACT_FORM_SECRET`. Verificación real hoy: nombre\ndel evento + ventana anti-replay de 5 min (la verificación HMAC\ncompleta tiene la misma limitación documentada que WF1 — sandbox\nde n8n bloquea require('crypto') en nodos Code; ver SEC-14 en\ndocs/PENDIENTES.md).\n\nEnvía: (1) acuse de recibo al remitente, (2) aviso interno a\nmarketing@blackseriesagency.es con el mensaje completo.",
+          "height": 280,
+          "width": 460,
+          "color": 3
+        }
+      },
+      {
+        "id": "wfc-node-01-webhook",
+        "name": "Webhook - Contact Form",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "blm/contact",
+          "responseMode": "responseNode",
+          "options": {
+            "rawBody": true
+          }
+        },
+        "webhookId": "63ba6c24-2309-47bc-b955-77fe3a162c85"
+      },
+      {
+        "id": "wfc-node-02-validate",
+        "name": "Validar firma y payload",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const input = $input.first().json;\nconst headers = input.headers || {};\nconst body = (typeof input.body === \"object\" && input.body !== null) ? input.body : {};\n\nfunction getHeader(h, key) {\n  const k = key.toLowerCase();\n  for (const [n, v] of Object.entries(h)) {\n    if (n.toLowerCase() === k) return Array.isArray(v) ? v[0] : v;\n  }\n}\n\nconst event = getHeader(headers, \"x-blacklabel-event\");\nconst ts    = getHeader(headers, \"x-blacklabel-timestamp\");\nconst sig   = getHeader(headers, \"x-blacklabel-signature\");\n\nif (event !== \"contact_form.submitted\") return [{ json: { ok: false, error: \"Evento invalido: \" + (event || \"missing\") } }];\nif (!ts)  return [{ json: { ok: false, error: \"Falta x-blacklabel-timestamp\" } }];\nif (!sig || !sig.startsWith(\"sha256=\")) return [{ json: { ok: false, error: \"Falta x-blacklabel-signature\" } }];\n\n// Verificacion HMAC real (2026-09-05): antes solo se comprobaba formato/presencia de la firma,\n// nunca su valor -- mismo patron ya aplicado a WF1, dealer-qualified y onboarding fundador (ver\n// docs/PENDIENTES.md). El hash se calcula en el nodo nativo \"Crypto - HMAC firma\" justo antes de\n// este (HMAC-SHA256 sobre el body crudo binario, rawBody:true del webhook).\nconst expectedSig = String(input.computed_signature || \"\").toLowerCase();\nconst providedSig = sig.slice(7).toLowerCase();\nif (!expectedSig || expectedSig !== providedSig) return [{ json: { ok: false, error: \"Firma invalida\" } }];\n\n// Ventana de frescura anti-replay (mismo patron que WF1): rechaza timestamps fuera de +/-5 min.\nconst tsMs = Date.parse(ts);\nif (!Number.isFinite(tsMs)) return [{ json: { ok: false, error: \"x-blacklabel-timestamp invalido\" } }];\nconst skewMs = Math.abs(Date.now() - tsMs);\nconst MAX_SKEW_MS = 5 * 60 * 1000;\nif (skewMs > MAX_SKEW_MS) return [{ json: { ok: false, error: \"timestamp fuera de ventana\" } }];\n\nconst p = body;\nconst required = [\"name\", \"email\", \"subject\", \"message\"];\nconst missing = required.filter(f => !p[f]);\nif (missing.length) return [{ json: { ok: false, error: \"Payload incompleto: \" + missing.join(\", \") } }];\n\nreturn [{ json: { ok: true, name: p.name, email: p.email, subject: p.subject, message: p.message } }];"
+        }
+      },
+      {
+        "id": "wfc-node-03-if",
+        "name": "Payload válido?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "ok",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "wfc-node-04-respond",
+        "name": "Responder 202 - Aceptado",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          720,
+          200
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { ok: true, accepted: true, workflow: 'BLM - Formulario de Contacto' } }}",
+          "options": {
+            "responseCode": 202
+          }
+        }
+      },
+      {
+        "id": "wfc-node-respond-bad",
+        "name": "Responder 400 - Inválido",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          720,
+          420
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { ok: false, error: $json.error } }}",
+          "options": {
+            "responseCode": 400
+          }
+        }
+      },
+      {
+        "id": "wfc-node-05-prepare",
+        "name": "Preparar emails contacto",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          960,
+          200
+        ],
+        "parameters": {
+          "jsCode": "const legalFooter = `<div style=\"margin-top:24px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#777;line-height:1.5\">Black Label Market es una marca de <strong>KAZAWEB, S.L.U.</strong> (NIF B42761254), con domicilio en Lugar Rebordelo nº 35, Planta 2, 15930 Boiro, A Coruña. Inscrita en el Registro Mercantil de Santiago de Compostela, Tomo 395, Folio 51, Hoja SC-51053.<br>Puedes solicitar la baja de comunicaciones o ejercer tus derechos de privacidad escribiendo a <a href=\"mailto:privacidad@blacklabelmarket.es\">privacidad@blacklabelmarket.es</a>. Consulta nuestra <a href=\"https://blacklabelmarket.es/legal/privacidad\">Política de Privacidad</a>.</div>`;\n\nconst d = $input.first().json;\nconst MAIL_FROM   = $env.MAIL_FROM   || 'Black Label Market <no-reply@blacklabelmarket.es>';\nconst ADMIN_EMAIL = 'marketing@blackseriesagency.es';\n\nconst subjectLabels = {\n  suscripcion: 'Gestión de mi suscripción',\n  soporte: 'Soporte técnico',\n  editorial: 'Revisión editorial de vehículo',\n  facturacion: 'Facturación',\n  otro: 'Otro',\n};\nconst subjectLabel = subjectLabels[d.subject] || d.subject;\n\nconst messageHtml = String(d.message)\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')\n  .replace(/\\n/g, '<br>');\n\nconst confirmEmailHtml = `<p>Hola ${d.name},</p>\n<p>Hemos recibido tu mensaje. Te respondemos en menos de 24 horas laborables.</p>\n<p>Un saludo,<br>Black Label Market</p>`;\n\nconst internalEmailHtml = `<h2>Nuevo mensaje de contacto</h2>\n<p><strong>Nombre:</strong> ${d.name}</p>\n<p><strong>Email:</strong> ${d.email}</p>\n<p><strong>Asunto:</strong> ${subjectLabel}</p>\n<blockquote style=\"border-left:3px solid #c9a227;padding-left:12px;margin:16px 0;color:#555\">${messageHtml}</blockquote>`;\n\nreturn [{\n  json: {\n    ...d,\n    confirmEmail: { from: MAIL_FROM, to: [d.email], subject: 'Hemos recibido tu mensaje - Black Label Market', html: confirmEmailHtml + legalFooter },\n    internalEmail: { from: MAIL_FROM, to: [ADMIN_EMAIL], subject: `Contacto: ${subjectLabel} — ${d.name}`, html: internalEmailHtml }\n  }\n}];"
+        }
+      },
+      {
+        "id": "wfc-node-06-email-confirm",
+        "name": "Email - Confirmación al remitente",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          120
+        ],
+        "parameters": {
+          "fromEmail": "={{ $json.confirmEmail.from }}",
+          "toEmail": "={{ $json.confirmEmail.to[0] }}",
+          "subject": "={{ $json.confirmEmail.subject }}",
+          "emailType": "html",
+          "html": "={{ $json.confirmEmail.html }}"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "webhookId": "0222ae53-219a-4d93-beeb-498da2c8e869",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "id": "wfc-node-07-email-internal",
+        "name": "Email - Aviso interno",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          300
+        ],
+        "parameters": {
+          "fromEmail": "={{ $json.internalEmail.from }}",
+          "toEmail": "={{ $json.internalEmail.to[0] }}",
+          "subject": "={{ $json.internalEmail.subject }}",
+          "emailType": "html",
+          "html": "={{ $json.internalEmail.html }}"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "webhookId": "45a12fc0-0509-462a-9328-13108caa22e7",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "id": "wfcf-node-crypto-hmac",
+        "name": "Crypto - HMAC firma",
+        "type": "n8n-nodes-base.crypto",
+        "typeVersion": 1,
+        "position": [
+          110,
+          420
+        ],
+        "parameters": {
+          "action": "hmac",
+          "type": "SHA256",
+          "binaryData": true,
+          "binaryPropertyName": "data",
+          "secret": "625289e2c8cdb1dee8a8237cc14355972197d6dc7ac42ddfbb9f01e399d63622",
+          "dataPropertyName": "computed_signature"
+        }
+      },
+      {
+        "id": "wfcf-alert-avisointernofalloconfirmacionremitente",
+        "name": "Aviso interno - fallo confirmacion remitente",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          280
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "parameters": {
+          "fromEmail": "={{ $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>' }}",
+          "toEmail": "marketing@blackseriesagency.es",
+          "subject": "=Fallo de envio: confirmacion al remitente ({{ $json.name || $json.email || \"sin datos\" }})",
+          "html": "=<p>Un email del formulario de contacto (confirmacion al remitente) no se pudo enviar.</p><p><strong>Nombre:</strong> {{ $json.name || 'desconocido' }}<br><strong>Email:</strong> {{ $json.email || 'desconocido' }}<br><strong>Asunto:</strong> {{ $json.subject || 'desconocido' }}</p>",
+          "options": {}
+        },
+        "webhookId": "e21b71f4-39c4-411b-9a25-ab93207b5e52"
+      },
+      {
+        "id": "wfcf-alert-avisointernofalloavisointerno",
+        "name": "Aviso interno - fallo aviso interno",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          460
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "89HQYy0shv3FbifN",
+            "name": "Hostinger SMTP BLM"
+          }
+        },
+        "parameters": {
+          "fromEmail": "={{ $env.MAIL_FROM || 'Black Label Market <no-reply@blacklabelmarket.es>' }}",
+          "toEmail": "marketing@blackseriesagency.es",
+          "subject": "=Fallo de envio: aviso interno del formulario de contacto ({{ $json.name || $json.email || \"sin datos\" }})",
+          "html": "=<p>Un email del formulario de contacto (aviso interno del formulario de contacto) no se pudo enviar.</p><p><strong>Nombre:</strong> {{ $json.name || 'desconocido' }}<br><strong>Email:</strong> {{ $json.email || 'desconocido' }}<br><strong>Asunto:</strong> {{ $json.subject || 'desconocido' }}</p>",
+          "options": {}
+        },
+        "webhookId": "56cc73dc-0202-4a49-864d-d24b719e3786"
+      }
+    ],
+    "connections": {
+      "Webhook - Contact Form": {
+        "main": [
+          [
+            {
+              "node": "Crypto - HMAC firma",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validar firma y payload": {
+        "main": [
+          [
+            {
+              "node": "Payload válido?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Payload válido?": {
+        "main": [
+          [
+            {
+              "node": "Responder 202 - Aceptado",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Responder 400 - Inválido",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Responder 202 - Aceptado": {
+        "main": [
+          [
+            {
+              "node": "Preparar emails contacto",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar emails contacto": {
+        "main": [
+          [
+            {
+              "node": "Email - Confirmación al remitente",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Email - Aviso interno",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Crypto - HMAC firma": {
+        "main": [
+          [
+            {
+              "node": "Validar firma y payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Email - Confirmación al remitente": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Aviso interno - fallo confirmacion remitente",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Email - Aviso interno": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Aviso interno - fallo aviso interno",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Torres",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-09-04T18:11:58.337Z",
+        "id": 976,
+        "workflowId": "VRI8UD5vNuIN0mdt",
+        "versionId": "2753cea2-9002-4403-b2f9-f463456e6ff1",
+        "event": "activated",
+        "userId": "08881be6-bc36-4021-b320-86c75fa53d0f"
+      }
+    ]
+  }
 }

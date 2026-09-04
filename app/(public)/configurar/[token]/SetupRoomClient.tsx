@@ -1,13 +1,24 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, CalendarClock, Check, FileText, ImagePlus, Loader2, Trash2, UploadCloud } from 'lucide-react'
+import { AlertTriangle, CalendarClock, Check, Download, FileText, ImagePlus, Link2, Loader2, Trash2, UploadCloud } from 'lucide-react'
 import type { SetupRoomData } from '@/lib/onboarding/setup-room'
 import { DEFAULT_RULES, DEFAULT_SETTINGS, rangesToStr, parseRanges } from '@/lib/booking'
 import type { BookingSettings, Weekday, TimeRange } from '@/lib/booking'
 import { createClient } from '@/lib/supabase/client'
 import { FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/utils'
 import { brandSlugsForType } from '@/lib/brand-types'
+import { TEMPLATE_CSV } from '@/lib/vehicle-intake/csv-parse'
+
+function downloadCsvTemplate() {
+  const blob = new Blob([TEMPLATE_CSV], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'plantilla_importacion_blacklabel.csv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 const DAYS: { key: Weekday; label: string }[] = [
   { key: 'mon', label: 'Lunes' }, { key: 'tue', label: 'Martes' }, { key: 'wed', label: 'Miércoles' },
@@ -38,17 +49,40 @@ const SERVICES = [
 
 type FileRef = { url: string; path: string; type: string; name?: string; size?: number; content_type?: string }
 
+// Mismas etiquetas que Dashboard → Citas (CitasConfig.tsx) — duplicado a propósito, es un mapa
+// de 7 líneas y evita acoplar esta ruta pública a un componente de (dashboard).
+const CALENDAR_ERROR_LABELS: Record<string, string> = {
+  not_configured: 'La conexión con Google Calendar no está disponible todavía.',
+  denied: 'Has cancelado la conexión con Google Calendar.',
+  invalid_request: 'La solicitud de conexión no es válida. Inténtalo de nuevo.',
+  invalid_state: 'La solicitud de conexión caducó. Inténtalo de nuevo.',
+  token_exchange_failed: 'Google no ha devuelto acceso permanente. Vuelve a intentarlo aceptando todos los permisos.',
+  calendar_fetch_failed: 'No se pudo leer tu calendario de Google. Inténtalo de nuevo.',
+  save_failed: 'No se pudo guardar la conexión. Inténtalo de nuevo.',
+}
+
+interface GoogleConnectionState {
+  configured: boolean
+  status: 'connected' | 'disconnected' | 'error' | 'pending' | null
+  email: string | null
+  errorMessage: string | null
+}
+
 interface Props {
   token: string
   setup: SetupRoomData
   feedSyncAvailable: boolean
+  google: GoogleConnectionState
+  calendarConnectedFlag: boolean
+  calendarErrorFlag: string | null
+  initialGallery: FileRef[]
 }
 
 function first<T>(...values: (T | null | undefined)[]): T | '' {
   return values.find((v) => v !== null && v !== undefined && v !== '') ?? ''
 }
 
-export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Props) {
+export default function SetupRoomClient({ token, setup, feedSyncAvailable, google, calendarConnectedFlag, calendarErrorFlag, initialGallery }: Props) {
   const dealer = setup.dealer
   const app = setup.application
   const needsAssistant = dealer.subscription_plan === 'professional' || dealer.subscription_plan === 'elite'
@@ -84,6 +118,13 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
     logo_url: dealer.logo_url ?? '',
     cover_url: dealer.cover_url ?? '',
     documents: [] as FileRef[],
+    // Las fotos de instalaciones ya se guardaban bien en el servidor (dealer_gallery_images,
+    // insertado al momento de subir cada una) pero uploadFiles() nunca las metía en este estado
+    // — el fundador las subía sin ver ninguna confirmación de que había funcionado (hallazgo
+    // 2026-09-04, simulacro E2E Karboceramic). No afecta al envío final: solo era la vista.
+    // Arranca con lo ya guardado (initialGallery, leído en page.tsx) para que reabrir la sala no
+    // parezca haber perdido las fotos ya subidas en una visita anterior.
+    gallery: initialGallery,
   })
   const [stock, setStock] = useState({
     mode: 'vehicle_by_vehicle',
@@ -106,18 +147,70 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [retryableSubmit, setRetryableSubmit] = useState(false)
+  type CsvIntakeSummary = { totalRows: number; inserted: number; updated: number; errors: { row: number; message: string }[] } | null
+  const [csvIntakeSummary, setCsvIntakeSummary] = useState<CsvIntakeSummary>(null)
+
+  // Conectar Google Calendar navega fuera de la SPA (ida y vuelta real por OAuth de Google) — sin
+  // esto, todo lo que el fundador ya hubiera escrito en el resto del formulario (perfil, asistente,
+  // horario) se perdería al volver, porque solo vive en estado de React hasta el envío final. Se
+  // guarda justo antes de salir y se restaura una sola vez al volver (2026-09-04, junto con la
+  // propia conexión de Google Calendar). Los vehículos añadidos uno a uno no necesitan esto: ya se
+  // publican en el servidor al momento y se recargan por su cuenta (ver vehiclesLoaded más abajo).
+  const draftKey = `blm_setup_draft_${token}`
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey)
+      if (!raw) return
+      localStorage.removeItem(draftKey)
+      const draft = JSON.parse(raw)
+      if (draft.profile) setProfile((prev) => ({ ...prev, ...draft.profile }))
+      if (draft.assets) setAssets((prev) => ({ ...prev, ...draft.assets }))
+      if (draft.assistant) setAssistant((prev) => ({ ...prev, ...draft.assistant }))
+      if (draft.stock) setStock((prev) => ({ ...prev, ...draft.stock }))
+      if (draft.appointments) setAppointments((prev) => ({ ...prev, ...draft.appointments }))
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function saveDraftBeforeLeaving() {
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ profile, assets, assistant, stock, appointments }))
+    } catch {}
+  }
+
+  // Antes solo se guardaba al pulsar "Conectar Google Calendar" — cerrar la pestaña o navegar
+  // fuera por cualquier otro motivo (a diferencia de las fotos y los vehículos, que se guardan al
+  // momento en el servidor) perdía en silencio el resto del formulario sin ningún aviso de
+  // "guardado" o "pendiente de enviar" (hallazgo de Codex, ronda 2 de la simulación E2E). Un
+  // listener de beforeunload cubre ese caso general con el mismo mecanismo ya construido.
+  useEffect(() => {
+    window.addEventListener('beforeunload', saveDraftBeforeLeaving)
+    return () => window.removeEventListener('beforeunload', saveDraftBeforeLeaving)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, assets, assistant, stock, appointments])
 
   // Alta vehículo a vehículo: publica de verdad al pulsar "Añadir vehículo" (no espera al envío
   // final de la sala) — así el gate automático de publicación del perfil puede dispararse en
   // cuanto haya una unidad con foto, dejando el perfil listo para revisión sin depender de que el
   // equipo procese fotos sueltas a mano.
-  type AddedVehicle = { id: string; brand_name: string; model_name: string; year: number; price: number | null; images: { url: string; order: number }[]; status: string }
+  type AddedVehicle = {
+    id: string; brand_name: string; model_name: string; year: number; price: number | null
+    images: { url: string; order: number }[]; status: string
+    blockingIssue: string | null; suggestedDescription: string | null
+  }
   const [vehicles, setVehicles] = useState<AddedVehicle[]>([])
   const [vehiclesLoaded, setVehiclesLoaded] = useState(false)
   const [allBrands, setAllBrands] = useState<{ id: string; name: string; slug: string }[]>([])
+  // Catálogo de modelos de la marca elegida (tabla `models`, curada) — mismo patrón que
+  // dashboard/publicar/page.tsx, para que dar de alta un vehículo se sienta igual en los dos
+  // sitios (hallazgo 2026-09-04, simulacro E2E Karboceramic: aquí Modelo era texto libre sin
+  // desplegable ni campo de Versión, a diferencia del wizard del dashboard).
+  const [allModels, setAllModels] = useState<string[]>([])
+  const [customBrandMode, setCustomBrandMode] = useState(false)
+  const [customModelMode, setCustomModelMode] = useState(false)
   const emptyVehicleForm = {
     vehicle_type: 'car' as 'car' | 'motorcycle',
-    brand_name: '', model_name: '', year: '', mileage_km: '', price: '',
+    brand_name: '', model_name: '', version: '', year: '', mileage_km: '', price: '',
     fuel_type: '', transmission: '', description: '',
     images: [] as FileRef[],
   }
@@ -130,6 +223,19 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
     supabase.from('brands').select('id, name, slug').eq('is_active', true).order('name')
       .then(({ data }) => setAllBrands(data ?? []))
   }, [])
+
+  useEffect(() => {
+    const brand = allBrands.find((b) => b.name === vehicleForm.brand_name)
+    if (!brand) { setAllModels([]); return }
+    const supabase = createClient()
+    const vtype = vehicleForm.vehicle_type === 'motorcycle' ? 'motorcycle' : 'car'
+    supabase.from('models').select('name').eq('brand_id', brand.id).eq('vehicle_type', vtype).eq('is_active', true).order('name')
+      .then(({ data }) => {
+        const names = (data ?? []).map((m: { name: string }) => m.name)
+        setAllModels(names)
+        if (vehicleForm.model_name && !names.includes(vehicleForm.model_name)) setCustomModelMode(true)
+      })
+  }, [vehicleForm.brand_name, vehicleForm.vehicle_type, allBrands])
 
   useEffect(() => {
     if (vehiclesLoaded) return
@@ -180,6 +286,7 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
           vehicle_type: vehicleForm.vehicle_type,
           brand_name: vehicleForm.brand_name,
           model_name: vehicleForm.model_name,
+          version: vehicleForm.version || null,
           year: Number(vehicleForm.year),
           mileage_km: Number(vehicleForm.mileage_km),
           price: vehicleForm.price ? Number(vehicleForm.price) : null,
@@ -193,12 +300,20 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(json.error || 'No se pudo publicar el vehículo.')
+      // El estado real puede quedar en pending_review si la revisión de IA encuentra un bloqueo
+      // (p. ej. sin descripción) — antes esto se pisaba con 'active' fijo aquí, así que el
+      // showroom veía "Publicado" aunque el vehículo no lo estuviera, y la sugerencia de la IA
+      // (si la hay) nunca se mostraba (hallazgo 2026-09-04, simulacro E2E Karboceramic).
+      const blockingIssue = (json.review?.issues ?? []).find((i: { blocking?: boolean; message?: string }) => i.blocking)?.message ?? null
       setVehicles((prev) => [...prev, {
         id: json.id, brand_name: vehicleForm.brand_name, model_name: vehicleForm.model_name,
         year: Number(vehicleForm.year), price: vehicleForm.price ? Number(vehicleForm.price) : null,
-        images: vehicleForm.images.map((f, i) => ({ url: f.url, order: i })), status: 'active',
+        images: vehicleForm.images.map((f, i) => ({ url: f.url, order: i })), status: json.status ?? 'active',
+        blockingIssue, suggestedDescription: json.review?.suggested_description ?? null,
       }])
       setVehicleForm(emptyVehicleForm)
+      setCustomBrandMode(false)
+      setCustomModelMode(false)
     } catch (err) {
       setVehicleError(err instanceof Error ? err.message : 'No se pudo publicar el vehículo.')
     } finally {
@@ -211,6 +326,32 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
     try {
       await fetch(`/api/onboarding/${encodeURIComponent(token)}/vehicles?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
     } catch {}
+  }
+
+  const [applyingSuggestion, setApplyingSuggestion] = useState<string | null>(null)
+
+  // Antes, la única forma de resolver un aviso de la IA (p. ej. sin descripción) era borrar el
+  // vehículo y volver a escribirlo entero — este botón aplica la sugerencia directamente y
+  // reevalúa, sin perder el resto de los datos ya cargados (hallazgo 2026-09-04).
+  async function applySuggestion(id: string, description: string) {
+    setApplyingSuggestion(id)
+    try {
+      const res = await fetch(`/api/onboarding/${encodeURIComponent(token)}/vehicles?id=${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'No se pudo aplicar la sugerencia.')
+      const blockingIssue = (json.review?.issues ?? []).find((i: { blocking?: boolean; message?: string }) => i.blocking)?.message ?? null
+      setVehicles((prev) => prev.map((v) => v.id === id
+        ? { ...v, status: json.status ?? v.status, blockingIssue, suggestedDescription: null }
+        : v))
+    } catch (err) {
+      setVehicleError(err instanceof Error ? err.message : 'No se pudo aplicar la sugerencia.')
+    } finally {
+      setApplyingSuggestion(null)
+    }
   }
 
   const brandOptions = useMemo(() => {
@@ -269,6 +410,7 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
       if (type === 'logo') setAssets((prev) => ({ ...prev, logo_url: uploaded[0]?.url ?? prev.logo_url }))
       if (type === 'cover') setAssets((prev) => ({ ...prev, cover_url: uploaded[0]?.url ?? prev.cover_url }))
       if (type === 'document') setAssets((prev) => ({ ...prev, documents: [...prev.documents, ...uploaded] }))
+      if (type === 'gallery') setAssets((prev) => ({ ...prev, gallery: [...prev.gallery, ...uploaded] }))
       if (type === 'stock_csv') setStock((prev) => ({ ...prev, csv_files: [...prev.csv_files, ...uploaded], mode: 'csv' }))
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'No se pudo subir el archivo.')
@@ -278,6 +420,17 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
   }
 
   async function submit() {
+    // Antes, elegir "Feed o portal" y dejar la URL vacía (o inválida) no bloqueaba el envío: se
+    // guardaba stock.mode='feed_url' sin feed_url real, así que el fundador creía tener el feed
+    // configurado cuando no había ninguno (hallazgo 2026-09-04).
+    if (stock.mode === 'feed_url') {
+      const url = stock.feed_url.trim()
+      const looksValid = /^https?:\/\/.+/i.test(url)
+      if (!looksValid) {
+        setSubmitError('Añade la URL de tu feed o portal (debe empezar por http:// o https://) antes de enviar.')
+        return
+      }
+    }
     setSubmitting(true)
     setSubmitError(null)
     setRetryableSubmit(false)
@@ -320,6 +473,7 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
             : json.error || 'No se pudo completar la configuración.'
         throw new Error(message)
       }
+      if (json.csv_intake) setCsvIntakeSummary(json.csv_intake)
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'No se pudo completar la configuración.')
@@ -340,6 +494,26 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
           <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-bsm-text-secondary">
             Hemos recibido el perfil, el material y el contexto operativo. El equipo revisará la presencia pública antes de publicar y te enviará el acceso al panel con un enlace nuevo.
           </p>
+          {csvIntakeSummary && (
+            <div className="mx-auto mt-6 max-w-lg border border-bsm-border bg-obsidian/50 p-4 text-left text-sm">
+              <p className="text-bsm-text-primary">
+                CSV procesado: {csvIntakeSummary.inserted + csvIntakeSummary.updated} de {csvIntakeSummary.totalRows} vehículos cargados correctamente.
+              </p>
+              {csvIntakeSummary.errors.length > 0 && (
+                <>
+                  <p className="mt-2 flex items-center gap-1.5 text-gold"><AlertTriangle className="h-3.5 w-3.5 shrink-0" /> {csvIntakeSummary.errors.length} fila{csvIntakeSummary.errors.length !== 1 ? 's' : ''} con incidencias:</p>
+                  <ul className="mt-1 space-y-0.5 text-xs text-bsm-text-muted">
+                    {csvIntakeSummary.errors.slice(0, 8).map((e, i) => (
+                      <li key={i}>Fila {e.row}: {e.message}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-xs text-bsm-text-muted">
+                    No hace falta reenviar nada ahora — cuando entres al panel podrás corregir y volver a subir esas filas desde Inventario → Importar CSV, sin depender de nadie más.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -399,6 +573,13 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
             <div className="mt-5 grid gap-5 md:grid-cols-2">
               <UploadPanel title="Fotografías de instalaciones" icon={<UploadCloud className="h-4 w-4" />} onClick={() => galleryRef.current?.click()} busy={uploading === 'gallery'} action="Añadir fotografías">
                 <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" onChange={(e) => uploadFiles(e.target.files, 'gallery')} />
+                {assets.gallery.length > 0 && (
+                  <div className="mt-4 grid grid-cols-4 gap-2">
+                    {assets.gallery.map((f) => (
+                      <img key={f.path} src={f.url} alt="" className="h-16 w-full object-cover" />
+                    ))}
+                  </div>
+                )}
               </UploadPanel>
               <UploadPanel title="Documento libre" icon={<FileText className="h-4 w-4" />} onClick={() => documentRef.current?.click()} busy={uploading === 'document'} action="Subir PDF o Word">
                 <input ref={documentRef} type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple className="sr-only" onChange={(e) => uploadFiles(e.target.files, 'document')} />
@@ -441,6 +622,46 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                   </p>
                 </div>
               </div>
+
+              {google.configured && (
+                <div className="mb-6 border border-bsm-border bg-obsidian/50 p-4">
+                  <p className="mb-2 text-xs uppercase tracking-widest text-gold">Google Calendar</p>
+                  {calendarConnectedFlag && (
+                    <p className="mb-2 flex items-center gap-1.5 text-sm text-emerald-400"><Check className="h-4 w-4" /> Google Calendar conectado.</p>
+                  )}
+                  {calendarErrorFlag && (
+                    <p className="mb-2 flex items-center gap-1.5 text-sm text-red-400">
+                      <AlertTriangle className="h-4 w-4 shrink-0" /> {CALENDAR_ERROR_LABELS[calendarErrorFlag] ?? 'No se pudo conectar Google Calendar.'}
+                    </p>
+                  )}
+                  {google.status === 'connected' ? (
+                    <p className="text-sm text-bsm-text-secondary">
+                      Conectado como <span className="text-bsm-text-primary">{google.email}</span>. Los huecos ya ocupados en
+                      ese calendario se descuentan automáticamente, y cada cita confirmada crea el evento ahí.
+                    </p>
+                  ) : (
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-bsm-text-secondary">
+                          Conecta tu Google Calendar para que la disponibilidad real de tu agenda se cruce con los huecos
+                          del agente, y para que cada cita confirmada se cree ahí automáticamente. Es opcional — el
+                          horario semanal de abajo funciona igual sin conectarlo.
+                        </p>
+                        {google.status === 'error' && google.errorMessage && (
+                          <p className="mt-2 flex items-center gap-1.5 text-xs text-red-400"><AlertTriangle className="h-3.5 w-3.5 shrink-0" /> {google.errorMessage}</p>
+                        )}
+                      </div>
+                      <a
+                        href={`/api/calendar/google/connect?setup_token=${encodeURIComponent(token)}`}
+                        onClick={saveDraftBeforeLeaving}
+                        className="btn-outline shrink-0 px-4 py-2 text-sm flex items-center gap-1.5"
+                      >
+                        <Link2 className="h-4 w-4" /> {google.status === 'error' ? 'Reconectar' : 'Conectar'}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <p className="label-base mb-2">Disponibilidad semanal</p>
               <p className="mb-3 text-xs text-bsm-text-muted">Franjas por día, formato <code>10:00-14:00, 16:00-20:00</code>. Deja vacío un día sin visitas.</p>
@@ -487,7 +708,7 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
               <ModeButton
                 active={stock.mode === 'vehicle_by_vehicle'}
                 title="Vehículo a vehículo"
-                text="Publica tú mismo cada unidad, con su ficha y fotos propias — recomendado si no tienes feed ni CSV. Queda publicado al momento, sin esperar a que nadie lo procese."
+                text="Publica tú mismo cada unidad, con su ficha y fotos propias — recomendado si no tienes feed ni CSV. Se revisa al momento y normalmente queda publicada sin esperas; si a alguna le falta un dato clave te lo decimos ahí mismo."
                 onClick={() => setStock((s) => ({ ...s, mode: 'vehicle_by_vehicle' }))}
               />
               <ModeButton
@@ -498,7 +719,7 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                   : 'URL de tu feed o portal de stock. El equipo lo importa por ti.'}
                 onClick={() => setStock((s) => ({ ...s, mode: 'feed_url' }))}
               />
-              <ModeButton active={stock.mode === 'csv'} title="CSV" text="Plantilla compatible con el alta masiva del dashboard. El equipo la sube por ti, con las descripciones optimizadas con IA — incluido una vez, en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'csv' }))} />
+              <ModeButton active={stock.mode === 'csv'} title="CSV" text="Plantilla compatible con el alta masiva del dashboard. Se procesa sola al enviar la sala, con revisión de calidad por IA — incluido en cualquier plan." onClick={() => setStock((s) => ({ ...s, mode: 'csv' }))} />
             </div>
             <div className="mt-5 space-y-4">
               {stock.mode === 'vehicle_by_vehicle' && (
@@ -506,16 +727,40 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                   {vehicles.length > 0 && (
                     <ul className="space-y-2">
                       {vehicles.map((v) => (
-                        <li key={v.id} className="flex items-center justify-between gap-3 border border-bsm-border bg-obsidian/50 px-3 py-2 text-sm">
-                          <div className="flex items-center gap-3">
-                            {v.images[0]?.url && <img src={v.images[0].url} alt="" className="h-10 w-14 object-cover" />}
-                            <span className="text-bsm-text-primary">{v.brand_name} {v.model_name} · {v.year}</span>
-                            <span className="text-xs text-bsm-text-muted">{v.price ? `${v.price.toLocaleString('es-ES')} €` : 'Precio a consultar'}</span>
-                            <span className="text-xs text-emerald-400">Publicado</span>
+                        <li key={v.id} className="border border-bsm-border bg-obsidian/50 px-3 py-2 text-sm">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              {v.images[0]?.url && <img src={v.images[0].url} alt="" className="h-10 w-14 object-cover" />}
+                              <span className="text-bsm-text-primary">{v.brand_name} {v.model_name} · {v.year}</span>
+                              <span className="text-xs text-bsm-text-muted">{v.price ? `${v.price.toLocaleString('es-ES')} €` : 'Precio a consultar'}</span>
+                              {v.status === 'active' && <span className="text-xs text-emerald-400">Publicado</span>}
+                              {v.status === 'pending_review' && <span className="text-xs text-gold">Pendiente de revisión</span>}
+                              {v.status === 'draft' && <span className="text-xs text-bsm-text-muted">Borrador</span>}
+                            </div>
+                            <button type="button" onClick={() => removeVehicle(v.id)} className="text-bsm-text-muted hover:text-red-400">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                           </div>
-                          <button type="button" onClick={() => removeVehicle(v.id)} className="text-bsm-text-muted hover:text-red-400">
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          {v.blockingIssue && (
+                            <p className="mt-2 flex items-start gap-1.5 text-xs text-gold">
+                              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {v.blockingIssue}
+                            </p>
+                          )}
+                          {v.suggestedDescription && (
+                            <div className="mt-2 flex items-start justify-between gap-3">
+                              <p className="text-xs leading-5 text-bsm-text-muted">
+                                <span className="text-bsm-text-secondary">Sugerencia de descripción: </span>{v.suggestedDescription}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => applySuggestion(v.id, v.suggestedDescription!)}
+                                disabled={applyingSuggestion === v.id}
+                                className="shrink-0 whitespace-nowrap text-xs text-gold hover:text-gold-light disabled:opacity-40"
+                              >
+                                {applyingSuggestion === v.id ? 'Aplicando...' : 'Usar esta sugerencia'}
+                              </button>
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -526,7 +771,7 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                     <div className="mb-4 flex gap-2">
                       {([['car', 'Coche'], ['motorcycle', 'Moto']] as const).map(([v, l]) => (
                         <label key={v} className="flex items-center justify-center px-4 py-2 border border-bsm-border text-sm text-bsm-text-muted cursor-pointer has-[:checked]:border-gold/40 has-[:checked]:text-gold has-[:checked]:bg-gold/5">
-                          <input type="radio" name="vehicle_type" value={v} checked={vehicleForm.vehicle_type === v} onChange={() => setVehicleForm((prev) => ({ ...prev, vehicle_type: v, brand_name: '' }))} className="sr-only" />
+                          <input type="radio" name="vehicle_type" value={v} checked={vehicleForm.vehicle_type === v} onChange={() => { setVehicleForm((prev) => ({ ...prev, vehicle_type: v, brand_name: '', model_name: '', version: '' })); setCustomBrandMode(false); setCustomModelMode(false) }} className="sr-only" />
                           {l}
                         </label>
                       ))}
@@ -534,12 +779,66 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="block">
                         <span className="label-base">Marca</span>
-                        <select className="input-base" value={vehicleForm.brand_name} onChange={(e) => setVehicleForm((prev) => ({ ...prev, brand_name: e.target.value }))}>
+                        <select
+                          className="input-base"
+                          value={customBrandMode ? '__other__' : vehicleForm.brand_name}
+                          onChange={(e) => {
+                            if (e.target.value === '__other__') {
+                              setCustomBrandMode(true)
+                              setCustomModelMode(true)
+                              setVehicleForm((prev) => ({ ...prev, brand_name: '', model_name: '' }))
+                            } else {
+                              setCustomBrandMode(false)
+                              setCustomModelMode(false)
+                              setVehicleForm((prev) => ({ ...prev, brand_name: e.target.value, model_name: '' }))
+                            }
+                          }}
+                        >
                           <option value="">Selecciona marca</option>
                           {brandOptions.map((b) => <option key={b.slug} value={b.name}>{b.name}</option>)}
+                          <option value="__other__">Otra marca (escribir)</option>
                         </select>
+                        {customBrandMode && (
+                          <input
+                            autoFocus
+                            value={vehicleForm.brand_name}
+                            onChange={(e) => setVehicleForm((prev) => ({ ...prev, brand_name: e.target.value }))}
+                            placeholder="Escribe la marca..."
+                            className="input-base mt-2"
+                          />
+                        )}
                       </label>
-                      <Field label="Modelo" value={vehicleForm.model_name} onChange={(v) => setVehicleForm((prev) => ({ ...prev, model_name: v }))} placeholder="Ej. 911 Carrera S" />
+                      <label className="block">
+                        <span className="label-base">Modelo</span>
+                        <select
+                          className="input-base"
+                          value={customModelMode ? '__other__' : vehicleForm.model_name}
+                          onChange={(e) => {
+                            if (e.target.value === '__other__') {
+                              setCustomModelMode(true)
+                              setVehicleForm((prev) => ({ ...prev, model_name: '' }))
+                            } else {
+                              setCustomModelMode(false)
+                              setVehicleForm((prev) => ({ ...prev, model_name: e.target.value }))
+                            }
+                          }}
+                          disabled={!vehicleForm.brand_name}
+                        >
+                          <option value="">{vehicleForm.brand_name ? 'Selecciona modelo' : 'Elige primero la marca'}</option>
+                          {allModels.map((name) => <option key={name} value={name}>{name}</option>)}
+                          <option value="__other__">Otro modelo (escribir)</option>
+                        </select>
+                        {customModelMode && (
+                          <input
+                            autoFocus
+                            value={vehicleForm.model_name}
+                            onChange={(e) => setVehicleForm((prev) => ({ ...prev, model_name: e.target.value }))}
+                            placeholder="Escribe el modelo..."
+                            className="input-base mt-2"
+                          />
+                        )}
+                      </label>
+                      <Field label="Versión / Acabado (opcional)" value={vehicleForm.version} onChange={(v) => setVehicleForm((prev) => ({ ...prev, version: v }))} placeholder="Competition, Pista, Spider..." />
                       <Field label="Año" value={vehicleForm.year} onChange={(v) => setVehicleForm((prev) => ({ ...prev, year: v }))} type="number" placeholder="2022" />
                       <Field label="Kilometraje" value={vehicleForm.mileage_km} onChange={(v) => setVehicleForm((prev) => ({ ...prev, mileage_km: v }))} type="number" placeholder="12000" />
                       <Field label="Precio (vacío = a consultar)" value={vehicleForm.price} onChange={(v) => setVehicleForm((prev) => ({ ...prev, price: v }))} type="number" placeholder="89000" />
@@ -570,8 +869,13 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
                     {vehicleError && <p className="mt-3 text-xs text-red-400">{vehicleError}</p>}
                     <button type="button" onClick={addVehicle} disabled={addingVehicle} className="btn-gold mt-4 px-5 py-2.5 text-sm">
                       {addingVehicle ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                      Añadir vehículo
+                      {addingVehicle ? 'Revisando ficha...' : 'Añadir vehículo'}
                     </button>
+                    {addingVehicle && (
+                      <p className="mt-2 text-xs text-bsm-text-muted">
+                        Puede tardar unos segundos — estamos revisando la ficha antes de publicarla.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -579,6 +883,9 @@ export default function SetupRoomClient({ token, setup, feedSyncAvailable }: Pro
               {stock.mode === 'csv' && (
                 <UploadPanel title="CSV de stock" icon={<FileText className="h-4 w-4" />} onClick={() => csvRef.current?.click()} busy={uploading === 'stock_csv'} action="Subir CSV">
                   <input ref={csvRef} type="file" accept=".csv,text/csv" className="sr-only" onChange={(e) => uploadFiles(e.target.files, 'stock_csv')} />
+                  <button type="button" onClick={downloadCsvTemplate} className="mt-4 flex items-center gap-1.5 text-xs text-gold hover:text-gold-light">
+                    <Download className="h-3.5 w-3.5" /> Descargar plantilla CSV
+                  </button>
                   <FileList files={stock.csv_files} />
                 </UploadPanel>
               )}

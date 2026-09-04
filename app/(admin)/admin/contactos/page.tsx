@@ -88,7 +88,7 @@ export default async function AdminContactosPage({ searchParams }: PageProps) {
 
       {/* Privacy notice */}
       <div className="border border-bsm-border bg-surface p-4 text-xs text-bsm-text-muted leading-relaxed">
-        Los datos de contacto individuales (nombre, email, teléfono, mensaje) son gestionados por cada showroom desde su panel de oportunidades — no están accesibles aquí por política de privacidad RGPD.
+        Vista agregada por estado y showroom — no incluye el detalle de contacto (nombre, email, teléfono, mensaje) de cada lead. Cada showroom gestiona ese detalle desde su panel de oportunidades; el equipo de Black Label Market puede consultarlo puntualmente desde la ficha del showroom para soporte.
       </div>
 
       {/* Status filters */}

@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatNumber } from '@/lib/utils'
-import { Users, UserCheck, Car, MessageSquare, Clock, CheckCircle, TrendingUp, Puzzle } from 'lucide-react'
+import { Users, UserCheck, Car, MessageSquare, Clock, CheckCircle, TrendingUp, Puzzle, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
 const VEHICLE_STATUS_BADGE: Record<string, string> = {
@@ -38,6 +38,7 @@ export default async function AdminPage() {
     { count: requests30d },
     { count: pendingShowroomApplications },
     { count: pendingManualAddons },
+    { count: expiredTrials },
     { data: recentDealers },
     { data: pendingReviewVehicles },
   ] = await Promise.all([
@@ -54,6 +55,9 @@ export default async function AdminPage() {
     supabase.from('addon_orders').select('*', { count: 'exact', head: true })
       .eq('status', 'pending_activation')
       .not('manual_activation_type', 'is', null),
+    supabase.from('dealers').select('*', { count: 'exact', head: true })
+      .eq('status', 'trial')
+      .lt('trial_ends_at', new Date().toISOString()),
     supabase.from('dealers')
       .select('id, name, status, subscription_plan, created_at')
       .order('created_at', { ascending: false })
@@ -89,6 +93,14 @@ export default async function AdminPage() {
       icon: Puzzle,
       color: pendingManualAddons ? 'text-amber-400' : 'text-bsm-text-muted',
       href: '/admin/complementos',
+    },
+    {
+      label: 'Trials vencidos',
+      sub: 'sin plan de pago',
+      value: formatNumber(expiredTrials || 0),
+      icon: AlertTriangle,
+      color: expiredTrials ? 'text-amber-400' : 'text-bsm-text-muted',
+      href: '/admin/dealers?status=trial_expired',
     },
     {
       label: 'Vehículos activos',
@@ -131,7 +143,7 @@ export default async function AdminPage() {
         <p className="text-sm text-bsm-text-muted">Black Label Market — Vista general del marketplace</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4 mb-10">
         {STATS.map((s) => (
           <Link key={s.label} href={s.href} className="stat-card hover:border-gold/20 transition-colors group">
             <div className={`${s.color} mb-3`}><s.icon className="w-5 h-5" /></div>
