@@ -128,7 +128,7 @@ export default function SolicitarAccesoPage() {
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
             <li><Link href="/profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-            <li className="text-bsm-text-secondary">Solicitar valoración</li>
+            <li className="text-bsm-text-secondary" aria-current="page">Solicitar valoración</li>
           </ol>
         </nav>
 

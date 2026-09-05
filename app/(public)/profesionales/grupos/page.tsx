@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
+import { JsonLd } from '@/components/seo/JsonLd'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -19,9 +20,23 @@ const FEATURES = [
   'Boosts individuales por sede',
 ]
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Para profesionales', item: `${SITE_URL}/profesionales` },
+    { '@type': 'ListItem', position: 3, name: 'Plan Grupo' },
+  ],
+}
+
 export default function GruposPage() {
   return (
     <div className="max-w-screen-lg mx-auto px-6 lg:px-12 pt-28 pb-24">
+      <JsonLd data={breadcrumbJsonLd} />
+
       {/* Breadcrumb */}
       <nav aria-label="breadcrumb" className="mb-10">
         <ol className="flex items-center gap-1.5 text-xs text-bsm-text-muted">
@@ -29,7 +44,7 @@ export default function GruposPage() {
           <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
           <li><Link href="/profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
           <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-          <li className="text-bsm-text-secondary">Modelo Grupo</li>
+          <li className="text-bsm-text-secondary" aria-current="page">Plan Grupo</li>
         </ol>
       </nav>
 
@@ -51,7 +66,7 @@ export default function GruposPage() {
 
       {/* Features */}
       <div className="mb-14">
-        <h2 className="font-display text-2xl font-light mb-6">Qué incluye el modelo Grupo</h2>
+        <h2 className="font-display text-2xl font-light mb-6">Qué incluye el plan Grupo</h2>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {FEATURES.map((f) => (
             <li key={f} className="flex items-start gap-3 text-sm text-bsm-text-secondary">
@@ -78,7 +93,7 @@ export default function GruposPage() {
           Gestión centralizada para grupos con criterio
         </p>
         <p className="text-sm text-bsm-text-secondary mb-6 max-w-lg">
-          El acceso al modelo Grupo se gestiona de forma consultiva.
+          El acceso al plan Grupo se gestiona de forma consultiva.
           Cuéntanos tu estructura y valoramos el encaje del grupo.
         </p>
         <div className="flex flex-wrap gap-4">

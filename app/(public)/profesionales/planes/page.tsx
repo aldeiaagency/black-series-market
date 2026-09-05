@@ -114,33 +114,44 @@ export default async function PlanesPage() {
     })),
   }
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Para profesionales', item: `${SITE_URL}/profesionales` },
+      { '@type': 'ListItem', position: 3, name: 'Planes' },
+    ],
+  }
+
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-32 pb-24">
       <JsonLd data={webPageJsonLd} />
       <JsonLd data={faqJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
 
-      {/* Header */}
-      <div className="text-center mb-16">
-        <nav aria-label="breadcrumb" className="mb-6 flex justify-center">
+      {/* Header — mismo patrón que el resto del market: migas y cabecera a la izquierda */}
+      <div className="mb-16">
+        <nav aria-label="breadcrumb" className="mb-6">
           <ol className="flex items-center gap-1.5 text-xs text-bsm-text-muted">
             <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
             <li><Link href="/profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
             <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-            <li className="text-bsm-text-secondary">Planes</li>
+            <li className="text-bsm-text-secondary" aria-current="page">Planes</li>
           </ol>
         </nav>
-        <div className="flex items-center justify-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />
           <span className="text-xs text-gold tracking-widest uppercase">Planes de suscripción</span>
-          <div className="h-px w-8 bg-gold" />
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary mb-4">
-          Tu inventario premium, donde merece estar
+          Planes de suscripción para showrooms
         </h1>
-        <p className="text-bsm-text-secondary max-w-xl mx-auto text-sm leading-relaxed">
-          Sin comisiones por venta. El acceso pasa por un proceso de admisión — precio y
-          condiciones se explican en una llamada con el equipo, no en esta página.
+        <p className="text-bsm-text-secondary max-w-xl text-sm leading-relaxed">
+          Essential, Professional y Elite. Sin comisiones por venta: pagas la suscripción, no un
+          porcentaje de lo que cierras. Cuéntanos tu showroom y vemos juntos el plan y las
+          condiciones, sin compromiso.
         </p>
       </div>
 
@@ -196,7 +207,7 @@ export default async function PlanesPage() {
 
       {/* CTA único — el plan se elige tras valorar el showroom, no aquí */}
       <div className="border border-bsm-border bg-surface p-8 mb-20 text-center max-w-2xl mx-auto">
-        <h3 className="font-display text-xl font-light mb-2">Primero valoramos el encaje del showroom</h3>
+        <h3 className="font-display text-xl font-light mb-2">¿Encaja tu showroom?</h3>
         <p className="text-sm text-bsm-text-secondary mb-6 leading-relaxed">
           Envíanos la información de tu showroom. Si cumple los criterios del market, te
           invitamos a una llamada donde vemos juntos qué plan encaja mejor y resolvemos
@@ -213,12 +224,12 @@ export default async function PlanesPage() {
           <p className="text-xs text-gold tracking-widest uppercase mb-1">Varias sedes</p>
           <h3 className="font-display text-2xl font-light mb-2">¿Operas más de una sede?</h3>
           <p className="text-sm text-bsm-text-secondary max-w-lg">
-            Para grupos con varias sedes preparamos una configuración adaptada a tu estructura,
-            tu inventario y tu equipo, sobre la base del plan Elite en cada sede.
+            Para grupos con varias sedes montamos una configuración adaptada a tu estructura,
+            tu inventario y tu equipo, con plan Elite en cada sede.
           </p>
         </div>
         <Link href="/profesionales/grupos" className="btn-outline px-6 whitespace-nowrap flex-shrink-0">
-          Conocer el modelo Grupo →
+          Ver el plan Grupo →
         </Link>
       </div>
 
