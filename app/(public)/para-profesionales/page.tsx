@@ -26,12 +26,12 @@ const BENEFITS = [
   {
     icon: '◈',
     title: 'Compradores cualificados',
-    body: 'Nuestro tráfico es específico: alguien que busca un Porsche 911 GT3 no llega aquí por accidente.',
+    body: 'El catálogo está acotado a este tipo de vehículo, así que quien entra ya sabe lo que busca. Tu stock no compite por atención con el resto del mercado.',
   },
   {
     icon: '◈',
     title: 'Un catálogo seleccionado',
-    body: 'Cada showroom pasa un proceso de admisión y cada vehículo pertenece a nuestro catálogo de marcas. El contexto premium protege el valor de tu stock.',
+    body: 'Cada showroom pasa una auditoría de reputación antes de entrar, y cada unidad tiene que encajar en el catálogo. Preferimos un catálogo corto y bien elegido antes que uno grande: eso es lo que sostiene el valor de lo que publicas.',
   },
   {
     icon: '◈',
@@ -41,12 +41,12 @@ const BENEFITS = [
   {
     icon: '◈',
     title: 'Analítica de rendimiento',
-    body: 'Visitas por anuncio, leads recibidos, comparativas con tu sector. Información para tomar decisiones.',
+    body: 'Visitas por unidad, contactos recibidos y el estado real de tu catálogo. Datos para decidir, no un panel decorativo.',
   },
   {
     icon: '◈',
-    title: 'Leads cualificados',
-    body: 'Los interesados contactan directamente desde la ficha. Recibes el mensaje con el vehículo referenciado.',
+    title: 'Contacto directo, con contexto',
+    body: 'El comprador elige cómo contactarte —teléfono, WhatsApp o mensaje desde la propia ficha— y siempre con la unidad referenciada. Sabes de qué vehículo te hablan antes de responder.',
   },
 ]
 
@@ -96,20 +96,20 @@ export default function ParaProfesionalesPage() {
           <span className="text-xs text-gold tracking-widest uppercase">Para profesionales</span>
         </div>
         <h1 className="section-title mb-5">
-          Llega a compradores que saben exactamente lo que buscan
+          El filtro que te cuesta pasar es el que te trae al comprador correcto
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed mb-8">
-          Black Label Market trabaja con showrooms, concesionarios y especialistas seleccionados —
-          no con cualquiera que quiera publicar. Nuestros usuarios no comparan por precio: comparan
-          por especificaciones, historial y presentación. Puedes conocer cómo funciona el acceso
-          sin dejar ningún dato.
+          Antes de publicar, auditamos la reputación de cada showroom, concesionario o
+          especialista. Ese filtro es lo que hace que el comprador llegue a tu ficha con la
+          confianza ya puesta, en vez de buscando el precio más bajo. Puedes conocer cómo funciona
+          el acceso sin dejar ningún dato.
         </p>
         <div className="flex flex-wrap gap-4">
           <Link href="#proceso-de-acceso" className="btn-gold px-6">
             Cómo funciona el acceso
           </Link>
           <Link href="/profesionales/planes" className="btn-outline px-6">
-            Comparar modalidades
+            Ver modalidades de acceso
           </Link>
         </div>
       </div>
@@ -147,18 +147,27 @@ export default function ParaProfesionalesPage() {
         </div>
       </div>
 
+      {/* Por qué somos selectivos — el circuito en dos direcciones */}
+      <div className="mb-20 max-w-2xl">
+        <h2 className="font-display text-lg text-bsm-text-primary mb-4">Por qué somos selectivos</h2>
+        <p className="text-sm text-bsm-text-secondary leading-relaxed">
+          Cada showroom que entra sube el listón para el comprador, y con él la confianza con la
+          que llega a tu ficha. El filtro no es un trámite de entrada: es lo que compras al entrar.
+        </p>
+      </div>
+
       {/* Criteria block */}
       <div className="border border-bsm-border bg-surface p-8 mb-20 max-w-2xl">
         <h2 className="font-display text-lg text-bsm-text-primary mb-4">Criterios de publicación</h2>
         <p className="text-sm text-bsm-text-secondary leading-relaxed mb-4">
-          Trabajamos con concesionarios especializados, dealers independientes, coleccionistas
-          particulares profesionales y preparadores que cumplan nuestros estándares de
+          Trabajamos con concesionarios especializados, dealers independientes, coleccionistas que
+          operan de forma profesional y preparadores que cumplan nuestros estándares de
           documentación y presentación.
         </p>
         <p className="text-sm text-bsm-text-secondary leading-relaxed mb-4">
-          No es un marketplace de volumen. Cada vehículo publicado tiene ficha técnica completa,
-          fotografía de calidad y precio visible. Los anuncios sin información suficiente no se
-          aprueban.
+          No competimos en volumen. Cada unidad necesita ficha completa y fotografía cuidada; lo
+          que no llega a ese nivel, no se publica. Es un filtro incómodo para quien solo quiere
+          publicar rápido, y es exactamente lo que hace que el comprador se fíe de lo que ve aquí.
         </p>
         <Link href="/legal/criterios-publicacion" className="text-sm text-gold hover:text-gold-light transition-colors">
           Leer los criterios completos →
@@ -190,7 +199,7 @@ export default function ParaProfesionalesPage() {
             Solicitar valoración
           </Link>
           <Link href="/profesionales/planes" className="btn-outline px-6 whitespace-nowrap">
-            Comparar modalidades
+            Ver modalidades de acceso
           </Link>
         </div>
       </div>
