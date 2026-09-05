@@ -73,6 +73,15 @@ const STEPS = [
   },
 ]
 
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Para profesionales' },
+  ],
+}
+
 const webPageJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
@@ -84,10 +93,19 @@ const webPageJsonLd = {
   isPartOf: { '@id': `${SITE_URL}/#website` },
 }
 
-export default function ParaProfesionalesPage() {
+export default function ProfesionalesPage() {
   return (
     <div className="max-w-screen-xl mx-auto px-6 lg:px-12 pt-28 pb-24">
       <JsonLd data={webPageJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
+
+      <nav aria-label="breadcrumb" className="mb-6">
+        <ol className="flex items-center gap-1.5 text-xs text-bsm-text-muted">
+          <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
+          <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
+          <li className="text-bsm-text-secondary" aria-current="page">Para profesionales</li>
+        </ol>
+      </nav>
 
       {/* Hero */}
       <div className="max-w-2xl mb-20">
