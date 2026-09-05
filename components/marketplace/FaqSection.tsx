@@ -55,7 +55,7 @@ export default function FaqSection({
           </h2>
         </div>
 
-        <div className="max-w-3xl divide-y divide-[#181818] border-t border-b border-[#181818]">
+        <div className="max-w-3xl mx-auto divide-y divide-[#181818] border-t border-b border-[#181818]">
           {items.map(({ q, a }, i) => (
             <details key={i} className="group">
               <summary className="flex items-center justify-between gap-4 cursor-pointer list-none py-5 text-[15px] text-[#D4D4D4] font-medium transition-colors hover:text-[#F4F1EA] focus-visible:outline-none focus-visible:text-gold [&::-webkit-details-marker]:hidden">
