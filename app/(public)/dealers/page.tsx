@@ -156,7 +156,7 @@ function renderPage(
       {/* Editorial — confianza / qué showrooms publican */}
       <div className="mb-8 max-w-2xl">
         <p className="text-sm text-bsm-text-secondary leading-relaxed">
-          En Black Label Market no publica cualquiera. Cada showroom —concesionario, compraventa o especialista— pasa por un proceso de verificación antes de poder publicar: revisamos su reputación, su trayectoria y su presencia online para asegurarnos de que está a la altura de los vehículos que ofrece. El resultado es una red de profesionales seleccionados en la que el comprador puede confiar desde el primer contacto, y un entorno donde un deportivo, un clásico o una moto premium se presentan junto a vendedores de su mismo nivel.
+          Aquí el vendedor se selecciona con el mismo criterio que el vehículo. Cada showroom —concesionario, compraventa o especialista— pasa por un proceso de verificación antes de poder publicar: revisamos su reputación, su trayectoria y su presencia online para asegurarnos de que está a la altura de los vehículos que ofrece. El resultado es una red de profesionales seleccionados en la que el comprador puede confiar desde el primer contacto, y un entorno donde un deportivo, un clásico o una moto premium se presentan junto a vendedores de su mismo nivel.
         </p>
       </div>
 
