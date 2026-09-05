@@ -582,7 +582,7 @@ export default async function HomePage() {
 
         <ul className="space-y-3 mb-8">
           {[
-            'Acceso bajo solicitud, revisión de reputación y una llamada antes del alta',
+            'Acceso bajo solicitud, revisión de reputación',
             'Tu stock aparece en un entorno alineado con su valor',
             'El comprador entiende mejor qué vendes y por qué merece atención',
             'Un canal exclusivo para convertir vehículos especiales en oportunidades mejor presentadas',
