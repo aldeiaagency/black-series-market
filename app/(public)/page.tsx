@@ -301,17 +301,17 @@ export default async function HomePage() {
               {
                 icon: Shield,
                 title: 'Vehículos premium',
-                desc: 'Deportivos, clásicos, motos premium y unidades singulares con algo que las diferencia: versión, estado, configuración, historia o atractivo real.',
+                desc: 'Deportivos, clásicos, motos premium y unidades exclusivas. El vehículo con el que sueñas, en una selección dedicada solo a este tipo de vehículos.',
               },
               {
                 icon: Star,
                 title: 'Profesionales verificados',
-                desc: 'Antes de publicar, revisamos la reputación y presencia online de cada concesionario, compraventa o especialista.',
+                desc: 'Antes de publicar, auditamos la reputación de cada concesionario, compraventa o especialista. Esa buena reputación, verificada, es la que te da la confianza para comprar.',
               },
               {
                 icon: Zap,
                 title: 'Una búsqueda más fácil',
-                desc: 'Menos ruido, más criterio. Explora vehículos premium en un entorno más claro y menos masificado que un portal generalista.',
+                desc: 'Aquí solo encontrarás vehículos premium, sin mezclarse con el resto de fichas de un portal generalista. Menos ruido, más lo que buscas.',
               },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="p-8 border border-[#181818] hover:border-[#242424] transition-colors duration-300">
