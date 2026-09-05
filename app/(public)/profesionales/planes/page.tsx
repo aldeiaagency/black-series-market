@@ -26,11 +26,11 @@ const FAQ_ITEMS = [
   },
   {
     q: '¿Cuándo conozco el precio y las condiciones?',
-    a: 'En esa llamada, que agendas tú cuando te vaya bien. Ahí repasamos qué modalidad encaja con tu volumen y tu forma de trabajar, y te explicamos precio, facturación e IVA con calma, no en una tabla genérica.',
+    a: 'En esa llamada, que agendas tú cuando te vaya bien. Ahí repasamos qué plan encaja con tu volumen y tu forma de trabajar, y te explicamos precio, facturación e IVA con calma, no en una tabla genérica.',
   },
   {
     q: '¿Puedo cambiar de plan más adelante?',
-    a: 'Sí. Un cambio a una modalidad superior se aplica de inmediato; a una inferior, al final del periodo en curso. Tu perfil y tu inventario no se tocan.',
+    a: 'Sí. Un cambio a un plan superior se aplica de inmediato; a uno inferior, al final del periodo en curso. Tu perfil y tu inventario no se tocan.',
   },
   {
     q: '¿Qué pasa si cancelo?',
@@ -132,7 +132,7 @@ export default async function PlanesPage() {
         </nav>
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="h-px w-8 bg-gold" />
-          <span className="text-xs text-gold tracking-widest uppercase">Modalidades para profesionales</span>
+          <span className="text-xs text-gold tracking-widest uppercase">Planes de suscripción</span>
           <div className="h-px w-8 bg-gold" />
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-light text-bsm-text-primary mb-4">
@@ -194,12 +194,12 @@ export default async function PlanesPage() {
         })}
       </div>
 
-      {/* CTA único — la modalidad se elige tras valorar el showroom, no aquí */}
+      {/* CTA único — el plan se elige tras valorar el showroom, no aquí */}
       <div className="border border-bsm-border bg-surface p-8 mb-20 text-center max-w-2xl mx-auto">
         <h3 className="font-display text-xl font-light mb-2">Primero valoramos el encaje del showroom</h3>
         <p className="text-sm text-bsm-text-secondary mb-6 leading-relaxed">
           Envíanos la información de tu showroom. Si cumple los criterios del market, te
-          invitamos a una llamada donde vemos juntos qué modalidad encaja mejor y resolvemos
+          invitamos a una llamada donde vemos juntos qué plan encaja mejor y resolvemos
           precio y condiciones.
         </p>
         <Link href="/profesionales/solicitar-acceso" className="btn-gold px-8">
@@ -214,7 +214,7 @@ export default async function PlanesPage() {
           <h3 className="font-display text-2xl font-light mb-2">¿Operas más de una sede?</h3>
           <p className="text-sm text-bsm-text-secondary max-w-lg">
             Para grupos con varias sedes preparamos una configuración adaptada a tu estructura,
-            tu inventario y tu equipo, sobre la base de la modalidad Elite en cada sede.
+            tu inventario y tu equipo, sobre la base del plan Elite en cada sede.
           </p>
         </div>
         <Link href="/profesionales/grupos" className="btn-outline px-6 whitespace-nowrap flex-shrink-0">

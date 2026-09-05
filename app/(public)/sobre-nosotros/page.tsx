@@ -171,7 +171,7 @@ export default function SobreNosotrosPage() {
               <a
                 href="https://blackseriesagency.es"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="text-gold hover:text-gold-light underline underline-offset-2 transition-colors"
               >
                 Black Series Agency
@@ -231,7 +231,7 @@ export default function SobreNosotrosPage() {
               <a
                 href="https://blackseriesagency.es"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="text-gold hover:text-gold-light underline underline-offset-2 transition-colors"
               >
                 Black Series Agency
@@ -257,7 +257,7 @@ export default function SobreNosotrosPage() {
             <a
               href="https://blackseriesagency.es"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener noreferrer nofollow"
               className="inline-flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors"
             >
               Conoce Black Series Agency <ArrowRight className="w-4 h-4" />

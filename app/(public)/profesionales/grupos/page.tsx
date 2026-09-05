@@ -67,7 +67,7 @@ export default function GruposPage() {
         <h2 className="font-display text-xl font-light mb-4">Cómo funciona</h2>
         <ul className="space-y-3 text-sm text-bsm-text-secondary">
           <li className="flex gap-2"><span className="text-gold">1.</span> Nos cuentas cuántas sedes operas y cómo se reparten tu inventario y tu equipo, y valoramos el encaje del grupo con los criterios del market.</li>
-          <li className="flex gap-2"><span className="text-gold">2.</span> Si encaja, agendamos una llamada para definir estructura, modalidad y condiciones a medida.</li>
+          <li className="flex gap-2"><span className="text-gold">2.</span> Si encaja, agendamos una llamada para definir estructura, plan y condiciones a medida.</li>
           <li className="flex gap-2"><span className="text-gold">3.</span> Abrimos la configuración de sedes, equipos e inventario.</li>
         </ul>
       </div>
@@ -86,7 +86,7 @@ export default function GruposPage() {
             Solicitar valoración para Grupo
           </Link>
           <Link href="/profesionales/planes" className="btn-outline px-6">
-            Ver todas las modalidades →
+            Ver todos los planes →
           </Link>
         </div>
       </div>

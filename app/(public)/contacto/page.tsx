@@ -97,7 +97,7 @@ export default function ContactoPage() {
             <a
               href="https://blackseriesagency.es"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener noreferrer nofollow"
               className="text-bsm-text-primary font-medium hover:text-gold transition-colors"
             >
               Black Series Agency

@@ -23,7 +23,7 @@ const PROFESIONALES = [
   { label: 'Solicitar valoración',      href: '/profesionales/solicitar-acceso' },
   { label: 'Criterios para publicar',   href: '/legal/criterios-publicacion' },
   { label: 'Condiciones profesionales', href: '/legal/condiciones-profesionales' },
-  { label: 'Comparar modalidades',      href: '/profesionales/planes' },
+  { label: 'Planes de suscripción',     href: '/profesionales/planes' },
   { label: 'Contacto',                   href: '/contacto' },
 ]
 
@@ -73,7 +73,7 @@ export default function Footer() {
                 <a
                   href="https://blackseriesagency.es"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener noreferrer nofollow"
                   className="hover:text-gold transition-colors"
                 >
                   Black Series
@@ -85,7 +85,7 @@ export default function Footer() {
               <a
                 href="https://blackseriesagency.es"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener noreferrer nofollow"
                 className="text-[#C9C9C9] hover:text-gold underline underline-offset-2 decoration-bsm-border transition-colors"
               >
                 Black Series

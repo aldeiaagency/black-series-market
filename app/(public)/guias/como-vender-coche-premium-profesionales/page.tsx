@@ -232,7 +232,7 @@ export default function GuiaVenderPremiumPage() {
               Cómo funciona el acceso profesional
             </Link>
             <Link href="/profesionales/planes" className="btn-outline text-sm px-5">
-              Comparar modalidades
+              Comparar planes
             </Link>
           </div>
         </div>

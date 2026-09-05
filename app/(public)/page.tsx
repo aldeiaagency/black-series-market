@@ -43,7 +43,7 @@ const HOME_FAQ: FaqItem[] = [
   },
   {
     q: 'Soy concesionario o compraventa, ¿cómo publico mi stock?',
-    a: 'El acceso profesional es bajo solicitud, con revisión de reputación y una llamada donde explicamos precios y condiciones antes del alta. Puedes conocer cómo funciona el proceso y comparar las modalidades sin dejar ningún dato.',
+    a: 'El acceso profesional es bajo solicitud, con revisión de reputación y una llamada donde explicamos precios y condiciones antes del alta. Puedes conocer cómo funciona el proceso y comparar los planes sin dejar ningún dato.',
   },
 ]
 

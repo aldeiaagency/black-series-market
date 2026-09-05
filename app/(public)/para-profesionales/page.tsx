@@ -54,7 +54,7 @@ const STEPS = [
   {
     n: '01',
     title: 'Conoces el modelo',
-    body: 'Lees cómo funciona Black Label Market y comparas las modalidades disponibles. No hace falta dejar ningún dato para esto.',
+    body: 'Lees cómo funciona Black Label Market y comparas los planes disponibles. No hace falta dejar ningún dato para esto.',
   },
   {
     n: '02',
@@ -109,7 +109,7 @@ export default function ParaProfesionalesPage() {
             Cómo funciona el acceso
           </Link>
           <Link href="/profesionales/planes" className="btn-outline px-6">
-            Ver modalidades de acceso
+            Ver planes de suscripción
           </Link>
         </div>
       </div>
@@ -199,7 +199,7 @@ export default function ParaProfesionalesPage() {
             Solicitar valoración
           </Link>
           <Link href="/profesionales/planes" className="btn-outline px-6 whitespace-nowrap">
-            Ver modalidades de acceso
+            Ver planes de suscripción
           </Link>
         </div>
       </div>
