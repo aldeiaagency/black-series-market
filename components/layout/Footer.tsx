@@ -19,7 +19,7 @@ const EXPLORAR = [
 ]
 
 const PROFESIONALES = [
-  { label: 'Para profesionales',        href: '/para-profesionales' },
+  { label: 'Para profesionales',        href: '/profesionales' },
   { label: 'Solicitar valoración',      href: '/profesionales/solicitar-acceso' },
   { label: 'Criterios para publicar',   href: '/legal/criterios-publicacion' },
   { label: 'Condiciones profesionales', href: '/legal/condiciones-profesionales' },

@@ -8,6 +8,14 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // La landing B2B vivía fuera del namespace /profesionales/*. Movida a la
+        // raíz del namespace (2026-09-05), aprovechando que el sitio nunca se ha
+        // indexado (noindex desde el día uno): mover ahora no cuesta autoridad.
+        source: '/para-profesionales',
+        destination: '/profesionales',
+        permanent: true,
+      },
+      {
         source: '/precios',
         destination: '/profesionales/planes',
         permanent: true,

@@ -7,11 +7,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es
 export const metadata: Metadata = {
   title: 'Acceso profesional para showrooms — Black Label Market',
   description: 'Cómo funciona el acceso profesional a Black Label Market: valoración del showroom, llamada de admisión y alta guiada para concesionarios y especialistas premium.',
-  alternates: { canonical: '/para-profesionales' },
+  alternates: { canonical: '/profesionales' },
   openGraph: {
     title: 'Acceso profesional — Black Label Market',
     description: 'El marketplace más selectivo de coches y motos premium en España. Conoce cómo funciona el acceso antes de solicitarlo.',
-    url: 'https://blacklabelmarket.es/para-profesionales',
+    url: 'https://blacklabelmarket.es/profesionales',
     siteName: 'Black Label Market',
     type: 'website',
   },
@@ -76,8 +76,8 @@ const STEPS = [
 const webPageJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
-  '@id': `${SITE_URL}/para-profesionales#webpage`,
-  url: `${SITE_URL}/para-profesionales`,
+  '@id': `${SITE_URL}/profesionales#webpage`,
+  url: `${SITE_URL}/profesionales`,
   name: 'Acceso profesional — Black Label Market',
   description: 'Cómo funciona el acceso profesional a Black Label Market para showrooms, concesionarios y especialistas premium.',
   inLanguage: 'es-ES',

@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/legal/terminos`,                       lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
     { url: `${BASE_URL}/legal/criterios-publicacion`,          lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
     { url: `${BASE_URL}/legal/condiciones-profesionales`,      lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
-    { url: `${BASE_URL}/para-profesionales`,                   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/profesionales`,                   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/glosario`,                             lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/coches/clasicos`,                      lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },
     { url: `${BASE_URL}/coches/deportivos`,                    lastModified: new Date(), changeFrequency: 'daily',   priority: 0.8 },

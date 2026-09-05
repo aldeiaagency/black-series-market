@@ -904,7 +904,7 @@ export default async function LegalPage({ params }: PageProps) {
               <Link href="/profesionales/solicitar-acceso" className="btn-gold px-6 whitespace-nowrap">
                 Solicitar valoración
               </Link>
-              <Link href="/para-profesionales" className="btn-outline px-6 whitespace-nowrap">
+              <Link href="/profesionales" className="btn-outline px-6 whitespace-nowrap">
                 Ver qué incluye →
               </Link>
             </div>

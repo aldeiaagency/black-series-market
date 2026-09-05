@@ -547,7 +547,7 @@ export default async function HomePage() {
 
             <div className="mt-6 pt-5 border-t border-[#1A1A1A]">
               <Link
-                href="/para-profesionales"
+                href="/profesionales"
                 className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
               >
                 Conocer el acceso profesional <ArrowRight className="w-3 h-3" />
@@ -597,7 +597,7 @@ export default async function HomePage() {
           ))}
         </ul>
 
-        <Link href="/para-profesionales" className="btn-outline px-8 py-3 text-sm inline-flex">
+        <Link href="/profesionales" className="btn-outline px-8 py-3 text-sm inline-flex">
           Conocer el acceso profesional
         </Link>
       </div>

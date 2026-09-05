@@ -287,7 +287,7 @@ export default function SobreNosotrosPage() {
             Publica tu inventario y llega a compradores que ya saben lo que buscan.
           </p>
           <Link
-            href="/para-profesionales"
+            href="/profesionales"
             className="inline-flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors"
           >
             Acceso para profesionales <ArrowRight className="w-4 h-4" />

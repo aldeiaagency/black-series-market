@@ -181,7 +181,7 @@ export default function RegistroCompradorPage() {
             </p>
             <p className="text-xs text-bsm-text-muted">
               ¿Eres concesionario?{' '}
-              <Link href="/para-profesionales" className="text-gold hover:text-gold-light transition-colors font-medium">
+              <Link href="/profesionales" className="text-gold hover:text-gold-light transition-colors font-medium">
                 Conocer el acceso profesional
               </Link>
             </p>

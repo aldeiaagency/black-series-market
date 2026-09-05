@@ -27,7 +27,7 @@ export default function GruposPage() {
         <ol className="flex items-center gap-1.5 text-xs text-bsm-text-muted">
           <li><Link href="/" className="hover:text-gold transition-colors">Inicio</Link></li>
           <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-          <li><Link href="/para-profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
+          <li><Link href="/profesionales" className="hover:text-gold transition-colors">Para profesionales</Link></li>
           <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
           <li className="text-bsm-text-secondary">Modelo Grupo</li>
         </ol>

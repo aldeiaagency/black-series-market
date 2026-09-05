@@ -63,7 +63,7 @@ Creado y operado por **Black Series** (https://blackseriesagency.es), agencia es
 - Inicio: https://blacklabelmarket.es
 - Vehículos a la carta (búsqueda personalizada): https://blacklabelmarket.es/vehiculos-a-la-carta
 - Showrooms verificados: https://blacklabelmarket.es/dealers
-- Para profesionales (B2B): https://blacklabelmarket.es/para-profesionales
+- Para profesionales (B2B): https://blacklabelmarket.es/profesionales
 - Planes y precios: https://blacklabelmarket.es/precios
 - Cómo funciona: https://blacklabelmarket.es/como-funciona
 
@@ -109,7 +109,7 @@ El sitio implementa schema.org extensivamente:
 - `DefinedTermSet` + `DefinedTerm` — glosario del sector en `/glosario`
 - `HowTo` — pasos de compra y venta en `/como-funciona` (compradores y profesionales)
 - `CollectionPage` — índice de marcas (`/marcas`) y guías (`/guias`)
-- `WebPage` — páginas transaccionales (`/vehiculos-a-la-carta`, `/para-profesionales`, `/precios`)
+- `WebPage` — páginas transaccionales (`/vehiculos-a-la-carta`, `/profesionales`, `/precios`)
 - `SearchResultsPage` — directorio de showrooms verificados (`/dealers`)
 - `ContactPage` — contacto con el marketplace (`/contacto`)
 

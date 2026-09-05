@@ -276,7 +276,7 @@ function renderPage(
             acceso y, si encajas, publica tu inventario para compradores cualificados.
           </p>
         </div>
-        <a href="/para-profesionales" className="btn-gold flex-shrink-0 px-10 py-4">
+        <a href="/profesionales" className="btn-gold flex-shrink-0 px-10 py-4">
           Cómo funciona el acceso
         </a>
       </div>
