@@ -292,7 +292,7 @@ export default async function HomePage() {
               Qué nos hace diferentes.<br />
             </h2>
             <p className="text-[13px] text-[#8A8A8A] leading-relaxed max-w-xl">
-              Cuando buscas un deportivo, un clásico, una moto premium o una unidad difícil de encontrar, necesitas algo más que una lista interminable de anuncios. Necesitas contexto, confianza y buenos profesionales detrás.
+              Cuando buscas un deportivo, un clásico, una moto premium o una unidad exclusiva, necesitas un espacio especializado y profesionales con buena reputación, verificada, que inspiran confianza.
             </p>
           </div>
 
