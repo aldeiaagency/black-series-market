@@ -290,7 +290,7 @@ export default function SobreNosotrosPage() {
             href="/profesionales"
             className="inline-flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors"
           >
-            Acceso para profesionales <ArrowRight className="w-4 h-4" />
+            Cómo publicar en Black Label <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="border border-bsm-border p-7">

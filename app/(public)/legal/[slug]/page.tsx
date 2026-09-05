@@ -905,7 +905,7 @@ export default async function LegalPage({ params }: PageProps) {
                 Solicitar valoración
               </Link>
               <Link href="/profesionales" className="btn-outline px-6 whitespace-nowrap">
-                Ver qué incluye →
+                Cómo publicar en Black Label
               </Link>
             </div>
           </div>

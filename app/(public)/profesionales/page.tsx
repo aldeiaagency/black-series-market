@@ -59,7 +59,7 @@ const STEPS = [
   {
     n: '02',
     title: 'Solicitas la valoración',
-    body: 'Nos cuentas sobre tu showroom: quién eres, dónde estáis y cómo os presentáis públicamente. Revisamos reputación, especialización y catálogo.',
+    body: 'Nos cuentas sobre tu showroom: quién eres, dónde estáis y cómo os presentáis públicamente. Revisamos reputación, especialización y presentación del stock.',
   },
   {
     n: '03',

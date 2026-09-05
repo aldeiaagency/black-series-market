@@ -156,7 +156,7 @@ function renderPage(
       {/* Editorial — confianza / qué showrooms publican */}
       <div className="mb-8 max-w-2xl">
         <p className="text-sm text-bsm-text-secondary leading-relaxed">
-          Aquí el vendedor se selecciona con el mismo criterio que el vehículo. Cada showroom —concesionario, compraventa o especialista— pasa por un proceso de verificación antes de poder publicar: revisamos su reputación, su trayectoria y su presencia online para asegurarnos de que está a la altura de los vehículos que ofrece. El resultado es una red de profesionales seleccionados en la que el comprador puede confiar desde el primer contacto, y un entorno donde un deportivo, un clásico o una moto premium se presentan junto a vendedores de su mismo nivel.
+          Aquí el vendedor se selecciona con el mismo criterio que el vehículo. Cada showroom —concesionario, compraventa o especialista— pasa por un proceso de verificación antes de poder publicar: revisamos su reputación, su especialización y cómo presenta su stock para asegurarnos de que está a la altura de los vehículos que ofrece. El resultado es una red de profesionales seleccionados en la que el comprador puede confiar desde el primer contacto, y un entorno donde un deportivo, un clásico o una moto premium se presentan junto a vendedores de su mismo nivel.
         </p>
       </div>
 
@@ -164,8 +164,8 @@ function renderPage(
       <div className="grid grid-cols-1 md:grid-cols-3 border border-bsm-border mb-12">
         {[
           { n: '01', title: 'Solicitud de acceso',     desc: 'Reservado a profesionales del sector: concesionarios, compraventas y especialistas.' },
-          { n: '02', title: 'Revisión de reputación',  desc: 'Analizamos su trayectoria, presencia online y nivel de servicio antes de aceptarlo.' },
-          { n: '03', title: 'Aceptación y estándar',   desc: 'Solo se publica cumpliendo un estándar de presentación a la altura del vehículo.' },
+          { n: '02', title: 'Revisión de reputación',  desc: 'Revisamos su reputación, su especialización y cómo presenta su stock antes de admitirlo.' },
+          { n: '03', title: 'Llamada y alta',          desc: 'Si encaja, hablamos con él y solo entonces publica, con ficha completa y fotografía a la altura del vehículo.' },
         ].map((s, i) => (
           <div key={s.n} className={`p-6 ${i > 0 ? 'border-t md:border-t-0 md:border-l border-bsm-border' : ''}`}>
             <div className="font-display text-xs text-gold/50 mb-3 tracking-[0.2em]">{s.n}</div>
@@ -272,12 +272,12 @@ function renderPage(
         <div>
           <h3 className="font-display text-2xl font-light mb-2">¿Eres profesional?</h3>
           <p className="text-sm text-bsm-text-muted max-w-md">
-            Black Label Market trabaja con showrooms seleccionados. Conoce cómo funciona el
-            acceso y, si encajas, publica tu inventario para compradores cualificados.
+            Black Label Market trabaja con showrooms seleccionados. Si el tuyo encaja, publica
+            tu inventario ante compradores que ya buscan este tipo de vehículo.
           </p>
         </div>
         <a href="/profesionales" className="btn-gold flex-shrink-0 px-10 py-4">
-          Cómo funciona el acceso
+          Cómo publicar en Black Label
         </a>
       </div>
     </div>

@@ -377,7 +377,7 @@ export default async function HomePage() {
         {
           n: '02',
           title: 'Profesionales verificados',
-          desc: 'Trabajamos solo con concesionarios, compraventas y especialistas cuya reputación y nivel de servicio estén a la altura del vehículo que ofrecen.',
+          desc: 'Trabajamos solo con concesionarios, compraventas y especialistas cuya reputación y forma de presentar su stock están a la altura del vehículo que ofrecen.',
         },
         {
           n: '03',

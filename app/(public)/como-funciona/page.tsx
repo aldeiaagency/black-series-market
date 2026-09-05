@@ -95,7 +95,7 @@ const DEALER_STEPS = [
   {
     icon: ShieldCheck,
     title: 'Solicita la valoración',
-    desc: 'Nos cuentas sobre tu showroom y revisamos reputación, especialización y catálogo — es lo que mantiene el market como una selección, no un clasificado abierto.',
+    desc: 'Nos cuentas sobre tu showroom y revisamos reputación, especialización y presentación del stock — es lo que mantiene el market como una selección, no un clasificado abierto.',
   },
   {
     icon: PhoneCall,
