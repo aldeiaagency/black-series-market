@@ -108,7 +108,7 @@ export default function LoginPage() {
             <p className="text-xs text-bsm-text-muted">
               ¿Eres concesionario?{' '}
               <Link href="/profesionales" className="text-bsm-text-secondary hover:text-gold transition-colors">
-                Conocer el acceso profesional
+                Cómo publicar en Black Label
               </Link>
             </p>
           </div>

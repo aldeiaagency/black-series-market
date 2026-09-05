@@ -550,7 +550,7 @@ export default async function HomePage() {
                 href="/profesionales"
                 className="flex items-center gap-1.5 text-xs text-gold hover:text-gold-light transition-colors"
               >
-                Conocer el acceso profesional <ArrowRight className="w-3 h-3" />
+                Cómo publicar en Black Label <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -598,7 +598,7 @@ export default async function HomePage() {
         </ul>
 
         <Link href="/profesionales" className="btn-outline px-8 py-3 text-sm inline-flex">
-          Conocer el acceso profesional
+          Cómo publicar en Black Label
         </Link>
       </div>
     </div>

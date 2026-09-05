@@ -182,7 +182,7 @@ export default function RegistroCompradorPage() {
             <p className="text-xs text-bsm-text-muted">
               ¿Eres concesionario?{' '}
               <Link href="/profesionales" className="text-gold hover:text-gold-light transition-colors font-medium">
-                Conocer el acceso profesional
+                Cómo publicar en Black Label
               </Link>
             </p>
           </div>
