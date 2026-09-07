@@ -12,7 +12,11 @@ import type { VehicleImage } from '@/lib/types'
 // ---------------------------------------------------------------------------
 
 type ImageItem = { kind: 'image'; url: string; alt?: string }
-type VideoItem = { kind: 'video'; videoId: string; thumbUrl: string }
+type VideoProvider = 'youtube' | 'vimeo'
+// Vimeo no tiene una URL de miniatura predecible a partir del ID (a diferencia de
+// YouTube) sin llamar a su API oEmbed — thumbUrl queda null y se usa el fallback
+// genérico (icono de play), no una miniatura real del vídeo.
+type VideoItem = { kind: 'video'; provider: VideoProvider; videoId: string; thumbUrl: string | null }
 type MediaItem = ImageItem | VideoItem
 
 interface VehicleGalleryProps {
@@ -25,27 +29,40 @@ interface VehicleGalleryProps {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function extractYouTubeId(url: string): string | null {
-  const m = url.match(
+function extractVideoInfo(url: string): { provider: VideoProvider; videoId: string } | null {
+  const yt = url.match(
     /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   )
-  return m?.[1] ?? null
+  if (yt?.[1]) return { provider: 'youtube', videoId: yt[1] }
+
+  // vimeo.com/123456789 · player.vimeo.com/video/123456789 · con o sin hash tras "/"
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  if (vimeo?.[1]) return { provider: 'vimeo', videoId: vimeo[1] }
+
+  return null
 }
 
-function buildMediaItems(images: VehicleImage[], videoId: string | null): MediaItem[] {
+function buildMediaItems(
+  images: VehicleImage[],
+  video: { provider: VideoProvider; videoId: string } | null
+): MediaItem[] {
   const imageItems: ImageItem[] = images.map((img) => ({
     kind: 'image',
     url: img.url,
     alt: img.alt,
   }))
 
-  if (!videoId) return imageItems
+  if (!video) return imageItems
 
   const videoItem: VideoItem = {
     kind: 'video',
-    videoId,
-    // hqdefault (480×360) always exists; maxresdefault only for HD uploads
-    thumbUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    provider: video.provider,
+    videoId: video.videoId,
+    // YouTube: hqdefault (480×360) siempre existe. Vimeo no tiene URL de
+    // miniatura predecible por ID sin llamar a su API — queda null.
+    thumbUrl: video.provider === 'youtube'
+      ? `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`
+      : null,
   }
 
   // Insert video after first image (or at start if no images)
@@ -129,8 +146,8 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
   const lightboxRef = useModalA11y(lightboxOpen, closeLightbox)
   const videoModalRef = useModalA11y(videoModalOpen, closeVideoModal)
 
-  const videoId = videoUrl ? extractYouTubeId(videoUrl) : null
-  const items = buildMediaItems(images, videoId)
+  const video = videoUrl ? extractVideoInfo(videoUrl) : null
+  const items = buildMediaItems(images, video)
   const activeItem = items[activeIndex] as MediaItem | undefined
 
   // Indices of image-only items, used for lightbox navigation
@@ -209,7 +226,7 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
           ) : activeItem?.kind === 'video' ? (
             // ---- Video facade slot ----
             <div className="absolute inset-0">
-              {failedItems.has(activeIndex) ? (
+              {failedItems.has(activeIndex) || !activeItem.thumbUrl ? (
                 <VideoThumbFallback />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -302,7 +319,7 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
                 ) : (
                   // Video thumbnail
                   <>
-                    {failedItems.has(i) ? (
+                    {failedItems.has(i) || !item.thumbUrl ? (
                       <VideoThumbFallback compact />
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -416,7 +433,11 @@ export default function VehicleGallery({ images, title, videoUrl }: VehicleGalle
             <div className="relative aspect-[16/9] bg-obsidian">
               {activeItem?.kind === 'video' && (
                 <iframe
-                  src={`https://www.youtube.com/embed/${activeItem.videoId}?autoplay=1&rel=0&modestbranding=1&color=white`}
+                  src={
+                    activeItem.provider === 'youtube'
+                      ? `https://www.youtube.com/embed/${activeItem.videoId}?autoplay=1&rel=0&modestbranding=1&color=white`
+                      : `https://player.vimeo.com/video/${activeItem.videoId}?autoplay=1`
+                  }
                   title={`${title} — vídeo`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen

@@ -56,8 +56,8 @@ const nextConfig = {
     // runtime. Un CSP estricto por nonce exigiría generar el nonce en middleware.ts y
     // enhebrarlo en cada script del árbol — fuera de alcance de este punto (SEC-9).
     // Dominios reales verificados en código, no asumidos: GTM/GA4 (ConsentManagedGtm.tsx,
-    // layout.tsx), Supabase (createClient, imágenes ya en remotePatterns), YouTube embed
-    // (VehicleGallery.tsx:419, único frame-src externo real). Stripe NO necesita entrada
+    // layout.tsx), Supabase (createClient, imágenes ya en remotePatterns), YouTube y Vimeo
+    // embed (VehicleGallery.tsx, los dos únicos frame-src externos reales). Stripe NO necesita entrada
     // aquí — el checkout es un <form> same-origin a /api/stripe/create-checkout que
     // redirige server-side, no hay Stripe.js ni iframe embebido (verificado, sin
     // `loadStripe`/`Elements` en el repo).
@@ -81,7 +81,7 @@ const nextConfig = {
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.clarity.ms",
-      "frame-src 'self' https://www.youtube.com",
+      "frame-src 'self' https://www.youtube.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
