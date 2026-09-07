@@ -64,7 +64,7 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
 
   return (
     <article className={cn(
-      'group relative bg-[#0D0D0D] border border-[#1A1A1A] overflow-hidden',
+      'group relative bg-[#0D0D0D] border border-[#1A1A1A] overflow-hidden flex flex-col h-full',
       'transition-all duration-300 hover:border-gold/25 hover:shadow-[0_8px_40px_rgba(0,0,0,0.7)]',
       !isActive && 'opacity-75'
     )}>
@@ -153,9 +153,11 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 pt-3.5">
-        <Link href={href} className="block">
+      {/* Content — flex-col + flex-1 en el Link deja que el divisor de abajo (mt-auto) empuje
+          precio+vendedor al fondo, alineados entre tarjetas aunque el contenido de arriba
+          (versión, specs, ubicación, badges) varíe en altura de una a otra. */}
+      <div className="p-4 pt-3.5 flex flex-col flex-1">
+        <Link href={href} className="block flex flex-col flex-1">
           {/* Brand */}
           <div className="mb-0.5">
             <span className="text-[11px] text-gold/80 tracking-[0.2em] uppercase font-medium">
@@ -172,7 +174,11 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             <p className="text-[12px] text-[#8A8A8A] mb-2.5 leading-tight">{vehicle.version}</p>
           )}
 
-          {/* Specs row: year · km · power · (moto: cc · carnet | car: cambio · combustible) */}
+          {/* Specs row: year · km · power · (moto: cc · carnet | car: cambio · combustible).
+              Vuelve a flex-wrap (probado en vivo: nowrap+overflow-hidden cortaba el texto a
+              mitad sin elipsis — "Doble Embrague · G" — peor que el problema original). No
+              hace falta forzar una sola línea: el mt-auto del divisor de abajo ya alinea
+              precio+vendedor entre tarjetas sin importar si esta fila ocupa 1 o 2 líneas. */}
           <div className="flex flex-wrap items-center gap-y-1 mb-3 text-[12px] text-[#8A8A8A]">
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-[#9E9E9E]" />
@@ -258,8 +264,8 @@ export default function VehicleCard({ vehicle, variant = 'default' }: VehicleCar
             </div>
           )}
 
-          {/* Divider */}
-          <div className="h-px bg-[#1A1A1A] mb-3.5" />
+          {/* Divider — mt-auto empuja precio (y la fila de vendedor, fuera del Link) al fondo */}
+          <div className="h-px bg-[#1A1A1A] mb-3.5 mt-auto" />
 
           {/* Price */}
           <div className={cn(
