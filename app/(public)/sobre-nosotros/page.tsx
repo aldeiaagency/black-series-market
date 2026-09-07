@@ -179,7 +179,7 @@ export default function SobreNosotrosPage() {
               : gestión de leads, automatización de seguimiento, cualificación y procesos comerciales pensados para
               este segmento. La infraestructura que hay detrás del marketplace es la misma que usamos para que los
               mejores operadores del sector funcionen con menos fuga y más control. No es un portal más donde
-              publicar un anuncio. Es un sistema.
+              publicar una ficha. Es un sistema.
             </p>
           </div>
         </section>
@@ -203,7 +203,7 @@ export default function SobreNosotrosPage() {
             </p>
             <p>
               La razón es sencilla: la calidad de lo que un comprador encuentra aquí depende directamente de quién
-              está detrás de cada anuncio. Y eso no lo garantiza ningún algoritmo. Lo garantiza decidir bien a
+              está detrás de cada ficha. Y eso no lo garantiza ningún algoritmo. Lo garantiza decidir bien a
               quién se le da acceso.
             </p>
           </div>
