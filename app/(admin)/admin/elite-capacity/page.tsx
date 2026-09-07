@@ -54,7 +54,7 @@ export default async function AdminEliteCapacityPage() {
                   <p className="text-xs text-bsm-text-muted mt-0.5">
                     Ocupación: {rule.current_elite_showrooms}
                     {rule.max_elite_showrooms ? ` / ${rule.max_elite_showrooms}` : ''}
-                    {rule.max_elite_share ? ` · Máx. ${Math.round(rule.max_elite_share * 100)}% del total` : ''}
+                    {rule.max_elite_share ? ` · Referencia (no aplicada): ${Math.round(rule.max_elite_share * 100)}% del total` : ''}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">

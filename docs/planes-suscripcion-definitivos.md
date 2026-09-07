@@ -74,7 +74,7 @@
 | Funcionalidad | Configuración definitiva | Estado |
 |---|---|---|
 | **Precio** | **899 €/mes + IVA** | operativo |
-| **Plazas (exclusividad)** | **Tope interno 50** (plano, sin categorías, **ajustable**, **NO publicado**) · regla guía **≤20% de showrooms activos** · copy público "Plazas limitadas según disponibilidad" | operativo |
+| **Plazas (exclusividad)** | **Tope interno 50** (plano, sin categorías, **ajustable**, **NO publicado**) · copy público "Plazas limitadas según disponibilidad" | operativo |
 | **Vehículos activos** | Hasta **100** (+ bloque 25 add-on) | operativo |
 | **Usuarios / Sedes** | 10 / 1 | operativo |
 | **Perfil + Activación Premium** | Igual que el resto | operativo |
@@ -88,6 +88,8 @@
 | **Boosts incluidos** | 3/mes | operativo |
 
 > Los ítems `future` están **incluidos en el plan** pero se activan/anuncian **cuando estén operativos** (principio v2: no prometer públicamente lo que no funciona). El "destacado" no es comprable como add-on (exclusivo Elite).
+
+> **Corregido 2026-09-07 (debate Claude↔Codex + H, ver `registro_decisiones.md`):** el tope de plazas Elite se gobierna **solo** por el número plano (hoy 50), nunca por un porcentaje calculado en vivo. Un tope por porcentaje sobre "showrooms activos" está roto en los dos extremos: con pocos showrooms bloquea altas que sí se querrían aceptar (20% de una base pequeña o de 0 es prácticamente 0), y si la base total baja (bajas de cualquier plan, no solo Elite), forzaría a "quitarle" el plan a un Elite que ya paga en cuanto el porcentaje se recalcula — inaceptable. La antigua "regla guía ≤20%" queda **retirada como mecanismo** — a lo sumo, referencia manual y periódica para que H decida si conviene subir el tope plano a medida que crece el negocio, nunca un cálculo automático. **Regla dura, para no repetir el error:** el tope, cualquiera que sea, solo bloquea **altas nuevas** — nunca revoca Elite a un showroom que ya lo tiene activo. Corregido también en código: `lib/elite-capacity.ts` (el share ya no se lee ni se aplica) y el tope plano nacional, que estaba sembrado en `NULL` (nunca se aplicaba de verdad), se fija en 50 vía migración `115_elite_capacity_flat_cap.sql`.
 
 **Add-ons disponibles en Elite:** Boost 7 días (49 €) · Pack 5 boosts (199 €) · Bloque +25 vehículos (99 €/mes). El Diagnóstico y la sincronización de stock **no se ofrecen como add-on** porque ya van incluidos de serie en el plan.
 

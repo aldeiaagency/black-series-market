@@ -22,6 +22,16 @@ const CTA_MAP: Record<EliteAvailabilityStatus, { label: string; href: string }> 
  * Checks Elite availability for a province + category.
  * Falls back to country-wide rule when no province rule exists.
  * Never exposes internal capacity numbers.
+ *
+ * IMPORTANTE: solo se lee/aplica el tope PLANO (max_elite_showrooms).
+ * max_elite_share (el porcentaje) NUNCA gobierna en vivo — con el número de
+ * showrooms activos cerca de cero o inestable, un tope por porcentaje o
+ * bloquea toda alta nueva (20% de 0 es 0) o exigiría "quitarle" el plan a
+ * alguien que ya paga en cuanto baja el denominador. El share queda solo
+ * como dato de referencia para que H revise manualmente, de tanto en tanto,
+ * si el tope plano sigue teniendo sentido a medida que crece el negocio —
+ * nunca se recalcula ni se aplica automáticamente. Y el tope, sea el que
+ * sea, solo bloquea ALTAS NUEVAS: nunca revoca Elite a quien ya lo tiene.
  */
 export async function checkEliteAvailability(
   provinceCode?: string | null,
@@ -34,7 +44,7 @@ export async function checkEliteAvailability(
     ? [
         admin
           .from('elite_capacity_rules')
-          .select('availability_status, max_elite_showrooms, max_elite_share, current_elite_showrooms, manual_override')
+          .select('availability_status, max_elite_showrooms, current_elite_showrooms, manual_override')
           .eq('geographic_scope_type', 'province')
           .eq('geographic_scope_id', provinceCode)
           .in('category', [category, '*'])
@@ -43,7 +53,7 @@ export async function checkEliteAvailability(
           .single(),
         admin
           .from('elite_capacity_rules')
-          .select('availability_status, max_elite_showrooms, max_elite_share, current_elite_showrooms, manual_override')
+          .select('availability_status, max_elite_showrooms, current_elite_showrooms, manual_override')
           .eq('geographic_scope_type', 'country')
           .eq('geographic_scope_id', 'ES')
           .limit(1)
@@ -52,7 +62,7 @@ export async function checkEliteAvailability(
     : [
         admin
           .from('elite_capacity_rules')
-          .select('availability_status, max_elite_showrooms, max_elite_share, current_elite_showrooms, manual_override')
+          .select('availability_status, max_elite_showrooms, current_elite_showrooms, manual_override')
           .eq('geographic_scope_type', 'country')
           .eq('geographic_scope_id', 'ES')
           .limit(1)
@@ -76,22 +86,41 @@ export async function checkEliteAvailability(
 }
 
 /**
- * Increments elite showroom counter for a province after a successful Elite subscription.
+ * Increments elite showroom counter after a successful Elite subscription.
  * Called from the Stripe webhook handler.
+ *
+ * Corregido (2026-09-07): antes solo buscaba una regla de PROVINCIA — como
+ * nunca se ha sembrado ninguna (solo existe la fila nacional de fallback),
+ * la función siempre hacía no-op y el contador nacional nunca subía. Ahora
+ * sigue la misma cascada provincia→país que checkEliteAvailability.
+ * Solo aplica el tope PLANO (max_elite_showrooms) — el share nunca gobierna
+ * en vivo (ver comentario en checkEliteAvailability). Y esto solo bloquea
+ * ALTAS NUEVAS (pasa a 'waitlist'): nunca revoca Elite a quien ya lo tiene.
  */
 export async function incrementEliteCounter(provinceCode: string, category = '*') {
   const admin = createAdminClient()
 
-  // Localiza la regla de la provincia (categoría específica o '*') y sube el contador.
-  const { data: rule } = await admin
-    .from('elite_capacity_rules')
-    .select('id, current_elite_showrooms, max_elite_showrooms, max_elite_share')
-    .eq('geographic_scope_type', 'province')
-    .eq('geographic_scope_id', provinceCode)
-    .in('category', [category, '*'])
-    .order('category', { ascending: false }) // categoría específica gana sobre '*'
-    .limit(1)
-    .maybeSingle()
+  const queries = [
+    admin
+      .from('elite_capacity_rules')
+      .select('id, current_elite_showrooms, max_elite_showrooms')
+      .eq('geographic_scope_type', 'province')
+      .eq('geographic_scope_id', provinceCode)
+      .in('category', [category, '*'])
+      .order('category', { ascending: false }) // categoría específica gana sobre '*'
+      .limit(1)
+      .maybeSingle(),
+    admin
+      .from('elite_capacity_rules')
+      .select('id, current_elite_showrooms, max_elite_showrooms')
+      .eq('geographic_scope_type', 'country')
+      .eq('geographic_scope_id', 'ES')
+      .limit(1)
+      .maybeSingle(),
+  ]
+
+  const results = await Promise.all(queries)
+  const rule = results.find((r) => r.data)?.data
 
   if (!rule) return
 
