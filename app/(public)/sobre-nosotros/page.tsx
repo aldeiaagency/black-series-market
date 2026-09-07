@@ -27,7 +27,7 @@ const aboutPageJsonLd = {
   url: `${SITE_URL}/sobre-nosotros`,
   name: 'Sobre nosotros — Black Label Market',
   description:
-    'Black Label Market es un marketplace de coches y motos premium en España con concesionarios y especialistas verificados y criterio editorial.',
+    'Black Label Market es un marketplace de coches y motos premium en España con concesionarios y especialistas verificados, con una línea editorial propia.',
   inLanguage: 'es-ES',
   isPartOf: { '@type': 'WebSite', '@id': `${SITE_URL}/#website` },
   about: { '@id': `${SITE_URL}/#organization` },
@@ -87,13 +87,13 @@ export default function SobreNosotrosPage() {
         {/* Por qué existe */}
         <section className="border-t border-[#141414] py-14">
           <h2 className="font-display text-2xl md:text-3xl font-light text-bsm-text-primary mb-6">
-            No somos el portal más grande. Somos el que tiene criterio.
+            No somos el portal más grande. Somos el más exigente.
           </h2>
           <div className="space-y-4 text-bsm-text-secondary leading-relaxed text-[15px]">
             <p>
               La propuesta no es complicada: un marketplace donde hay un estándar real de entrada, donde cada
               concesionario o compraventa ha sido verificado antes de poder publicar, y donde el comprador llega
-              a un catálogo con criterio en lugar de a un buscador de volumen.
+              a un catálogo cuidado, no a un buscador de volumen.
             </p>
             <p>
               No buscamos ser excluyentes. La palabra clave no es exclusividad, es coherencia. Un Aston Martin,
@@ -119,7 +119,7 @@ export default function SobreNosotrosPage() {
               Cuando llegas a Black Label, el trabajo de filtrado ya está hecho.
             </p>
             <p>
-              No hay anuncios sin criterio ni stock que no pertenezca a esta categoría. Cada showroom o compraventa
+              No publicamos cualquier ficha, ni admitimos stock que no pertenezca a esta categoría. Cada showroom o compraventa
               que aparece aquí ha pasado por un proceso de verificación real antes de publicar. Cada vehículo tiene
               que cumplir un estándar de presentación: información completa, fotografía de calidad, precio visible.
               Sin esas condiciones, no aparece.
@@ -127,7 +127,7 @@ export default function SobreNosotrosPage() {
           </div>
           <ul className="my-6 space-y-3">
             {[
-              'El catálogo tiene criterio aplicado. Sin anuncios fuera de categoría.',
+              'Solo entra el stock que pertenece a esta categoría. Nada fuera de lugar.',
               'Cada concesionario o showroom ha pasado una revisión real antes de publicar.',
               'Cada vehículo cumple un estándar de presentación: información completa, imagen de calidad, precio visible.',
               'Si no encuentras lo que buscas, Vehículos a la carta trabaja para ti.',
@@ -272,7 +272,7 @@ export default function SobreNosotrosPage() {
         <div className="border border-bsm-border p-7">
           <p className="text-xs text-gold tracking-widest uppercase mb-3">Catálogo</p>
           <p className="text-sm text-bsm-text-secondary leading-relaxed mb-5">
-            Explora coches y motos premium con criterio de selección real.
+            Explora coches y motos premium, elegidos por calidad, no por volumen.
           </p>
           <Link
             href="/coches"
