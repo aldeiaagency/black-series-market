@@ -643,9 +643,9 @@ Black Label Market se reserva el derecho de aceptar, rechazar, editar, pausar o 
 
 **Clasificación de vehículos y showrooms**
 
-En el catálogo de vehículos, el orden predeterminado sitúa primero los anuncios que tienen activo un Boost o destacado contratado separadamente o incluido en el plan del profesional. Dentro de cada grupo, los anuncios se ordenan por fecha de publicación, de más reciente a más antigua. El destacado remunerado es, por tanto, el parámetro de mayor importancia relativa en el orden predeterminado.
+En el catálogo de vehículos, el orden predeterminado sitúa primero las fichas que tienen activo un Boost o destacado contratado separadamente o incluido en el plan del profesional. Dentro de cada grupo, las fichas se ordenan por fecha de publicación, de más reciente a más antigua. El destacado remunerado es, por tanto, el parámetro de mayor importancia relativa en el orden predeterminado.
 
-La completitud, calidad de las fotografías, exactitud de los datos y adecuación a los Criterios de Publicación se utilizan para decidir si un anuncio puede publicarse o mantenerse activo, pero no constituyen actualmente un parámetro directo del orden predeterminado.
+La completitud, calidad de las fotografías, exactitud de los datos y adecuación a los Criterios de Publicación se utilizan para decidir si una ficha puede publicarse o mantenerse activa, pero no constituyen actualmente un parámetro directo del orden predeterminado.
 
 El usuario puede cambiar el orden mediante las opciones de fecha, precio y kilometraje disponibles en el catálogo.
 
