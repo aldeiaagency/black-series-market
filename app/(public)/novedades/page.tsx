@@ -16,7 +16,7 @@ export const revalidate = 300
 // búsqueda propia — se evita competir por las mismas keywords. follow sí, para que el
 // link equity llegue a las fichas reales.
 export const metadata: Metadata = {
-  title: 'Novedades — Black Label Market',
+  title: 'Novedades',
   description: 'Las últimas unidades publicadas en Black Label Market: coches y motos premium, deportivos, clásicos y unidades especiales.',
   robots: { index: false, follow: true },
 }

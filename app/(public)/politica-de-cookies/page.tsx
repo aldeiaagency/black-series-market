@@ -2,7 +2,7 @@
 import { permanentRedirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Política de cookies — Black Label Market',
+  title: 'Política de cookies',
   description: 'Información sobre el uso de cookies en Black Label Market.',
   alternates: { canonical: '/legal/cookies' },
 }

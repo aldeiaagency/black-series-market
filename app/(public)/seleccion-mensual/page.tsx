@@ -5,7 +5,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es
 const PAGE_PATH = '/seleccion-mensual'
 
 export const metadata: Metadata = {
-  title: 'Selección mensual — Black Label Market',
+  title: 'Selección mensual',
   description: 'Una vez al mes, una selección editada de unidades y hallazgos del mercado premium y de colección. Sin spam, baja en un clic.',
   alternates: { canonical: PAGE_PATH },
   robots: { index: true, follow: true },

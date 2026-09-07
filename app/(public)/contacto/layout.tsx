@@ -4,7 +4,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
-  title: 'Contacto | Black Label Market',
+  title: 'Contacto',
   description: 'Contacta con el equipo de Black Label Market. Dudas sobre publicación de vehículos, acceso de compradores, gestión de cuenta o cualquier consulta sobre el marketplace premium.',
   alternates: { canonical: '/contacto' },
   openGraph: {

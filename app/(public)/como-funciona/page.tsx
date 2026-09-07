@@ -6,7 +6,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
-  title: 'Cómo funciona — Black Label Market',
+  title: 'Cómo funciona',
   description: 'Cómo funciona Black Label Market: marketplace de coches y motos premium con profesionales verificados. Para compradores y para concesionarios.',
   alternates: { canonical: '/como-funciona' },
   openGraph: {

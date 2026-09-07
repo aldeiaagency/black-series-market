@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 export const metadata: Metadata = {
-  title: 'Buscar vehículos — Black Label Market',
+  title: 'Buscar vehículos',
   robots: { index: false, follow: false },
 }
 

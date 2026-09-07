@@ -6,7 +6,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
-  title: 'Sobre nosotros — Black Label Market',
+  title: 'Sobre nosotros',
   description:
     'Black Label Market nació para darle al vehículo premium el escaparate que merece. Conoce quiénes somos, cómo verificamos a los profesionales y qué hace diferente a este marketplace.',
   alternates: { canonical: '/sobre-nosotros' },

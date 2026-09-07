@@ -4,7 +4,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Varias sedes — Black Label Market',
+  title: 'Varias sedes',
   description:
     'Gestiona varias sedes desde una única cuenta, con visión consolidada de inventario y oportunidades. El acceso se gestiona de forma consultiva: ponte en contacto con nosotros.',
   alternates: { canonical: '/profesionales/grupos' },

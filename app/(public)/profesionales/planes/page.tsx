@@ -43,7 +43,7 @@ const FAQ_ITEMS = [
 ] as const
 
 export const metadata: Metadata = {
-  title: 'Planes para profesionales — Black Label Market',
+  title: 'Planes para profesionales',
   description:
     'Compara Essential, Professional y Elite. Sin comisiones por venta. El acceso pasa por un proceso de admisión — precio y condiciones se explican en una llamada con el equipo.',
   alternates: { canonical: '/profesionales/planes' },

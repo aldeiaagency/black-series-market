@@ -8,7 +8,7 @@ import CompareExpandToggle from '@/components/marketplace/CompareExpandToggle'
 import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 export const metadata: Metadata = {
-  title: 'Comparar vehículos — Black Label Market',
+  title: 'Comparar vehículos',
   robots: { index: false, follow: false },
 }
 

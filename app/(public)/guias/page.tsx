@@ -9,7 +9,7 @@ const HUB_IMAGE = '/images/guides/coches-premium-segunda-mano.webp'
 const HUB_IMAGE_URL = `${SITE_URL}${HUB_IMAGE}`
 
 export const metadata: Metadata = {
-  title: 'Guías de compra de coches y motos premium — Black Label Market',
+  title: 'Guías de compra de coches y motos premium',
   description: 'Guías prácticas para comprar coches y motos premium en España: coches de lujo, superdeportivos, SUV premium, clásicos, youngtimers y motos de alta gama.',
   alternates: { canonical: '/guias' },
   openGraph: {

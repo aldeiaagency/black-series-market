@@ -9,7 +9,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
-  title: 'Marcas de coches y motos premium en España | Black Label Market',
+  title: 'Marcas de coches y motos premium en España',
   description: 'Ferrari, Porsche, Lamborghini, BMW, McLaren, Ducati, Triumph y más de 50 marcas premium. Catálogo completo de coches y motos de lujo, deportivos y de colección en España.',
   alternates: { canonical: '/marcas' },
 }

@@ -5,7 +5,7 @@ import { JsonLd } from '@/components/seo/JsonLd'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
-  title: 'Acceso profesional para showrooms — Black Label Market',
+  title: 'Acceso profesional para showrooms',
   description: 'Cómo funciona el acceso profesional a Black Label Market: valoración del showroom, llamada de admisión y alta guiada para concesionarios y especialistas premium.',
   alternates: { canonical: '/profesionales' },
   openGraph: {

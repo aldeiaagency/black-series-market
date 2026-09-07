@@ -11,7 +11,7 @@ import { DEALER_PUBLIC_COLUMNS } from '@/lib/public-columns'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
-  title: 'Concesionarios, compraventas y especialistas premium verificados | Black Label Market',
+  title: 'Concesionarios, compraventas y especialistas premium verificados',
   description: 'Concesionarios, compraventas y especialistas premium verificados en España. Coches deportivos, supercars, clásicos y motos premium de profesionales seleccionados por Black Label Market.',
   alternates: { canonical: '/showrooms' },
   openGraph: {
