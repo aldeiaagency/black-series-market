@@ -1,5 +1,5 @@
 ﻿import Link from 'next/link'
-import { Search, Heart, Bell, GitCompareArrows, MessageSquare, ShieldCheck, Package, BarChart2, PhoneCall, X, ArrowRight } from 'lucide-react'
+import { Search, Heart, Bell, GitCompareArrows, MessageSquare, Package, BarChart2, X, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { JsonLd } from '@/components/seo/JsonLd'
 
@@ -91,17 +91,11 @@ const BUYER_STEPS = [
   },
 ]
 
-const DEALER_STEPS = [
-  {
-    icon: ShieldCheck,
-    title: 'Solicita la valoración',
-    desc: 'Nos cuentas sobre tu showroom y revisamos reputación, especialización y presentación del stock — es lo que mantiene el market como una selección, no un clasificado abierto.',
-  },
-  {
-    icon: PhoneCall,
-    title: 'Agenda tu llamada',
-    desc: 'Si encajas con los criterios, eliges tú mismo cuándo hablamos. En esa llamada vemos precio y condiciones, sin compromiso.',
-  },
+// El proceso de acceso (solicitud → llamada → alta) vive solo en /profesionales — antes se
+// repetía aquí con texto casi idéntico y ambas páginas divergían con el tiempo (corregido
+// 07-09-2026). Esta lista se queda solo con lo que /profesionales no cubre: qué pasa una vez
+// admitido, no cómo se entra.
+const DEALER_HIGHLIGHTS = [
   {
     icon: Package,
     title: 'Publica tu inventario',
@@ -146,10 +140,10 @@ const howToDealerJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
   '@id': `${SITE_URL}/como-funciona#howto-profesional`,
-  name: 'Cómo publicar vehículos premium como profesional en Black Label Market',
-  description: 'Pasos para solicitar acceso, publicar inventario y recibir leads cualificados como concesionario en España.',
+  name: 'Cómo funciona Black Label Market para un profesional ya admitido',
+  description: 'Qué ocurre una vez admitido como concesionario: publicar inventario, recibir solicitudes cualificadas y controlar el rendimiento. El proceso de acceso previo se describe en /profesionales.',
   inLanguage: 'es-ES',
-  step: DEALER_STEPS.map((s, i) => ({
+  step: DEALER_HIGHLIGHTS.map((s, i) => ({
     '@type': 'HowToStep',
     position: i + 1,
     name: s.title,
@@ -206,10 +200,17 @@ export default function ComoFuncionaPage() {
       <section className="mb-20">
         <div className="mb-8">
           <h2 className="font-display text-3xl font-light mb-2">Para profesionales</h2>
-          <p className="text-bsm-text-muted text-sm">Un entorno pensado para presentar mejor tu stock y conectar con compradores más cualificados.</p>
+          <p className="text-bsm-text-muted text-sm max-w-2xl">
+            Un entorno pensado para presentar mejor tu stock y conectar con compradores más
+            cualificados. El acceso pasa por una revisión de reputación antes de admitir a
+            cada showroom —{' '}
+            <Link href="/profesionales" className="text-gold hover:text-gold-light transition-colors">
+              ver cómo funciona el acceso →
+            </Link>
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {DEALER_STEPS.map((step) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {DEALER_HIGHLIGHTS.map((step) => (
             <div key={step.title} className="bg-surface border border-bsm-border p-6 hover:border-gold/20 transition-colors">
               <div className="w-9 h-9 flex items-center justify-center border border-gold/20 bg-gold/5 mb-4">
                 <step.icon className="w-4 h-4 text-gold" />

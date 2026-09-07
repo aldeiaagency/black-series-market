@@ -31,7 +31,9 @@ const NAV_ITEMS = [
   },
   { label: 'Showrooms', href: '/dealers' },
   { label: 'Vehículos a la carta', href: '/vehiculos-a-la-carta' },
-  { label: 'Cómo funciona', href: '/como-funciona' },
+  // "Cómo funciona" no vive en el menú principal (07-09-2026, decisión de H) — página de
+  // orientación para quien llega sin saber qué es Black Label Market, no un destino que se
+  // busque desde la barra de navegación. Sigue accesible desde el footer (columna Explorar).
 ]
 
 interface AuthUser {
