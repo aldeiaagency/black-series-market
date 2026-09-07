@@ -11,11 +11,11 @@ import { DEALER_PUBLIC_COLUMNS } from '@/lib/public-columns'
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es'
 
 export const metadata: Metadata = {
-  title: 'Concesionarios y especialistas premium verificados | Black Label Market',
+  title: 'Concesionarios, compraventas y especialistas premium verificados | Black Label Market',
   description: 'Concesionarios, compraventas y especialistas premium verificados en España. Coches deportivos, supercars, clásicos y motos premium de profesionales seleccionados por Black Label Market.',
   alternates: { canonical: '/dealers' },
   openGraph: {
-    title: 'Concesionarios y especialistas verificados | Black Label Market',
+    title: 'Concesionarios, compraventas y especialistas verificados | Black Label Market',
     description: 'Concesionarios, compraventas y especialistas premium verificados en España. Profesionales seleccionados por Black Label Market.',
     url: 'https://blacklabelmarket.es/dealers',
     siteName: 'Black Label Market',
@@ -156,7 +156,7 @@ function renderPage(
       {/* Editorial — confianza / qué showrooms publican */}
       <div className="mb-8 max-w-2xl">
         <p className="text-sm text-bsm-text-secondary leading-relaxed">
-          Aquí el vendedor se selecciona con el mismo criterio que el vehículo. Cada showroom —concesionario, compraventa o especialista— pasa por un proceso de verificación antes de poder publicar: revisamos su reputación, su especialización y cómo presenta su stock para asegurarnos de que está a la altura de los vehículos que ofrece. El resultado es una red de profesionales seleccionados en la que el comprador puede confiar desde el primer contacto, y un entorno donde un deportivo, un clásico o una moto premium se presentan junto a vendedores de su mismo nivel.
+          Selección de profesionales verificados previamente: concesionarios, compraventas y especialistas, revisados por reputación, especialización y presentación de su stock antes de publicar.
         </p>
       </div>
 
@@ -249,7 +249,7 @@ function renderPage(
       {nonFeatured.length > 0 && (
         <div>
           <h2 className="font-display text-xl font-light mb-6 pb-3 border-b border-bsm-border">
-            {featured.length > 0 ? 'Más profesionales' : 'Profesionales seleccionados'}
+            {featured.length > 0 ? 'Más showrooms' : 'Showrooms'}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {nonFeatured.map((d: any) => (
@@ -262,7 +262,7 @@ function renderPage(
       {/* Estado vacío */}
       {dealers.length === 0 && (
         <div className="text-center py-16 text-bsm-text-muted border border-bsm-border bg-surface">
-          No hay profesionales{tipoLabel ? ` de ${tipoLabel}` : ''}
+          No hay showrooms{tipoLabel ? ` de ${tipoLabel}` : ''}
           {zonaLabel ? ` en ${zonaLabel}` : ''} disponibles en este momento.
         </div>
       )}
@@ -273,7 +273,7 @@ function renderPage(
           <h3 className="font-display text-2xl font-light mb-2">¿Eres profesional?</h3>
           <p className="text-sm text-bsm-text-muted max-w-md">
             Black Label Market trabaja con showrooms seleccionados. Si el tuyo encaja, publica
-            tu inventario ante compradores que ya buscan este tipo de vehículo.
+            tu inventario en un catálogo pensado para este tipo de vehículo.
           </p>
         </div>
         <a href="/profesionales" className="btn-gold flex-shrink-0 px-10 py-4">
