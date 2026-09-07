@@ -33,7 +33,7 @@ const FAQ_ITEMS = [
   },
   {
     q: '¿Qué significa que un profesional esté verificado?',
-    a: 'Antes de publicar, revisamos la reputación online, la especialización y la calidad de presentación de cada profesional. El badge "verificado" indica que ha superado ese proceso de selección.',
+    a: 'Antes de publicar, revisamos la reputación, la especialización y la presentación del stock de cada profesional. El distintivo "verificado" indica que ha superado ese proceso de selección.',
   },
   {
     q: '¿Puedo vender mi vehículo si soy particular?',
@@ -87,7 +87,7 @@ const BUYER_STEPS = [
   {
     icon: MessageSquare,
     title: 'Contacta con profesionales verificados',
-    desc: 'Habla directamente con concesionarios, compraventas y especialistas seleccionados por su reputación, especialización y calidad de atención.',
+    desc: 'Habla directamente con concesionarios, compraventas y especialistas seleccionados por su reputación, su especialización y cómo presentan su stock.',
   },
 ]
 
@@ -110,7 +110,7 @@ const DEALER_STEPS = [
   {
     icon: MessageSquare,
     title: 'Recibe solicitudes más cualificadas',
-    desc: 'Las solicitudes llegan con información útil sobre el comprador: plazo, financiación, entrega, preferencias y forma de contacto.',
+    desc: 'Las solicitudes llegan con información útil sobre el comprador: plazo, financiación, cambio de vehículo, preferencias y forma de contacto.',
   },
   {
     icon: BarChart2,
@@ -121,7 +121,7 @@ const DEALER_STEPS = [
 
 const NOT_BL = [
   'No somos un portal masivo de anuncios',
-  'No aceptamos cualquier vendedor ni cualquier unidad',
+  'No admitimos a un vendedor ni publicamos una unidad sin revisarlos antes',
   'No trabajamos por volumen, sino por encaje y presentación',
   'No intervenimos como parte en la operación de compraventa',
   'No sustituimos las comprobaciones técnicas y documentales del comprador',
@@ -174,7 +174,7 @@ export default function ComoFuncionaPage() {
           Cómo funciona Black Label Market
         </h1>
         <p className="text-bsm-text-secondary leading-relaxed">
-          Black Label Market reúne coches y motos premium, deportivos, clásicos y unidades especiales en un entorno más selectivo y especializado que un portal generalista. Solo pueden publicar profesionales revisados y verificados por nosotros y cada unidad debe encajar con nuestro estándar de presentación, información y calidad.
+          Black Label Market reúne coches y motos premium, deportivos, clásicos y unidades especiales en un entorno más selectivo y especializado que un portal generalista. Solo pueden publicar profesionales revisados y verificados por nosotros, y cada unidad debe encajar con nuestro estándar de presentación e información.
         </p>
       </div>
 

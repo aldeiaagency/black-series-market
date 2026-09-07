@@ -27,7 +27,7 @@ const HOME_FAQ: FaqItem[] = [
   },
   {
     q: '¿Los vendedores son de fiar? ¿Qué significa que un profesional esté verificado?',
-    a: 'Antes de dejar publicar, revisamos la reputación online, la especialización y la calidad de presentación de cada concesionario, compraventa o especialista. El distintivo "verificado" indica que ha superado ese proceso. Black Label no es intermediario en la compraventa: facilita el contacto directo entre comprador y vendedor.',
+    a: 'Antes de dejar publicar, revisamos la reputación, la especialización y la presentación del stock de cada concesionario, compraventa o especialista. El distintivo "verificado" indica que ha superado ese proceso. Black Label no es intermediario en la compraventa: facilita el contacto directo entre comprador y vendedor.',
   },
   {
     q: '¿Puedo contactar directamente con el vendedor?',
