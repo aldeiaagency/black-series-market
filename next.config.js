@@ -16,6 +16,18 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // /dealers → /showrooms (2026-09-07): alinea el slug con el copy del
+        // sitio ("Showrooms"), mismo criterio que /para-profesionales arriba.
+        source: '/dealers',
+        destination: '/showrooms',
+        permanent: true,
+      },
+      {
+        source: '/dealers/:slug',
+        destination: '/showrooms/:slug',
+        permanent: true,
+      },
+      {
         source: '/precios',
         destination: '/profesionales/planes',
         permanent: true,

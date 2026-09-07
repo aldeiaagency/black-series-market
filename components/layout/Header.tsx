@@ -29,7 +29,7 @@ const NAV_ITEMS = [
       { label: 'Ver todas', href: '/marcas' },
     ],
   },
-  { label: 'Showrooms', href: '/dealers' },
+  { label: 'Showrooms', href: '/showrooms' },
   { label: 'Vehículos a la carta', href: '/vehiculos-a-la-carta' },
   // "Cómo funciona" no vive en el menú principal (07-09-2026, decisión de H) — página de
   // orientación para quien llega sin saber qué es Black Label Market, no un destino que se

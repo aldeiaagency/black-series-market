@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/coches`,  lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.9 },
     { url: `${BASE_URL}/motos`,   lastModified: new Date(), changeFrequency: 'hourly',  priority: 0.9 },
     { url: `${BASE_URL}/marcas`,  lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
-    { url: `${BASE_URL}/dealers`, lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${BASE_URL}/showrooms`, lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${BASE_URL}/profesionales/planes`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/contacto`,lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE_URL}/vehiculos-a-la-carta`,                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
@@ -106,7 +106,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   const dealerRoutes: MetadataRoute.Sitemap = (dealers || []).map((d) => ({
-    url: `${BASE_URL}/dealers/${d.slug}`,
+    url: `${BASE_URL}/showrooms/${d.slug}`,
     lastModified: new Date(d.updated_at),
     changeFrequency: 'weekly',
     priority: 0.6,

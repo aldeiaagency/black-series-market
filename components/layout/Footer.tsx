@@ -9,7 +9,7 @@ const EXPLORAR = [
   { label: 'Coches',                        href: '/coches' },
   { label: 'Motos',                         href: '/motos' },
   { label: 'Marcas',                        href: '/marcas' },
-  { label: 'Concesionarios y compraventas', href: '/dealers' },
+  { label: 'Concesionarios y compraventas', href: '/showrooms' },
   { label: 'Vehículos a la carta',          href: '/vehiculos-a-la-carta' },
   { label: 'Guías del mercado',             href: '/guias' },
   { label: 'Glosario premium',              href: '/glosario' },

@@ -279,7 +279,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
 
   revalidatePath(`/admin/dealers/${setup.dealer.id}`)
   revalidatePath('/admin/dealers')
-  revalidatePath(`/dealers/${setup.dealer.slug}`)
+  revalidatePath(`/showrooms/${setup.dealer.slug}`)
 
   // csvIntakeSummary ya se mandaba a n8n dentro del payload del webhook, pero nunca volvía al
   // propio navegador — si el CSV tenía filas rechazadas, el fundador no se enteraba de ninguna

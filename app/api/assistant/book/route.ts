@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
     vehicleId,
     payload: {
       contact: { name: buyerName, email: buyerEmail, phone: buyerPhone },
-      dealer: { name: ctx.dealer.name, email: dealerRow?.email ?? null, profile_url: dealerRow?.slug ? `/dealers/${dealerRow.slug}` : null },
+      dealer: { name: ctx.dealer.name, email: dealerRow?.email ?? null, profile_url: dealerRow?.slug ? `/showrooms/${dealerRow.slug}` : null },
       appointment: {
         starts_at: startDate.toISOString(),
         ends_at: endDate.toISOString(),

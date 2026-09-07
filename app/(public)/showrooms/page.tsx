@@ -13,11 +13,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://blacklabelmarket.es
 export const metadata: Metadata = {
   title: 'Concesionarios, compraventas y especialistas premium verificados | Black Label Market',
   description: 'Concesionarios, compraventas y especialistas premium verificados en España. Coches deportivos, supercars, clásicos y motos premium de profesionales seleccionados por Black Label Market.',
-  alternates: { canonical: '/dealers' },
+  alternates: { canonical: '/showrooms' },
   openGraph: {
     title: 'Concesionarios, compraventas y especialistas verificados | Black Label Market',
     description: 'Concesionarios, compraventas y especialistas premium verificados en España. Profesionales seleccionados por Black Label Market.',
-    url: 'https://blacklabelmarket.es/dealers',
+    url: 'https://blacklabelmarket.es/showrooms',
     siteName: 'Black Label Market',
     type: 'website',
   },
@@ -33,10 +33,10 @@ function buildUrl(current: { tipo?: string; zona?: string }, override: { tipo?: 
   if (merged.tipo) params.set('tipo', merged.tipo)
   if (merged.zona) params.set('zona', merged.zona)
   const qs = params.toString()
-  return `/dealers${qs ? '?' + qs : ''}`
+  return `/showrooms${qs ? '?' + qs : ''}`
 }
 
-export default async function DealersPage({ searchParams }: PageProps) {
+export default async function ShowroomsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = createPublicClient()
 
@@ -109,10 +109,10 @@ function renderPage(
   const webPageJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SearchResultsPage',
-    '@id': `${SITE_URL}/dealers`,
+    '@id': `${SITE_URL}/showrooms`,
     name: 'Concesionarios y especialistas premium verificados en España',
     description: 'Red de profesionales verificados por Black Label Market: concesionarios, compraventas y especialistas en coches y motos premium.',
-    url: `${SITE_URL}/dealers`,
+    url: `${SITE_URL}/showrooms`,
     inLanguage: 'es-ES',
     isPartOf: { '@type': 'WebSite', '@id': `${SITE_URL}/#website` },
   }

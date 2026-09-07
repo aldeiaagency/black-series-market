@@ -117,7 +117,7 @@ export default function VehiculosALaCartaPage() {
               {[
                 { href: '/coches', label: 'Explorar coches disponibles' },
                 { href: '/motos', label: 'Explorar motos disponibles' },
-                { href: '/dealers', label: 'Ver showrooms verificados' },
+                { href: '/showrooms', label: 'Ver showrooms verificados' },
               ].map(({ href, label }) => (
                 <Link
                   key={href}

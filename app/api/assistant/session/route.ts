@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
       name:        dealer.name,
       city:        dealer.location_city ?? null,
       whatsapp:    (cfg.whatsapp_number as string) || (dealer.whatsapp as string) || null,
-      profile_url: `/dealers/${dealer.slug}`,
+      profile_url: `/showrooms/${dealer.slug}`,
       description: (dealer.description as string) || null,
       financing_available: financing.available === true,
       financing_conditions: typeof financing.conditions === 'string' ? financing.conditions : null,

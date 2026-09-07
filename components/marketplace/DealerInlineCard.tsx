@@ -34,7 +34,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
   if (variant === 'card') {
     return (
       <Link
-        href={`/dealers/${dealer.slug}`}
+        href={`/showrooms/${dealer.slug}`}
         className={cn(
           'flex items-center gap-3 group/dealer',
           className
@@ -118,7 +118,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
 
         {/* Name */}
         <Link
-          href={`/dealers/${dealer.slug}`}
+          href={`/showrooms/${dealer.slug}`}
           className="font-medium text-white hover:text-gold transition-colors text-sm mb-1"
         >
           {dealer.name}
@@ -138,7 +138,7 @@ export default function DealerInlineCard({ dealer, variant = 'card', className }
 
         {/* Link */}
         <Link
-          href={`/dealers/${dealer.slug}`}
+          href={`/showrooms/${dealer.slug}`}
           className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
         >
           Ver showroom completo <ChevronRight className="w-3 h-3" />

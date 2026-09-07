@@ -82,7 +82,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: `/dealers/${slug}` },
+    alternates: { canonical: `/showrooms/${slug}` },
     openGraph: { title, description, type: 'website', images: image ? [image] : [] },
     twitter: { card: 'summary_large_image', title, description, images: image ? [image] : [] },
   }
@@ -202,7 +202,7 @@ export default async function DealerPage({ params }: PageProps) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Showrooms', item: `${SITE_URL}/dealers` },
+      { '@type': 'ListItem', position: 2, name: 'Showrooms', item: `${SITE_URL}/showrooms` },
       { '@type': 'ListItem', position: 3, name: dealer.name },
     ],
   }
@@ -210,12 +210,12 @@ export default async function DealerPage({ params }: PageProps) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'AutoDealer',
-    '@id': `${SITE_URL}/dealers/${dealer.slug}`,
+    '@id': `${SITE_URL}/showrooms/${dealer.slug}`,
     name: dealer.name,
     description: dealer.description || `Showroom seleccionado por Black Label Market en ${dealer.location_city || 'España'}.`,
     image: dealer.cover_url || dealer.logo_url || undefined,
     logo: dealer.logo_url || undefined,
-    url: `${SITE_URL}/dealers/${dealer.slug}`,
+    url: `${SITE_URL}/showrooms/${dealer.slug}`,
     telephone: dealer.phone || undefined,
     email: dealer.email || undefined,
     priceRange,
@@ -253,7 +253,7 @@ export default async function DealerPage({ params }: PageProps) {
             <ol className="flex items-center gap-1.5 text-xs text-[#9E9E9E]">
               <li><Link href="/" className="hover:text-[#C9C9C9] transition-colors">Inicio</Link></li>
               <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
-              <li><Link href="/dealers" className="hover:text-[#C9C9C9] transition-colors">Showrooms</Link></li>
+              <li><Link href="/showrooms" className="hover:text-[#C9C9C9] transition-colors">Showrooms</Link></li>
               <li className="text-[#3A3A3A]" aria-hidden="true">/</li>
               <li className="text-[#C9C9C9] truncate max-w-[120px]" aria-current="page">{dealer.name}</li>
             </ol>

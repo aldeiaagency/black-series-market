@@ -15,7 +15,7 @@ export default function DealerCard({ dealer, variant = 'default' }: DealerCardPr
   const location = [dealer.location_city, dealer.location_region].filter(Boolean).join(', ')
 
   return (
-    <Link href={`/dealers/${dealer.slug}`}>
+    <Link href={`/showrooms/${dealer.slug}`}>
       <article className={cn(
         'group relative bg-[#0D0D0D] border overflow-hidden transition-all duration-300',
         'hover:shadow-[0_8px_40px_rgba(0,0,0,0.7)]',

@@ -445,7 +445,7 @@ export default function VehicleDetailContent({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                       <Link
-                        href={`/dealers/${vehicle.dealer.slug}`}
+                        href={`/showrooms/${vehicle.dealer.slug}`}
                         className="font-medium text-bsm-text-primary hover:text-gold transition-colors"
                       >
                         {vehicle.dealer.name}
@@ -467,7 +467,7 @@ export default function VehicleDetailContent({
                 )}
                 <div className="border-t border-bsm-border pt-4">
                   <Link
-                    href={`/dealers/${vehicle.dealer.slug}`}
+                    href={`/showrooms/${vehicle.dealer.slug}`}
                     className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
                   >
                     Ver showroom completo <ChevronRight className="w-3 h-3" />
@@ -762,7 +762,7 @@ export default function VehicleDetailContent({
             </div>
             {vehicle.dealer?.slug && (
               <Link
-                href={`/dealers/${vehicle.dealer.slug}`}
+                href={`/showrooms/${vehicle.dealer.slug}`}
                 className="text-xs text-gold hover:text-gold-light transition-colors hidden sm:flex items-center gap-1"
               >
                 Ver showroom <ChevronRight className="w-3 h-3" />

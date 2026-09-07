@@ -122,7 +122,7 @@ async function setDealerPlan(dealerId: string, plan: string) {
   await pauseExcessActiveVehicles(supabase, dealerId, slots)
 
   revalidatePath(`/admin/dealers/${dealerId}`)
-  revalidatePath('/dealers')
+  revalidatePath('/showrooms')
   redirect(`/admin/dealers/${dealerId}`)
 }
 
@@ -212,7 +212,7 @@ async function publishDealerProfile(formData: FormData) {
   }
 
   revalidatePath(`/admin/dealers/${dealerId}`)
-  revalidatePath('/dealers')
+  revalidatePath('/showrooms')
   redirect(`/admin/dealers/${dealerId}`)
 }
 

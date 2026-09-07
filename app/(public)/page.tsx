@@ -334,7 +334,7 @@ export default async function HomePage() {
               </div>
               <h2 className="section-title">Concesionarios y compraventas</h2>
             </div>
-            <Link href="/dealers" className="btn-ghost hidden md:flex text-[#8A8A8A] hover:text-[#C9C9C9]">
+            <Link href="/showrooms" className="btn-ghost hidden md:flex text-[#8A8A8A] hover:text-[#C9C9C9]">
               Ver todos
               <ArrowRight className="w-4 h-4" />
             </Link>

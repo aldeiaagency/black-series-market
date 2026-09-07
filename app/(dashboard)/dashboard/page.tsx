@@ -110,7 +110,7 @@ export default async function DashboardPage() {
           <p className="mt-1 text-sm text-bsm-text-secondary">{profileStatusConfig.text}</p>
         </div>
         {profileStatus === 'published' && dealer.slug && (
-          <Link href={`/dealers/${dealer.slug}`} className="shrink-0 text-xs uppercase tracking-widest text-gold hover:underline">
+          <Link href={`/showrooms/${dealer.slug}`} className="shrink-0 text-xs uppercase tracking-widest text-gold hover:underline">
             Ver ficha pública →
           </Link>
         )}

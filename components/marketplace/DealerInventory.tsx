@@ -25,7 +25,7 @@ export default function DealerInventory(props: DealerInventoryProps) {
     window.history.pushState(
       null,
       '',
-      value ? '/dealers/' + props.slug + '?tipo=' + value : '/dealers/' + props.slug,
+      value ? '/showrooms/' + props.slug + '?tipo=' + value : '/showrooms/' + props.slug,
     )
   }
 
@@ -50,7 +50,7 @@ function InventoryContent({
     vehicles
 
   const filterHref = (value: string | null) =>
-    value ? '/dealers/' + slug + '?tipo=' + value : '/dealers/' + slug
+    value ? '/showrooms/' + slug + '?tipo=' + value : '/showrooms/' + slug
 
   return (
     <div className='pb-8'>

@@ -105,7 +105,7 @@ export default function Sidebar({ dealerName, dealerSlug, plan, sections, role, 
       {/* Bottom actions */}
       <div className="border-t border-bsm-border p-4 space-y-1">
         <a
-          href={`/dealers/${dealerSlug}`}
+          href={`/showrooms/${dealerSlug}`}
           target="_blank"
           rel="noopener noreferrer"
           className="sidebar-link text-xs"

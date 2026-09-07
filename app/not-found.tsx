@@ -39,7 +39,7 @@ export default function NotFound() {
         </div>
 
         <div className="border-t border-[#141414] pt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-[#5A5A5A]">
-          <Link href="/dealers" className="hover:text-gold transition-colors">Showrooms</Link>
+          <Link href="/showrooms" className="hover:text-gold transition-colors">Showrooms</Link>
           <Link href="/marcas" className="hover:text-gold transition-colors">Marcas</Link>
           <Link href="/vehiculos-a-la-carta" className="hover:text-gold transition-colors">Vehículos a la carta</Link>
           <Link href="/guias" className="hover:text-gold transition-colors">Guías</Link>
