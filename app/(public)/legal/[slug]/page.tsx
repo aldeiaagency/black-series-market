@@ -36,7 +36,7 @@ Salvo que se indique expresamente lo contrario, Black Label Market no vende dire
 
 La operación comercial, negociación, documentación, garantía, pago, reserva, financiación, entrega y cualquier acuerdo posterior se realiza directamente entre el comprador interesado y el vendedor profesional responsable del vehículo.
 
-La información de cada anuncio es facilitada por el vendedor profesional responsable, sin perjuicio de los procesos internos de revisión, verificación o control de calidad que Black Label Market pueda aplicar antes o después de la publicación.
+La información de cada ficha es facilitada por el vendedor profesional responsable, sin perjuicio de los procesos internos de revisión, verificación o control de calidad que Black Label Market pueda aplicar antes o después de la publicación.
 
 **Uso del sitio web**
 
@@ -52,7 +52,7 @@ Black Label Market procura que la información publicada sea clara, actualizada 
 
 El usuario deberá verificar directamente con el vendedor profesional cualquier información relevante antes de tomar una decisión de compra, reserva, desplazamiento, contratación, entrega de señal o formalización de cualquier operación.
 
-Black Label Market podrá corregir, editar, suspender, limitar la visibilidad o retirar anuncios, perfiles profesionales o contenidos cuando detecte información inexacta, incompleta, desactualizada, engañosa, ilícita o contraria a sus criterios de publicación o a la normativa aplicable.
+Black Label Market podrá corregir, editar, suspender, limitar la visibilidad o retirar fichas, perfiles profesionales o contenidos cuando detecte información inexacta, incompleta, desactualizada, engañosa, ilícita o contraria a sus criterios de publicación o a la normativa aplicable.
 
 **Propiedad intelectual e industrial**
 
@@ -74,13 +74,13 @@ Para cualquier cuestión relacionada con este Aviso Legal, el usuario puede cont
 
 hola@blacklabelmarket.es
 
-Este canal también podrá utilizarse para comunicar incidencias legales, anuncios incorrectos, contenidos presuntamente ilícitos o cualquier información que pueda vulnerar los Términos y Condiciones de Uso o la normativa aplicable.
+Este canal también podrá utilizarse para comunicar incidencias legales, fichas incorrectas, contenidos presuntamente ilícitos o cualquier información que pueda vulnerar los Términos y Condiciones de Uso o la normativa aplicable.
 
 Black Label Market revisará las comunicaciones recibidas y podrá adoptar las medidas que considere oportunas, incluyendo la corrección, suspensión o retirada de contenidos.
 
 **Notificación de contenido presuntamente ilícito**
 
-Cualquier persona o entidad puede notificar contenido que considere ilícito escribiendo a hola@blacklabelmarket.es. La notificación deberá incluir: una explicación suficientemente motivada de la ilicitud; la URL exacta del anuncio o contenido; el nombre y email del notificante, salvo las excepciones previstas legalmente; una declaración de buena fe confirmando que la información y alegaciones son precisas y completas.
+Cualquier persona o entidad puede notificar contenido que considere ilícito escribiendo a hola@blacklabelmarket.es. La notificación deberá incluir: una explicación suficientemente motivada de la ilicitud; la URL exacta de la ficha o contenido; el nombre y email del notificante, salvo las excepciones previstas legalmente; una declaración de buena fe confirmando que la información y alegaciones son precisas y completas.
 
 Black Label Market acusará recibo sin dilación indebida cuando disponga de un email de contacto. La notificación será tratada de forma diligente, objetiva, no arbitraria y en tiempo oportuno. El notificante recibirá la decisión adoptada y las vías de recurso disponibles. Si se emplean medios automatizados para tramitar o decidir, se informará de ello.
 
@@ -137,7 +137,7 @@ Black Label Market puede tratar distintas categorías de datos personales en fun
 - Datos relativos a vehículos a la carta: tipo de vehículo buscado, marca, modelo, versión, presupuesto aproximado, ubicación preferida, plazo de compra, preferencias y comentarios.
 - Datos de cuenta de usuario: identificador de usuario, email, fecha de registro, accesos, preferencias, vehículos guardados y actividad asociada a la cuenta.
 - Datos de profesionales o showrooms: nombre de contacto, empresa, email, teléfono, tipo de negocio, ubicación, stock aproximado, información profesional y datos necesarios para valorar o gestionar el acceso profesional.
-- Datos de publicación profesional: vehículos publicados, imágenes, características del stock, estado de anuncios, contactos recibidos y métricas agregadas de rendimiento.
+- Datos de publicación profesional: vehículos publicados, imágenes, características del stock, estado de las fichas, contactos recibidos y métricas agregadas de rendimiento.
 - Datos técnicos y de navegación: dirección IP, identificadores técnicos, dispositivo, navegador, logs de seguridad, preferencias de cookies y eventos de uso de la plataforma cuando proceda.
 - Datos de analítica interna: vistas de vehículos, clics, contactos, vehículos guardados, filtros utilizados y otros eventos de uso, tratados de forma agregada o limitada para mejorar la plataforma.
 
@@ -462,7 +462,7 @@ Estas obligaciones se entienden sin perjuicio de los Criterios de Publicación, 
 
 No podrán publicarse vehículos robados, apropiados sin autorización, sujetos a embargo o reserva de dominio no declarada, con número de bastidor manipulado, documentación falsa, origen ilícito, características cuya comercialización esté prohibida o que no puedan venderse legalmente en España.
 
-Tampoco podrán publicarse anuncios engañosos, ofertas señuelo, precios falsos, fotografías de otra unidad, información que infrinja derechos de terceros o contenidos discriminatorios, violentos, fraudulentos o contrarios a la normativa aplicable.
+Tampoco podrán publicarse fichas engañosas, ofertas señuelo, precios falsos, fotografías de otra unidad, información que infrinja derechos de terceros o contenidos discriminatorios, violentos, fraudulentos o contrarios a la normativa aplicable.
 
 Las cargas, limitaciones administrativas, daños estructurales, siniestros relevantes, modificaciones no homologadas y cualquier circunstancia que afecte a la seguridad, documentación, valor o posibilidad de transmisión deberán declararse de forma clara.
 
@@ -470,13 +470,13 @@ Las cargas, limitaciones administrativas, daños estructurales, siniestros relev
 
 Black Label Market no es un clasificado abierto. La publicación de vehículos, perfiles profesionales o contenidos puede estar sujeta a revisión previa o posterior.
 
-Black Label Market podrá aceptar, rechazar, editar, pausar, limitar la visibilidad o retirar anuncios, perfiles, imágenes, textos o contenidos cuando considere que incumplen estos Términos, los criterios de publicación, las condiciones profesionales, la normativa aplicable o los estándares de calidad de la plataforma.
+Black Label Market podrá aceptar, rechazar, editar, pausar, limitar la visibilidad o retirar fichas, perfiles, imágenes, textos o contenidos cuando considere que incumplen estos Términos, los criterios de publicación, las condiciones profesionales, la normativa aplicable o los estándares de calidad de la plataforma.
 
 También podrá adoptar medidas cuando detecte información incompleta, inexacta, desactualizada, engañosa, ilícita, fraudulenta, ofensiva, no autorizada o que pueda perjudicar a usuarios, profesionales, terceros o a la propia plataforma.
 
 **Notificación de contenidos incorrectos o ilícitos**
 
-Los usuarios, profesionales o terceros pueden comunicar a Black Label Market la existencia de anuncios incorrectos, contenidos presuntamente ilícitos, información engañosa, uso indebido de marcas, imágenes no autorizadas, suplantación, fraude o cualquier vulneración de estos Términos.
+Los usuarios, profesionales o terceros pueden comunicar a Black Label Market la existencia de fichas incorrectas, contenidos presuntamente ilícitos, información engañosa, uso indebido de marcas, imágenes no autorizadas, suplantación, fraude o cualquier vulneración de estos Términos.
 
 Las comunicaciones deberán enviarse a través del canal legal o de contacto indicado en el Aviso Legal, incluyendo información suficiente para identificar el contenido afectado y explicar el motivo de la comunicación.
 
