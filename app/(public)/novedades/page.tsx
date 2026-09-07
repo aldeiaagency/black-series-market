@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { createPublicClient } from '@/lib/supabase/server'
 import VehicleCard from '@/components/marketplace/VehicleCard'
-import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
+import { loadRecentVehicles } from '@/lib/vehicle-query'
 
 // ISR: mismo patrón que /coches y /motos — catálogo público, cache CDN, revalida cada 5 min.
 export const revalidate = 300
@@ -26,13 +26,7 @@ const LIMIT = 24
 export default async function NovedadesPage() {
   const supabase = createPublicClient()
 
-  const { data: vehicles } = await supabase
-    .from('vehicles')
-    .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string)
-    .eq('status', 'active')
-    .eq('dealer.profile_status', 'published')
-    .order('published_at', { ascending: false })
-    .limit(LIMIT)
+  const vehicles = await loadRecentVehicles(supabase, { limit: LIMIT, windowDays: 30, minCount: 8 })
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 pt-28 pb-20">

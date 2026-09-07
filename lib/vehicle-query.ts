@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getProvinciasByComunidad } from '@/lib/utils'
 import { resolveBrandNameFromSlug } from '@/lib/brands'
+import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 
 export type VehicleQueryType = 'car' | 'motorcycle'
 
@@ -97,4 +98,43 @@ export async function applyVehicleFilters(
   }
 
   return { query, resolvedBrandName }
+}
+
+/**
+ * Carga vehículos recién publicados para las superficies de "novedades" (teaser de la
+ * home + /novedades). Fuente única para que las dos no se desincronicen.
+ *
+ * Prioriza recencia real (publicados dentro de `windowDays`), no solo "los N últimos que
+ * haya" — con poco inventario, ese criterio llamaría "novedades" a stock viejo para
+ * siempre. Cae a los N últimos sin límite de fecha SOLO si la ventana de tiempo no llega
+ * a `minCount`, para que la sección nunca se vea vacía o pobre mientras hay poco
+ * movimiento real (07-09-2026, hallazgo de H).
+ */
+export async function loadRecentVehicles(
+  supabase: SupabaseClient,
+  { limit, windowDays = 30, minCount = 8 }: { limit: number; windowDays?: number; minCount?: number }
+) {
+  const columns = `${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`
+  const since = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString()
+
+  const { data: recent } = await supabase
+    .from('vehicles')
+    .select(columns as string)
+    .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
+    .gte('published_at', since)
+    .order('published_at', { ascending: false })
+    .limit(limit)
+
+  if (recent && recent.length >= minCount) return recent
+
+  const { data: fallback } = await supabase
+    .from('vehicles')
+    .select(columns as string)
+    .eq('status', 'active')
+    .eq('dealer.profile_status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(limit)
+
+  return fallback ?? []
 }

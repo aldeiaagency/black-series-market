@@ -8,6 +8,7 @@ import DealerCard from '@/components/marketplace/DealerCard'
 import SearchBar from '@/components/marketplace/SearchBar'
 import FaqSection, { type FaqItem } from '@/components/marketplace/FaqSection'
 import { VEHICLE_PUBLIC_COLUMNS, DEALER_PUBLIC_COLUMNS } from '@/lib/public-columns'
+import { loadRecentVehicles } from '@/lib/vehicle-query'
 
 // Preguntas frecuentes de la home. Objetivo doble: (1) resolver las dudas iniciales del
 // comprador y (2) posicionar (SEO/GEO) con respuestas citables — definición del servicio,
@@ -67,7 +68,7 @@ const PILLARS: { label: string; icon: LucideIcon }[] = [
 export default async function HomePage() {
   const supabase = createPublicClient()
 
-  const [{ data: featuredVehicles }, { data: newVehicles }, { data: featuredDealers }] =
+  const [{ data: featuredVehicles }, newVehicles, { data: featuredDealers }] =
     await Promise.all([
       supabase
         .from('vehicles')
@@ -78,13 +79,7 @@ export default async function HomePage() {
         .gt('featured_until', new Date().toISOString())
         .order('published_at', { ascending: false })
         .limit(8),
-      supabase
-        .from('vehicles')
-        .select((`${VEHICLE_PUBLIC_COLUMNS}, dealer:dealers!inner(name, slug, location_city, logo_url, is_verified)`) as string)
-        .eq('status', 'active')
-        .eq('dealer.profile_status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(8),
+      loadRecentVehicles(supabase, { limit: 8, windowDays: 30, minCount: 8 }),
       supabase
         .from('dealers')
         .select(DEALER_PUBLIC_COLUMNS)
