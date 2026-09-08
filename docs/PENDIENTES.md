@@ -4,7 +4,34 @@
 > captura, handoff/K22, advocacy/UGC), ver `agency/backlog_unificado_growth.md` — no duplicar aquí, es la
 > fuente única de eso desde 2026-08-28. Un ítem compartido: "unificar `ContactForm`/`QualifiedLeadForm`"
 > (bloque B4-B11 abajo) se relaciona con varios hallazgos de `QualifiedLeadForm` en ese otro documento.
-> Última actualización: **2026-09-05 (octava ronda, la misma tarde)** — **Resuelta la inconsistencia de
+> Última actualización: **2026-09-07 — Revisión de páginas legales y de `/profesionales/planes`, más
+> corrección de un hallazgo SEO sitewide.** Cuatro cierres reales, verificados en producción (`curl`/build),
+> commits `d94f437`..`669d9ec`:
+> 1. **Nota interna filtrada en producción (severidad alta)** — `condiciones-profesionales` (contrato legal
+>    que los profesionales aceptan) tenía un comentario `// TODO LEGAL — decisión pendiente de H...`
+>    renderizándose como texto visible: dentro de un template literal JS, `//` no es un comentario real, es
+>    texto literal. Confirmado en vivo con `curl` antes de tocar código. Eliminada solo la nota; la frase de
+>    cara al profesional no prometía el plazo de 30 días que la nota cuestionaba, así que se dejó intacta sin
+>    inventar ni suavizar nada.
+> 2. **Terminología "anuncio"→"ficha" en las 5 páginas legales** (`aviso-legal`, `privacidad`, `terminos`,
+>    `criterios-publicacion`, `condiciones-profesionales`) — 12 instancias en total, corregidas
+>    documento por documento con confirmación explícita en cada uno. `anuncio` ya no aparece en
+>    `app/(public)/legal/[slug]/page.tsx`.
+> 3. **Rename `/dealers` → `/showrooms`** — alinea el slug con el copy del sitio, mismo criterio que
+>    `/para-profesionales`→`/profesionales`. Redirect 308 (listado + fichas), canonical/JSON-LD/sitemap
+>    actualizados, ~20 archivos de referencias internas. No se tocó `/admin/dealers` (herramienta interna)
+>    ni la tabla Supabase `dealers`. De paso, documentado abajo el hallazgo **ARQ-1**: el patrón `data ?? []`
+>    tras las consultas Supabase en las 23 páginas públicas del catálogo no distingue "sin resultados" de
+>    "la consulta falló" — sistémico, no un bug puntual de esa página, diferido a decisión posterior.
+> 4. **`<title>` duplicado en 15 páginas** (hallazgo surgido al auditar `/profesionales/planes`) —
+>    `app/layout.tsx` ya aplica `title.template: '%s | Black Label Market'`; esas 15 páginas además incluían
+>    la marca en su propio `metadata.title`, duplicándola en pestaña y SERP. Corregido solo el campo `title`
+>    de cada página (`openGraph.title` no usa la plantilla, queda igual). Verificado en vivo tras el deploy.
+> Revisión de `/profesionales/planes` en sí: contenido y precios verificados contra
+> `docs/planes-suscripcion-definitivos.md`, sin discrepancias — incluida la ventana Elite de 24h en
+> vehículos a la carta, confirmada como funcionalidad real en `dashboard/solicitudes/page.tsx:50-52`, no una
+> promesa vacía.
+> Última actualización anterior: **2026-09-05 (octava ronda, la misma tarde)** — **Resuelta la inconsistencia de
 > privacidad de `admin/contactos` dejada abierta en la ronda anterior, por instrucción explícita de H
 > ("arregla los bugs") sin especificar dirección — se tomó la opción más conservadora: corregir la
 > afirmación falsa en vez de retirar una función de soporte ya en uso.** El texto decía que el detalle de
