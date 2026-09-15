@@ -100,7 +100,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
     const hasPhotos = Array.isArray(merged.images) && merged.images.length > 0
     review = await reviewVehicleIntake(merged)
-    clean.status = resolveStatus('active', hasPhotos, review)
+    if (Object.prototype.hasOwnProperty.call(payload, 'status')) {
+      clean.status = resolveStatus(clean.status === 'draft' ? 'draft' : 'active', hasPhotos, review)
+    }
     // original_description se conserva si ya había uno (registro de qué escribió el dealer antes
     // de que la IA interviniera por primera vez); solo se rellena con la descripción actual si
     // esta columna seguía vacía. Mismo criterio que el PATCH de la sala de configuración.
@@ -113,7 +115,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   return NextResponse.json({
     ok: true,
-    status: clean.status,
+    status: clean.status ?? currentVehicle.status,
     review: review
       ? { blockingIssue: review.issues.find((i) => i.blocking)?.message ?? null, suggestedDescription: review.suggested_description }
       : undefined,

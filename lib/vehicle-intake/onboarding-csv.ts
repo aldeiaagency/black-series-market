@@ -18,6 +18,12 @@ type Admin = ReturnType<typeof createAdminClient>
 
 const PRIVATE_BUCKET = 'onboarding-private'
 
+export function isOnboardingCsvPath(path: string, dealerId: string): boolean {
+  const prefix = `onboarding/${dealerId}/stock_csv/`
+  // Match the upload route exactly; disallow nested paths, traversal and URL encoding.
+  return path.startsWith(prefix) && /^\d+-[a-z0-9]*\.csv$/.test(path.slice(prefix.length))
+}
+
 export interface OnboardingCsvFileRef {
   path: string
   name?: string
@@ -63,6 +69,10 @@ export async function processOnboardingCsv(
   let rowOffset = 0
 
   for (const file of files) {
+    if (!isOnboardingCsvPath(file.path, dealerId)) {
+      errors.push({ row: rowOffset + 1, message: 'El CSV no pertenece a este showroom.' })
+      continue
+    }
     const { data: blob, error: downloadError } = await admin.storage.from(PRIVATE_BUCKET).download(file.path)
     if (downloadError || !blob) {
       errors.push({ row: rowOffset + 1, message: `No se pudo leer ${file.name ?? file.path}: ${downloadError?.message ?? 'archivo no encontrado'}` })

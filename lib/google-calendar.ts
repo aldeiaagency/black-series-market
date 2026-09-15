@@ -95,15 +95,24 @@ export async function revokeGoogleToken(token: string): Promise<void> {
 
 // ── Firma del `state` de OAuth (CSRF + transporte del dealerId) ────────────────
 
-export function signOAuthState(dealerId: string, options?: { returnTo?: string }): string {
+export const GOOGLE_OAUTH_NONCE_COOKIE = 'google_calendar_oauth_nonce'
+export const GOOGLE_OAUTH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/api/calendar/google',
+  maxAge: 10 * 60,
+}
+
+export function signOAuthState(dealerId: string, options: { nonce: string; returnTo?: string }): string {
   const secret = process.env.GOOGLE_OAUTH_STATE_SECRET
   if (!secret) throw new Error('GOOGLE_OAUTH_STATE_SECRET no configurada')
-  const payloadB64 = Buffer.from(JSON.stringify({ dealerId, ts: Date.now(), returnTo: options?.returnTo ?? null })).toString('base64url')
+  const payloadB64 = Buffer.from(JSON.stringify({ dealerId, ts: Date.now(), nonce: options.nonce, returnTo: options.returnTo ?? null })).toString('base64url')
   const sig = createHmac('sha256', secret).update(payloadB64).digest('base64url')
   return `${payloadB64}.${sig}`
 }
 
-export function verifyOAuthState(state: string, maxAgeMs = 10 * 60_000): { dealerId: string; returnTo: string | null } | null {
+export function verifyOAuthState(state: string, maxAgeMs = 10 * 60_000): { dealerId: string; nonce: string; returnTo: string | null } | null {
   const secret = process.env.GOOGLE_OAUTH_STATE_SECRET
   if (!secret) return null
   const [payloadB64, sig] = state.split('.')
@@ -113,10 +122,11 @@ export function verifyOAuthState(state: string, maxAgeMs = 10 * 60_000): { deale
   const expBuf = Buffer.from(expected, 'base64url')
   if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) return null
   try {
-    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')) as { dealerId: string; ts: number; returnTo?: string | null }
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')) as { dealerId: string; ts: number; nonce?: string; returnTo?: string | null }
     if (!payload.dealerId || Date.now() - payload.ts > maxAgeMs) return null
+    if (typeof payload.nonce !== 'string' || !/^[a-f0-9]{64}$/.test(payload.nonce)) return null
     const returnTo = typeof payload.returnTo === 'string' && payload.returnTo.startsWith('/') ? payload.returnTo : null
-    return { dealerId: payload.dealerId, returnTo }
+    return { dealerId: payload.dealerId, nonce: payload.nonce, returnTo }
   } catch {
     return null
   }

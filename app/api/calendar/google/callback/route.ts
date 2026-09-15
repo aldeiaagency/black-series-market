@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { exchangeCodeForTokens, fetchPrimaryCalendar, encryptToken, verifyOAuthState } from '@/lib/google-calendar'
+import { exchangeCodeForTokens, fetchPrimaryCalendar, encryptToken, verifyOAuthState, GOOGLE_OAUTH_NONCE_COOKIE, GOOGLE_OAUTH_COOKIE_OPTIONS } from '@/lib/google-calendar'
+
+function finishOAuth(target: URL) {
+  const response = NextResponse.redirect(target)
+  response.cookies.set(GOOGLE_OAUTH_NONCE_COOKIE, '', { ...GOOGLE_OAUTH_COOKIE_OPTIONS, maxAge: 0 })
+  return response
+}
 
 /**
  * GET /api/calendar/google/callback — intercambia el `code` de Google, guarda la
  * conexión cifrada y redirige al origen: /dashboard/citas o sala tokenizada.
- * El `state` firmado (HMAC) transporta dealerId y returnTo opcional; no depende de sesión.
+ * El `state` firmado transporta dealerId, returnTo y el nonce ligado a la cookie del navegador.
  */
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code')
@@ -13,38 +19,34 @@ export async function GET(req: NextRequest) {
   const errorParam = req.nextUrl.searchParams.get('error')
   let redirectTo = new URL('/dashboard/citas', req.url)
 
-  if (state) {
-    const preVerified = verifyOAuthState(state)
-    if (preVerified?.returnTo) redirectTo = new URL(preVerified.returnTo, req.url)
+  const verified = state ? verifyOAuthState(state) : null
+  const browserNonce = req.cookies.get(GOOGLE_OAUTH_NONCE_COOKIE)?.value
+  if (!verified || !browserNonce || verified.nonce !== browserNonce) {
+    redirectTo.searchParams.set('calendar_error', 'invalid_state')
+    return finishOAuth(redirectTo)
   }
+  if (verified.returnTo) redirectTo = new URL(verified.returnTo, req.url)
 
   if (errorParam) {
     redirectTo.searchParams.set('calendar_error', 'denied')
-    return NextResponse.redirect(redirectTo)
+    return finishOAuth(redirectTo)
   }
   if (!code || !state) {
     redirectTo.searchParams.set('calendar_error', 'invalid_request')
-    return NextResponse.redirect(redirectTo)
+    return finishOAuth(redirectTo)
   }
-
-  const verified = verifyOAuthState(state)
-  if (!verified) {
-    redirectTo.searchParams.set('calendar_error', 'invalid_state')
-    return NextResponse.redirect(redirectTo)
-  }
-  if (verified.returnTo) redirectTo = new URL(verified.returnTo, req.url)
 
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`
   const tokens = await exchangeCodeForTokens(code, redirectUri)
   if (!tokens?.access_token || !tokens.refresh_token) {
     redirectTo.searchParams.set('calendar_error', 'token_exchange_failed')
-    return NextResponse.redirect(redirectTo)
+    return finishOAuth(redirectTo)
   }
 
   const calendar = await fetchPrimaryCalendar(tokens.access_token)
   if (!calendar) {
     redirectTo.searchParams.set('calendar_error', 'calendar_fetch_failed')
-    return NextResponse.redirect(redirectTo)
+    return finishOAuth(redirectTo)
   }
 
   const admin = createAdminClient()
@@ -76,9 +78,9 @@ export async function GET(req: NextRequest) {
 
   if (error) {
     redirectTo.searchParams.set('calendar_error', 'save_failed')
-    return NextResponse.redirect(redirectTo)
+    return finishOAuth(redirectTo)
   }
 
   redirectTo.searchParams.set('calendar_connected', '1')
-  return NextResponse.redirect(redirectTo)
+  return finishOAuth(redirectTo)
 }

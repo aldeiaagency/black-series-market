@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
-import { signOAuthState } from '@/lib/google-calendar'
+import { canAccessSection } from '@/lib/permissions'
+import { signOAuthState, GOOGLE_OAUTH_NONCE_COOKIE, GOOGLE_OAUTH_COOKIE_OPTIONS } from '@/lib/google-calendar'
+import { randomBytes } from 'crypto'
 import { planAllowsGoogleCalendar, validateSetupToken } from '@/lib/onboarding/setup-room'
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -42,6 +44,9 @@ export async function GET(req: NextRequest) {
 
     const access = await getDealerAccess(user.id)
     if (!access) return NextResponse.redirect(new URL('/registro', req.url))
+    if (!canAccessSection(access.role, 'citas')) {
+      return NextResponse.json({ error: 'No tienes permisos para gestionar el calendario.' }, { status: 403 })
+    }
     dealerId = access.dealerId
   }
 
@@ -52,7 +57,8 @@ export async function GET(req: NextRequest) {
   }
 
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/calendar/google/callback`
-  const state = signOAuthState(dealerId, setupReturnTo ? { returnTo: setupReturnTo } : undefined)
+  const nonce = randomBytes(32).toString('hex')
+  const state = signOAuthState(dealerId, { nonce, returnTo: setupReturnTo ?? undefined })
 
   const url = new URL(GOOGLE_AUTH_URL)
   url.searchParams.set('client_id', clientId)
@@ -63,5 +69,7 @@ export async function GET(req: NextRequest) {
   url.searchParams.set('prompt', 'consent')
   url.searchParams.set('state', state)
 
-  return NextResponse.redirect(url.toString())
+  const response = NextResponse.redirect(url.toString())
+  response.cookies.set(GOOGLE_OAUTH_NONCE_COOKIE, nonce, GOOGLE_OAUTH_COOKIE_OPTIONS)
+  return response
 }

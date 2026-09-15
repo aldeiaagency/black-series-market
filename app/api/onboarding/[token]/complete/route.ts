@@ -12,7 +12,7 @@ import {
   sanitizeHttpUrl,
 } from '@/lib/onboarding/setup-room'
 import { normalizeRules, normalizeSettings } from '@/lib/booking'
-import { processOnboardingCsv } from '@/lib/vehicle-intake/onboarding-csv'
+import { isOnboardingCsvPath, processOnboardingCsv } from '@/lib/vehicle-intake/onboarding-csv'
 
 const SPECIALTIES = ['sport', 'classic', 'premium', 'motorcycle', 'import', 'suv', 'supercar', 'custom'] as const
 const SERVICES = ['financing', 'trade_in', 'warranty', 'transport_nat', 'transport_intl', 'own_workshop', 'detailing', 'home_delivery'] as const
@@ -29,7 +29,7 @@ type UploadedFileRef = {
   content_type?: string
 }
 
-function normalizeFiles(value: unknown): UploadedFileRef[] {
+function normalizeFiles(value: unknown, csvDealerId?: string): UploadedFileRef[] {
   if (!Array.isArray(value)) return []
   return value.flatMap((file) => {
     if (!file || typeof file !== 'object') return []
@@ -37,6 +37,7 @@ function normalizeFiles(value: unknown): UploadedFileRef[] {
     const url = sanitizeHttpUrl(f.url)
     const path = normalizeText(f.path, 500)
     if (!url || !path) return []
+    if (csvDealerId && !isOnboardingCsvPath(path, csvDealerId)) return []
     return [{
       url,
       path,
@@ -165,7 +166,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
       mode: stockMode,
       feed_url: stockFeedUrl,
       notes: normalizeText(stock.notes, 700),
-      csv_files: normalizeFiles(stock.csv_files),
+      csv_files: normalizeFiles(stock.csv_files, setup.dealer.id),
     },
   }
 

@@ -49,15 +49,17 @@ const ALLOWED_VEHICLE_FIELDS = [
 /**
  * Filtra el payload a la allowlist de campos editables por el dealer y fija un `status` válido.
  * El cliente puede dejar el vehículo en 'draft' o publicarlo ('active') directamente — ya no hay
- * cola de moderación previa. Cualquier otro valor recibido (o ausente) se trata como publicación,
- * salvo que sea explícitamente 'draft'.
+ * cola de moderación previa. Conserva 'draft' y 'pending_review'; cualquier otro valor recibido
+ * se trata como publicación. Si status no viene en el payload, no se escribe esa columna.
  */
 export function sanitizeVehiclePayload<T extends Record<string, unknown>>(payload: T): T {
   const clean: Record<string, unknown> = {}
   for (const f of ALLOWED_VEHICLE_FIELDS) {
     if (Object.prototype.hasOwnProperty.call(payload, f)) clean[f] = payload[f]
   }
-  if (clean.status !== 'draft' && clean.status !== 'pending_review') clean.status = 'active'
+  if (Object.prototype.hasOwnProperty.call(payload, 'status') && clean.status !== 'draft' && clean.status !== 'pending_review') {
+    clean.status = 'active'
+  }
   // 'BMW Motorrad' es la marca correcta al elegirla en el desplegable (catálogo de motos), pero
   // la ficha publicada debe mostrar 'BMW' — ver lib/brand-types.ts.
   if (typeof clean.brand_name === 'string') clean.brand_name = publicBrandName(clean.brand_name)

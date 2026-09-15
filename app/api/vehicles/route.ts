@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getDealerAccess } from '@/lib/dealer-access'
 import { getPermissions } from '@/lib/permissions'
 import { sanitizeVehiclePayload } from '@/lib/vehicle-write'
+import { vehicleCreateSchema } from '@/lib/vehicle-create-validation'
 import { VEHICLE_PUBLIC_COLUMNS } from '@/lib/public-columns'
 import { reviewVehicleIntake } from '@/lib/vehicle-intake/review'
 import { normalizeVin } from '@/lib/vehicle-intake/dedupe'
@@ -23,12 +24,21 @@ export async function POST(request: NextRequest) {
 
   let payload: Record<string, unknown>
   try { payload = await request.json() } catch { return NextResponse.json({ error: 'Datos inválidos.' }, { status: 400 }) }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return NextResponse.json({ error: 'Datos inválidos.' }, { status: 400 })
+  }
 
   // Seguridad: quita campos reservados al sistema (moderación/destacado/sellos/contador) y
   // normaliza status a draft|active (decisión 2026-07-17, ver lib/vehicle-write.ts — ya no hay
   // cola de moderación previa). El admin client se salta el trigger 060, así que el saneo va
   // aquí. El dealer_id lo decide el servidor, no el cliente.
   const clean = sanitizeVehiclePayload(payload)
+  clean.status ??= 'active'
+  const validation = vehicleCreateSchema.safeParse(clean)
+  if (!validation.success) {
+    return NextResponse.json({ error: 'Datos del vehículo inválidos.', details: validation.error.flatten() }, { status: 400 })
+  }
+  Object.assign(clean, validation.data)
   clean.dealer_id = access.dealerId
 
   // Pipeline de intake (migración 110): revisa la ficha contra la guía de marca antes de
