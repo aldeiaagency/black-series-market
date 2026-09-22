@@ -8,7 +8,7 @@
       "typeVersion": 1,
       "position": [60, 60],
       "parameters": {
-        "content": "## P5 punto 1 — Frescura de stock\n\n2 triggers independientes en el mismo workflow:\n\n**A) Cron diario** — pausa automática de unidades activas sin confirmar hace >14 días. Por unidad, silencioso, no genera email.\n\n**B) Cron quincenal** — un único email genérico por showroom (no por unidad), recordando la política. Excluye showrooms con `feed_sync` activo.\n\n**Simplificación v1, a propósito**: la exclusión de feed_sync solo mira `dealers.subscription_plan = 'elite'` (que lo incluye por defecto) — no comprueba todavía `organization_feature_overrides` (el add-on de pago en Essential/Professional). Verificado que hoy son 0 overrides activos, así que es equivalente ahora mismo — revisar si algún dealer no-Elite compra el add-on.\n\n**Variables necesarias:** SUPABASE_URL, SUPABASE_SERVICE_KEY, MARKET_URL",
+        "content": "## P5 punto 1 — Frescura de stock\n\n2 triggers independientes en el mismo workflow:\n\n**A) Cron diario** — pausa automática de unidades activas sin confirmar hace >14 días. Por unidad, silencioso, no genera email.\n\n**B) Cron quincenal** — un único email genérico por showroom (no por unidad), recordando la política. Excluye showrooms con `feed_sync` activo.\n\n**Simplificación v1, a propósito**: la exclusión de feed_sync solo mira `dealers.subscription_plan = 'elite'` (que lo incluye por defecto) — no comprueba todavía `organization_feature_overrides` (el add-on de pago en Essential/Professional). Verificado que hoy son 0 overrides activos, así que es equivalente ahora mismo — revisar si algún dealer no-Elite compra el add-on.\n\n**Variables necesarias:** SUPABASE_URL, SUPABASE_SERVICE_KEY, MARKET_URL\n\n**EXCLUSION CATALOGO DEMO (2026-09-22)**: el cron diario excluye por dealer_id los 12 showrooms del catalogo demo/showcase (sin dueño real que confirme stock) — si no, se pausan solos cada vez que se reactivan porque last_confirmed_at nunca se refresca. Lista de IDs en el propio filtro del nodo \"Supabase — Vehiculos caducados\". Si se anaden mas showrooms demo en el futuro, hay que anadir su id ahi tambien.",
         "height": 320,
         "width": 340
       }
@@ -45,7 +45,8 @@
             { "name": "status", "value": "eq.active" },
             { "name": "last_confirmed_at", "value": "=lt.{{ new Date(Date.now() - 14*24*60*60*1000).toISOString() }}" },
             { "name": "select", "value": "id" },
-            { "name": "limit", "value": "500" }
+            { "name": "limit", "value": "500" },
+            { "name": "dealer_id", "value": "not.in.(3f901ac8-9373-5194-9242-378481972cfe,1b442abf-9e9d-512a-8690-7f742b4d5970,bef7efe3-e2d6-5f2e-beaa-45e5f80fd56f,2113eadb-f8d7-4fa4-b3d1-0ad9061c98a3,246c3c5b-ef9a-4a7e-9439-e6175f9e0bdd,0e537b4a-270f-5fe9-9ae0-bdd2fd70f577,a9ed6bf3-018d-5371-880c-311aa3734a20,c14d4ae9-af87-56b8-a3ce-1ee71b79a20c,2e94a552-4560-546f-862d-b423432d714a,271d4496-df80-5701-8cc6-ca1e7bdc93a6,93661d53-f9f8-523d-9d2f-4e6627bdc61a,ac8258ac-7a2f-5fb6-99c3-c9882e631b01)" }
           ]
         },
         "options": {}
