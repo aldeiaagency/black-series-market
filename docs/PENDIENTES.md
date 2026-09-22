@@ -4,7 +4,23 @@
 > captura, handoff/K22, advocacy/UGC), ver `agency/backlog_unificado_growth.md` — no duplicar aquí, es la
 > fuente única de eso desde 2026-08-28. Un ítem compartido: "unificar `ContactForm`/`QualifiedLeadForm`"
 > (bloque B4-B11 abajo) se relaciona con varios hallazgos de `QualifiedLeadForm` en ese otro documento.
-> Última actualización: **2026-09-07 — Revisión de páginas legales y de `/profesionales/planes`, más
+> Última actualización: **2026-09-22 — Catálogo demo (12 showrooms/63 vehículos) se auto-pausaba solo, causa
+> raíz encontrada y `WF-P5 — Frescura de stock` (n8n) desactivado a propósito.** El cron diario de ese
+> workflow pausa cualquier vehículo `active` con `last_confirmed_at` >14 días — política correcta contra
+> "coches fantasma" para concesionarios reales que confirman su stock, pero el catálogo demo no tiene ningún
+> dueño real que confirme nada, así que se auto-pausaba cada vez que se reactivaba (confirmado 2 veces:
+> 2026-09-13 y 2026-09-19, ambas ~24h después de reactivarlo). El workflow se creó el 2026-08-29 — por eso el
+> primer pausado automático fue el 13-sep y no antes. Primero se aplicó un fix quirúrgico (filtro
+> `dealer_id=not.in.(...)` con los 12 IDs del catálogo demo excluidos del cron, commit `709945a`); después,
+> decisión explícita de H: **pausar el workflow entero** en vez de solo excluir el catálogo demo. El filtro
+> quirúrgico queda en el JSON del workflow, dormido, por si se reactiva en el futuro.
+> **Pendiente real, sin aviso automático**: `WF-P5` bundlea 2 funciones en el mismo workflow — el cron diario
+> de pausa por caducidad Y el recordatorio quincenal por email a showrooms reales. Al pausarlo entero se
+> apagan las dos. Hoy no importa (cero concesionarios reales activos), pero **el día que entre el primer
+> fundador real, hay que decidir si reactivar `WF-P5`** (ya con el filtro de exclusión del catálogo demo
+> aplicado, así que sería seguro reactivarlo tal cual) — nada avisará de que sigue parado si no se revisa.
+> 63 vehículos y 12 showrooms reactivados y verificados en vivo tras el fix.
+> Actualización anterior: **2026-09-07 — Revisión de páginas legales y de `/profesionales/planes`, más
 > corrección de un hallazgo SEO sitewide.** Cuatro cierres reales, verificados en producción (`curl`/build),
 > commits `d94f437`..`669d9ec`:
 > 1. **Nota interna filtrada en producción (severidad alta)** — `condiciones-profesionales` (contrato legal
